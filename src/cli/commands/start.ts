@@ -21,11 +21,15 @@ import {
   renderGaps,
   renderWeightedGaps,
   renderEvolution,
+  renderSummary,
 } from "../render.js";
 
-// Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
-const SESSION_TARGET_QUESTIONS = 25;
-const MIN_PER_DIMENSION = 4;
+// Test LARGO por defecto: para evaluar en serio a través de los rangos de
+// seniority (junior→staff) hace falta bastante muestra por dimensión y dificultad.
+// Con el banco lleno (~50/dim) esto toma ~24/dim (~120 preguntas); con bancos
+// menores toma gran parte de cada dimensión. selectBalanced acota por pool.
+const SESSION_TARGET_QUESTIONS = 120;
+const MIN_PER_DIMENSION = 20;
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const PACKS_ROOT = join(ROOT, "packs");
@@ -82,13 +86,18 @@ export async function startCommand(packName: string = DEFAULT_PACK): Promise<voi
   const updatedHistory = [...history, record];
   saveHistory(historyPath, updatedHistory);
 
-  console.log("\n" + renderResult(result) + "\n");
+  const gaps = readinessCfg ? computeGaps(answered, selected, readinessCfg) : [];
+
+  // TL;DR narrativo primero: ranking, peores puntos y por dónde estudiar.
+  if (readinessCfg) {
+    console.log("\n" + renderSummary(roles, gaps, readinessCfg.levels.map((l) => l.id)) + "\n");
+  }
+  console.log(renderResult(result) + "\n");
   console.log(renderCalibration(calib) + "\n");
 
   if (readinessCfg) {
     console.log(renderReadiness(roles) + "\n");
 
-    const gaps = computeGaps(answered, selected, readinessCfg);
     // Gaps: si jobhunt está disponible, ponderar por demanda de mercado (INTEG-01);
     // si no, mostrar los gaps sin ponderar (degradación elegante, sin error).
     const jobTexts = loadJobTexts(JOBHUNT_DB_PATH);

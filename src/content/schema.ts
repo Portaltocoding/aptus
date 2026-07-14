@@ -10,7 +10,8 @@ export const QuestionSchema = z
     id: z.string(),
     dimension: z.string(), // sin enum hardcodeado: el pack declara sus dimensiones (ENG-04)
     subtopic: z.string().optional(),
-    difficulty: z.enum(["easy", "medium", "hard"]),
+    // 4 tramos para distinguir seniority hasta staff: experto es el más profundo.
+    difficulty: z.enum(["easy", "medium", "hard", "experto"]),
     // Formato de la pregunta (para variar y renderizar): concepto (por defecto),
     // diagrama (ASCII en el enunciado), codigo (snippet), escenario (caso práctico).
     type: z.enum(["concepto", "diagrama", "codigo", "escenario"]).default("concepto"),

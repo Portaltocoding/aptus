@@ -13,12 +13,17 @@ const DifficultyThresholdsSchema = z.object({
   easy: z.number().min(0).max(1),
   medium: z.number().min(0).max(1),
   hard: z.number().min(0).max(1),
+  // Tramo experto: opcional; por defecto 0 (solo staff suele exigirlo).
+  experto: z.number().min(0).max(1).default(0),
 });
 
 const LevelSchema = z.object({
   id: z.string(),
   label: z.string(),
   requires: DifficultyThresholdsSchema,
+  // Amplitud (solo staff): acierto mínimo exigido también en las dimensiones
+  // SECUNDARIAS del rol (no solo las núcleo). Ausente = no se exige amplitud.
+  breadth: z.number().min(0).max(1).optional(),
 });
 
 const RoleSchema = z.object({

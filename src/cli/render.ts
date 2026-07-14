@@ -84,6 +84,7 @@ function tierCell(t: TierAccuracy): string {
 }
 
 function levelColor(levelId: string | null): (s: string) => string {
+  if (levelId === "staff") return pc.magenta;
   if (levelId === "senior") return pc.green;
   if (levelId === "mid") return pc.cyan;
   if (levelId === "junior") return pc.yellow;
@@ -97,17 +98,23 @@ function levelColor(levelId: string | null): (s: string) => string {
  */
 export function renderReadiness(roles: RoleReadiness[]): string {
   const table = new Table({
-    head: ["Rol", "Readiness", "Fácil", "Media", "Difícil", "N"],
+    head: ["Rol", "Readiness", "Fácil", "Media", "Difícil", "Experto", "N"],
   });
+
+  const cell = (byTier: Map<string, TierAccuracy>, d: string): string => {
+    const t = byTier.get(d);
+    return t ? tierCell(t) : "—";
+  };
 
   for (const r of roles) {
     const byTier = new Map(r.byDifficulty.map((t) => [t.difficulty, t]));
     table.push([
       r.label,
       levelColor(r.levelId)(r.levelLabel),
-      tierCell(byTier.get("easy")!),
-      tierCell(byTier.get("medium")!),
-      tierCell(byTier.get("hard")!),
+      cell(byTier, "easy"),
+      cell(byTier, "medium"),
+      cell(byTier, "hard"),
+      cell(byTier, "experto"),
       String(r.answered),
     ]);
   }
@@ -132,6 +139,38 @@ export function renderReadiness(roles: RoleReadiness[]): string {
     "\n\nDetalle por rol y dimensión núcleo:\n" +
     detalle
   );
+}
+
+/**
+ * Resumen narrativo (TL;DR) del resultado: ranking de roles por nivel alcanzado,
+ * los puntos más flojos y por dónde empezar a estudiar. Solo presenta; los gaps
+ * llegan ya ordenados por debilidad (más flojo primero).
+ */
+export function renderSummary(roles: RoleReadiness[], gaps: Gap[], levelOrder: string[]): string {
+  const rank = (id: string | null): number => (id === null ? -1 : levelOrder.indexOf(id));
+  const ordered = [...roles].sort((a, b) => rank(b.levelId) - rank(a.levelId));
+
+  const lines: string[] = [pc.bold("Resumen")];
+
+  if (ordered.length > 0) {
+    const top = ordered[0]!;
+    lines.push(`  • Tu readiness más alto: ${top.label} — ${levelColor(top.levelId)(top.levelLabel)}.`);
+    const ranking = ordered.map((r) => `${r.label} (${r.levelLabel})`).join("  >  ");
+    lines.push(`  • Ranking (de más a menos listo): ${ranking}`);
+  }
+
+  if (gaps.length > 0) {
+    const worst = gaps
+      .slice(0, 3)
+      .map((g) => `${g.dimension} ${Math.round(g.accuracy * 100)}%`)
+      .join(", ");
+    lines.push(`  • Puntos más flojos: ${worst}.`);
+    lines.push(`  • Empieza por: ${gaps[0]!.dimension} → ${gaps[0]!.study}`);
+  } else {
+    lines.push("  • Sin gaps mayores: vas sólido en las dimensiones respondidas.");
+  }
+
+  return lines.join("\n");
 }
 
 /**

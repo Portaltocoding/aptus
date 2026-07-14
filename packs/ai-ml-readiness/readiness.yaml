@@ -37,6 +37,16 @@ levels:
       easy: 0.90
       medium: 0.75
       hard: 0.60
+  - id: staff
+    label: "Staff-ready"
+    # Staff = profundidad experta EN el núcleo + AMPLITUD: también hay que
+    # demostrar competencia en las dimensiones secundarias del rol (breadth).
+    requires:
+      easy: 0.90
+      medium: 0.80
+      hard: 0.70
+      experto: 0.55
+    breadth: 0.60
 
 # Perfiles de rol: dimensiones núcleo (definen el nivel) y secundarias (contexto).
 roles:

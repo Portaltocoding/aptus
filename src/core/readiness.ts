@@ -12,8 +12,8 @@ import type { ReadinessConfig } from "../content/readiness.js";
  * lista de gaps priorizados con su plan de estudio (RES-03).
  */
 
-export type Difficulty = "easy" | "medium" | "hard";
-const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
+export type Difficulty = "easy" | "medium" | "hard" | "experto";
+const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard", "experto"];
 
 /** Por debajo de este acierto, una dimensión respondida se considera un gap. */
 export const GAP_THRESHOLD = 0.7;
@@ -39,6 +39,7 @@ export interface RoleReadiness {
   levelLabel: string; // etiqueta legible del nivel (o "Aún no <primer nivel>")
   byDifficulty: TierAccuracy[]; // evidencia por dificultad (base del nivel, ENG-03)
   byDimension: DimensionAccuracy[]; // acierto por dimensión núcleo (matriz rol × dimensión)
+  secondary: DimensionAccuracy[]; // acierto en dimensiones secundarias (amplitud, para staff)
   answered: number; // total respondidas de las dimensiones núcleo
 }
 
@@ -90,19 +91,33 @@ function tierBreakdown(results: QResult[]): TierAccuracy[] {
  * (answered > 0) además de superar el umbral; si el nivel exige ese tramo y no se
  * vio ninguna pregunta de esa dificultad, el nivel NO se concede (p. ej. no hay
  * "senior-ready" sin haber respondido preguntas difíciles). Un tramo sin
- * exigencia (requires === 0) no impone nada. Se recorre de menor a mayor nivel.
+ * exigencia (requires === 0) no impone nada.
+ *
+ * Amplitud (staff): si el nivel declara `breadth`, además exige competencia en
+ * las dimensiones SECUNDARIAS del rol — al menos una secundaria respondida y
+ * todas las respondidas por encima del umbral de amplitud (no hay staff sin
+ * demostrar anchura, no solo profundidad en el núcleo). Se recorre de menor a
+ * mayor nivel y se queda con el más alto que se cumple.
  */
-function highestLevel(byDifficulty: TierAccuracy[], config: ReadinessConfig): string | null {
+function highestLevel(
+  byDifficulty: TierAccuracy[],
+  secondary: DimensionAccuracy[],
+  config: ReadinessConfig,
+): string | null {
   const byTier = new Map(byDifficulty.map((t) => [t.difficulty, t]));
+  const secondaryAnswered = secondary.filter((s) => s.answered > 0);
   let achieved: string | null = null;
   for (const level of config.levels) {
-    const meets = DIFFICULTIES.every((d) => {
+    const meetsDifficulty = DIFFICULTIES.every((d) => {
       const req = level.requires[d];
       if (req <= 0) return true; // sin exigencia en este tramo
       const tier = byTier.get(d)!;
       return tier.answered > 0 && tier.accuracy >= req; // exige evidencia y umbral
     });
-    if (meets) achieved = level.id;
+    const meetsBreadth =
+      level.breadth === undefined ||
+      (secondaryAnswered.length > 0 && secondaryAnswered.every((s) => s.accuracy >= level.breadth!));
+    if (meetsDifficulty && meetsBreadth) achieved = level.id;
   }
   return achieved;
 }
@@ -114,16 +129,20 @@ export function computeReadiness(
 ): RoleReadiness[] {
   const results = toResults(answered, bank);
 
-  return config.roles.map((role) => {
-    const core = results.filter((r) => r.answered && role.core.includes(r.dimension));
-    const byDifficulty = tierBreakdown(core);
-    const byDimension: DimensionAccuracy[] = role.core.map((dimension) => {
-      const dq = core.filter((r) => r.dimension === dimension);
+  const accuracyForDims = (dims: string[]): DimensionAccuracy[] =>
+    dims.map((dimension) => {
+      const dq = results.filter((r) => r.answered && r.dimension === dimension);
       const answeredDim = dq.length;
       const correct = dq.filter((r) => r.correct).length;
       return { dimension, answered: answeredDim, correct, accuracy: answeredDim > 0 ? correct / answeredDim : 0 };
     });
-    const levelId = highestLevel(byDifficulty, config);
+
+  return config.roles.map((role) => {
+    const core = results.filter((r) => r.answered && role.core.includes(r.dimension));
+    const byDifficulty = tierBreakdown(core);
+    const byDimension = accuracyForDims(role.core);
+    const secondary = accuracyForDims(role.secondary);
+    const levelId = highestLevel(byDifficulty, secondary, config);
     const firstLevel = config.levels[0]!;
     const levelLabel = levelId
       ? config.levels.find((l) => l.id === levelId)!.label
@@ -136,6 +155,7 @@ export function computeReadiness(
       levelLabel,
       byDifficulty,
       byDimension,
+      secondary,
       answered: core.length,
     };
   });
