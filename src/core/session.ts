@@ -1,5 +1,5 @@
 import type { Question } from "../content/schema.js";
-import type { AnsweredQuestion } from "./scoring.js";
+import type { AnsweredQuestion, Confidence } from "./scoring.js";
 
 /**
  * Motor de sesión puro: selección equilibrada por dimensión (SESS-02) y
@@ -56,10 +56,11 @@ export interface SessionState {
   readonly questions: Question[];
   readonly index: number;
   readonly answers: ReadonlyMap<string, string>; // questionId -> selectedOptionId
+  readonly confidences: ReadonlyMap<string, Confidence>; // questionId -> confianza declarada
 }
 
 export function buildSession(selected: Question[]): SessionState {
-  return { questions: selected, index: 0, answers: new Map() };
+  return { questions: selected, index: 0, answers: new Map(), confidences: new Map() };
 }
 
 /** Registra (o sobrescribe) la respuesta de la pregunta en el índice actual, sin avanzar. */
@@ -70,6 +71,16 @@ export function answerCurrent(state: SessionState, selectedOptionId: string): Se
   const answers = new Map(state.answers);
   answers.set(current.id, selectedOptionId);
   return { ...state, answers };
+}
+
+/** Registra (o sobrescribe) la confianza declarada de la pregunta actual, sin avanzar. */
+export function setConfidenceCurrent(state: SessionState, confidence: Confidence): SessionState {
+  const current = state.questions[state.index];
+  if (!current) return state; // índice fuera de rango: no-op puro
+
+  const confidences = new Map(state.confidences);
+  confidences.set(current.id, confidence);
+  return { ...state, confidences };
 }
 
 /** Avanza el índice, sin sobrepasar el final (índice === length marca la sesión completa). */
@@ -93,5 +104,6 @@ export function toAnswered(state: SessionState): AnsweredQuestion[] {
   return state.questions.map((q) => ({
     questionId: q.id,
     selectedOptionId: state.answers.get(q.id) ?? null,
+    confidence: state.confidences.get(q.id) ?? null,
   }));
 }

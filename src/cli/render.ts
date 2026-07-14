@@ -1,6 +1,7 @@
 import Table from "cli-table3";
 import pc from "picocolors";
 import type { ScoreResult } from "../core/scoring.js";
+import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -33,4 +34,43 @@ export function renderResult(result: ScoreResult): string {
   }
 
   return table.toString();
+}
+
+const CONFIDENCE_LABEL: Record<string, string> = {
+  alta: "Alta",
+  media: "Media",
+  baja: "Baja",
+};
+
+/**
+ * Formatea la curva confianza-vs-acierto (RES-04): por cada nivel de confianza
+ * declarado, el acierto real con su N y una lectura honesta (sobreestimas /
+ * calibrado / infravaloras). No calcula nada: solo presenta el CalibrationResult
+ * del núcleo. Sin ningún score agregado.
+ */
+export function renderCalibration(result: CalibrationResult): string {
+  if (result.byConfidence.length === 0) {
+    return "Calibración: no declaraste confianza en esta sesión, no hay curva que mostrar.";
+  }
+
+  const table = new Table({
+    head: ["Confianza", "Declarada", "Acierto real", "N", "Lectura"],
+  });
+
+  for (const b of result.byConfidence) {
+    let lectura: string;
+    if (b.gap <= -CALIBRATION_GAP_THRESHOLD) lectura = pc.red("⚠ te sobreestimas");
+    else if (b.gap >= CALIBRATION_GAP_THRESHOLD) lectura = pc.yellow("te infravaloras");
+    else lectura = pc.green("calibrado");
+
+    table.push([
+      CONFIDENCE_LABEL[b.confidence] ?? b.confidence,
+      `~${Math.round(b.declared * 100)}%`,
+      `${bar(b.accuracy)} ${Math.round(b.accuracy * 100)}%`,
+      `${b.correct}/${b.answered}`,
+      lectura,
+    ]);
+  }
+
+  return "Calibración (confianza declarada vs acierto real):\n" + table.toString();
 }

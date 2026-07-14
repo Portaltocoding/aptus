@@ -4,8 +4,9 @@ import { loadPack } from "../../content/loader.js";
 import { selectBalanced } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
+import { calibration } from "../../core/calibration.js";
 import { runSession } from "../runner.js";
-import { renderResult } from "../render.js";
+import { renderResult, renderCalibration } from "../render.js";
 
 // Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
 // Con 5 dimensiones: 5 preguntas/dimensión → 25 por sesión (~20 min, ≥15 min).
@@ -51,6 +52,8 @@ export async function startCommand(): Promise<void> {
 
   const answered = await runSession(selected);
   const result = score(answered, selected);
+  const calib = calibration(answered, selected);
 
   console.log("\n" + renderResult(result) + "\n");
+  console.log(renderCalibration(calib) + "\n");
 }

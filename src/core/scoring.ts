@@ -11,9 +11,13 @@ import type { Question } from "../content/schema.js";
  * sin crédito parcial.
  */
 
+/** Nivel de confianza declarado por el usuario en una respuesta (Phase 3, SESS-03). */
+export type Confidence = "baja" | "media" | "alta";
+
 export interface AnsweredQuestion {
   questionId: string;
   selectedOptionId: string | null; // null = no respondida
+  confidence?: Confidence | null; // confianza declarada; ausente/null si no se capturó
 }
 
 export interface SubtopicScore {
