@@ -46,4 +46,28 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 - **Generación de preguntas por LLM en tiempo real** — rompe la garantía de respuesta correcta curada.
 
 ## Traceability
-(Rellenado por el roadmap.)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ENG-01 | Phase 1 | Pending |
+| ENG-02 | Phase 1 | Pending |
+| ENG-04 | Phase 1 | Pending |
+| CONT-01 | Phase 1 | Pending |
+| CONT-02 | Phase 1 | Pending |
+| CONT-03 | Phase 1 | Pending |
+| SESS-01 | Phase 1 | Pending |
+| SESS-02 | Phase 1 | Pending |
+| RES-01 | Phase 1 | Pending |
+| CONT-04 | Phase 2 | Pending |
+| SESS-04 | Phase 2 | Pending |
+| SESS-03 | Phase 3 | Pending |
+| RES-04 | Phase 3 | Pending |
+| ENG-03 | Phase 4 | Pending |
+| CONT-05 | Phase 4 | Pending |
+| RES-02 | Phase 4 | Pending |
+| RES-03 | Phase 4 | Pending |
+| PERS-01 | Phase 5 | Pending |
+| PERS-02 | Phase 5 | Pending |
+| INTEG-01 (v2, opcional) | Phase 6 | Pending |
+
+**Cobertura v1:** 19/19 requisitos mapeados (100%). No hay huérfanos.
