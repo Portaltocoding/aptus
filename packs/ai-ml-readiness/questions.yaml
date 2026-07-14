@@ -1,5 +1,5 @@
-# Banco real v1 (Phase 1) — hand-curado, técnicamente correcto.
-# Dimensión llm-rag-evals: 15 preguntas (dimensión ml-clasico llega en la Task 2).
+# Banco real v1 (Phase 1) — 30 preguntas hand-curadas, técnicamente correctas.
+# 2 dimensiones: llm-rag-evals (15) y ml-clasico (15).
 # source: "curación manual" — el mining de bootcamp-ml-llm es Phase 2, no aquí.
 
 # ============================================================
@@ -303,5 +303,309 @@
       text: "Porque RAG desactiva el mecanismo de atención del modelo"
   correct: b
   explanation: "RAG mitiga la alucinación dando al modelo contexto verificado, pero no lo garantiza: el modelo puede ignorar o distorsionar ese contexto (falta de faithfulness), y el propio retriever puede fallar trayendo fragmentos poco relevantes, dejando al modelo sin evidencia real para responder con precisión."
+  source: "curación manual"
+  date: "2026-07-14"
+
+# ============================================================
+# Dimensión: ml-clasico (ML clásico)
+# ============================================================
+
+- id: ml-001
+  dimension: ml-clasico
+  subtopic: bias-variance
+  difficulty: easy
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "En el compromiso sesgo-varianza (bias-variance tradeoff), un modelo con alto sesgo (bias) y baja varianza típicamente..."
+  options:
+    - id: a
+      text: "Se ajusta demasiado a los datos de entrenamiento y generaliza mal (overfitting)"
+    - id: b
+      text: "Es demasiado simple para capturar la relación real de los datos, produciendo errores sistemáticos tanto en train como en test (underfitting)"
+    - id: c
+      text: "Siempre logra el mejor rendimiento posible en test"
+    - id: d
+      text: "No depende del conjunto de datos usado para entrenar"
+  correct: b
+  explanation: "Alto sesgo significa que el modelo hace suposiciones demasiado simples (p. ej. una recta para una relación no lineal), por lo que no logra capturar el patrón real ni siquiera en entrenamiento: es underfitting, con error alto y estable en train y test."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-002
+  dimension: ml-clasico
+  subtopic: overfitting
+  difficulty: easy
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Qué señal característica indica que un modelo está sobreajustando (overfitting) a los datos de entrenamiento?"
+  options:
+    - id: a
+      text: "Error alto tanto en entrenamiento como en validación"
+    - id: b
+      text: "Error muy bajo en entrenamiento pero notablemente más alto en validación/test"
+    - id: c
+      text: "Error igual en entrenamiento y validación, ambos altos"
+    - id: d
+      text: "El modelo tarda más en entrenar que en predecir"
+  correct: b
+  explanation: "El overfitting ocurre cuando el modelo memoriza patrones específicos (incluido ruido) del set de entrenamiento; por eso el error de entrenamiento es muy bajo mientras que el de validación/test, con datos no vistos, es claramente peor: el modelo no generaliza."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-003
+  dimension: ml-clasico
+  subtopic: regularizacion-l2
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Qué efecto tiene añadir un término de regularización L2 (ridge) a la función de pérdida de un modelo lineal?"
+  options:
+    - id: a
+      text: "Fuerza a que algunos coeficientes sean exactamente cero, actuando como selección de variables"
+    - id: b
+      text: "Penaliza la magnitud al cuadrado de los coeficientes, encogiéndolos hacia cero (sin anularlos necesariamente) y reduciendo la varianza del modelo"
+    - id: c
+      text: "Aumenta artificialmente el tamaño del dataset de entrenamiento"
+    - id: d
+      text: "Elimina la necesidad de normalizar las features"
+  correct: b
+  explanation: "La regularización L2 añade lambda * suma(w_i^2) a la pérdida; esto penaliza coeficientes grandes y los encoge de forma suave hacia cero, reduciendo la varianza (y el riesgo de overfitting) a costa de un pequeño aumento de sesgo, pero rara vez lleva coeficientes exactamente a cero."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-004
+  dimension: ml-clasico
+  subtopic: regularizacion-l1
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "A diferencia de L2, la regularización L1 (lasso) es conocida por..."
+  options:
+    - id: a
+      text: "Producir soluciones dispersas (sparse), llevando algunos coeficientes exactamente a cero, lo que la hace útil para selección automática de features"
+    - id: b
+      text: "Ser matemáticamente idéntica a L2 en sus efectos"
+    - id: c
+      text: "Solo poder aplicarse a modelos de árboles"
+    - id: d
+      text: "Aumentar siempre la varianza del modelo respecto a no regularizar"
+  correct: a
+  explanation: "La penalización L1 (suma de valores absolutos de los coeficientes) tiene una geometría que favorece soluciones en las esquinas de la región factible, anulando exactamente algunos coeficientes; esto la convierte en un mecanismo de selección de variables implícito, a diferencia de L2."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-005
+  dimension: ml-clasico
+  subtopic: precision-recall
+  difficulty: easy
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "En un problema de clasificación binaria, la 'precision' (precisión) se define como..."
+  options:
+    - id: a
+      text: "TP / (TP + FN): de todos los positivos reales, cuántos se detectaron"
+    - id: b
+      text: "TP / (TP + FP): de todas las predicciones positivas del modelo, cuántas eran realmente positivas"
+    - id: c
+      text: "(TP + TN) / total: proporción total de aciertos"
+    - id: d
+      text: "TN / (TN + FP): de todos los negativos reales, cuántos se detectaron correctamente"
+  correct: b
+  explanation: "Precision mide la fiabilidad de las predicciones positivas del modelo: de todo lo que el modelo marcó como positivo, qué fracción era efectivamente positivo (TP / (TP+FP)). No debe confundirse con recall, que mide cobertura sobre los positivos reales."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-006
+  dimension: ml-clasico
+  subtopic: precision-recall
+  difficulty: easy
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "El 'recall' (sensibilidad/exhaustividad) en clasificación binaria mide..."
+  options:
+    - id: a
+      text: "TP / (TP + FP)"
+    - id: b
+      text: "TP / (TP + FN): de todos los casos positivos reales, cuántos logró detectar el modelo"
+    - id: c
+      text: "El porcentaje de predicciones negativas correctas"
+    - id: d
+      text: "La media aritmética entre precision y accuracy"
+  correct: b
+  explanation: "Recall (o sensibilidad) responde a: de todos los casos que realmente eran positivos, ¿cuántos identificó el modelo correctamente? Se calcula como TP / (TP + FN); un recall bajo indica que el modelo deja escapar muchos positivos reales (falsos negativos)."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-007
+  dimension: ml-clasico
+  subtopic: f1-score
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Por qué el F1-score se define como la media armónica de precision y recall, en lugar de su media aritmética?"
+  options:
+    - id: a
+      text: "Porque es matemáticamente más simple de calcular"
+    - id: b
+      text: "Porque la media armónica penaliza más fuertemente los valores bajos, de modo que el F1 solo es alto cuando AMBAS métricas (precision y recall) son razonablemente altas, evitando que un valor extremo compense al otro"
+    - id: c
+      text: "Porque la media armónica siempre da un resultado mayor que la aritmética"
+    - id: d
+      text: "Porque el F1-score no tiene relación con precision y recall"
+  correct: b
+  explanation: "La media armónica se ve dominada por el valor más bajo de los dos; así, un modelo con precision=1.0 y recall=0.1 tendría una media aritmética engañosamente alta (0.55) pero un F1 bajo (~0.18), reflejando mejor que el modelo falla gravemente en una de las dos dimensiones."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-008
+  dimension: ml-clasico
+  subtopic: cross-validation
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Cuál es el propósito principal de la validación cruzada k-fold frente a usar un único split train/test?"
+  options:
+    - id: a
+      text: "Entrenar k modelos distintos para hacer ensemble obligatoriamente en producción"
+    - id: b
+      text: "Obtener una estimación más robusta y menos dependiente del azar del rendimiento del modelo, promediando el desempeño sobre k particiones distintas de los datos"
+    - id: c
+      text: "Eliminar por completo la necesidad de un conjunto de test final"
+    - id: d
+      text: "Aumentar artificialmente el tamaño del dataset"
+  correct: b
+  explanation: "Un único split train/test puede dar una estimación de rendimiento sesgada por cómo cayeron los datos en esa partición concreta. K-fold divide los datos en k partes, entrena y evalúa k veces rotando qué parte se usa como validación, y promedia los resultados para una estimación más estable y fiable."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-009
+  dimension: ml-clasico
+  subtopic: gradient-descent
+  difficulty: hard
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "Si el learning rate (tasa de aprendizaje) del descenso de gradiente es demasiado alto, el síntoma típico durante el entrenamiento es..."
+  options:
+    - id: a
+      text: "Convergencia extremadamente lenta pero estable"
+    - id: b
+      text: "La función de pérdida oscila, diverge o 'rebota' sin converger, en vez de disminuir de forma estable hacia un mínimo"
+    - id: c
+      text: "El modelo converge instantáneamente al mínimo global en una sola iteración"
+    - id: d
+      text: "No tiene ningún efecto sobre el entrenamiento"
+  correct: b
+  explanation: "Con un learning rate excesivo, cada actualización de los pesos da 'pasos' demasiado grandes en la superficie de la función de pérdida, pudiendo saltar por encima del mínimo repetidamente; esto se manifiesta como una pérdida que oscila o incluso crece (diverge) en lugar de bajar monotónicamente."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-010
+  dimension: ml-clasico
+  subtopic: feature-scaling
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Por qué suele ser necesario escalar (normalizar/estandarizar) las features antes de entrenar un modelo basado en distancias, como KNN, o un modelo con descenso de gradiente?"
+  options:
+    - id: a
+      text: "Porque los algoritmos no aceptan números decimales"
+    - id: b
+      text: "Porque features con rangos de magnitud muy distintos dominan el cálculo de distancia o el gradiente, sesgando el modelo hacia las variables de mayor escala aunque no sean más informativas"
+    - id: c
+      text: "Porque reduce el número de features automáticamente"
+    - id: d
+      text: "Solo es necesario para variables categóricas"
+  correct: b
+  explanation: "Si una feature va de 0 a 1 y otra de 0 a 100000, en un cálculo de distancia euclídea o en el gradiente la segunda dominará completamente el resultado independientemente de su relevancia real; escalar (p. ej. estandarizar a media 0 y varianza 1) pone a todas las features en una escala comparable."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-011
+  dimension: ml-clasico
+  subtopic: decision-trees
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "Los árboles de decisión sin restricciones (sin poda ni profundidad máxima) tienden a..."
+  options:
+    - id: a
+      text: "Underfitting sistemático, sin importar el dataset"
+    - id: b
+      text: "Sobreajustar (overfitting) el conjunto de entrenamiento, creciendo hasta separar casos muy específicos o ruido, por lo que necesitan poda o límites de profundidad para generalizar bien"
+    - id: c
+      text: "Ser insensibles al ruido en los datos"
+    - id: d
+      text: "No poder usarse nunca para clasificación, solo para regresión"
+  correct: b
+  explanation: "Un árbol sin límite puede seguir dividiendo hasta que cada hoja contenga un único ejemplo, memorizando el ruido del set de entrenamiento; técnicas como la poda (pruning), max_depth o min_samples_leaf limitan esa complejidad para mejorar la generalización."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-012
+  dimension: ml-clasico
+  subtopic: random-forest
+  difficulty: hard
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Por qué un Random Forest (bagging de árboles con selección aleatoria de features) suele reducir la varianza respecto a un único árbol de decisión?"
+  options:
+    - id: a
+      text: "Porque cada árbol individual se vuelve por sí solo menos propenso a overfitting"
+    - id: b
+      text: "Porque promedia (o vota) las predicciones de muchos árboles entrenados sobre distintos subconjuntos de datos y features; si los errores de cada árbol están poco correlacionados, tienden a cancelarse al promediar"
+    - id: c
+      text: "Porque usa una sola muestra de datos para todos los árboles, garantizando consistencia"
+    - id: d
+      text: "Porque reduce automáticamente el número de features del dataset original"
+  correct: b
+  explanation: "Cada árbol del bosque puede seguir siendo de alta varianza individualmente, pero al entrenarlos sobre bootstrap samples distintos y subconjuntos aleatorios de features, sus errores tienden a estar poco correlacionados; promediar (regresión) o votar (clasificación) esas predicciones reduce la varianza global del conjunto sin aumentar mucho el sesgo."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-013
+  dimension: ml-clasico
+  subtopic: svm
+  difficulty: hard
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Para qué sirve el 'kernel trick' en una Support Vector Machine (SVM)?"
+  options:
+    - id: a
+      text: "Para acelerar el entrenamiento reduciendo el número de muestras"
+    - id: b
+      text: "Para permitir separar clases que no son linealmente separables en el espacio original, calculando de forma eficiente el producto escalar equivalente a proyectar los datos a un espacio de mayor dimensión sin construir explícitamente esa proyección"
+    - id: c
+      text: "Para convertir un problema de clasificación en uno de regresión"
+    - id: d
+      text: "Para eliminar la necesidad de un margen de separación"
+  correct: b
+  explanation: "El kernel trick permite calcular el producto escalar que tendrían los datos en un espacio de características de dimensión mayor (donde sí podrían ser linealmente separables) sin tener que transformarlos explícitamente a ese espacio, lo cual sería computacionalmente muy costoso: solo se calcula la función kernel K(x,y)."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-014
+  dimension: ml-clasico
+  subtopic: k-means
+  difficulty: medium
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "¿Cuál es una limitación conocida del algoritmo k-means?"
+  options:
+    - id: a
+      text: "No requiere especificar de antemano el número de clusters k"
+    - id: b
+      text: "Requiere elegir k de antemano y el resultado final es sensible a la inicialización aleatoria de los centroides, pudiendo converger a un óptimo local distinto en cada corrida"
+    - id: c
+      text: "Solo puede usarse con datos etiquetados (aprendizaje supervisado)"
+    - id: d
+      text: "Garantiza siempre encontrar la partición óptima global"
+  correct: b
+  explanation: "k-means necesita que el número de clusters k se fije de antemano (no lo aprende de los datos) y, al depender de una inicialización aleatoria de los centroides, distintas corridas pueden converger a óptimos locales diferentes; por eso en la práctica se ejecuta varias veces (p. ej. k-means++) y se elige la mejor."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: ml-015
+  dimension: ml-clasico
+  subtopic: class-imbalance
+  difficulty: easy
+  roles: ["ML Engineer", "Data Scientist"]
+  stem: "En un dataset con fuerte desbalanceo de clases (p. ej. 99% clase A, 1% clase B), ¿por qué la métrica 'accuracy' puede ser engañosa?"
+  options:
+    - id: a
+      text: "Porque accuracy no puede calcularse en problemas binarios"
+    - id: b
+      text: "Porque un modelo trivial que siempre predice la clase mayoritaria obtendría un 99% de accuracy sin haber aprendido nada útil sobre la clase minoritaria"
+    - id: c
+      text: "Porque accuracy solo existe para problemas de regresión"
+    - id: d
+      text: "Porque accuracy siempre penaliza más a la clase mayoritaria"
+  correct: b
+  explanation: "Con clases muy desbalanceadas, un clasificador que ignore por completo la clase minoritaria y prediga siempre la mayoritaria logra una accuracy muy alta sin ningún valor práctico; por eso en estos casos se prefieren métricas como precision, recall, F1 o AUC-PR, sensibles al desempeño sobre la clase minoritaria."
   source: "curación manual"
   date: "2026-07-14"
