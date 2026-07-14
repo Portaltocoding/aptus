@@ -1,0 +1,53 @@
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import { loadPack } from "../../content/loader.js";
+import { selectBalanced } from "../../core/session.js";
+import { makeSeededShuffle } from "../../core/random.js";
+import { score } from "../../core/scoring.js";
+import { runSession } from "../runner.js";
+import { renderResult } from "../render.js";
+
+// Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
+const SESSION_TARGET_QUESTIONS = 20;
+const MIN_PER_DIMENSION = 8;
+
+// Ruta FIJA al pack real bajo packs/ — en P1 no se acepta una ruta arbitraria
+// del usuario (sin superficie de path traversal).
+const PACK_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../packs/ai-ml-readiness");
+
+/**
+ * Compone el walking skeleton end-to-end: cargar pack real → seleccionar de
+ * forma equilibrada → correr la sesión select navegable → puntuar con el motor
+ * puro → renderizar el resultado por dimensión con N. La aleatoriedad (seed) se
+ * genera aquí, en la capa de I/O, y se inyecta al núcleo — nunca al revés.
+ */
+export async function startCommand(): Promise<void> {
+  const packYaml = resolve(PACK_DIR, "pack.yaml");
+  const questionsYaml = resolve(PACK_DIR, "questions.yaml");
+
+  let pack;
+  try {
+    pack = loadPack(packYaml, questionsYaml);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`\n✗ No se puede iniciar la sesión: ${msg}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  // Seed derivada del arranque: distinta cada sesión, pero inyectada como valor
+  // puro al núcleo determinista.
+  const seed = Date.now() >>> 0;
+  const shuffle = makeSeededShuffle(seed);
+  const selected = selectBalanced(
+    pack.questions,
+    SESSION_TARGET_QUESTIONS,
+    MIN_PER_DIMENSION,
+    shuffle,
+  );
+
+  const answered = await runSession(selected);
+  const result = score(answered, selected);
+
+  console.log("\n" + renderResult(result) + "\n");
+}
