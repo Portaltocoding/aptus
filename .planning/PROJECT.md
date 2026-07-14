@@ -16,13 +16,14 @@ Decirle con honestidad, **a nivel de conocimiento**, cómo de preparado está pa
 
 ### Active
 
-- [ ] Test interactivo por terminal con preguntas tipo **select** (opción múltiple), navegable, sesión de **≥15 min**.
-- [ ] **Banco de preguntas curadas** con respuesta correcta real por dimensión (no autoevaluación blanda), etiquetadas por tema y nivel.
-- [ ] Cobertura de dimensiones: LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design, comportamental (STAR).
-- [ ] **Scoring por dimensión** y agregación a **readiness por arquetipo de rol** (junior/mid/senior-ready).
-- [ ] **Resultado final**: radar/desglose por dimensión + readiness por rol + top gaps + plan de estudio.
-- [ ] Persistencia de resultados para ver evolución entre sesiones.
-- [ ] (Opcional) Cruce con las ofertas reales de jobhunt (`~/workspace/jobhunt`) para ponderar por lo que el mercado pide.
+- [ ] Test interactivo por terminal, **todo respondido con select** (opción múltiple), navegable, sesión de **≥15 min**.
+- [ ] **Banco de preguntas MUY rico**: amplio y profundo, muchas dimensiones y subtemas, curadas con respuesta correcta real y explicación (no autoevaluación blanda), etiquetadas por tema, subtema, dificultad y rol.
+- [ ] Cobertura de dimensiones: LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design, comportamental (STAR), y subtemas dentro de cada una.
+- [ ] **Baselines por rol y nivel**: definir perfiles de referencia (qué se espera saber para junior/mid/senior de cada arquetipo). El resultado del candidato se mide **contra estas baselines**, no en abstracto.
+- [ ] **Scoring por dimensión/subtema** y agregación a **readiness por arquetipo de rol** (junior/mid/senior-ready), comparando contra la baseline correspondiente.
+- [ ] **Resultado accionable**: radar/desglose por dimensión + readiness por rol + **"te falta X, te falta Y"** con gaps priorizados + **"tienes que hacer Z"** (plan de estudio concreto por gap).
+- [ ] Persistencia de resultados para ver evolución entre sesiones (subir sobre la baseline con el tiempo).
+- [ ] (Opcional) Cruce con las ofertas reales de jobhunt (`~/workspace/jobhunt`) para ponderar baselines/gaps por lo que el mercado pide de verdad.
 
 ### Out of Scope
 
@@ -45,6 +46,13 @@ Decirle con honestidad, **a nivel de conocimiento**, cómo de preparado está pa
 - Roles objetivo: AI Engineer, AI Product Engineer, LLM Engineer, ML Engineer, Fullstack, Product Engineer (junior a senior).
 - Proyecto hermano: `jobhunt` (descubrimiento + evaluación de ofertas). Aptus mide al candidato; jobhunt mide las ofertas.
 - Ubicación prevista: `~/workspace/aptus`. Estética minimalista clásica sobria.
+
+### Fuente de conocimiento para el banco de preguntas (CLAVE)
+- Repo **`github.com/Portaltocoding/bootcamp-ml-llm`** — mina de conocimiento LLM/ML del propio Carlos:
+  - `bootcampLLMs.md` / `bootcampLLMs.en.md` (~1,6 MB c/u): material de bootcamp LLM/ML.
+  - `BOOTCAMP-FACTORIAL-MASTER-ordered-answers.BACKUP.md` (~1,6 MB): preguntas + respuestas ordenadas → base directa para curar el banco.
+  - `module_maps.json` (~45 KB): mapa de módulos/temas → estructura de dimensiones/subtemas.
+- Plan: en la fase de construcción del banco, importar/adaptar este material a preguntas select con respuesta correcta + explicación, etiquetadas por tema/subtema/dificultad/rol. Complementar con temas no cubiertos (fullstack Next/Nest, system design, STAR).
 
 ## Evolution
 
