@@ -1,8 +1,12 @@
-# Pack real v1 (Phase 1): banco mínimo pero técnicamente correcto, curado a mano.
-# El mining serio de bootcamp-ml-llm llega en Phase 2 (source seguirá siendo
-# "curación manual" aquí, no confundir con ese futuro pipeline).
+# Pack real v2 (Phase 2): banco completo curado, 5 dimensiones ancladas al
+# temario de bootcamp-ml-llm (llm/ml/product/system-design/comportamental) más
+# el stack profesional externo (fullstack Next/Nest/TS). Cada pregunta declara
+# su `source` (bootcamp-ml-llm | externa) para auditar el sesgo de autocuración.
 name: "AI/ML Readiness"
-version: "1.0.0"
+version: "2.0.0"
 dimensions:
   - llm-rag-evals
   - ml-clasico
+  - fullstack-next-nest-ts
+  - ai-product-system-design
+  - comportamental-star

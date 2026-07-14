@@ -8,8 +8,11 @@ import { runSession } from "../runner.js";
 import { renderResult } from "../render.js";
 
 // Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
-const SESSION_TARGET_QUESTIONS = 20;
-const MIN_PER_DIMENSION = 8;
+// Con 5 dimensiones: 5 preguntas/dimensión → 25 por sesión (~20 min, ≥15 min).
+// El banco (66) es muy superior a lo mostrado, así que la selección con seed
+// distinta por arranque rota preguntas entre intentos (SESS-04).
+const SESSION_TARGET_QUESTIONS = 25;
+const MIN_PER_DIMENSION = 4;
 
 // Ruta FIJA al pack real bajo packs/ — en P1 no se acepta una ruta arbitraria
 // del usuario (sin superficie de path traversal).
