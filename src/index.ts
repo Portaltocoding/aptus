@@ -3,6 +3,7 @@ import { startCommand, DEFAULT_PACK } from "./cli/commands/start.js";
 import { historyCommand } from "./cli/commands/history.js";
 import { packsCommand } from "./cli/commands/packs.js";
 import { newPackCommand } from "./cli/commands/new-pack.js";
+import { verifyPackCommand } from "./cli/commands/verify-pack.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -35,6 +36,13 @@ program
   .description("Crea el esqueleto aislado de un pack de tema nuevo")
   .action(async (name: string) => {
     await newPackCommand(name);
+  });
+
+program
+  .command("verify-pack [name]")
+  .description("Valida y audita la calidad de un pack (curadas, no relleno)")
+  .action(async (name?: string) => {
+    await verifyPackCommand(name);
   });
 
 program.parse();
