@@ -1,0 +1,8 @@
+# Pack real v1 (Phase 1): banco mínimo pero técnicamente correcto, curado a mano.
+# El mining serio de bootcamp-ml-llm llega en Phase 2 (source seguirá siendo
+# "curación manual" aquí, no confundir con ese futuro pipeline).
+name: "AI/ML Readiness"
+version: "1.0.0"
+dimensions:
+  - llm-rag-evals
+  - ml-clasico

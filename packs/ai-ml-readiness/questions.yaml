@@ -1,0 +1,307 @@
+# Banco real v1 (Phase 1) — hand-curado, técnicamente correcto.
+# Dimensión llm-rag-evals: 15 preguntas (dimensión ml-clasico llega en la Task 2).
+# source: "curación manual" — el mining de bootcamp-ml-llm es Phase 2, no aquí.
+
+# ============================================================
+# Dimensión: llm-rag-evals (LLM / RAG / evals)
+# ============================================================
+
+- id: llm-001
+  dimension: llm-rag-evals
+  subtopic: chunking
+  difficulty: easy
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "En un pipeline RAG, ¿cuál es el motivo principal de usar 'chunk overlap' (solape) al trocear los documentos?"
+  options:
+    - id: a
+      text: "Reducir el tamaño total del índice vectorial"
+    - id: b
+      text: "Evitar que información relevante quede cortada justo en el límite entre dos fragmentos"
+    - id: c
+      text: "Acelerar la generación de embeddings"
+    - id: d
+      text: "Eliminar la necesidad de un modelo de reranking"
+  correct: b
+  explanation: "El overlap entre chunks consecutivos evita que una idea o frase relevante quede partida exactamente en el corte, de forma que al menos uno de los fragmentos solapados la contenga completa y pueda recuperarse."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-002
+  dimension: llm-rag-evals
+  subtopic: embeddings
+  difficulty: easy
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Qué representa, en esencia, un embedding de texto generado por un modelo de lenguaje?"
+  options:
+    - id: a
+      text: "Un resumen comprimido en texto plano del contenido original"
+    - id: b
+      text: "Un vector numérico de dimensión fija que codifica el significado semántico del texto en un espacio donde textos similares quedan cerca"
+    - id: c
+      text: "El identificador único (hash) del texto en la base de datos"
+    - id: d
+      text: "La lista de tokens exactos que componen el texto"
+  correct: b
+  explanation: "Un embedding es una representación vectorial de dimensión fija; el modelo se entrena para que textos semánticamente similares se ubiquen cerca en ese espacio vectorial, permitiendo búsqueda por similitud."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-003
+  dimension: llm-rag-evals
+  subtopic: retrieval
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "En un sistema de recuperación semántica que usa similitud coseno sobre embeddings normalizados (norma 1), ¿qué relación existe con la distancia euclídea a la hora de ordenar resultados?"
+  options:
+    - id: a
+      text: "No guardan ninguna relación, hay que calcular ambas por separado"
+    - id: b
+      text: "Para vectores normalizados, maximizar la similitud coseno equivale a minimizar la distancia euclídea, por lo que el ranking resultante es el mismo"
+    - id: c
+      text: "La similitud coseno solo funciona con vectores de números enteros"
+    - id: d
+      text: "La distancia euclídea siempre da un ranking inverso al de la similitud coseno"
+  correct: b
+  explanation: "Cuando los vectores están normalizados a norma 1, ||a-b||^2 = 2 - 2·cos(a,b); como la relación es monótona decreciente, ordenar por mayor similitud coseno da exactamente el mismo orden que ordenar por menor distancia euclídea."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-004
+  dimension: llm-rag-evals
+  subtopic: alucinacion
+  difficulty: easy
+  roles: ["AI Engineer", "LLM Engineer", "Product Manager"]
+  stem: "¿Qué se entiende por 'alucinación' en un modelo de lenguaje generativo?"
+  options:
+    - id: a
+      text: "Un fallo de red que impide al modelo responder"
+    - id: b
+      text: "La generación de contenido que suena fluido y seguro pero es factualmente incorrecto o no está respaldado por las fuentes/datos disponibles"
+    - id: c
+      text: "Un error de sintaxis en el JSON de salida"
+    - id: d
+      text: "El uso de un vocabulario excesivamente técnico"
+  correct: b
+  explanation: "La alucinación es la generación de afirmaciones plausibles y bien redactadas que no se corresponden con hechos reales ni con la evidencia/contexto proporcionado, sin que el modelo señale incertidumbre."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-005
+  dimension: llm-rag-evals
+  subtopic: evals-faithfulness
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "En evaluación de sistemas RAG, la métrica 'faithfulness' (fidelidad) mide principalmente..."
+  options:
+    - id: a
+      text: "Si la respuesta generada está soportada por el contexto recuperado, sin añadir afirmaciones no presentes en él"
+    - id: b
+      text: "La velocidad de respuesta del sistema en milisegundos"
+    - id: c
+      text: "Si la pregunta del usuario está bien formulada gramaticalmente"
+    - id: d
+      text: "El número total de documentos recuperados"
+  correct: a
+  explanation: "Faithfulness evalúa si cada afirmación de la respuesta puede atribuirse al contexto recuperado; una respuesta poco fiel introduce contenido que no proviene de las fuentes, es decir, alucina sobre el propio contexto."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-006
+  dimension: llm-rag-evals
+  subtopic: evals-context-precision
+  difficulty: hard
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Qué diferencia a 'context precision' de 'context recall' al evaluar el módulo de recuperación de un RAG?"
+  options:
+    - id: a
+      text: "Son sinónimos, dos nombres para la misma métrica"
+    - id: b
+      text: "Context precision mide qué proporción de los fragmentos recuperados son realmente relevantes; context recall mide qué proporción de los fragmentos relevantes existentes en el corpus fueron efectivamente recuperados"
+    - id: c
+      text: "Context precision solo aplica a modelos cerrados (closed-source)"
+    - id: d
+      text: "Context recall se calcula sobre la respuesta generada, no sobre los fragmentos recuperados"
+  correct: b
+  explanation: "Precision y recall aplicados a retrieval: precision = relevantes_recuperados / total_recuperados (ruido en lo recuperado); recall = relevantes_recuperados / total_relevantes_existentes (cobertura). Un RAG puede tener alta precisión pero baja cobertura si el top-k es pequeño."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-007
+  dimension: llm-rag-evals
+  subtopic: sampling
+  difficulty: easy
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "Al generar texto con un LLM, ¿qué efecto tiene aumentar el parámetro 'temperature' (por encima de 0)?"
+  options:
+    - id: a
+      text: "Hace la salida más determinista y repetitiva"
+    - id: b
+      text: "Aplana la distribución de probabilidad sobre el siguiente token, aumentando la aleatoriedad y diversidad de la salida"
+    - id: c
+      text: "Reduce el tamaño del contexto disponible"
+    - id: d
+      text: "Aumenta la longitud máxima de la respuesta"
+  correct: b
+  explanation: "Temperature reescala los logits antes del softmax; valores más altos aplanan la distribución de probabilidad, haciendo que tokens menos probables tengan más chance de ser elegidos, lo que incrementa la diversidad (y el riesgo de incoherencia)."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-008
+  dimension: llm-rag-evals
+  subtopic: rag-vs-finetuning
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer", "Product Manager"]
+  stem: "Un equipo necesita que su asistente responda con información que cambia semanalmente (precios, stock). ¿Por qué RAG suele ser más adecuado que el fine-tuning para este caso?"
+  options:
+    - id: a
+      text: "Porque el fine-tuning es siempre gratuito y RAG siempre es más caro"
+    - id: b
+      text: "Porque RAG permite actualizar el conocimiento simplemente actualizando el índice/documentos, sin reentrenar el modelo, mientras que el fine-tuning fija el conocimiento en los pesos hasta el siguiente reentrenamiento"
+    - id: c
+      text: "Porque RAG elimina por completo la posibilidad de alucinación"
+    - id: d
+      text: "Porque el fine-tuning no puede usarse nunca con datos privados"
+  correct: b
+  explanation: "RAG separa el conocimiento (en un índice externo, actualizable en tiempo real) del modelo; el fine-tuning 'hornea' el conocimiento en los pesos del modelo, por lo que datos que cambian con frecuencia quedarían desactualizados hasta un nuevo ciclo de reentrenamiento."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-009
+  dimension: llm-rag-evals
+  subtopic: vector-db
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Para qué se usan índices de búsqueda aproximada de vecinos más cercanos (ANN, p. ej. HNSW) en una base de datos vectorial?"
+  options:
+    - id: a
+      text: "Para garantizar siempre el resultado exacto más similar, sin excepción"
+    - id: b
+      text: "Para encontrar vecinos aproximados de forma mucho más rápida que una búsqueda exhaustiva (fuerza bruta), a cambio de una pequeña pérdida de exactitud"
+    - id: c
+      text: "Para comprimir los embeddings a texto plano"
+    - id: d
+      text: "Para entrenar el modelo de embeddings desde cero"
+  correct: b
+  explanation: "En corpus grandes, comparar un vector contra todos los demás (búsqueda exacta) es demasiado costoso; estructuras como HNSW o IVF sacrifican una pequeña cantidad de exactitud (aproximado) para lograr búsquedas sublineales mucho más rápidas."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-010
+  dimension: llm-rag-evals
+  subtopic: context-window
+  difficulty: easy
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Qué es la 'ventana de contexto' (context window) de un LLM?"
+  options:
+    - id: a
+      text: "El número máximo de usuarios que pueden usar el modelo a la vez"
+    - id: b
+      text: "La cantidad máxima de tokens (entrada + salida) que el modelo puede procesar/tener en cuenta en una sola llamada"
+    - id: c
+      text: "El tiempo máximo de espera antes de que expire una petición"
+    - id: d
+      text: "El número de capas (layers) del modelo"
+  correct: b
+  explanation: "La ventana de contexto es el límite de tokens que el modelo puede atender simultáneamente en una llamada; todo lo que exceda ese límite (prompt + contexto recuperado + historial + respuesta) queda fuera o debe truncarse/resumirse."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-011
+  dimension: llm-rag-evals
+  subtopic: tokenization
+  difficulty: hard
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Por qué la mayoría de LLMs modernos usan tokenización por subpalabras (p. ej. BPE/byte-pair encoding) en lugar de tokenizar por palabra completa?"
+  options:
+    - id: a
+      text: "Porque es más fácil de leer para los humanos"
+    - id: b
+      text: "Porque permite un vocabulario finito que aun así puede representar palabras raras, nombres propios o errores tipográficos combinando subunidades, evitando el problema de palabras fuera de vocabulario (OOV)"
+    - id: c
+      text: "Porque reduce a la mitad el número de parámetros del modelo"
+    - id: d
+      text: "Porque elimina por completo la necesidad de un embedding por token"
+  correct: b
+  explanation: "La tokenización por palabra completa requeriría un vocabulario enorme y aun así fallaría con palabras nuevas (OOV); BPE construye subpalabras frecuentes de modo que cualquier palabra, incluso desconocida, pueda componerse a partir de fragmentos ya presentes en el vocabulario."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-012
+  dimension: llm-rag-evals
+  subtopic: prompting
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer", "Prompt Engineer"]
+  stem: "¿Cuál es la diferencia entre un prompt 'zero-shot' y uno 'few-shot'?"
+  options:
+    - id: a
+      text: "El zero-shot no usa ningún modelo de lenguaje"
+    - id: b
+      text: "El few-shot incluye en el propio prompt varios ejemplos de entrada/salida deseada antes de la pregunta real, mientras que el zero-shot no incluye ningún ejemplo"
+    - id: c
+      text: "Son sinónimos"
+    - id: d
+      text: "El few-shot solo funciona con modelos ajustados por fine-tuning"
+  correct: b
+  explanation: "En few-shot prompting se incluyen ejemplos representativos de la tarea directamente en el contexto para guiar el formato/estilo de la respuesta; en zero-shot se pide la tarea directamente, confiando solo en la capacidad general del modelo."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-013
+  dimension: llm-rag-evals
+  subtopic: rag-failure-modes
+  difficulty: hard
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "El fenómeno 'lost in the middle' observado en LLMs con contextos largos se refiere a que..."
+  options:
+    - id: a
+      text: "El modelo pierde la conexión de red a mitad de la generación"
+    - id: b
+      text: "El modelo tiende a prestar menos atención a la información situada en el medio de un contexto largo, siendo más preciso con lo que aparece al principio o al final"
+    - id: c
+      text: "Los embeddings del medio del texto siempre tienen menor dimensión"
+    - id: d
+      text: "Los documentos recuperados en la posición intermedia del ranking nunca se muestran al usuario"
+  correct: b
+  explanation: "Estudios empíricos muestran que, ante contextos largos, los LLMs recuperan y usan mejor la información situada al inicio o al final del contexto que la que está en posiciones intermedias, lo que afecta el diseño del orden en que se inyectan los fragmentos recuperados en un RAG."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-014
+  dimension: llm-rag-evals
+  subtopic: reranking
+  difficulty: medium
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "¿Qué función cumple un 'reranker' en un pipeline RAG, tras la recuperación inicial por embeddings?"
+  options:
+    - id: a
+      text: "Genera la respuesta final en lugar del LLM principal"
+    - id: b
+      text: "Reordena un conjunto más amplio de candidatos recuperados usando un modelo más preciso (aunque más costoso) para priorizar los fragmentos realmente más relevantes antes de pasarlos al LLM"
+    - id: c
+      text: "Elimina la necesidad de generar embeddings"
+    - id: d
+      text: "Traduce automáticamente los documentos a otro idioma"
+  correct: b
+  explanation: "La recuperación inicial por similitud de embeddings es rápida pero aproximada; un reranker (habitualmente un cross-encoder) analiza pregunta y documento conjuntamente para dar un score de relevancia más fino, reordenando el top-k antes de construir el prompt final."
+  source: "curación manual"
+  date: "2026-07-14"
+
+- id: llm-015
+  dimension: llm-rag-evals
+  subtopic: grounding
+  difficulty: hard
+  roles: ["AI Engineer", "LLM Engineer"]
+  stem: "Aunque RAG reduce la alucinación respecto a un LLM sin contexto externo, ¿por qué NO la elimina por completo?"
+  options:
+    - id: a
+      text: "Porque RAG nunca recupera documentos reales"
+    - id: b
+      text: "Porque el LLM puede seguir generando afirmaciones no soportadas por el contexto recuperado (falta de fidelidad), o el retriever puede devolver contexto irrelevante o insuficiente, en ambos casos abriendo espacio a contenido inventado"
+    - id: c
+      text: "Porque los embeddings siempre son aleatorios"
+    - id: d
+      text: "Porque RAG desactiva el mecanismo de atención del modelo"
+  correct: b
+  explanation: "RAG mitiga la alucinación dando al modelo contexto verificado, pero no lo garantiza: el modelo puede ignorar o distorsionar ese contexto (falta de faithfulness), y el propio retriever puede fallar trayendo fragmentos poco relevantes, dejando al modelo sin evidencia real para responder con precisión."
+  source: "curación manual"
+  date: "2026-07-14"
