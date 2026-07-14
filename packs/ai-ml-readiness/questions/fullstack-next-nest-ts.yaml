@@ -1,5 +1,5 @@
-# Dimensión: fullstack-next-nest-ts — 15 preguntas. Curadas, técnicamente correctas.
-# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+# Dimensión: fullstack-next-nest-ts — 50 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. difficulty incl. experto (staff). source: externa (stack profesional).
 
 - id: fs-001
   dimension: fullstack-next-nest-ts
@@ -393,5 +393,860 @@
   explanation: En el App Router los componentes son Server Components por defecto
     y no tienen estado ni efectos de cliente. Para usar useState/useEffect hay
     que marcar el archivo con 'use client'.
+  source: externa
+  date: 2026-07-14
+- id: fs-016
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - Full Stack Engineer
+  stem: ¿Qué diferencia hay entre los utility types Pick<T,K> y Omit<T,K>?
+  options:
+    - id: a
+      text: Pick construye un tipo con SOLO las claves K; Omit construye uno con todas
+        MENOS las claves K
+    - id: b
+      text: Son idénticos
+    - id: c
+      text: Pick borra claves y Omit las añade
+    - id: d
+      text: Solo funcionan con arrays
+  correct: a
+  explanation: Pick<T,K> selecciona un subconjunto de propiedades; Omit<T,K> es el
+    complementario (todas salvo K). Útiles para derivar tipos sin repetir.
+  source: externa
+  date: 2026-07-14
+- id: fs-017
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Cuál es una diferencia práctica entre 'interface' y 'type' en TypeScript?
+  options:
+    - id: a
+      text: Las interface admiten 'declaration merging' (varias declaraciones del
+        mismo nombre se fusionan); los type no
+    - id: b
+      text: Los type no pueden describir objetos
+    - id: c
+      text: Las interface no permiten extender
+    - id: d
+      text: Son intercambiables sin ninguna diferencia
+  correct: a
+  explanation: Ambos describen formas de objeto, pero interface se puede
+    reabrir/fusionar (útil para augmentar tipos de librerías) y type es más
+    flexible para uniones, tuplas y tipos calculados.
+  source: externa
+  date: 2026-07-14
+- id: fs-018
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: "¿Para qué sirve una restricción en un genérico, como `<T extends { id:
+    string }>`?"
+  options:
+    - id: a
+      text: Limita T a tipos que cumplen esa forma, permitiendo acceder a esas
+        propiedades dentro de la función con seguridad de tipos
+    - id: b
+      text: Convierte T en 'any'
+    - id: c
+      text: Obliga a que T sea string
+    - id: d
+      text: Desactiva el chequeo de tipos
+  correct: a
+  explanation: La constraint `extends` acota qué tipos acepta el genérico y
+    habilita el acceso a los miembros garantizados (aquí `.id`), manteniendo la
+    seguridad de tipos sin perder generalidad.
+  source: externa
+  date: 2026-07-14
+- id: fs-019
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué obtienes con `keyof T` y con un acceso indexado `T[K]`?
+  options:
+    - id: a
+      text: keyof T es la unión de las claves de T; T[K] es el tipo del valor en esa
+        clave
+    - id: b
+      text: keyof T es el número de claves; T[K] su longitud
+    - id: c
+      text: Ambos devuelven 'any'
+    - id: d
+      text: Solo funcionan en runtime
+  correct: a
+  explanation: keyof T da la unión literal de nombres de propiedad; el acceso
+    indexado T[K] da el tipo del valor asociado. Son la base de utilidades
+    genéricas tipadas (p. ej. un get(obj, key) seguro).
+  source: externa
+  date: 2026-07-14
+- id: fs-020
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es el 'narrowing' (estrechamiento) de tipos y cómo se logra?
+  options:
+    - id: a
+      text: Reducir un tipo amplio a uno más concreto en una rama de código con guards
+        (typeof, instanceof, in, comprobaciones de igualdad)
+    - id: b
+      text: Ampliar cualquier tipo a 'any'
+    - id: c
+      text: Borrar tipos en runtime
+    - id: d
+      text: Un tipo de bucle
+  correct: a
+  explanation: "El compilador estrecha el tipo dentro de bloques según los guards:
+    p. ej. `if (typeof x === 'string')` hace que x sea string en esa rama. Es
+    cómo se opera con seguridad sobre uniones y unknown."
+  source: externa
+  date: 2026-07-14
+- id: fs-021
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    type Shape = Circle | Square;
+    function area(s: Shape) {
+      switch (s.kind) {
+        case 'circle': return ...;
+        case 'square': return ...;
+        default: const _e: never = s; return _e;
+      }
+    }
+
+    ¿Qué consigue el `const _e: never = s` en el default?
+  options:
+    - id: a
+      text: "Chequeo de exhaustividad: si se añade un miembro a la union y no se
+        maneja, TypeScript da error de compilación"
+    - id: b
+      text: Lanza una excepción en runtime siempre
+    - id: c
+      text: Convierte s en any
+    - id: d
+      text: No hace nada útil
+  correct: a
+  explanation: Si la union crece y falta un case, `s` en el default ya no es
+    `never` y la asignación a `never` falla en compilación. Es el patrón
+    estándar de exhaustividad con discriminated unions.
+  source: externa
+  date: 2026-07-14
+- id: fs-022
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: "¿Qué efecto tiene `as const` sobre un literal, p. ej. `const cfg = {
+    modo: 'oscuro' } as const`?"
+  options:
+    - id: a
+      text: Hace el valor readonly e infiere los tipos más estrechos (literales) en
+        vez de ensancharlos (p. ej. 'oscuro' en vez de string)
+    - id: b
+      text: Lo convierte en any
+    - id: c
+      text: Lo copia en profundidad en runtime
+    - id: d
+      text: No cambia nada
+  correct: a
+  explanation: "`as const` congela el valor (readonly) y conserva los tipos
+    literales exactos, en vez de ensanchar 'oscuro' a string o 3 a number. Útil
+    para configs, tuplas y uniones derivadas."
+  source: externa
+  date: 2026-07-14
+- id: fs-023
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: "¿Qué es un 'mapped type', como `type Opt<T> = { [K in keyof T]?: T[K] }`?"
+  options:
+    - id: a
+      text: Un tipo que transforma cada propiedad de otro iterando sobre sus claves
+        (aquí hace todas opcionales, como Partial)
+    - id: b
+      text: Un array de tipos
+    - id: c
+      text: Un tipo que solo existe en runtime
+    - id: d
+      text: Una función genérica
+  correct: a
+  explanation: Los mapped types recorren `keyof T` y construyen un nuevo tipo
+    transformando cada propiedad (opcional, readonly, remapeada...). Partial,
+    Readonly y Record se definen así.
+  source: externa
+  date: 2026-07-14
+- id: fs-024
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: experto
+  type: codigo
+  roles: *a1
+  stem: |-
+    type RetType<F> = F extends (...args: any[]) => infer R ? R : never;
+
+    ¿Qué hace `infer R` aquí?
+  options:
+    - id: a
+      text: Captura (infiere) el tipo de retorno de la función F dentro del tipo
+        condicional, para devolverlo
+    - id: b
+      text: Declara una variable en runtime
+    - id: c
+      text: Fuerza R a ser any
+    - id: d
+      text: Es un error de sintaxis
+  correct: a
+  explanation: En un conditional type, `infer R` introduce una variable de tipo
+    que el compilador deduce por unificación del patrón; aquí extrae el tipo de
+    retorno de F (como el ReturnType nativo).
+  source: externa
+  date: 2026-07-14
+- id: fs-025
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Con `strictNullChecks` activo, ¿qué aporta el encadenamiento opcional
+    `a?.b?.c` frente a `a.b.c`?
+  options:
+    - id: a
+      text: Cortocircuita a undefined si algún eslabón es null/undefined, evitando el
+        error en tiempo de ejecución y de tipos
+    - id: b
+      text: Lanza una excepción si algo es null
+    - id: c
+      text: Convierte todo a any
+    - id: d
+      text: Es solo azúcar sin efecto de tipos
+  correct: a
+  explanation: El optional chaining devuelve undefined en cuanto un eslabón es
+    nullish, sin evaluar el resto; combinado con `??` (nullish coalescing) es la
+    forma segura de navegar estructuras potencialmente nulas bajo
+    strictNullChecks.
+  source: externa
+  date: 2026-07-14
+- id: fs-026
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué el sistema de tipos de TypeScript se describe como 'estructural'
+    (structural typing)?
+  options:
+    - id: a
+      text: La compatibilidad se decide por la FORMA (propiedades) de los tipos, no
+        por su nombre o herencia declarada
+    - id: b
+      text: Porque usa clases obligatoriamente
+    - id: c
+      text: Porque comprueba tipos en runtime
+    - id: d
+      text: Porque solo admite tipos primitivos
+  correct: a
+  explanation: En tipado estructural (pato), un valor es asignable a un tipo si
+    tiene las propiedades requeridas, aunque no declare implementar nada.
+    Contrasta con el tipado nominal de lenguajes como Java/C#.
+  source: externa
+  date: 2026-07-14
+- id: fs-027
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: "En un conditional type distributivo como `type ToArr<T> = T extends any ?
+    T[] : never`, aplicado a `ToArr<string | number>`, ¿qué resulta?"
+  options:
+    - id: a
+      text: string[] | number[] — el condicional se distribuye sobre cada miembro de
+        la unión
+    - id: b
+      text: (string | number)[]
+    - id: c
+      text: never
+    - id: d
+      text: any[]
+  correct: a
+  explanation: "Cuando el tipo comprobado es un parámetro genérico desnudo y
+    recibe una unión, el conditional type se aplica miembro a miembro
+    (distributividad): string→string[], number→number[]. Para evitarlo se
+    envuelve en tuplas: [T] extends [any]."
+  source: externa
+  date: 2026-07-14
+- id: fs-028
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirve la prop `key` al renderizar una lista en React?
+  options:
+    - id: a
+      text: Da identidad estable a cada elemento para que React reconcilie
+        eficientemente qué cambió, se movió o se borró
+    - id: b
+      text: Es el texto que se muestra
+    - id: c
+      text: Define el color del elemento
+    - id: d
+      text: Es obligatoria solo en producción
+  correct: a
+  explanation: Las keys identifican los elementos entre renders; con keys estables
+    React actualiza/mueve en vez de recrear. Usar el índice como key causa bugs
+    si la lista se reordena o filtra.
+  source: externa
+  date: 2026-07-14
+- id: fs-029
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Cuándo aportan valor `useMemo`/`useCallback`?
+  options:
+    - id: a
+      text: Para memoizar cálculos caros o mantener referencias estables que evitan
+        re-renders/recomputaciones innecesarias; no para todo
+    - id: b
+      text: Siempre, en cada variable
+    - id: c
+      text: Para hacer peticiones HTTP
+    - id: d
+      text: Para reemplazar useState
+  correct: a
+  explanation: Memoizan un valor (useMemo) o una función (useCallback) entre
+    renders según sus dependencias. Útiles ante cálculos caros o para
+    estabilizar props que alimentan componentes memoizados; usarlos en todo
+    añade coste sin beneficio.
+  source: externa
+  date: 2026-07-14
+- id: fs-030
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué distingue un input 'controlado' de uno 'no controlado' en React?
+  options:
+    - id: a
+      text: El controlado tiene su valor en el estado de React (value + onChange); el
+        no controlado lo mantiene el propio DOM (se lee con ref)
+    - id: b
+      text: El no controlado no funciona
+    - id: c
+      text: Son lo mismo
+    - id: d
+      text: El controlado no usa estado
+  correct: a
+  explanation: En el controlado, React es la fuente de verdad (value ligado al
+    estado). En el no controlado, el DOM guarda el valor y lo lees puntualmente
+    con una ref. Lo habitual es controlado para validación/lógica reactiva.
+  source: externa
+  date: 2026-07-14
+- id: fs-031
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿En qué se diferencia `useRef` de `useState`?
+  options:
+    - id: a
+      text: Mutar una ref (ref.current) NO provoca re-render; cambiar el estado SÍ.
+        useRef sirve para valores mutables persistentes o acceso al DOM
+    - id: b
+      text: Son idénticos
+    - id: c
+      text: useRef re-renderiza y useState no
+    - id: d
+      text: useRef solo guarda strings
+  correct: a
+  explanation: useRef guarda un contenedor mutable estable entre renders sin
+    disparar re-render al cambiarlo; útil para referencias al DOM o valores que
+    no deben provocar repintado. useState sí re-renderiza al actualizar.
+  source: externa
+  date: 2026-07-14
+- id: fs-032
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un `useEffect` con `setInterval` que lee `count` muestra siempre el valor
+    inicial aunque count cambie. ¿Cuál es la causa típica?
+  options:
+    - id: a
+      text: "Stale closure: el intervalo capturó el `count` del primer render; se
+        arregla con la forma funcional de setState o dependencias/cleanup
+        correctos"
+    - id: b
+      text: React está roto
+    - id: c
+      text: setInterval no existe
+    - id: d
+      text: Falta subir la versión de React
+  correct: a
+  explanation: El callback del intervalo cierra sobre el `count` del render en que
+    se creó (stale closure). Se resuelve usando setCount(c => c + 1), o
+    recreando el efecto con las deps adecuadas y limpiando el intervalo.
+  source: externa
+  date: 2026-07-14
+- id: fs-033
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué usar el índice del array como `key` puede causar bugs?
+  options:
+    - id: a
+      text: Si la lista se reordena, inserta o filtra, los índices se reasignan y
+        React asocia estado/DOM al elemento equivocado
+    - id: b
+      text: Porque los índices son lentos de calcular
+    - id: c
+      text: Porque React prohíbe los números
+    - id: d
+      text: No causa ningún problema
+  correct: a
+  explanation: La key debe identificar al ITEM, no su posición. Con índices, al
+    reordenar/insertar, React cree que el elemento de una posición es 'el mismo'
+    y arrastra estado (inputs, foco) al item incorrecto. Usar un id estable.
+  source: externa
+  date: 2026-07-14
+- id: fs-034
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué problema resuelve la Context API de React?
+  options:
+    - id: a
+      text: "El 'prop drilling': pasar datos a componentes profundos sin encadenar
+        props por cada nivel intermedio"
+    - id: b
+      text: Hacer peticiones HTTP
+    - id: c
+      text: Sustituir a TypeScript
+    - id: d
+      text: Renderizar en el servidor
+  correct: a
+  explanation: Context provee un valor a un subárbol sin pasarlo prop a prop.
+    Bueno para temas transversales (tema, auth, i18n); abusar de él para estado
+    que cambia mucho puede causar re-renders amplios.
+  source: externa
+  date: 2026-07-14
+- id: fs-035
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué pasar `{}` u `() => {}` en línea como prop puede provocar
+    re-renders de un hijo memoizado (React.memo)?
+  options:
+    - id: a
+      text: Se crea una referencia NUEVA en cada render; React.memo compara por
+        igualdad referencial y la ve como prop cambiada
+    - id: b
+      text: Porque los objetos no se pueden pasar como props
+    - id: c
+      text: Porque memo está roto
+    - id: d
+      text: Porque TypeScript lo impide
+  correct: a
+  explanation: React.memo hace comparación superficial (referencial) de props. Un
+    objeto/función literal se recrea cada render (nueva referencia), así que
+    memo no evita el re-render. Se estabiliza con useMemo/useCallback.
+  source: externa
+  date: 2026-07-14
+- id: fs-036
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: En el App Router de Next.js, ¿qué representan los archivos especiales
+    `page.tsx`, `layout.tsx`, `loading.tsx` y `error.tsx`?
+  options:
+    - id: a
+      text: "Convenciones de fichero por segmento de ruta: la página, su layout
+        envolvente, el estado de carga (Suspense) y el límite de error"
+    - id: b
+      text: Son solo ejemplos, no tienen significado
+    - id: c
+      text: Archivos de configuración de webpack
+    - id: d
+      text: Tests
+  correct: a
+  explanation: "El App Router usa convenciones por carpeta/segmento: page (UI de
+    la ruta), layout (envoltura persistente), loading (fallback de Suspense) y
+    error (error boundary del segmento)."
+  source: externa
+  date: 2026-07-14
+- id: fs-037
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En el App Router, ¿cómo se define un endpoint de API (no una página)?
+  options:
+    - id: a
+      text: "Con un route handler: `app/.../route.ts` exportando funciones
+        GET/POST/etc."
+    - id: b
+      text: Con un archivo page.tsx
+    - id: c
+      text: No se puede, hay que usar otro framework
+    - id: d
+      text: Con un componente cliente
+  correct: a
+  explanation: Los route handlers (`route.ts`) exportan funciones por método HTTP
+    (GET, POST...) y devuelven Response. Son el equivalente en App Router a las
+    API routes de `pages/api`.
+  source: externa
+  date: 2026-07-14
+- id: fs-038
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En un Server Component del App Router, ¿qué controla que un `fetch()` se
+    cachee o se reejecute?
+  options:
+    - id: a
+      text: "Opciones como `cache: 'no-store'` (sin caché) o `next: { revalidate: N }`
+        (revalidar cada N segundos)"
+    - id: b
+      text: Nada, siempre se cachea eternamente
+    - id: c
+      text: El color del componente
+    - id: d
+      text: El tamaño de la respuesta
+  correct: a
+  explanation: "Next extiende fetch con control de caché: por defecto puede
+    cachear, `no-store` lo desactiva (dinámico) y `revalidate` fija un tiempo de
+    frescura (ISR a nivel de dato). Determina si la ruta es estática o
+    dinámica."
+  source: externa
+  date: 2026-07-14
+- id: fs-039
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Qué hace que una ruta del App Router pase a renderizarse de forma
+    DINÁMICA (en cada petición) en vez de estática?
+  options:
+    - id: a
+      text: "Usar APIs dinámicas (cookies(), headers(), searchParams) o fetch con
+        no-store: Next no puede prerenderizarla en build"
+    - id: b
+      text: Tener muchos componentes
+    - id: c
+      text: Usar TypeScript
+    - id: d
+      text: Importar un CSS
+  correct: a
+  explanation: Si la ruta depende de la petición (cookies/headers/searchParams) o
+    de datos sin caché, no se puede generar en build y pasa a render dinámico
+    por request. Si todo es estático/cacheable, Next la prerenderiza.
+  source: externa
+  date: 2026-07-14
+- id: fs-040
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: El App Router tiene varias capas de caché. ¿Cuál describe correctamente
+    dos de ellas?
+  options:
+    - id: a
+      text: Data Cache (persiste resultados de fetch entre peticiones/deploys según
+        revalidate) y Full Route Cache (HTML/RSC prerenderizado de rutas
+        estáticas en build)
+    - id: b
+      text: Solo hay una caché, la del navegador
+    - id: c
+      text: Todas las cachés son en cliente
+    - id: d
+      text: Next no cachea nada
+  correct: a
+  explanation: "Next tiene: Request Memoization (dedup de fetch en un render),
+    Data Cache (persistente, controlada por revalidate/tags), Full Route Cache
+    (render estático en build) y Router Cache (navegación en cliente).
+    Entenderlas es clave para frescura vs rendimiento."
+  source: externa
+  date: 2026-07-14
+- id: fs-041
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Pasas una función (callback) como prop desde un Server Component a un
+    Client Component y Next lanza un error de serialización. ¿Por qué?
+  options:
+    - id: a
+      text: Las props que cruzan de servidor a cliente deben ser serializables; una
+        función no lo es. Hay que mover la lógica al cliente o pasar datos
+        serializables / Server Actions
+    - id: b
+      text: Next no permite props
+    - id: c
+      text: Falta 'use server' en la función
+    - id: d
+      text: Es un bug de React
+  correct: a
+  explanation: El límite servidor→cliente serializa las props (para enviarlas al
+    cliente); funciones, clases o valores no serializables no cruzan. Se pasan
+    datos planos, o se usa una Server Action (marcada) como acción del cliente.
+  source: externa
+  date: 2026-07-14
+- id: fs-042
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué se usa típicamente el `middleware.ts` en Next.js?
+  options:
+    - id: a
+      text: Interceptar peticiones antes de resolver la ruta (p. ej. auth,
+        redirecciones, i18n) en el edge
+    - id: b
+      text: Estilar componentes
+    - id: c
+      text: Definir el modelo de datos
+    - id: d
+      text: Ejecutar tests
+  correct: a
+  explanation: El middleware corre antes de renderizar la ruta y puede reescribir,
+    redirigir o bloquear la petición (auth, geolocalización, A/B, i18n). Se
+    ejecuta en el runtime edge, así que tiene límites de APIs.
+  source: externa
+  date: 2026-07-14
+- id: fs-043
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: diagrama
+  roles: *a1
+  stem: >-
+    Flujo de una ruta en el App Router (falta el paso ?):
+
+      request -> Server Components (render en servidor) -> HTML + payload RSC -> [ ? ] -> UI interactiva
+
+    ¿Qué va en [ ? ]?
+  options:
+    - id: a
+      text: Hidratación en el cliente de los Client Components ('use client')
+    - id: b
+      text: Otra petición al servidor por cada click
+    - id: c
+      text: Compilar TypeScript en el navegador
+    - id: d
+      text: Reiniciar el servidor
+  correct: a
+  explanation: El servidor renderiza los Server Components y envía HTML + el
+    payload RSC; en el cliente, React HIDRATA los Client Components para
+    hacerlos interactivos. Los Server Components no se hidratan (no envían su
+    JS).
+  source: externa
+  date: 2026-07-14
+- id: fs-044
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Cuál es el rol de un Interceptor en NestJS?
+  options:
+    - id: a
+      text: Envolver la ejecución del handler para transformar la respuesta, medir
+        tiempos, cachear o mapear excepciones (lógica transversal antes/después)
+    - id: b
+      text: Validar el payload de entrada
+    - id: c
+      text: Decidir si la petición procede (auth)
+    - id: d
+      text: Conectar a la base de datos
+  correct: a
+  explanation: "Los interceptors usan un patrón alrededor del handler (RxJS):
+    pueden transformar la respuesta, añadir logging/timing o mapear resultados.
+    La validación es de los Pipes y la autorización de los Guards."
+  source: externa
+  date: 2026-07-14
+- id: fs-045
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirve un Exception Filter en NestJS?
+  options:
+    - id: a
+      text: Capturar excepciones lanzadas y traducirlas a una respuesta HTTP
+        consistente (código y cuerpo de error)
+    - id: b
+      text: Filtrar filas de la base de datos
+    - id: c
+      text: Inyectar dependencias
+    - id: d
+      text: Definir rutas
+  correct: a
+  explanation: "Los exception filters centralizan el manejo de errores: capturan
+    excepciones (o una clase concreta) y devuelven una respuesta uniforme,
+    evitando fugas de stack traces y unificando el formato de error de la API."
+  source: externa
+  date: 2026-07-14
+- id: fs-046
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Por defecto, ¿qué scope tienen los providers en NestJS?
+  options:
+    - id: a
+      text: "Singleton: una única instancia compartida en toda la aplicación"
+    - id: b
+      text: Uno nuevo por cada petición siempre
+    - id: c
+      text: Uno por cada método invocado
+    - id: d
+      text: No se instancian nunca
+  correct: a
+  explanation: Por defecto los providers son singleton (una instancia para toda la
+    app). Se puede pedir scope REQUEST (una por petición) o TRANSIENT cuando
+    haga falta, con coste de rendimiento.
+  source: externa
+  date: 2026-07-14
+- id: fs-047
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirve un 'custom provider' con `useFactory` o `useValue` y un
+    token de inyección?
+  options:
+    - id: a
+      text: Registrar dependencias no triviales (valores, instancias construidas
+        condicionalmente, config) bajo un token que luego se inyecta
+    - id: b
+      text: Para desactivar la inyección de dependencias
+    - id: c
+      text: Para definir rutas HTTP
+    - id: d
+      text: Para escribir tests solamente
+  correct: a
+  explanation: Cuando lo que quieres inyectar no es una clase simple (un valor de
+    config, una instancia creada por una fábrica, algo condicional), lo
+    registras como custom provider con un token (string/símbolo) y lo inyectas
+    con @Inject(token).
+  source: externa
+  date: 2026-07-14
+- id: fs-048
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En NestJS, ¿cómo comparte un módulo un provider con otros módulos?
+  options:
+    - id: a
+      text: Debe declararlo en `exports`; el módulo que lo necesita lo trae con
+        `imports`
+    - id: b
+      text: Todos los providers son globales automáticamente
+    - id: c
+      text: Copiando el archivo
+    - id: d
+      text: No se puede compartir
+  correct: a
+  explanation: "Los módulos encapsulan sus providers: solo los que aparecen en
+    `exports` son visibles para quien haga `imports` de ese módulo. Es el
+    mecanismo de encapsulación/reuso de Nest (salvo módulos marcados @Global)."
+  source: externa
+  date: 2026-07-14
+- id: fs-049
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: Dos servicios de NestJS se necesitan mutuamente y falla la inyección por
+    dependencia circular. ¿Cuál es la solución idiomática?
+  options:
+    - id: a
+      text: Usar `forwardRef(() => OtroServicio)` en ambos lados para que Nest
+        resuelva la referencia diferida
+    - id: b
+      text: Instanciarlos con 'new' a mano
+    - id: c
+      text: Fusionar todo en un único archivo gigante
+    - id: d
+      text: Es imposible de resolver
+  correct: a
+  explanation: Ante una dependencia circular, Nest ofrece forwardRef() para
+    diferir la resolución del token en ambos providers/módulos. Aun así, una
+    circularidad suele señalar que conviene extraer la lógica compartida a un
+    tercer servicio.
+  source: externa
+  date: 2026-07-14
+- id: fs-050
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    @Injectable()
+    export class RolesGuard implements CanActivate {
+      canActivate(ctx: ExecutionContext): boolean {
+        const req = ctx.switchToHttp().getRequest();
+        return req.user?.role === 'admin';
+      }
+    }
+
+    ¿Qué hace este Guard?
+  options:
+    - id: a
+      text: Autoriza la petición solo si el usuario tiene rol 'admin'; si devuelve
+        false, Nest responde 403 y no ejecuta el handler
+    - id: b
+      text: Valida el body de la petición
+    - id: c
+      text: Transforma la respuesta
+    - id: d
+      text: Conecta a la base de datos
+  correct: a
+  explanation: "Un Guard implementa canActivate y decide si la request procede:
+    aquí comprueba el rol del usuario (RBAC). Si devuelve false (o lanza), Nest
+    corta con 403 y no llega al controlador."
   source: externa
   date: 2026-07-14
