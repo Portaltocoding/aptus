@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { startCommand, DEFAULT_PACK } from "./cli/commands/start.js";
 import { historyCommand } from "./cli/commands/history.js";
 import { packsCommand } from "./cli/commands/packs.js";
+import { newPackCommand } from "./cli/commands/new-pack.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -27,6 +28,13 @@ program
   .description("Lista los packs de conocimiento disponibles")
   .action(async () => {
     await packsCommand();
+  });
+
+program
+  .command("new-pack <name>")
+  .description("Crea el esqueleto aislado de un pack de tema nuevo")
+  .action(async (name: string) => {
+    await newPackCommand(name);
   });
 
 program.parse();
