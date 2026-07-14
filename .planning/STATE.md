@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-current_phase_name: Readiness por rol con baselines ancladas
+current_phase: 5
+current_phase_name: Persistencia y evolución
 status: ready
-stopped_at: Completado Phase 3 — confianza y calibración (03-01)
-last_updated: "2026-07-14T21:20:00.000Z"
+stopped_at: Completado Phase 4 — readiness por rol con baselines ancladas (04-01)
+last_updated: "2026-07-14T21:40:00.000Z"
 last_activity: 2026-07-14
-last_activity_desc: Completado 03-01 (confianza + curva de calibración) y cerrada Phase 3; 62/62 tests en verde
+last_activity_desc: Completado 04-01 (readiness por rol + gaps con plan) y cerrada Phase 4; 80/80 tests en verde
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
-  percent: 50
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 ## Current Position
 
-Phase: 4 of 6 (Readiness por rol con baselines ancladas) — no iniciada
-Plan: Phases 1, 2 y 3 completas
-Status: Phase 3 verificada end-to-end (confianza por pregunta + curva de calibración); Phase 4 lista cuando Carlos decida
-Last activity: 2026-07-14 — Completado 03-01 (confianza + calibración), cerrada Phase 3; 62/62 tests
+Phase: 5 of 6 (Persistencia y evolución) — no iniciada
+Plan: Phases 1-4 completas
+Status: Phase 4 verificada end-to-end (readiness por rol + gaps con plan); Phase 5 lista cuando Carlos decida
+Last activity: 2026-07-14 — Completado 04-01 (readiness por rol), cerrada Phase 4; 80/80 tests
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -83,7 +83,7 @@ None yet.
 
 - Quality gate transversal (todas las fases de resultado): nunca mostrar un score único agregado tipo "empleabilidad"; siempre mostrar N junto a cada score; nada de IRT/CAT en el mapeo score→rol.
 - ~~Fase 2 requiere inspección real de `bootcampLLMs.md` / `BACKUP.md` / `module_maps.json`~~ RESUELTO (Phase 2): inspeccionado `module_maps.json`; el bootcamp cubre 4/5 dimensiones (fullstack es externo). Procedencia por pregunta anclada en consecuencia.
-- Fase 4 requiere investigación de umbrales junior/mid/senior por rol anclados a fuentes externas — research flag pendiente de resolver en discuss/plan de esa fase.
+- ~~Fase 4 requiere investigación de umbrales junior/mid/senior por rol anclados a fuentes externas~~ RESUELTO (Phase 4): niveles anclados a marcos de leveling (dificultad) y perfiles de rol a descripciones de puesto 2026, documentado en 04-RESEARCH.md con fuentes.
 
 ## Deferred Items
 
@@ -96,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T21:20:00.000Z
-Stopped at: Completado Phase 3 — confianza y calibración (03-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
+Last session: 2026-07-14T21:40:00.000Z
+Stopped at: Completado Phase 4 — readiness por rol con baselines ancladas (04-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
 Resume file: None

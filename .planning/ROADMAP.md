@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Fundamento end-to-end** - Banco mínimo real, motor de scoring puro, sesión select en terminal y resultado básico con N, de punta a punta.
 - [x] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
 - [x] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
-- [ ] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
+- [x] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
 - [ ] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
 - [ ] **Phase 6: Integración con jobhunt (opcional, aditiva)** - Ponderación de gaps por demanda real de mercado, con degradación elegante si jobhunt no está disponible.
 
@@ -88,7 +88,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. El resultado nunca colapsa en un score único agregado tipo "probabilidad de contratación" o "employability index"; siempre se presenta como matriz rol × dimensión.
   4. Carlos ve una lista de gaps priorizados ("te falta X, te falta Y") junto a un plan de estudio concreto por gap ("haz Z").
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
+
+- [x] 04-01-PLAN.md — Readiness por rol anclado a dificultad (ENG-03/RES-02) + baselines externas (CONT-05) + gaps con plan (RES-03)
 
 ### Phase 5: Persistencia y evolución
 
