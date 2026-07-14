@@ -1,0 +1,397 @@
+# Dimensión: fullstack-next-nest-ts — 15 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+
+- id: fs-001
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: easy
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: En TypeScript, ¿qué utility type convierte todas las propiedades de un
+    tipo en opcionales?
+  options:
+    - id: a
+      text: Required<T>
+    - id: b
+      text: Partial<T>
+    - id: c
+      text: Readonly<T>
+    - id: d
+      text: Pick<T, K>
+  correct: b
+  explanation: "Partial<T> mapea cada propiedad a opcional (prop?: tipo).
+    Required<T> hace lo contrario, Readonly<T> las hace inmutables y Pick<T,K>
+    selecciona un subconjunto de claves."
+  source: externa
+  date: 2026-07-14
+- id: fs-002
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+  stem: ¿Cuál es la diferencia práctica clave entre los tipos 'unknown' y 'any' en
+    TypeScript?
+  options:
+    - id: a
+      text: Son sinónimos, 'unknown' es solo un alias más moderno de 'any'
+    - id: b
+      text: "'unknown' es type-safe: obliga a estrechar el tipo (narrowing) antes de
+        operar con el valor, mientras 'any' desactiva toda comprobación"
+    - id: c
+      text: "'any' solo se puede usar en tipos de retorno y 'unknown' solo en
+        parámetros"
+    - id: d
+      text: "'unknown' no existe en TypeScript, es de Flow"
+  correct: b
+  explanation: "'unknown' acepta cualquier valor pero no permite acceder a
+    propiedades ni llamarlo sin antes estrechar el tipo (typeof, instanceof,
+    guards). 'any' apaga el chequeo de tipos por completo, propagando
+    inseguridad."
+  source: externa
+  date: 2026-07-14
+- id: fs-003
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+  stem: Tienes un tipo union 'type Shape = Circle | Square' donde cada miembro
+    tiene un campo literal 'kind'. ¿Cómo se llama el patrón que permite a
+    TypeScript estrechar el tipo dentro de un switch sobre 'shape.kind'?
+  options:
+    - id: a
+      text: Discriminated union (union etiquetada)
+    - id: b
+      text: Intersection type
+    - id: c
+      text: Conditional type
+    - id: d
+      text: Mapped type
+  correct: a
+  explanation: Una discriminated union usa un campo literal común (el
+    discriminante, aquí 'kind') para que el compilador estreche automáticamente
+    al miembro correcto en cada rama del switch, dando exhaustividad
+    verificable.
+  source: externa
+  date: 2026-07-14
+- id: fs-004
+  dimension: fullstack-next-nest-ts
+  subtopic: typescript
+  difficulty: hard
+  roles:
+    - Full Stack Engineer
+  stem: "¿Qué aporta el operador 'satisfies' de TypeScript frente a una anotación
+    de tipo normal ': T'?"
+  options:
+    - id: a
+      text: Comprueba que el valor cumple el tipo T pero conserva el tipo literal más
+        estrecho inferido del valor, en vez de ensancharlo a T
+    - id: b
+      text: Convierte el valor a T en tiempo de ejecución (cast real)
+    - id: c
+      text: Hace que el valor sea readonly
+    - id: d
+      text: Es equivalente a 'as T' pero más lento
+  correct: a
+  explanation: "'satisfies' valida la compatibilidad con T sin descartar la
+    información literal: p. ej. un objeto de config queda validado contra el
+    tipo pero cada clave mantiene su tipo estrecho, algo que ': T' perdería al
+    ensanchar. No hay efecto en runtime."
+  source: externa
+  date: 2026-07-14
+- id: fs-005
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: easy
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: En Next.js, ¿qué diferencia hay entre SSG (Static Site Generation) y SSR
+    (Server-Side Rendering)?
+  options:
+    - id: a
+      text: SSG renderiza en el navegador; SSR en el servidor
+    - id: b
+      text: SSG genera el HTML en tiempo de build (una vez); SSR lo genera en el
+        servidor en cada petición
+    - id: c
+      text: Son lo mismo, solo cambia el nombre según la versión
+    - id: d
+      text: SSR solo funciona sin JavaScript y SSG requiere JavaScript
+  correct: b
+  explanation: SSG produce HTML estático en el build y lo sirve igual a todos
+    (ideal para contenido que cambia poco). SSR ejecuta el render en el servidor
+    por cada request, útil cuando el contenido depende de la petición (usuario,
+    datos frescos).
+  source: externa
+  date: 2026-07-14
+- id: fs-006
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: En el App Router de Next.js, ¿qué caracteriza a un React Server Component
+    (RSC) por defecto?
+  options:
+    - id: a
+      text: Se ejecuta en el servidor, no envía su JS al cliente y no puede usar hooks
+        de estado como useState/useEffect
+    - id: b
+      text: Se ejecuta solo en el cliente y siempre requiere 'use client'
+    - id: c
+      text: Es idéntico a un componente cliente pero con otro nombre
+    - id: d
+      text: Solo puede renderizar texto plano, no otros componentes
+  correct: a
+  explanation: "En el App Router los componentes son Server Components por
+    defecto: corren en el servidor, pueden hacer fetch/acceso a datos
+    directamente y no mandan JS al bundle del cliente. Para interactividad con
+    estado/efectos hace falta marcar 'use client'."
+  source: externa
+  date: 2026-07-14
+- id: fs-007
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+  stem: ¿Qué hace Incremental Static Regeneration (ISR) en Next.js?
+  options:
+    - id: a
+      text: Regenera todo el sitio en cada request
+    - id: b
+      text: Permite regenerar páginas estáticas en segundo plano tras un intervalo
+        ('revalidate'), sirviendo la versión cacheada hasta que la nueva esté
+        lista
+    - id: c
+      text: Deshabilita el cache por completo
+    - id: d
+      text: Convierte las páginas en client-side rendering
+  correct: b
+  explanation: "ISR combina lo estático con frescura: la página se sirve desde
+    cache y, pasado el tiempo de 'revalidate', Next.js la regenera en background
+    y sustituye la versión servida, sin rebuild completo del sitio ni SSR en
+    cada petición."
+  source: externa
+  date: 2026-07-14
+- id: fs-008
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: hard
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: Tras mutar datos con una Server Action en Next.js, ¿cuál es la forma
+    idiomática de que la UI refleje el cambio sin recargar toda la página a
+    mano?
+  options:
+    - id: a
+      text: Llamar a revalidatePath() o revalidateTag() para invalidar el cache del
+        segmento afectado y que Next.js vuelva a renderizarlo
+    - id: b
+      text: Hacer window.location.reload() al final de la acción
+    - id: c
+      text: Guardar el estado en localStorage y leerlo en el próximo render
+    - id: d
+      text: "No es posible: las Server Actions no pueden refrescar datos"
+  correct: a
+  explanation: revalidatePath/revalidateTag invalidan el cache de datos/segmento
+    tras la mutación, de modo que el siguiente render en servidor trae los datos
+    frescos. Es el mecanismo idiomático; un reload completo pierde el beneficio
+    de la navegación por RSC.
+  source: externa
+  date: 2026-07-14
+- id: fs-009
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+  stem: ¿Cuál es una causa típica de un 'hydration mismatch' en Next.js/React?
+  options:
+    - id: a
+      text: Renderizar en el servidor un HTML distinto al que produce el cliente en el
+        primer render (p. ej. usar Date.now(), Math.random() o window durante el
+        render)
+    - id: b
+      text: Usar demasiados componentes
+    - id: c
+      text: Tener el bundle de JS demasiado pequeño
+    - id: d
+      text: Definir tipos con TypeScript
+  correct: a
+  explanation: La hidratación asume que el HTML del servidor coincide con el
+    primer render del cliente. Si el árbol difiere (valores no deterministas,
+    acceso a APIs de navegador solo disponibles en cliente), React detecta el
+    desajuste y avisa/re-renderiza, con parpadeos o errores.
+  source: externa
+  date: 2026-07-14
+- id: fs-010
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+    - Backend Engineer
+  stem: En NestJS, ¿qué principio arquitectónico está en el centro de cómo se
+    conectan controllers, services y repositories?
+  options:
+    - id: a
+      text: "Inyección de dependencias (DI): los providers se declaran y Nest los
+        inyecta por su token/tipo, en vez de instanciarlos a mano"
+    - id: b
+      text: Herencia múltiple entre controllers
+    - id: c
+      text: Variables globales compartidas entre módulos
+    - id: d
+      text: Singletons creados manualmente con 'new' en cada archivo
+  correct: a
+  explanation: "NestJS se apoya en un contenedor de inyección de dependencias: los
+    providers (services, repositories) se registran en módulos y Nest resuelve e
+    inyecta las dependencias por constructor, favoreciendo el desacople y la
+    testabilidad (mocks)."
+  source: externa
+  date: 2026-07-14
+- id: fs-011
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: hard
+  roles:
+    - Full Stack Engineer
+    - Backend Engineer
+  stem: En NestJS, ¿cuál es el rol correcto de un Guard frente a un Pipe?
+  options:
+    - id: a
+      text: El Guard decide si una petición puede continuar
+        (autorización/autenticación); el Pipe transforma o valida los datos de
+        entrada antes de llegar al handler
+    - id: b
+      text: Son intercambiables, hacen exactamente lo mismo
+    - id: c
+      text: El Guard formatea la respuesta y el Pipe gestiona la conexión a la base de
+        datos
+    - id: d
+      text: El Pipe controla el acceso y el Guard registra logs
+  correct: a
+  explanation: "Un Guard implementa canActivate() y decide si la request procede
+    (típico: auth/roles). Un Pipe opera sobre los argumentos del handler para
+    validarlos o transformarlos (p. ej. ValidationPipe con class-validator,
+    ParseIntPipe). Son responsabilidades distintas en el ciclo de petición."
+  source: externa
+  date: 2026-07-14
+- id: fs-012
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+    - Backend Engineer
+  stem: ¿Cómo se valida idiomáticamente el body de una petición en NestJS?
+  options:
+    - id: a
+      text: Con un DTO decorado con class-validator y el ValidationPipe global, que
+        rechaza la petición si el payload no cumple el esquema
+    - id: b
+      text: Comprobando cada campo con if/else dentro del controller
+    - id: c
+      text: Confiando en que el cliente envíe siempre datos válidos
+    - id: d
+      text: Validando en el frontend y desactivando la validación en el backend
+  correct: a
+  explanation: El patrón idiomático es definir un DTO con decoradores de
+    class-validator (@IsString, @IsEmail, etc.) y activar el ValidationPipe (a
+    menudo global con whitelist), que transforma y valida el payload y devuelve
+    400 automáticamente si no cumple, sin validación manual dispersa.
+  source: externa
+  date: 2026-07-14
+- id: fs-013
+  dimension: fullstack-next-nest-ts
+  subtopic: react
+  difficulty: medium
+  type: codigo
+  roles:
+    - Full Stack Engineer
+  stem: |-
+    function Comp() {
+      const [n, setN] = useState(0);
+      useEffect(() => {
+        setN(n + 1);          // sin array de dependencias
+      });
+      return <div>{n}</div>;
+    }
+
+    ¿Qué ocurre al montar este componente?
+  options:
+    - id: a
+      text: "Bucle infinito de renders: el effect corre en cada render y setN provoca
+        otro render"
+    - id: b
+      text: Nada raro, n se queda en 1
+    - id: c
+      text: Error de compilación de TypeScript
+    - id: d
+      text: n se queda en 0 para siempre
+  correct: a
+  explanation: "Sin array de dependencias, el effect se ejecuta tras CADA render;
+    como llama a setN, dispara un nuevo render que vuelve a ejecutar el effect:
+    bucle infinito. Se corrige con `[]` (una vez) o las dependencias correctas."
+  source: externa
+  date: 2026-07-14
+- id: fs-014
+  dimension: fullstack-next-nest-ts
+  subtopic: nestjs
+  difficulty: hard
+  type: diagrama
+  roles:
+    - Full Stack Engineer
+    - Backend Engineer
+  stem: |-
+    Ciclo de una petición en NestJS (falta el paso ? justo antes del handler):
+
+      Request -> Middleware -> Guard -> Interceptor -> [ ? ] -> Controller
+
+    ¿Qué va en [ ? ]?
+  options:
+    - id: a
+      text: Pipe (valida/transforma el payload, p. ej. ValidationPipe con el DTO)
+    - id: b
+      text: Otro Controller
+    - id: c
+      text: La conexión a la base de datos
+    - id: d
+      text: El navegador del cliente
+  correct: a
+  explanation: El orden en Nest es middleware -> guards -> interceptors -> pipes
+    -> handler. El Pipe valida y transforma los argumentos (típicamente el
+    ValidationPipe contra el DTO) justo antes de que el controller los reciba.
+  source: externa
+  date: 2026-07-14
+- id: fs-015
+  dimension: fullstack-next-nest-ts
+  subtopic: nextjs
+  difficulty: medium
+  type: escenario
+  roles:
+    - Full Stack Engineer
+  stem: En el App Router de Next.js pones useState en un componente sin la
+    directiva 'use client' y falla. ¿Por qué?
+  options:
+    - id: a
+      text: Es un Server Component por defecto; los hooks de estado solo van en Client
+        Components ('use client')
+    - id: b
+      text: useState ya no existe en React
+    - id: c
+      text: Falta importar React manualmente
+    - id: d
+      text: Next.js no soporta estado en el cliente
+  correct: a
+  explanation: En el App Router los componentes son Server Components por defecto
+    y no tienen estado ni efectos de cliente. Para usar useState/useEffect hay
+    que marcar el archivo con 'use client'.
+  source: externa
+  date: 2026-07-14

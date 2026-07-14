@@ -1,0 +1,351 @@
+# Dimensión: comportamental-star — 14 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+
+- id: star-001
+  dimension: comportamental-star
+  subtopic: metodo-star
+  difficulty: easy
+  roles:
+    - Cualquiera
+  stem: En el contexto de entrevistas comportamentales, ¿qué significa el acrónimo
+    STAR?
+  options:
+    - id: a
+      text: Situation, Task, Action, Result
+    - id: b
+      text: Strategy, Timing, Analysis, Review
+    - id: c
+      text: Skill, Talent, Attitude, Reward
+    - id: d
+      text: Story, Tone, Approach, Reaction
+  correct: a
+  explanation: STAR estructura una respuesta comportamental en Situación
+    (contexto), Tarea (tu responsabilidad/objetivo), Acción (lo que hiciste tú)
+    y Resultado (el desenlace, idealmente medible). Da orden y evita divagar.
+  source: externa
+  date: 2026-07-14
+- id: star-002
+  dimension: comportamental-star
+  subtopic: resultado
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: Al contar el 'Result' de una respuesta STAR, ¿qué la hace más convincente?
+  options:
+    - id: a
+      text: Cuantificar el impacto siempre que se pueda (p. ej. 'reduje la latencia un
+        40%') y añadir qué aprendiste
+    - id: b
+      text: Dejarlo vago para no comprometerse con cifras
+    - id: c
+      text: Terminar en la Acción y no mencionar el resultado
+    - id: d
+      text: Atribuir el resultado al equipo sin decir tu parte
+  correct: a
+  explanation: Un Result con métricas concretas demuestra impacto real y
+    credibilidad, mucho más que afirmaciones genéricas. Añadir el aprendizaje
+    muestra reflexión. Omitir el resultado deja la historia sin cierre y sin
+    evidencia de que funcionó.
+  source: externa
+  date: 2026-07-14
+- id: star-003
+  dimension: comportamental-star
+  subtopic: errores-comunes
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: ¿Cuál es un error frecuente al responder con STAR que conviene evitar?
+  options:
+    - id: a
+      text: Dedicar demasiado tiempo a la Situación y quedarse sin contar la Acción y
+        el Resultado
+    - id: b
+      text: Explicar la Acción con detalle
+    - id: c
+      text: Cuantificar el Resultado
+    - id: d
+      text: Elegir una historia relevante para el rol
+  correct: a
+  explanation: "Un fallo típico es sobre-explicar el contexto (Situación/Tarea) y
+    llegar con el tiempo agotado a lo que de verdad evalúa el entrevistador: qué
+    hiciste TÚ (Acción) y qué conseguiste (Resultado). El contexto debe ser
+    breve y suficiente."
+  source: externa
+  date: 2026-07-14
+- id: star-004
+  dimension: comportamental-star
+  subtopic: conflicto
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: Ante 'háblame de un conflicto con un compañero', ¿qué enfoque transmite
+    mejor señal?
+  options:
+    - id: a
+      text: Centrarse en cómo entendiste la otra postura, qué hiciste para resolverlo
+        y qué aprendiste, sin culpabilizar
+    - id: b
+      text: Demostrar que la otra persona estaba equivocada y tú tenías razón
+    - id: c
+      text: Decir que nunca has tenido conflictos
+    - id: d
+      text: Describir el conflicto sin contar cómo se resolvió
+  correct: a
+  explanation: "El entrevistador busca madurez y colaboración: empatía con la otra
+    postura, acciones concretas para resolver y aprendizaje. Echar culpas o
+    negar todo conflicto (poco creíble) resta; quedarse sin resolución deja la
+    señal incompleta."
+  source: externa
+  date: 2026-07-14
+- id: star-005
+  dimension: comportamental-star
+  subtopic: yo-vs-nosotros
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: En una respuesta comportamental, ¿por qué importa usar 'yo' al describir
+    la Acción, aunque fuera un trabajo de equipo?
+  options:
+    - id: a
+      text: Porque el entrevistador evalúa tu contribución individual; 'nosotros'
+        constante difumina qué hiciste tú realmente
+    - id: b
+      text: Porque hablar en plural está prohibido en entrevistas
+    - id: c
+      text: Porque el 'yo' hace la historia más corta
+    - id: d
+      text: No importa, da igual el pronombre
+  correct: a
+  explanation: Reconocer al equipo está bien, pero la evaluación es de TU aporte.
+    Si todo es 'nosotros', el entrevistador no puede distinguir tu contribución.
+    Conviene ser claro en el 'yo' de la Acción sin negar el contexto
+    colaborativo.
+  source: externa
+  date: 2026-07-14
+- id: star-006
+  dimension: comportamental-star
+  subtopic: fracaso
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: Cuando preguntan por un fracaso o error propio, ¿qué señal busca sobre
+    todo el entrevistador?
+  options:
+    - id: a
+      text: Que asumes responsabilidad (ownership) y muestras qué aprendiste y qué
+        cambiaste después
+    - id: b
+      text: Que nunca fallas
+    - id: c
+      text: Un fracaso tan pequeño que no cuente como fracaso
+    - id: d
+      text: Que la culpa fue de causas externas
+  correct: a
+  explanation: "La pregunta de fracaso mide autoconciencia y crecimiento:
+    reconocer el error, tu parte en él, y qué aprendiste/cambiaste. Negar fallos
+    o culpar al entorno transmite falta de reflexión; un 'fracaso' trivial evade
+    la pregunta."
+  source: externa
+  date: 2026-07-14
+- id: star-007
+  dimension: comportamental-star
+  subtopic: metodo-star
+  difficulty: hard
+  roles:
+    - Cualquiera
+  stem: En STAR, ¿qué distingue la 'Task' de la 'Action'?
+  options:
+    - id: a
+      text: La Task es el objetivo o responsabilidad que te tocaba (el qué había que
+        lograr); la Action es lo que concretamente hiciste tú para lograrlo (el
+        cómo)
+    - id: b
+      text: Son lo mismo con distinto nombre
+    - id: c
+      text: La Task es el resultado final y la Action es el contexto
+    - id: d
+      text: La Action ocurre antes que la Task
+  correct: a
+  explanation: Task define el reto/objetivo del que eras responsable en esa
+    situación; Action detalla los pasos concretos que TÚ tomaste. Confundirlas
+    hace que la respuesta salte del contexto al resultado sin dejar claro tu
+    papel activo.
+  source: externa
+  date: 2026-07-14
+- id: star-008
+  dimension: comportamental-star
+  subtopic: debilidades
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: Ante '¿cuál es tu mayor debilidad?', ¿qué respuesta es más sólida?
+  options:
+    - id: a
+      text: Una debilidad real y concreta acompañada de lo que estás haciendo
+        activamente para mejorarla
+    - id: b
+      text: "'Soy demasiado perfeccionista' u otra fortaleza disfrazada"
+    - id: c
+      text: "'No tengo debilidades'"
+    - id: d
+      text: Una debilidad crítica para el puesto sin plan de mejora
+  correct: a
+  explanation: La respuesta fuerte es honesta y muestra autoconciencia más acción
+    de mejora. Las 'fortalezas disfrazadas' suenan a cliché y no engañan; negar
+    debilidades resta credibilidad; y elegir una que inhabilite para el rol se
+    dispara en el pie.
+  source: externa
+  date: 2026-07-14
+- id: star-009
+  dimension: comportamental-star
+  subtopic: liderazgo
+  difficulty: medium
+  roles:
+    - Cualquiera
+    - Tech Lead
+  stem: Piden un ejemplo de 'liderazgo sin autoridad formal'. ¿Qué historia encaja
+    mejor?
+  options:
+    - id: a
+      text: Una en la que alineaste a compañeros hacia una decisión mediante datos,
+        contexto y persuasión, sin ser su jefe
+    - id: b
+      text: Una en la que diste órdenes porque eras el manager
+    - id: c
+      text: Una en la que trabajaste solo sin implicar a nadie
+    - id: d
+      text: Una en la que impusiste tu criterio ignorando al equipo
+  correct: a
+  explanation: Liderazgo sin autoridad significa influir por credibilidad, datos y
+    comunicación, no por jerarquía. La historia ideal muestra cómo lograste
+    alineamiento y acción de otros sobre los que no tenías poder formal.
+  source: externa
+  date: 2026-07-14
+- id: star-010
+  dimension: comportamental-star
+  subtopic: motivacion
+  difficulty: easy
+  roles:
+    - Cualquiera
+  stem: Ante '¿por qué dejaste tu anterior trabajo?', ¿cuál es el mejor enfoque?
+  options:
+    - id: a
+      text: Enmarcarlo en positivo, hacia lo que buscas (crecimiento, reto, encaje),
+        sin criticar duramente a tu empresa anterior
+    - id: b
+      text: Despotricar en detalle sobre tu antiguo jefe
+    - id: c
+      text: Decir que solo te interesa el dinero
+    - id: d
+      text: Evitar la pregunta cambiando de tema
+  correct: a
+  explanation: "Un buen framing es prospectivo y positivo: qué buscas en el
+    siguiente paso, no un ajuste de cuentas. Hablar mal del empleador anterior
+    transmite riesgo de que hagas lo mismo con el próximo; evadir la pregunta
+    genera desconfianza."
+  source: externa
+  date: 2026-07-14
+- id: star-011
+  dimension: comportamental-star
+  subtopic: preparacion
+  difficulty: medium
+  roles:
+    - Cualquiera
+  stem: Al preparar historias comportamentales para una entrevista, ¿qué
+    estrategia rinde más?
+  options:
+    - id: a
+      text: Tener unas pocas historias versátiles y bien estructuradas que puedas
+        adaptar a varias preguntas (conflicto, liderazgo, fracaso, impacto)
+    - id: b
+      text: Memorizar una respuesta literal distinta para cada posible pregunta
+    - id: c
+      text: Improvisar todo sin preparar nada
+    - id: d
+      text: Preparar una única historia para todo
+  correct: a
+  explanation: Un puñado de historias sólidas y reutilizables (cada una con
+    Situación/Tarea/Acción/Resultado claros) cubre muchas preguntas si sabes
+    reencuadrarlas según lo que se pide. Memorizar guiones literales suena
+    rígido; no preparar nada arriesga divagar.
+  source: externa
+  date: 2026-07-14
+- id: star-012
+  dimension: comportamental-star
+  subtopic: impacto
+  difficulty: easy
+  roles:
+    - Cualquiera
+  stem: ¿Por qué conviene cerrar una respuesta comportamental con el impacto
+    medible de tus acciones?
+  options:
+    - id: a
+      text: Porque las cifras concretas hacen la historia creíble y memorable, y
+        demuestran que tu acción produjo un resultado real
+    - id: b
+      text: Porque alarga la respuesta
+    - id: c
+      text: Porque los entrevistadores solo escuchan el final
+    - id: d
+      text: Porque evita tener que explicar la acción
+  correct: a
+  explanation: Cerrar con impacto medible (métricas, ahorro, mejora, adopción)
+    ancla la historia en evidencia y la hace memorable. Sin resultado tangible,
+    incluso una buena acción queda como una anécdota sin prueba de que sirvió.
+  source: externa
+  date: 2026-07-14
+- id: star-013
+  dimension: comportamental-star
+  subtopic: resultado
+  difficulty: medium
+  type: escenario
+  roles:
+    - Cualquiera
+  stem: |-
+    Respuesta de un candidato:
+
+      "Había un bug en producción (S). Yo era responsable de arreglarlo (T).
+       Revisé los logs, encontré la causa raíz y desplegué un fix (A)."
+
+    ¿Qué le falta a esta respuesta STAR?
+  options:
+    - id: a
+      text: "El Resultado (R): el desenlace/impacto, idealmente cuantificado"
+    - id: b
+      text: La Situación (S)
+    - id: c
+      text: La Tarea (T)
+    - id: d
+      text: Nada, está completa
+  correct: a
+  explanation: "Cubre Situación, Tarea y Acción, pero corta antes del Resultado:
+    cuánto bajó el downtime, qué impacto tuvo, qué se aprendió. Sin la R no
+    demuestra que la acción funcionó."
+  source: externa
+  date: 2026-07-14
+- id: star-014
+  dimension: comportamental-star
+  subtopic: conflicto
+  difficulty: medium
+  type: escenario
+  roles:
+    - Cualquiera
+  stem: "'Cuéntame una vez que discrepaste con tu manager.' ¿Qué enfoque da mejor
+    señal?"
+  options:
+    - id: a
+      text: Expusiste tu punto con datos, escuchaste el suyo, y cuentas cómo se
+        decidió y qué resultó
+    - id: b
+      text: Cediste enseguida para evitar el conflicto
+    - id: c
+      text: Fuiste por encima de tu manager a su jefe
+    - id: d
+      text: Dices que nunca has discrepado con un superior
+  correct: a
+  explanation: "Buscan criterio y madurez: argumentar con datos, escuchar la otra
+    postura y llegar a una decisión (aunque no sea la tuya) con un resultado.
+    Ceder siempre, saltarse la jerarquía o negar toda discrepancia dan mala
+    señal."
+  source: externa
+  date: 2026-07-14

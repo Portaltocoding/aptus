@@ -1,0 +1,375 @@
+# Dimensión: ai-product-system-design — 14 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+
+- id: aps-001
+  dimension: ai-product-system-design
+  subtopic: agent-vs-workflow
+  difficulty: medium
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: Diseñando un feature con LLMs, ¿cuándo es preferible un 'workflow' (pasos
+    fijos orquestados) frente a un 'agent' (el LLM decide los pasos y qué
+    herramientas usar)?
+  options:
+    - id: a
+      text: "Cuando el problema tiene pasos conocidos y acotados: un workflow es más
+        predecible, barato y fácil de evaluar que dar autonomía al modelo"
+    - id: b
+      text: Siempre un agent, porque más autonomía es siempre mejor
+    - id: c
+      text: Siempre un workflow, porque los agents no funcionan nunca
+    - id: d
+      text: Da igual, el coste y la fiabilidad son idénticos
+  correct: a
+  explanation: Si la tarea se puede descomponer en pasos deterministas, un
+    workflow orquestado es más predecible, depurable, barato y evaluable.
+    Reservar la autonomía de un agent para problemas realmente abiertos evita
+    sobre-ingeniería y variabilidad difícil de controlar en producción.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-002
+  dimension: ai-product-system-design
+  subtopic: llm-en-produccion
+  difficulty: medium
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: Un AI feature funciona en demo pero su coste por petición es demasiado
+    alto en producción. ¿Cuál es una palanca legítima para bajar coste sin
+    romper la calidad?
+  options:
+    - id: a
+      text: Cachear respuestas a prompts repetidos y enrutar los casos fáciles a un
+        modelo más pequeño, reservando el modelo grande para los difíciles
+    - id: b
+      text: Eliminar toda la evaluación de calidad para ahorrar llamadas
+    - id: c
+      text: Subir siempre al modelo más caro porque es el mejor
+    - id: d
+      text: Ignorar el coste, no es responsabilidad del ingeniero
+  correct: a
+  explanation: "Estrategias de coste sin sacrificar calidad: caching de prompts
+    frecuentes, routing por dificultad (modelo pequeño para lo fácil, grande
+    para lo difícil), acortar contexto y batching. Quitar evals no baja coste
+    real y destruye la garantía de calidad."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-003
+  dimension: ai-product-system-design
+  subtopic: evals-como-contrato
+  difficulty: hard
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: Al diseñar un 'AI Skill', ¿por qué conviene definir sus evals e
+    invariantes verificables ANTES de codificarlo?
+  options:
+    - id: a
+      text: "Porque el eval actúa como contrato: fija qué significa 'correcto' de
+        forma medible, permite iterar el prompt/modelo sin regresiones y evita
+        el 'creo que funciona' subjetivo"
+    - id: b
+      text: Porque los evals son obligatorios legalmente
+    - id: c
+      text: Porque así el modelo entrena más rápido
+    - id: d
+      text: "No conviene: los evals se escriben solo al final, si sobra tiempo"
+  correct: a
+  explanation: "Definir el eval primero convierte 'parece que va' en un criterio
+    medible y reproducible. Funciona como contrato del skill: puedes cambiar
+    prompt, modelo o lógica y comprobar objetivamente que no hay regresión, y
+    aísla la definición de 'correcto' del capricho subjetivo."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-004
+  dimension: ai-product-system-design
+  subtopic: human-in-the-loop
+  difficulty: medium
+  roles:
+    - AI Product Engineer
+  stem: ¿En qué situación tiene más sentido meter a un humano en el bucle
+    (human-in-the-loop) de un sistema con LLMs?
+  options:
+    - id: a
+      text: En decisiones de alto impacto o irreversibles con baja tolerancia al
+        error, donde el coste de un fallo del modelo supera el coste de la
+        revisión humana
+    - id: b
+      text: En todas las decisiones, siempre, sin excepción
+    - id: c
+      text: Nunca, porque frena la automatización
+    - id: d
+      text: Solo cuando el modelo es muy barato
+  correct: a
+  explanation: El human-in-the-loop se justifica donde el error es caro o
+    irreversible (pagos, decisiones legales/médicas, acciones destructivas).
+    Poner revisión humana en todo mata el valor de automatizar; quitarla en
+    decisiones críticas expone al negocio a fallos costosos del modelo.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-005
+  dimension: ai-product-system-design
+  subtopic: llm-ux-latencia
+  difficulty: medium
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: Para mejorar la latencia PERCIBIDA de un chat con LLM, ¿qué técnica es la
+    más directa?
+  options:
+    - id: a
+      text: "Streaming de tokens: mostrar la respuesta a medida que se genera, en vez
+        de esperar a tenerla entera"
+    - id: b
+      text: Aumentar el max_tokens de la respuesta
+    - id: c
+      text: Deshabilitar el caché
+    - id: d
+      text: Renderizar la respuesta solo cuando el usuario recargue
+  correct: a
+  explanation: "El streaming (SSE/token-by-token) reduce drásticamente la latencia
+    percibida: el usuario empieza a leer casi de inmediato aunque la generación
+    total tarde lo mismo. Es una mejora de UX de percepción, complementaria a
+    optimizar la latencia real."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-006
+  dimension: ai-product-system-design
+  subtopic: guardrails
+  difficulty: hard
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: En un sistema con LLMs en producción, ¿qué es un 'guardrail' y dónde encaja?
+  options:
+    - id: a
+      text: Una comprobación programática alrededor del LLM (validación de
+        formato/salida, filtros, límites) que rechaza o corrige salidas fuera de
+        contrato antes de que lleguen al usuario o a un sistema aguas abajo
+    - id: b
+      text: Un parámetro del modelo que garantiza que nunca alucina
+    - id: c
+      text: Un tipo de fine-tuning
+    - id: d
+      text: Una métrica de coste
+  correct: a
+  explanation: "Un guardrail es lógica determinista que envuelve al modelo: valida
+    que la salida cumple el contrato (schema, rangos, políticas), la filtra o la
+    reintenta si no. No es una propiedad mágica del modelo; es defensa en
+    profundidad para acotar el comportamiento no determinista del LLM."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-007
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: easy
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: En diseño de sistemas, ¿qué distingue 'latencia' de 'throughput'?
+  options:
+    - id: a
+      text: La latencia es el tiempo de una operación individual; el throughput es
+        cuántas operaciones se completan por unidad de tiempo
+    - id: b
+      text: Son sinónimos
+    - id: c
+      text: La latencia mide bytes y el throughput mide segundos
+    - id: d
+      text: El throughput solo aplica a bases de datos
+  correct: a
+  explanation: Latencia = cuánto tarda una petición (p. ej. p95 en ms). Throughput
+    = capacidad, peticiones/segundo. Se pueden optimizar por separado e incluso
+    entrar en conflicto (el batching sube throughput pero puede subir la
+    latencia individual).
+  source: externa
+  date: 2026-07-14
+- id: aps-008
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: medium
+  roles:
+    - Full Stack Engineer
+    - Backend Engineer
+  stem: Un endpoint de pago puede reintentarse por timeouts de red. ¿Qué mecanismo
+    evita cobrar dos veces al reintentar la misma operación?
+  options:
+    - id: a
+      text: "Una idempotency key: el cliente envía un identificador único y el
+        servidor descarta reintentos con la misma clave"
+    - id: b
+      text: Aumentar el timeout hasta que nunca falle
+    - id: c
+      text: Guardar el pago en una variable global
+    - id: d
+      text: Reintentar más veces para asegurar que entra
+  correct: a
+  explanation: "Una idempotency key hace que repetir la petición produzca el mismo
+    efecto que hacerla una vez: el servidor registra la clave y, ante un
+    reintento con la misma, devuelve el resultado previo sin re-ejecutar el
+    cobro. Es el patrón estándar para operaciones no idempotentes por
+    naturaleza."
+  source: externa
+  date: 2026-07-14
+- id: aps-009
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: hard
+  roles:
+    - Backend Engineer
+    - Full Stack Engineer
+  stem: Según el teorema CAP, ante una partición de red (P) en un sistema
+    distribuido, ¿entre qué dos propiedades hay que elegir?
+  options:
+    - id: a
+      text: "Consistencia (C) y Disponibilidad (A): durante la partición no se pueden
+        garantizar ambas a la vez"
+    - id: b
+      text: Coste y Rendimiento
+    - id: c
+      text: Concurrencia y Persistencia
+    - id: d
+      text: Caché y Autenticación
+  correct: a
+  explanation: "CAP dice que, cuando hay partición de red (P, inevitable en
+    sistemas distribuidos reales), debes sacrificar Consistencia o
+    Disponibilidad: o rechazas peticiones para no servir datos inconsistentes
+    (CP), o respondes aun a riesgo de datos desactualizados (AP)."
+  source: externa
+  date: 2026-07-14
+- id: aps-010
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: medium
+  roles:
+    - Backend Engineer
+    - Full Stack Engineer
+  stem: ¿Qué problema resuelve principalmente introducir una cola de mensajes
+    (message queue) entre un productor y un consumidor?
+  options:
+    - id: a
+      text: "Desacoplar y absorber picos: el productor no espera al consumidor y la
+        cola amortigua ráfagas, dando resiliencia y backpressure"
+    - id: b
+      text: Cifrar los datos en tránsito
+    - id: c
+      text: Eliminar la necesidad de una base de datos
+    - id: d
+      text: Hacer el sistema síncrono y bloqueante
+  correct: a
+  explanation: "Una cola desacopla productor y consumidor en el tiempo: el
+    productor encola y sigue, el consumidor procesa a su ritmo. Absorbe picos de
+    carga, aporta reintentos y backpressure, y evita que un consumidor lento
+    tumbe al productor."
+  source: externa
+  date: 2026-07-14
+- id: aps-011
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: medium
+  roles:
+    - Backend Engineer
+    - AI Product Engineer
+  stem: Para limitar cuántas peticiones por segundo acepta una API permitiendo a
+    la vez ráfagas cortas, ¿qué algoritmo es el idiomático?
+  options:
+    - id: a
+      text: "Token bucket: se rellenan tokens a una tasa fija y cada petición consume
+        uno; el tamaño del bucket permite ráfagas hasta agotarlo"
+    - id: b
+      text: Bubble sort
+    - id: c
+      text: Round-robin de DNS
+    - id: d
+      text: Hashing consistente
+  correct: a
+  explanation: El token bucket rellena tokens a ritmo constante (la tasa media
+    permitida) y cada request gasta uno; mientras haya tokens acumulados se
+    toleran ráfagas, y al agotarse se limita al ritmo de recarga. Es el estándar
+    para rate limiting con burst.
+  source: externa
+  date: 2026-07-14
+- id: aps-012
+  dimension: ai-product-system-design
+  subtopic: influencia-tecnica
+  difficulty: medium
+  roles:
+    - AI Product Engineer
+    - Tech Lead
+  stem: Pasar de 'buen ejecutor' a alguien que diseña sistemas end-to-end e
+    influye sin autoridad implica sobre todo...
+  options:
+    - id: a
+      text: Alinear a otros mediante contexto y trade-offs explícitos (por qué esta
+        decisión y qué se sacrifica), no imponer por jerarquía
+    - id: b
+      text: Escribir más código que nadie para demostrar valía
+    - id: c
+      text: Evitar documentar para mantener el conocimiento propio
+    - id: d
+      text: Tomar todas las decisiones en solitario y comunicarlas al final
+  correct: a
+  explanation: "Influir sin autoridad se basa en hacer visible el razonamiento:
+    exponer trade-offs, contexto y criterios para que otros se alineen por
+    convicción. El impacto senior es de diseño y de elevar al equipo, no de
+    volumen de código ni de acaparar conocimiento."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-013
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: medium
+  type: diagrama
+  roles:
+    - Full Stack Engineer
+    - AI Product Engineer
+  stem: |-
+    Arquitectura actual (la DB va saturada por lecturas repetidas y caras):
+
+      clientes -> load balancer -> app servers -> [ base de datos ]
+
+    ¿Qué añadirías PRIMERO para aliviar las lecturas repetidas?
+  options:
+    - id: a
+      text: Una capa de caché (p. ej. Redis) entre app y DB, con TTL/invalidación
+    - id: b
+      text: Eliminar el load balancer
+    - id: c
+      text: Comprar un dominio nuevo
+    - id: d
+      text: Añadir más CSS al frontend
+  correct: a
+  explanation: Para lecturas repetidas y costosas, una caché en memoria
+    (Redis/Memcached) delante de la DB reduce carga y latencia sirviendo
+    resultados calientes; se combina con TTL o invalidación para no servir datos
+    rancios.
+  source: externa
+  date: 2026-07-14
+- id: aps-014
+  dimension: ai-product-system-design
+  subtopic: llm-en-produccion
+  difficulty: hard
+  type: escenario
+  roles:
+    - AI Product Engineer
+    - AI Engineer
+  stem: Un endpoint que llama a un LLM tarda 8s y a veces devuelve JSON mal
+    formado que rompe el frontend. ¿Qué combinación ataca AMBOS problemas?
+  options:
+    - id: a
+      text: Streaming para la latencia percibida + un guardrail que valide/repare el
+        JSON contra el schema antes de responder
+    - id: b
+      text: Subir la temperature del modelo
+    - id: c
+      text: Quitar el LLM del flujo
+    - id: d
+      text: Reintentar la misma llamada 10 veces
+  correct: a
+  explanation: "Son dos problemas distintos: la latencia (el streaming mejora la
+    percepción mostrando tokens según se generan) y la salida no fiable (un
+    guardrail valida el JSON contra el schema y repara/reintenta antes de
+    mandarlo al front). Cada técnica ataca uno."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
