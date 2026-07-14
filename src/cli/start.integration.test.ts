@@ -77,7 +77,7 @@ describe("readiness + gaps end-to-end (pack y config reales)", () => {
     // Un readiness por cada perfil de rol de la config, con evidencia por dificultad.
     expect(roles.map((r) => r.roleId).sort()).toEqual(cfg.roles.map((r) => r.id).sort());
     for (const r of roles) {
-      expect(r.byDifficulty.map((t) => t.difficulty)).toEqual(["easy", "medium", "hard"]);
+      expect(r.byDifficulty.map((t) => t.difficulty)).toEqual(["easy", "medium", "hard", "experto"]);
     }
 
     const readinessOut = renderReadiness(roles);

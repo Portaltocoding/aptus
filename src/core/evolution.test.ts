@@ -18,6 +18,7 @@ describe("buildSessionRecord (puro)", () => {
         levelLabel: "Mid-ready",
         byDifficulty: [],
         byDimension: [],
+        secondary: [],
         answered: 5,
       },
     ];

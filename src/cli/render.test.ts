@@ -102,6 +102,7 @@ const ROLES: RoleReadiness[] = [
       { dimension: "llm-rag-evals", answered: 5, correct: 3, accuracy: 0.6 },
       { dimension: "ai-product-system-design", answered: 5, correct: 5, accuracy: 1 },
     ],
+    secondary: [{ dimension: "ml-clasico", answered: 3, correct: 2, accuracy: 2 / 3 }],
     answered: 10,
   },
   {
@@ -115,6 +116,7 @@ const ROLES: RoleReadiness[] = [
       { difficulty: "hard", answered: 0, correct: 0, accuracy: 0 },
     ],
     byDimension: [{ dimension: "llm-rag-evals", answered: 5, correct: 1, accuracy: 0.2 }],
+    secondary: [],
     answered: 5,
   },
 ];

@@ -10,7 +10,7 @@ describe("loadReadiness", () => {
   it("carga la config real: niveles, roles y plan de estudio", () => {
     const cfg = loadReadiness(REAL_READINESS);
 
-    expect(cfg.levels.map((l) => l.id)).toEqual(["junior", "mid", "senior"]);
+    expect(cfg.levels.map((l) => l.id)).toEqual(["junior", "mid", "senior", "staff"]);
     expect(cfg.roles.length).toBeGreaterThanOrEqual(5);
     for (const role of cfg.roles) {
       expect(role.core.length, `rol '${role.id}' sin dimensiones núcleo`).toBeGreaterThanOrEqual(1);
@@ -36,15 +36,26 @@ describe("loadReadiness", () => {
     }
   });
 
-  it("los umbrales por nivel suben con la dificultad (junior <= mid <= senior)", () => {
+  it("los umbrales suben (o se mantienen) de un nivel al siguiente, en cada tramo", () => {
     const cfg = loadReadiness(REAL_READINESS);
-    const byId = new Map(cfg.levels.map((l) => [l.id, l]));
-    const j = byId.get("junior")!;
-    const m = byId.get("mid")!;
-    const s = byId.get("senior")!;
-    for (const d of ["easy", "medium", "hard"] as const) {
-      expect(j.requires[d]).toBeLessThanOrEqual(m.requires[d]);
-      expect(m.requires[d]).toBeLessThanOrEqual(s.requires[d]);
+    for (const d of ["easy", "medium", "hard", "experto"] as const) {
+      for (let i = 1; i < cfg.levels.length; i++) {
+        expect(
+          cfg.levels[i - 1]!.requires[d],
+          `nivel ${cfg.levels[i]!.id} baja el umbral en '${d}'`,
+        ).toBeLessThanOrEqual(cfg.levels[i]!.requires[d]);
+      }
+    }
+  });
+
+  it("staff exige tramo experto y amplitud (breadth); los niveles previos no", () => {
+    const cfg = loadReadiness(REAL_READINESS);
+    const staff = cfg.levels.find((l) => l.id === "staff")!;
+    expect(staff.requires.experto).toBeGreaterThan(0);
+    expect(staff.breadth).toBeGreaterThan(0);
+    for (const l of cfg.levels.filter((l) => l.id !== "staff")) {
+      expect(l.requires.experto).toBe(0);
+      expect(l.breadth).toBeUndefined();
     }
   });
 
