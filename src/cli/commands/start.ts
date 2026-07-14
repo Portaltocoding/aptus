@@ -2,13 +2,21 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { loadPack } from "../../content/loader.js";
 import { loadReadiness } from "../../content/readiness.js";
+import { loadHistory, saveHistory } from "../../content/history.js";
 import { selectBalanced } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
 import { calibration } from "../../core/calibration.js";
 import { computeReadiness, computeGaps } from "../../core/readiness.js";
+import { buildSessionRecord, evolution } from "../../core/evolution.js";
 import { runSession } from "../runner.js";
-import { renderResult, renderCalibration, renderReadiness, renderGaps } from "../render.js";
+import {
+  renderResult,
+  renderCalibration,
+  renderReadiness,
+  renderGaps,
+  renderEvolution,
+} from "../render.js";
 
 // Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
 // Con 5 dimensiones: 5 preguntas/dimensión → 25 por sesión (~20 min, ≥15 min).
@@ -20,6 +28,9 @@ const MIN_PER_DIMENSION = 4;
 // Ruta FIJA al pack real bajo packs/ — en P1 no se acepta una ruta arbitraria
 // del usuario (sin superficie de path traversal).
 const PACK_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../packs/ai-ml-readiness");
+
+// Store local del historial de sesiones (fuera del código, gitignored).
+const HISTORY_PATH = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/history.json");
 
 /**
  * Compone el walking skeleton end-to-end: cargar pack real → seleccionar de
@@ -33,9 +44,12 @@ export async function startCommand(): Promise<void> {
 
   let pack;
   let readinessCfg;
+  let history;
   try {
     pack = loadPack(packYaml, questionsYaml);
     readinessCfg = loadReadiness(resolve(PACK_DIR, "readiness.yaml"));
+    // Se carga ANTES de la sesión para fallar rápido si el historial está corrupto.
+    history = loadHistory(HISTORY_PATH);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`\n✗ No se puede iniciar la sesión: ${msg}`);
@@ -60,8 +74,15 @@ export async function startCommand(): Promise<void> {
   const roles = computeReadiness(answered, selected, readinessCfg);
   const gaps = computeGaps(answered, selected, readinessCfg);
 
+  // Persistir la sesión (PERS-01) y mostrar la evolución (PERS-02). El timestamp
+  // se genera aquí, en la capa de I/O, y se inyecta al registro puro.
+  const record = buildSessionRecord(new Date().toISOString(), result, roles);
+  const updatedHistory = [...history, record];
+  saveHistory(HISTORY_PATH, updatedHistory);
+
   console.log("\n" + renderResult(result) + "\n");
   console.log(renderCalibration(calib) + "\n");
   console.log(renderReadiness(roles) + "\n");
   console.log(renderGaps(gaps) + "\n");
+  console.log(renderEvolution(evolution(updatedHistory)) + "\n");
 }

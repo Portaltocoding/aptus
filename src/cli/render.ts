@@ -3,6 +3,7 @@ import pc from "picocolors";
 import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
 import type { Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
+import type { EvolutionReport } from "../core/evolution.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -148,4 +149,44 @@ export function renderGaps(gaps: Gap[]): string {
   });
 
   return "Gaps priorizados y plan de estudio:\n" + lines.join("\n");
+}
+
+function deltaCell(delta: number | null): string {
+  if (delta === null) return "—";
+  const pts = Math.round(delta * 100);
+  if (pts > 0) return pc.green(`↑ +${pts}`);
+  if (pts < 0) return pc.red(`↓ ${pts}`);
+  return pc.yellow("= 0");
+}
+
+/**
+ * Formatea la evolución entre sesiones (PERS-02): por dimensión, el acierto de
+ * ahora vs la sesión anterior y su delta en puntos; más los cambios de nivel de
+ * readiness por rol. Solo presenta el EvolutionReport del núcleo.
+ */
+export function renderEvolution(report: EvolutionReport): string {
+  if (report.sessionCount === 0) {
+    return "Evolución: aún no hay sesiones guardadas.";
+  }
+  if (report.sessionCount === 1) {
+    return "Evolución: primera sesión guardada. La comparación aparecerá a partir de la segunda.";
+  }
+
+  const table = new Table({ head: ["Dimensión", "Ahora", "Antes", "Δ (puntos)"] });
+  for (const d of report.byDimension) {
+    table.push([
+      d.dimension,
+      `${Math.round(d.current * 100)}%`,
+      d.previous === null ? "—" : `${Math.round(d.previous * 100)}%`,
+      deltaCell(d.delta),
+    ]);
+  }
+
+  const roleChanges = report.byRole.filter((r) => r.changed);
+  const rolesLine = roleChanges.length
+    ? "\nCambios de readiness por rol:\n" +
+      roleChanges.map((r) => `  • ${r.label}: ${r.previous} → ${r.current}`).join("\n")
+    : "\n(Sin cambios de nivel de readiness por rol respecto a la sesión anterior.)";
+
+  return `Evolución (esta sesión vs la anterior; ${report.sessionCount} guardadas):\n` + table.toString() + rolesLine;
 }

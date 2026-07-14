@@ -1,0 +1,62 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { z } from "zod";
+import type { SessionRecord } from "../core/evolution.js";
+
+/**
+ * Persistencia local del histórico de sesiones (Phase 5, PERS-01). Store JSON
+ * simple: suficiente para un historial personal, testeable y sin dependencias.
+ * Es la frontera de I/O; el modelo y la evolución viven puros en core/evolution.
+ * Se valida al cargar (zod) y se falla rápido si el fichero está corrupto, para
+ * no perder datos silenciosamente ni operar sobre un historial roto.
+ */
+
+const SessionDimensionScoreSchema = z.object({
+  dimension: z.string(),
+  answered: z.number(),
+  correct: z.number(),
+  pct: z.number(),
+});
+
+const SessionRoleReadinessSchema = z.object({
+  roleId: z.string(),
+  label: z.string(),
+  levelId: z.string().nullable(),
+  levelLabel: z.string(),
+});
+
+const SessionRecordSchema = z.object({
+  timestamp: z.string(),
+  byDimension: z.array(SessionDimensionScoreSchema),
+  readiness: z.array(SessionRoleReadinessSchema),
+});
+
+const HistorySchema = z.array(SessionRecordSchema);
+
+/** Carga el histórico. Fichero inexistente → []. Corrupto → Error con mensaje claro. */
+export function loadHistory(pathToJson: string): SessionRecord[] {
+  if (!existsSync(pathToJson)) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(pathToJson, "utf8"));
+  } catch {
+    throw new Error(`Historial corrupto (JSON inválido) en ${pathToJson}. Bórralo o corrígelo para continuar.`);
+  }
+
+  const result = HistorySchema.safeParse(parsed);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
+      .join("\n");
+    throw new Error(`Historial inválido en ${pathToJson}:\n${issues}`);
+  }
+
+  return result.data;
+}
+
+/** Guarda el histórico (crea el directorio si hace falta). Sobrescribe el fichero. */
+export function saveHistory(pathToJson: string, records: SessionRecord[]): void {
+  mkdirSync(dirname(pathToJson), { recursive: true });
+  writeFileSync(pathToJson, JSON.stringify(records, null, 2), "utf8");
+}

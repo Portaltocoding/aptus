@@ -3,3 +3,6 @@ dist/
 coverage/
 *.log
 .DS_Store
+
+# Historial de sesiones (datos personales, Phase 5) — no se versiona.
+data/
