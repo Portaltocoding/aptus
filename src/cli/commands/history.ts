@@ -1,20 +1,22 @@
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { loadHistory } from "../../content/history.js";
 import { evolution } from "../../core/evolution.js";
 import { renderEvolution } from "../render.js";
+import { DEFAULT_PACK } from "./start.js";
 
-// Store local del historial (fuera del código; gitignored). Misma ruta que start.ts.
-const HISTORY_PATH = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/history.json");
+const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data");
 
 /**
- * Subcomando `history`: consulta el historial de sesiones y muestra la evolución
- * (PERS-02) sin correr una sesión nueva. Falla claro si el historial está corrupto.
+ * Subcomando `history`: consulta el historial de un pack y muestra la evolución
+ * (PERS-02) sin correr una sesión nueva. El historial es por pack.
  */
-export async function historyCommand(): Promise<void> {
+export async function historyCommand(packName: string = DEFAULT_PACK): Promise<void> {
+  const historyPath = join(DATA_DIR, `history-${packName}.json`);
+
   let history;
   try {
-    history = loadHistory(HISTORY_PATH);
+    history = loadHistory(historyPath);
   } catch (err) {
     console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
     process.exitCode = 1;
@@ -22,11 +24,11 @@ export async function historyCommand(): Promise<void> {
   }
 
   if (history.length === 0) {
-    console.log("\nAún no hay sesiones guardadas. Completa una con `aptus start`.\n");
+    console.log(`\nAún no hay sesiones guardadas para el pack '${packName}'. Completa una con \`aptus start --pack ${packName}\`.\n`);
     return;
   }
 
-  console.log(`\nHistorial: ${history.length} sesión(es) guardada(s).`);
+  console.log(`\nHistorial de '${packName}': ${history.length} sesión(es) guardada(s).`);
   console.log(`  Primera: ${history[0]!.timestamp}`);
   console.log(`  Última:  ${history[history.length - 1]!.timestamp}\n`);
   console.log(renderEvolution(evolution(history)) + "\n");
