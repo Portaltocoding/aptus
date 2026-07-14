@@ -40,7 +40,7 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 ## v2 / Deferred
 
-- [ ] **INTEG-01** (opcional): Adaptador de solo lectura hacia jobhunt (`~/workspace/jobhunt/data/jobs.db`) para ponderar baselines/gaps por demanda real de mercado. Degradación elegante si no existe.
+- [x] **INTEG-01** (opcional): Adaptador de solo lectura hacia jobhunt (`~/workspace/jobhunt/data/jobs.db`) para ponderar baselines/gaps por demanda real de mercado. Degradación elegante si no existe.
 - [ ] **PACK-02**: Packs adicionales de otros dominios (certificaciones, idiomas, etc.) — reutilizan el motor sin tocar código.
 - [ ] **RES-05**: Resurfacing tipo spaced-repetition de los temas peor puntuados.
 
@@ -75,6 +75,6 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 | RES-03 | Phase 4 | Complete |
 | PERS-01 | Phase 5 | Complete |
 | PERS-02 | Phase 5 | Complete |
-| INTEG-01 (v2, opcional) | Phase 6 | Pending |
+| INTEG-01 (v2, opcional) | Phase 6 | Complete |
 
 **Cobertura v1:** 19/19 requisitos mapeados (100%). No hay huérfanos.

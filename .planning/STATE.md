@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 6
 current_phase_name: Integración con jobhunt (opcional, aditiva)
-status: ready
-stopped_at: Completado Phase 5 — persistencia y evolución (05-01)
-last_updated: "2026-07-14T22:00:00.000Z"
+status: complete
+stopped_at: Completado Phase 6 — milestone v1 completo (6/6 fases)
+last_updated: "2026-07-14T22:20:00.000Z"
 last_activity: 2026-07-14
-last_activity_desc: Completado 05-01 (persistencia + evolución) y cerrada Phase 5; 93/93 tests en verde
+last_activity_desc: Completado 06-01 (ponderación por mercado) y cerrada Phase 6; milestone v1 completo; 105/105 tests en verde
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 9
-  completed_plans: 9
-  percent: 83
+  completed_phases: 6
+  total_plans: 10
+  completed_plans: 10
+  percent: 100
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 ## Current Position
 
-Phase: 6 of 6 (Integración con jobhunt, opcional/aditiva) — no iniciada
-Plan: Phases 1-5 completas
-Status: Phase 5 verificada end-to-end (persistencia + evolución + subcomando history); Phase 6 (opcional) lista cuando Carlos decida
-Last activity: 2026-07-14 — Completado 05-01 (persistencia + evolución), cerrada Phase 5; 93/93 tests
+Phase: 6 of 6 (Integración con jobhunt) — COMPLETA. Milestone v1 completo.
+Plan: Phases 1-6 completas (10/10 planes)
+Status: Milestone v1 completo y verificado end-to-end. Pendiente (a decisión de Carlos): lifecycle de cierre (audit → complete → ship).
+Last activity: 2026-07-14 — Completado 06-01 (ponderación por mercado), cerrada Phase 6; 105/105 tests
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -96,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T22:00:00.000Z
-Stopped at: Completado Phase 5 — persistencia y evolución (05-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
+Last session: 2026-07-14T22:20:00.000Z
+Stopped at: Completado Phase 6 — milestone v1 completo (6/6 fases, 105/105 tests). A la espera de que Carlos decida el cierre (audit/ship) o parar aquí.
 Resume file: None

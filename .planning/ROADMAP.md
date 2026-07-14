@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
 - [x] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
 - [x] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
-- [ ] **Phase 6: Integración con jobhunt (opcional, aditiva)** - Ponderación de gaps por demanda real de mercado, con degradación elegante si jobhunt no está disponible.
+- [x] **Phase 6: Integración con jobhunt (opcional, aditiva)** - Ponderación de gaps por demanda real de mercado, con degradación elegante si jobhunt no está disponible.
 
 ## Phase Details
 
@@ -119,7 +119,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Si el fichero de jobhunt no existe o no es accesible, Aptus degrada con gracia: la sesión y el resultado funcionan exactamente igual, sin error ni bloqueo, simplemente sin la ponderación de mercado.
   3. El cruce con jobhunt nunca genera un score nuevo de "encaje" o "empleabilidad"; solo reordena/pondera la prioridad de los gaps ya calculados por el motor.
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
+
+- [x] 06-01-PLAN.md — Ponderación de gaps por demanda de mercado desde jobhunt (INTEG-01), solo lectura y con degradación elegante
 
 ## Progress
 
