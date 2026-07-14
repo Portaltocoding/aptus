@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Fundamento end-to-end** - Banco mínimo real, motor de scoring puro, sesión select en terminal y resultado básico con N, de punta a punta.
 - [x] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
-- [ ] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
+- [x] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
 - [ ] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
 - [ ] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
 - [ ] **Phase 6: Integración con jobhunt (opcional, aditiva)** - Ponderación de gaps por demanda real de mercado, con degradación elegante si jobhunt no está disponible.
@@ -71,7 +71,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Para cada pregunta, Carlos puede indicar su confianza (p.ej. baja/media/alta) sin que esto rompa el flujo select de la sesión.
   2. El resultado final incluye una curva/tabla confianza-vs-acierto que muestra en qué dimensiones o preguntas Carlos se sobreestima respecto a su desempeño real.
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
+
+- [x] 03-01-PLAN.md — Captura de confianza (SESS-03) + curva confianza-vs-acierto con lectura de sobreestimación (RES-04)
 
 ### Phase 4: Readiness por rol con baselines ancladas
 

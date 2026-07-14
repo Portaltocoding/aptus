@@ -23,7 +23,7 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 - [x] **SESS-01**: El usuario responde todas las preguntas con **select** (opción múltiple), navegable, en una sesión de **≥15 min**.
 - [x] **SESS-02**: El motor de sesión selecciona preguntas equilibradas por dimensión y evita muestra insuficiente por dimensión.
-- [ ] **SESS-03**: El usuario puede indicar su **confianza** por pregunta (para la curva confianza-vs-acierto que combate el autoengaño).
+- [x] **SESS-03**: El usuario puede indicar su **confianza** por pregunta (para la curva confianza-vs-acierto que combate el autoengaño).
 - [x] **SESS-04**: La sesión rota preguntas entre intentos para mitigar memorización.
 
 ### Result (resultado accionable)
@@ -31,7 +31,7 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 - [x] **RES-01**: El resultado muestra desglose por dimensión con el **N (nº de preguntas)** junto a cada score.
 - [ ] **RES-02**: El resultado da readiness por rol (junior/mid/senior-ready) contra baseline, **sin** un score único agregado de "empleabilidad".
 - [ ] **RES-03**: El resultado lista **gaps priorizados** ("te falta X, te falta Y") y un **plan concreto** por gap ("haz Z").
-- [ ] **RES-04**: El resultado muestra la curva confianza-vs-acierto (dónde te sobreestimas).
+- [x] **RES-04**: El resultado muestra la curva confianza-vs-acierto (dónde te sobreestimas).
 
 ### Persistence
 
@@ -67,8 +67,8 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 | RES-01 | Phase 1 | Complete |
 | CONT-04 | Phase 2 | Complete |
 | SESS-04 | Phase 2 | Complete |
-| SESS-03 | Phase 3 | Pending |
-| RES-04 | Phase 3 | Pending |
+| SESS-03 | Phase 3 | Complete |
+| RES-04 | Phase 3 | Complete |
 | ENG-03 | Phase 4 | Pending |
 | CONT-05 | Phase 4 | Pending |
 | RES-02 | Phase 4 | Pending |

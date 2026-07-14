@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: Confianza y calibración
+current_phase: 4
+current_phase_name: Readiness por rol con baselines ancladas
 status: ready
-stopped_at: Completado Phase 2 — banco completo 5 dimensiones (02-01)
-last_updated: "2026-07-14T21:05:00.000Z"
+stopped_at: Completado Phase 3 — confianza y calibración (03-01)
+last_updated: "2026-07-14T21:20:00.000Z"
 last_activity: 2026-07-14
-last_activity_desc: Completado 02-01 (banco completo 5 dimensiones) y cerrada Phase 2; 50/50 tests en verde
+last_activity_desc: Completado 03-01 (confianza + curva de calibración) y cerrada Phase 3; 62/62 tests en verde
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 33
+  completed_phases: 3
+  total_plans: 7
+  completed_plans: 7
+  percent: 50
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 ## Current Position
 
-Phase: 3 of 6 (Confianza y calibración) — no iniciada
-Plan: Phases 1 y 2 completas
-Status: Phase 2 verificada end-to-end (banco de 5 dimensiones, 66 preguntas); Phase 3 lista cuando Carlos decida
-Last activity: 2026-07-14 — Completado 02-01 (banco completo), cerrada Phase 2; 50/50 tests
+Phase: 4 of 6 (Readiness por rol con baselines ancladas) — no iniciada
+Plan: Phases 1, 2 y 3 completas
+Status: Phase 3 verificada end-to-end (confianza por pregunta + curva de calibración); Phase 4 lista cuando Carlos decida
+Last activity: 2026-07-14 — Completado 03-01 (confianza + calibración), cerrada Phase 3; 62/62 tests
 
-Progress: [███░░░░░░░] 33%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -96,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T21:05:00.000Z
-Stopped at: Completado Phase 2 — banco completo 5 dimensiones (02-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
+Last session: 2026-07-14T21:20:00.000Z
+Stopped at: Completado Phase 3 — confianza y calibración (03-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
 Resume file: None
