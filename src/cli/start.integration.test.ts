@@ -4,9 +4,15 @@ import { selectBalanced } from "../core/session.js";
 import { makeSeededShuffle } from "../core/random.js";
 import { score, type AnsweredQuestion, type Confidence } from "../core/scoring.js";
 import { calibration } from "../core/calibration.js";
-import { renderResult, renderCalibration } from "./render.js";
+import { loadReadiness } from "../content/readiness.js";
+import { computeReadiness, computeGaps } from "../core/readiness.js";
+import { renderResult, renderCalibration, renderReadiness, renderGaps } from "./render.js";
 
 const CONF_CYCLE: Confidence[] = ["alta", "media", "baja"];
+
+const REAL_PACK = new URL("../../packs/ai-ml-readiness/pack.yaml", import.meta.url).pathname;
+const REAL_QUESTIONS = new URL("../../packs/ai-ml-readiness/questions.yaml", import.meta.url).pathname;
+const REAL_READINESS = new URL("../../packs/ai-ml-readiness/readiness.yaml", import.meta.url).pathname;
 
 // Smoke NO interactivo: ejercita el camino end-to-end motor+contenido+render sin
 // `@inquirer` (la interactividad viva del select se verifica manualmente en UAT).
@@ -51,5 +57,38 @@ describe("start end-to-end (smoke no interactivo)", () => {
     const selected = selectBalanced(pack.questions, 20, 8, makeSeededShuffle(7));
     const dims = new Set(selected.map((q) => q.dimension));
     expect(dims).toEqual(new Set(["dimension-alpha", "dimension-beta"]));
+  });
+});
+
+describe("readiness + gaps end-to-end (pack y config reales)", () => {
+  it("compone readiness por rol y gaps priorizados sobre el pack real", () => {
+    const pack = loadPack(REAL_PACK, REAL_QUESTIONS);
+    const cfg = loadReadiness(REAL_READINESS);
+    const selected = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(99));
+
+    const answered: AnsweredQuestion[] = selected.map((q) => ({
+      questionId: q.id,
+      selectedOptionId: q.options[0]!.id,
+      confidence: "media",
+    }));
+
+    const roles = computeReadiness(answered, selected, cfg);
+    const gaps = computeGaps(answered, selected, cfg);
+
+    // Un readiness por cada perfil de rol de la config, con evidencia por dificultad.
+    expect(roles.map((r) => r.roleId).sort()).toEqual(cfg.roles.map((r) => r.id).sort());
+    for (const r of roles) {
+      expect(r.byDifficulty.map((t) => t.difficulty)).toEqual(["easy", "medium", "hard"]);
+    }
+
+    const readinessOut = renderReadiness(roles);
+    expect(readinessOut).toContain("AI Engineer");
+    expect(readinessOut).not.toMatch(/empleab|índice de contrataci/i);
+
+    // Cada gap (si lo hay) trae su plan de estudio; el render nunca revienta.
+    expect(typeof renderGaps(gaps)).toBe("string");
+    for (const g of gaps) {
+      expect(g.study.length).toBeGreaterThan(0);
+    }
   });
 });

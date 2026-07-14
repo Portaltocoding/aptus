@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { renderResult, renderCalibration } from "./render.js";
+import { renderResult, renderCalibration, renderReadiness, renderGaps } from "./render.js";
 import type { ScoreResult } from "../core/scoring.js";
 import type { CalibrationResult } from "../core/calibration.js";
+import type { RoleReadiness, Gap } from "../core/readiness.js";
 
 // Fixture de ScoreResult (nombres de dimensión genéricos: el render no conoce
 // el dominio). Incluye una dimensión sin responder para el caso borde de N=0.
@@ -74,5 +75,72 @@ describe("renderCalibration", () => {
   it("sin datos de confianza devuelve un mensaje claro, no una tabla vacía", () => {
     const out = renderCalibration({ byConfidence: [] });
     expect(out).toMatch(/no declaraste confianza/i);
+  });
+});
+
+const ROLES: RoleReadiness[] = [
+  {
+    roleId: "ai-engineer",
+    label: "AI Engineer",
+    levelId: "mid",
+    levelLabel: "Mid-ready",
+    byDifficulty: [
+      { difficulty: "easy", answered: 4, correct: 4, accuracy: 1 },
+      { difficulty: "medium", answered: 4, correct: 3, accuracy: 0.75 },
+      { difficulty: "hard", answered: 2, correct: 1, accuracy: 0.5 },
+    ],
+    answered: 10,
+  },
+  {
+    roleId: "llm-engineer",
+    label: "LLM Engineer",
+    levelId: null,
+    levelLabel: "Aún no junior-ready",
+    byDifficulty: [
+      { difficulty: "easy", answered: 3, correct: 1, accuracy: 1 / 3 },
+      { difficulty: "medium", answered: 2, correct: 0, accuracy: 0 },
+      { difficulty: "hard", answered: 0, correct: 0, accuracy: 0 },
+    ],
+    answered: 5,
+  },
+];
+
+describe("renderReadiness", () => {
+  it("muestra una fila por rol con su nivel y la evidencia por dificultad con N", () => {
+    const out = renderReadiness(ROLES);
+    expect(out).toContain("AI Engineer");
+    expect(out).toContain("Mid-ready");
+    expect(out).toContain("4/4"); // evidencia easy del primer rol
+    expect(out).toContain("LLM Engineer");
+    expect(out).toContain("Aún no junior-ready");
+  });
+
+  it("muestra '—' en un tramo de dificultad sin preguntas (no evaluable)", () => {
+    const out = renderReadiness(ROLES);
+    expect(out).toContain("—"); // hard del LLM Engineer (N=0)
+  });
+
+  it("no muestra un score único agregado de empleabilidad", () => {
+    const out = renderReadiness(ROLES);
+    expect(out).not.toMatch(/overall|empleab|índice|score total/i);
+  });
+});
+
+const GAPS: Gap[] = [
+  { dimension: "ml-clasico", answered: 5, correct: 1, accuracy: 0.2, study: "Repasa m0 y m0plus." },
+  { dimension: "fullstack-next-nest-ts", answered: 5, correct: 3, accuracy: 0.6, study: "Docs oficiales." },
+];
+
+describe("renderGaps", () => {
+  it("lista cada gap con su acierto y su plan de estudio", () => {
+    const out = renderGaps(GAPS);
+    expect(out).toMatch(/te falta ml-clasico/i);
+    expect(out).toContain("Repasa m0 y m0plus.");
+    expect(out).toContain("1/5");
+  });
+
+  it("sin gaps devuelve un mensaje claro", () => {
+    const out = renderGaps([]);
+    expect(out).toMatch(/sin gaps mayores/i);
   });
 });
