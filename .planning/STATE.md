@@ -1,11 +1,19 @@
 ---
-gsd_state_version: '1.0'
-status: planning
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 1
+current_phase_name: Fundamento end-to-end
+status: executing
+stopped_at: ROADMAP.md y STATE.md creados; REQUIREMENTS.md traceability actualizada
+last_updated: "2026-07-14T17:00:00.179Z"
+last_activity: 2026-07-14
+last_activity_desc: Completado 01-01 (andamiaje ESM + schema.ts + random.ts)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 5
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,15 +29,16 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 1 of 6 (Fundamento end-to-end)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-14 — ROADMAP.md creado, 19/19 requisitos v1 mapeados (100% cobertura)
+Plan: 2 of 5 in current phase
+Status: Ready to execute
+Last activity: 2026-07-14 — Completado 01-01 (andamiaje ESM + schema.ts + random.ts)
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: - min
 - Total execution time: 0 hours
@@ -41,10 +50,12 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: -
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P01 | 22min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -57,6 +68,8 @@ Recent decisions affecting current work:
 - [Roadmap]: El banco completo desde `bootcamp-ml-llm` se separa en Fase 2, después del slice mínimo funcional, para no bloquear la validación del núcleo con el trabajo de curación de contenido.
 - [Roadmap]: Readiness por rol (ENG-03/RES-02) se pospone a Fase 4, después de tener el banco completo (Fase 2) y baselines ancladas a fuentes externas (CONT-05), para evitar mapeos arbitrarios score→nivel.
 - [Roadmap]: Integración con jobhunt (INTEG-01) queda como Fase 6, opcional y aditiva — el sistema es completo y útil sin ella.
+- [Phase ?]: typescript fijado a ^6.0.3 (red de seguridad prevista): typescript-eslint@8 no soporta el peer range de TS7, ERESOLVE resuelto sin bloquear el andamiaje
+- [Phase ?]: dimension en QuestionSchema es z.string() (cadena libre), unico z.enum permitido es difficulty, cumple ENG-04
 
 ### Pending Todos
 
@@ -79,6 +92,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14
+Last session: 2026-07-14T16:59:47.455Z
 Stopped at: ROADMAP.md y STATE.md creados; REQUIREMENTS.md traceability actualizada
 Resume file: None
