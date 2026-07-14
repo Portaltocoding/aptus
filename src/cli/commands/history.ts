@@ -12,7 +12,8 @@ const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data
  * (PERS-02) sin correr una sesión nueva. El historial es por pack.
  */
 export async function historyCommand(packName: string = DEFAULT_PACK): Promise<void> {
-  const historyPath = join(DATA_DIR, `history-${packName}.json`);
+  // Resultados aislados por tema en data/<pack>/ (no se cruzan entre packs).
+  const historyPath = join(DATA_DIR, packName, "history.json");
 
   let history;
   try {

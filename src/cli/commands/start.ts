@@ -49,9 +49,11 @@ const JOBHUNT_DB_PATH = join(homedir(), "workspace", "jobhunt", "data", "jobs.db
  * puede traer solo preguntas.
  */
 export async function startCommand(packName: string = DEFAULT_PACK): Promise<void> {
+  // Aislamiento por tema: cada pack tiene su carpeta de contenido (packs/<pack>/)
+  // y su carpeta de resultados (data/<pack>/). Nunca se cruzan entre temas.
   const packDir = join(PACKS_ROOT, packName);
   const readinessPath = join(packDir, "readiness.yaml");
-  const historyPath = join(DATA_DIR, `history-${packName}.json`);
+  const historyPath = join(DATA_DIR, packName, "history.json");
 
   let pack;
   let readinessCfg: ReadinessConfig | null = null;
