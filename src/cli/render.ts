@@ -110,7 +110,26 @@ export function renderReadiness(roles: RoleReadiness[]): string {
     ]);
   }
 
-  return "Readiness por rol (lectura orientativa, anclada a tu acierto por dificultad):\n" + table.toString();
+  // Matriz rol × dimensión: por rol, el acierto en cada dimensión núcleo (con N).
+  const detalle = roles
+    .map((r) => {
+      const dims = r.byDimension
+        .map((d) =>
+          d.answered > 0
+            ? `${d.dimension} ${Math.round(d.accuracy * 100)}% (${d.correct}/${d.answered})`
+            : `${d.dimension} —`,
+        )
+        .join("  ·  ");
+      return `  ${r.label}: ${dims}`;
+    })
+    .join("\n");
+
+  return (
+    "Readiness por rol (lectura orientativa, anclada a tu acierto por dificultad):\n" +
+    table.toString() +
+    "\n\nDetalle por rol y dimensión núcleo:\n" +
+    detalle
+  );
 }
 
 /**

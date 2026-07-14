@@ -89,6 +89,10 @@ const ROLES: RoleReadiness[] = [
       { difficulty: "medium", answered: 4, correct: 3, accuracy: 0.75 },
       { difficulty: "hard", answered: 2, correct: 1, accuracy: 0.5 },
     ],
+    byDimension: [
+      { dimension: "llm-rag-evals", answered: 5, correct: 3, accuracy: 0.6 },
+      { dimension: "ai-product-system-design", answered: 5, correct: 5, accuracy: 1 },
+    ],
     answered: 10,
   },
   {
@@ -101,6 +105,7 @@ const ROLES: RoleReadiness[] = [
       { difficulty: "medium", answered: 2, correct: 0, accuracy: 0 },
       { difficulty: "hard", answered: 0, correct: 0, accuracy: 0 },
     ],
+    byDimension: [{ dimension: "llm-rag-evals", answered: 5, correct: 1, accuracy: 0.2 }],
     answered: 5,
   },
 ];
@@ -118,6 +123,13 @@ describe("renderReadiness", () => {
   it("muestra '—' en un tramo de dificultad sin preguntas (no evaluable)", () => {
     const out = renderReadiness(ROLES);
     expect(out).toContain("—"); // hard del LLM Engineer (N=0)
+  });
+
+  it("incluye la matriz rol × dimensión núcleo con el acierto por dimensión", () => {
+    const out = renderReadiness(ROLES);
+    expect(out).toMatch(/rol y dimensión/i);
+    expect(out).toContain("llm-rag-evals");
+    expect(out).toContain("ai-product-system-design");
   });
 
   it("no muestra un score único agregado de empleabilidad", () => {

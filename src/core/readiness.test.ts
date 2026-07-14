@@ -124,6 +124,10 @@ describe("computeReadiness (motor puro)", () => {
     const r2 = readinessFor("r2", answered, bank); // core dim-b
     expect(r1.answered).toBe(1);
     expect(r2.answered).toBe(2);
+    // matriz rol × dimensión: solo las dimensiones núcleo del rol
+    expect(r1.byDimension).toEqual([{ dimension: "dim-a", answered: 1, correct: 1, accuracy: 1 }]);
+    expect(r2.byDimension.map((d) => d.dimension)).toEqual(["dim-b"]);
+    expect(r2.byDimension[0]!.answered).toBe(2);
   });
 });
 

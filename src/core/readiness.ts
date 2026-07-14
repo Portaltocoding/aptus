@@ -25,12 +25,20 @@ export interface TierAccuracy {
   accuracy: number; // correct/answered (0 si answered===0, nunca NaN)
 }
 
+export interface DimensionAccuracy {
+  dimension: string;
+  answered: number;
+  correct: number;
+  accuracy: number; // correct/answered (0 si answered===0, nunca NaN)
+}
+
 export interface RoleReadiness {
   roleId: string;
   label: string;
   levelId: string | null; // nivel alcanzado; null = por debajo del primer nivel
   levelLabel: string; // etiqueta legible del nivel (o "Aún no <primer nivel>")
-  byDifficulty: TierAccuracy[]; // evidencia sobre las dimensiones núcleo del rol
+  byDifficulty: TierAccuracy[]; // evidencia por dificultad (base del nivel, ENG-03)
+  byDimension: DimensionAccuracy[]; // acierto por dimensión núcleo (matriz rol × dimensión)
   answered: number; // total respondidas de las dimensiones núcleo
 }
 
@@ -109,6 +117,12 @@ export function computeReadiness(
   return config.roles.map((role) => {
     const core = results.filter((r) => r.answered && role.core.includes(r.dimension));
     const byDifficulty = tierBreakdown(core);
+    const byDimension: DimensionAccuracy[] = role.core.map((dimension) => {
+      const dq = core.filter((r) => r.dimension === dimension);
+      const answeredDim = dq.length;
+      const correct = dq.filter((r) => r.correct).length;
+      return { dimension, answered: answeredDim, correct, accuracy: answeredDim > 0 ? correct / answeredDim : 0 };
+    });
     const levelId = highestLevel(byDifficulty, config);
     const firstLevel = config.levels[0]!;
     const levelLabel = levelId
@@ -121,6 +135,7 @@ export function computeReadiness(
       levelId,
       levelLabel,
       byDifficulty,
+      byDimension,
       answered: core.length,
     };
   });
