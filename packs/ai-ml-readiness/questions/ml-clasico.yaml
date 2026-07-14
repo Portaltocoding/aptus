@@ -1,5 +1,5 @@
-# Dimensión: ml-clasico — 18 preguntas. Curadas, técnicamente correctas.
-# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+# Dimensión: ml-clasico — 50 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. difficulty incl. experto (staff). source: bootcamp-ml-llm|externa.
 
 - id: ml-001
   dimension: ml-clasico
@@ -507,5 +507,771 @@
   explanation: Con clases muy desbalanceadas la accuracy engaña (predecir siempre
     'no fraude' da 99%). Importa el recall de la clase positiva (cuántos fraudes
     se detectan), junto a precision/F1 y la matriz de confusión.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-019
+  dimension: ml-clasico
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - ML Engineer
+    - Data Scientist
+  stem: ¿Qué distingue el aprendizaje supervisado del no supervisado?
+  options:
+    - id: a
+      text: El supervisado aprende de datos ETIQUETADOS (X→y); el no supervisado busca
+        estructura en datos sin etiquetas
+    - id: b
+      text: El supervisado no usa datos
+    - id: c
+      text: Son lo mismo
+    - id: d
+      text: El no supervisado siempre rinde mejor
+  correct: a
+  explanation: "Supervisado: pares entrada-etiqueta (clasificación/regresión). No
+    supervisado: sin etiquetas, encuentra estructura (clustering, reducción de
+    dimensión)."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-020
+  dimension: ml-clasico
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Cuál es la diferencia entre un problema de clasificación y uno de regresión?
+  options:
+    - id: a
+      text: Clasificación predice una categoría discreta; regresión predice un valor
+        continuo
+    - id: b
+      text: Es al revés
+    - id: c
+      text: Son idénticos
+    - id: d
+      text: La regresión solo sirve para imágenes
+  correct: a
+  explanation: La salida de clasificación es una clase (spam/no spam); la de
+    regresión es un número real (precio, temperatura).
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-021
+  dimension: ml-clasico
+  subtopic: metricas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En una matriz de confusión binaria, ¿qué es un 'falso positivo' (FP)?
+  options:
+    - id: a
+      text: El modelo predijo positivo pero la etiqueta real era negativa
+    - id: b
+      text: Predijo negativo siendo realmente positivo
+    - id: c
+      text: Acertó un caso positivo
+    - id: d
+      text: Acertó un caso negativo
+  correct: a
+  explanation: "FP = predicción positiva sobre un caso realmente negativo (falsa
+    alarma). Un FN sería lo contrario: no detectar un positivo real."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-022
+  dimension: ml-clasico
+  subtopic: metricas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué mide el AUC de una curva ROC?
+  options:
+    - id: a
+      text: "La capacidad de ordenar clases a través de todos los umbrales:
+        probabilidad de puntuar un positivo por encima de un negativo"
+    - id: b
+      text: La accuracy fija a umbral 0.5
+    - id: c
+      text: El tiempo de entrenamiento
+    - id: d
+      text: El número de features
+  correct: a
+  explanation: La ROC traza TPR vs FPR variando el umbral; el AUC (área) es la
+    probabilidad de rankear un positivo aleatorio por encima de un negativo. Es
+    independiente del umbral y bastante robusto al desbalanceo.
+  source: externa
+  date: 2026-07-14
+- id: ml-023
+  dimension: ml-clasico
+  subtopic: metricas
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un detector de spam marca demasiados correos buenos como spam. Sin
+    reentrenar, ¿qué ajustas para reducir esos falsos positivos?
+  options:
+    - id: a
+      text: "Subir el umbral de decisión (exigir más confianza para marcar spam): sube
+        precision a costa de recall"
+    - id: b
+      text: Bajar el umbral de decisión
+    - id: c
+      text: Cambiar el idioma del correo
+    - id: d
+      text: No se puede hacer nada sin reentrenar
+  correct: a
+  explanation: "Subir el umbral hace el modelo más conservador al predecir
+    positivo: menos falsos positivos (más precision) pero más falsos negativos
+    (menos recall). Es el trade-off precision-recall vía umbral."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-024
+  dimension: ml-clasico
+  subtopic: generalizacion
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Qué indica que un modelo hace 'underfitting'?
+  options:
+    - id: a
+      text: "Rinde mal en train Y en validación: es demasiado simple para el patrón
+        (alto sesgo)"
+    - id: b
+      text: Rinde perfecto en train y mal en validación
+    - id: c
+      text: No usa datos de entrenamiento
+    - id: d
+      text: Tiene demasiados parámetros
+  correct: a
+  explanation: "Underfitting = alto sesgo: el modelo no captura la señal ni en los
+    datos de entrenamiento. Lo contrario del overfitting (bien en train, mal en
+    val)."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-025
+  dimension: ml-clasico
+  subtopic: optimizacion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿En qué se diferencian gradient descent por lotes (batch), estocástico
+    (SGD) y mini-batch?
+  options:
+    - id: a
+      text: Batch usa todo el dataset por paso; SGD un solo ejemplo; mini-batch un
+        subconjunto pequeño (equilibrio entre ruido y eficiencia)
+    - id: b
+      text: Son idénticos
+    - id: c
+      text: SGD usa todo el dataset de golpe
+    - id: d
+      text: Mini-batch no calcula gradientes
+  correct: a
+  explanation: Batch es estable pero caro; SGD es ruidoso pero rápido por paso;
+    mini-batch (lo habitual) combina eficiencia en hardware y una actualización
+    razonablemente estable.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-026
+  dimension: ml-clasico
+  subtopic: preprocesado
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué usar one-hot encoding en vez de label encoding para una variable
+    categórica NOMINAL (sin orden)?
+  options:
+    - id: a
+      text: El label encoding introduce un orden numérico falso (0<1<2) que el modelo
+        puede malinterpretar; one-hot lo evita
+    - id: b
+      text: One-hot es más lento sin ninguna ventaja
+    - id: c
+      text: Son exactamente equivalentes
+    - id: d
+      text: El label encoding no existe
+  correct: a
+  explanation: Con categorías sin orden (rojo/verde/azul), asignarles 0/1/2
+    sugiere una relación de orden/distancia inexistente. One-hot crea una
+    columna binaria por categoría y no impone orden.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-027
+  dimension: ml-clasico
+  subtopic: data-leakage
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué riesgo hay al imputar valores faltantes con la media de TODO el
+    dataset antes del train/test split?
+  options:
+    - id: a
+      text: "Data leakage: la media incluye info del test; hay que imputar con
+        estadísticas calculadas solo en train"
+    - id: b
+      text: Ningún riesgo
+    - id: c
+      text: Que el dataset crece de tamaño
+    - id: d
+      text: Que se pierden columnas
+  correct: a
+  explanation: Como con el escalado, cualquier estadística de imputación debe
+    calcularse solo con train y aplicarse a test; si no, filtras información del
+    test y la evaluación se infla.
+  source: externa
+  date: 2026-07-14
+- id: ml-028
+  dimension: ml-clasico
+  subtopic: validacion
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirve reservar un conjunto de TEST que no se toca durante el
+    desarrollo?
+  options:
+    - id: a
+      text: Para estimar sin sesgo el rendimiento en datos no vistos; si lo usas para
+        ajustar deja de ser una estimación honesta
+    - id: b
+      text: Para entrenar más rápido
+    - id: c
+      text: No sirve para nada
+    - id: d
+      text: Para duplicar los datos
+  correct: a
+  explanation: El test es la única muestra 'limpia' de generalización. Si tomas
+    decisiones mirándolo, se contamina y su estimación deja de ser fiable (para
+    eso está el set de validación).
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-029
+  dimension: ml-clasico
+  subtopic: validacion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Con clases desbalanceadas, ¿por qué conviene k-fold ESTRATIFICADO?
+  options:
+    - id: a
+      text: Mantiene la proporción de clases en cada fold, evitando folds sin ejemplos
+        de la clase minoritaria
+    - id: b
+      text: Porque es más rápido
+    - id: c
+      text: Porque usa menos datos
+    - id: d
+      text: Porque elimina el desbalanceo
+  correct: a
+  explanation: El k-fold normal puede dejar folds con muy pocos (o ningún) ejemplo
+    de la clase rara, dando métricas inestables. El estratificado preserva la
+    proporción de clases en cada fold.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-030
+  dimension: ml-clasico
+  subtopic: reduccion-dim
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué hace PCA (Análisis de Componentes Principales)?
+  options:
+    - id: a
+      text: Proyecta los datos a menos dimensiones conservando la mayor varianza
+        posible, con combinaciones lineales ortogonales
+    - id: b
+      text: Añade dimensiones nuevas
+    - id: c
+      text: Etiqueta los datos
+    - id: d
+      text: Entrena un clasificador supervisado
+  correct: a
+  explanation: "PCA es reducción de dimensión no supervisada: encuentra las
+    direcciones (componentes) de máxima varianza y proyecta sobre las primeras,
+    comprimiendo con mínima pérdida de información."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-031
+  dimension: ml-clasico
+  subtopic: reduccion-dim
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es la 'maldición de la dimensionalidad'?
+  options:
+    - id: a
+      text: Al crecer las dimensiones, los datos se vuelven dispersos y las distancias
+        pierden significado, degradando métodos por distancia y exigiendo muchos
+        más datos
+    - id: b
+      text: Que hay demasiadas filas
+    - id: c
+      text: Un bug de numpy
+    - id: d
+      text: Que el modelo entrena más rápido
+  correct: a
+  explanation: En alta dimensión el volumen crece exponencialmente y los puntos
+    quedan casi equidistantes; kNN, clustering y densidades se degradan, y hace
+    falta un volumen de datos que crece exponencialmente.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-032
+  dimension: ml-clasico
+  subtopic: algoritmos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Cómo clasifica un k-Nearest Neighbors (kNN)?
+  options:
+    - id: a
+      text: Asigna la clase mayoritaria entre los k ejemplos de entrenamiento más
+        cercanos; no ajusta un modelo paramétrico
+    - id: b
+      text: Ajusta una recta de regresión
+    - id: c
+      text: Usa gradient descent para aprender pesos
+    - id: d
+      text: Construye un único árbol
+  correct: a
+  explanation: "kNN es 'perezoso': no entrena parámetros, guarda los datos y en
+    predicción vota entre los k vecinos más próximos. Sensible a la escala de
+    las features y costoso en predicción."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-033
+  dimension: ml-clasico
+  subtopic: algoritmos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué asunción 'ingenua' hace el clasificador Naive Bayes?
+  options:
+    - id: a
+      text: Que las features son condicionalmente independientes dada la clase
+    - id: b
+      text: Que no existen clases
+    - id: c
+      text: Que los datos son siempre imágenes
+    - id: d
+      text: Que la relación es siempre lineal
+  correct: a
+  explanation: Naive Bayes asume independencia condicional de las features dada la
+    clase; irreal, pero funciona sorprendentemente bien (p. ej. clasificación de
+    texto) y es muy rápido.
+  source: externa
+  date: 2026-07-14
+- id: ml-034
+  dimension: ml-clasico
+  subtopic: algoritmos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué busca un SVM lineal al separar dos clases?
+  options:
+    - id: a
+      text: "El hiperplano que maximiza el margen: la distancia a los puntos más
+        cercanos (vectores de soporte)"
+    - id: b
+      text: Cualquier recta que separe las clases
+    - id: c
+      text: Minimizar el número de features
+    - id: d
+      text: Maximizar el error de clasificación
+  correct: a
+  explanation: El SVM elige, entre los infinitos separadores posibles, el de
+    margen máximo; solo los vectores de soporte (los más cercanos) determinan el
+    hiperplano, lo que da buena generalización.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-035
+  dimension: ml-clasico
+  subtopic: clustering
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirven el método del codo (elbow) o el silhouette en k-means?
+  options:
+    - id: a
+      text: Para elegir un número de clústers k razonable, ya que k-means no aprende k
+        por sí solo
+    - id: b
+      text: Para entrenar más rápido
+    - id: c
+      text: Para etiquetar los datos
+    - id: d
+      text: Para reducir dimensiones
+  correct: a
+  explanation: k-means requiere fijar k de antemano; el codo (inercia vs k) y el
+    silhouette (cohesión/separación) ayudan a elegir un k sensato en vez de a
+    ojo.
+  source: externa
+  date: 2026-07-14
+- id: ml-036
+  dimension: ml-clasico
+  subtopic: clustering
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué ventaja tiene DBSCAN frente a k-means?
+  options:
+    - id: a
+      text: Encuentra clústers de forma arbitraria por densidad y detecta outliers,
+        sin fijar k de antemano
+    - id: b
+      text: Es siempre más rápido
+    - id: c
+      text: Requiere datos etiquetados
+    - id: d
+      text: Solo puede formar 2 clústers
+  correct: a
+  explanation: "DBSCAN agrupa por densidad: descubre clústers no esféricos, marca
+    como ruido los puntos aislados y no necesita k. A cambio es sensible a sus
+    parámetros (eps, min_samples)."
+  source: externa
+  date: 2026-07-14
+- id: ml-037
+  dimension: ml-clasico
+  subtopic: ensembles
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿En qué se diferencian bagging y boosting?
+  options:
+    - id: a
+      text: Bagging entrena modelos en paralelo sobre remuestreos y promedia (reduce
+        varianza); boosting entrena en secuencia, cada uno corrigiendo los
+        errores del anterior (reduce sesgo)
+    - id: b
+      text: Son lo mismo con otro nombre
+    - id: c
+      text: Bagging es secuencial y boosting paralelo
+    - id: d
+      text: Boosting solo promedia modelos independientes
+  correct: a
+  explanation: Bagging (p. ej. Random Forest) decorrela modelos de alta varianza y
+    promedia. Boosting (p. ej. gradient boosting) añade modelos débiles
+    secuencialmente enfocados en los errores previos, reduciendo sesgo.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-038
+  dimension: ml-clasico
+  subtopic: ensembles
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Cómo construye el modelo un algoritmo de gradient boosting (p. ej. XGBoost)?
+  options:
+    - id: a
+      text: Añade árboles secuencialmente, cada uno ajustado a los residuos/gradiente
+        del error de los anteriores
+    - id: b
+      text: Promedia árboles entrenados de forma independiente
+    - id: c
+      text: Entrena una única red neuronal
+    - id: d
+      text: No utiliza árboles en absoluto
+  correct: a
+  explanation: Gradient boosting ajusta cada nuevo árbol al gradiente negativo de
+    la pérdida (los residuos) del ensemble actual, mejorando de forma
+    escalonada. Potente pero propenso a overfitting sin regularización/learning
+    rate.
+  source: externa
+  date: 2026-07-14
+- id: ml-039
+  dimension: ml-clasico
+  subtopic: ensembles
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En un Random Forest, ¿qué es la evaluación 'out-of-bag' (OOB)?
+  options:
+    - id: a
+      text: "Estimar el error usando, para cada árbol, los ejemplos que su muestra
+        bootstrap NO incluyó: una validación casi gratis"
+    - id: b
+      text: Entrenar cada árbol con todos los datos
+    - id: c
+      text: Un método de poda de árboles
+    - id: d
+      text: El número total de árboles del bosque
+  correct: a
+  explanation: Cada árbol se entrena con un bootstrap (~63% de los datos); los
+    ejemplos fuera de su bolsa sirven para estimar el error sin un set de
+    validación aparte.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-040
+  dimension: ml-clasico
+  subtopic: metricas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué diferencia a MAE de RMSE como métricas de regresión?
+  options:
+    - id: a
+      text: RMSE penaliza más los errores grandes (los eleva al cuadrado) y es más
+        sensible a outliers; MAE trata todos los errores de forma lineal
+    - id: b
+      text: Son idénticas
+    - id: c
+      text: MAE solo sirve para clasificación
+    - id: d
+      text: RMSE ignora el error
+  correct: a
+  explanation: "RMSE = raíz del error cuadrático medio: castiga desviaciones
+    grandes; MAE = error absoluto medio: robusto a outliers. La elección depende
+    de cuánto te importen los errores grandes."
+  source: externa
+  date: 2026-07-14
+- id: ml-041
+  dimension: ml-clasico
+  subtopic: metricas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué indica un R² (coeficiente de determinación) de 0.0 en regresión?
+  options:
+    - id: a
+      text: El modelo no explica la varianza mejor que predecir siempre la media del
+        objetivo
+    - id: b
+      text: Un ajuste perfecto
+    - id: c
+      text: Que faltan datos
+    - id: d
+      text: Que hay overfitting con seguridad
+  correct: a
+  explanation: R²=1 es ajuste perfecto; R²=0 equivale a predecir la media; R²<0 es
+    peor que la media. Mide la fracción de varianza explicada por el modelo.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-042
+  dimension: ml-clasico
+  subtopic: desbalanceo
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    Dataset 98% clase 0 / 2% clase 1; el modelo predice siempre 0.
+
+      modelo = LogisticRegression()   # por defecto
+
+    ¿Qué cambio ataca el desbalanceo DESDE el modelo?
+  options:
+    - id: a
+      text: class_weight='balanced' (o pesos por clase) para penalizar más los errores
+        en la clase minoritaria
+    - id: b
+      text: Subir max_iter
+    - id: c
+      text: Eliminar la clase minoritaria
+    - id: d
+      text: No tocar nada, ya está bien
+  correct: a
+  explanation: Ponderar las clases (o remuestrear, p. ej. SMOTE) hace que el coste
+    de fallar la minoría pese más, evitando el clasificador trivial que predice
+    siempre la mayoritaria.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-043
+  dimension: ml-clasico
+  subtopic: data-leakage
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Tu modelo de predicción de baja de clientes da 99.9% de accuracy en
+    validación. Descubres que una feature es 'fecha_de_baja'. ¿Qué ha pasado?
+  options:
+    - id: a
+      text: "Target leakage: una feature contiene información del futuro/etiqueta que
+        no existiría al predecir; hay que quitarla"
+    - id: b
+      text: El modelo es simplemente excelente
+    - id: c
+      text: Falta regularización
+    - id: d
+      text: Es un resultado normal
+  correct: a
+  explanation: "Una feature que solo se conoce después del evento (o que codifica
+    la etiqueta) filtra el objetivo: accuracy irreal que se desploma en
+    producción. Se eliminan las features no disponibles en el momento de
+    predecir."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-044
+  dimension: ml-clasico
+  subtopic: preprocesado
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué familia de modelos NO necesita escalado de features?
+  options:
+    - id: a
+      text: "Los basados en árboles (decision tree, random forest, gradient boosting):
+        parten por umbrales, insensibles a la escala"
+    - id: b
+      text: SVM con kernel RBF
+    - id: c
+      text: k-Nearest Neighbors
+    - id: d
+      text: Regresión logística con regularización
+  correct: a
+  explanation: Los árboles deciden por umbrales de cada feature por separado, así
+    que la escala da igual. En cambio kNN, SVM y modelos con
+    gradiente/regularización sí se benefician (o requieren) escalado.
+  source: externa
+  date: 2026-07-14
+- id: ml-045
+  dimension: ml-clasico
+  subtopic: regularizacion
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué la regularización L1 (lasso) tiende a dar pesos exactamente CERO
+    (selección de features) y la L2 (ridge) no?
+  options:
+    - id: a
+      text: La geometría de la restricción L1 (rombo, con vértices sobre los ejes)
+        hace que el óptimo caiga a menudo en un eje (peso=0); la L2 (círculo)
+        rara vez toca un eje
+    - id: b
+      text: Porque L1 usa más datos
+    - id: c
+      text: Porque es aleatorio
+    - id: d
+      text: Porque L2 también produce ceros siempre
+  correct: a
+  explanation: La región factible de L1 es un rombo con esquinas en los ejes; la
+    solución óptima suele tocar una esquina, anulando coeficientes (sparsity).
+    La de L2 es una esfera suave, que encoge pero casi nunca anula.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-046
+  dimension: ml-clasico
+  subtopic: teoria
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: El error cuadrático esperado de predicción se descompone como E[(y − ŷ)²]
+    = ...
+  options:
+    - id: a
+      text: sesgo² + varianza + error irreducible
+    - id: b
+      text: solo varianza
+    - id: c
+      text: sesgo × varianza
+    - id: d
+      text: accuracy + recall
+  correct: a
+  explanation: "La descomposición sesgo-varianza: sesgo² (error sistemático por un
+    modelo demasiado simple), varianza (sensibilidad a los datos de train) y
+    ruido irreducible. Reducir uno suele aumentar el otro."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-047
+  dimension: ml-clasico
+  subtopic: ensembles
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué promediar B modelos entrenados sobre remuestreos bootstrap
+    (bagging) reduce la varianza?
+  options:
+    - id: a
+      text: La varianza de la media de estimadores decrece con B (si no están
+        perfectamente correlados), y el bootstrap los decorrela
+    - id: b
+      text: Porque aumenta el sesgo
+    - id: c
+      text: Porque usa menos datos
+    - id: d
+      text: El promedio no reduce la varianza
+  correct: a
+  explanation: Promediar reduce la varianza (~σ²/B más un término por la
+    correlación entre modelos). El bootstrap decorrela los modelos, por eso el
+    bagging estabiliza estimadores de alta varianza como los árboles profundos.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-048
+  dimension: ml-clasico
+  subtopic: teoria
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: El 'kernel trick' permite un SVM no lineal sin calcular explícitamente la
+    transformación φ(x). ¿Por qué funciona?
+  options:
+    - id: a
+      text: La forma dual del SVM solo depende de productos internos ⟨φ(x),φ(z)⟩, que
+        un kernel válido (Mercer) calcula directamente como K(x,z)
+    - id: b
+      text: Porque φ es siempre la identidad
+    - id: c
+      text: Porque no usa productos internos
+    - id: d
+      text: Porque borra los datos para linealizarlos
+  correct: a
+  explanation: En su formulación dual el SVM solo usa productos internos entre
+    ejemplos; un kernel de Mercer devuelve ⟨φ(x),φ(z)⟩ sin construir φ (que
+    puede ser de dimensión infinita, como el RBF). Ese es el truco.
+  source: externa
+  date: 2026-07-14
+- id: ml-049
+  dimension: ml-clasico
+  subtopic: calibracion
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: Un modelo tiene buen AUC, pero cuando predice 'probabilidad 0.9' solo
+    acierta el 60% de las veces. ¿Qué problema hay y cómo se corrige?
+  options:
+    - id: a
+      text: Está mal CALIBRADO; se corrige con calibración post-hoc (Platt/sigmoide o
+        isotónica) sobre un set de validación
+    - id: b
+      text: Tiene overfitting; solo hace falta más datos
+    - id: c
+      text: Es imposible que ocurra
+    - id: d
+      text: Hay que cambiar de lenguaje de programación
+  correct: a
+  explanation: Buen ranking (AUC) no implica probabilidades fiables. Si al 0.9
+    predicho le corresponde un 60% real, hay descalibración; Platt scaling
+    (sigmoide) o la regresión isotónica reajustan las probabilidades.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: ml-050
+  dimension: ml-clasico
+  subtopic: generalizacion
+  difficulty: hard
+  type: diagrama
+  roles: *a1
+  stem: |-
+    Error vs complejidad del modelo:
+
+      error
+       |\                         .
+       | \                      .   <- test
+       |  \                  .
+       |   '._          _.'
+       |      '-.____.-'   <- valle (óptimo)
+       +----------------------------- complejidad
+        simple                 complejo
+
+    ¿Qué pasa en la zona de la DERECHA (modelo muy complejo)?
+  options:
+    - id: a
+      text: "Overfitting: el error de train sigue bajando pero el de test sube
+        (varianza alta)"
+    - id: b
+      text: "Underfitting: el modelo es demasiado simple"
+    - id: c
+      text: Es el punto óptimo de complejidad
+    - id: d
+      text: El error irreducible se hace cero
+  correct: a
+  explanation: "El error de test tiene forma de U: la izquierda (simple) es
+    underfitting (sesgo alto), la derecha (complejo) es overfitting (varianza
+    alta), y el óptimo está en el valle. El error de train, en cambio, baja
+    siempre."
   source: bootcamp-ml-llm
   date: 2026-07-14
