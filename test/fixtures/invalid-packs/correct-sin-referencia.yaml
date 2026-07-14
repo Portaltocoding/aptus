@@ -1,0 +1,22 @@
+# Fixture inválida: la pregunta 'invalid-correct-001' tiene un `correct` que
+# no referencia ningún option.id existente. Debe ser rechazada por el
+# superRefine de QuestionSchema (CONT-03).
+name: invalid-pack-correct-sin-referencia
+version: "1.0.0"
+dimensions:
+  - dimension-alpha
+questions:
+  - id: invalid-correct-001
+    dimension: dimension-alpha
+    difficulty: easy
+    roles: []
+    stem: "Pregunta con correct que no existe entre las options."
+    options:
+      - id: a
+        text: "Opción A"
+      - id: b
+        text: "Opción B"
+    correct: z
+    explanation: "Esta fixture es intencionalmente inválida."
+    source: fixture
+    date: "2026-01-01"

@@ -1,0 +1,5 @@
+name: mini-pack
+version: "1.0.0"
+dimensions:
+  - dimension-alpha
+  - dimension-beta

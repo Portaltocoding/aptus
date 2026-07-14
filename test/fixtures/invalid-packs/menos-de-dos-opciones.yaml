@@ -1,0 +1,19 @@
+# Fixture inválida: la pregunta 'invalid-options-001' tiene una sola option
+# (options.min(2) en QuestionSchema). Debe ser rechazada (CONT-03).
+name: invalid-pack-menos-de-dos-opciones
+version: "1.0.0"
+dimensions:
+  - dimension-alpha
+questions:
+  - id: invalid-options-001
+    dimension: dimension-alpha
+    difficulty: easy
+    roles: []
+    stem: "Pregunta con una sola option."
+    options:
+      - id: a
+        text: "Opción A"
+    correct: a
+    explanation: "Esta fixture es intencionalmente inválida."
+    source: fixture
+    date: "2026-01-01"

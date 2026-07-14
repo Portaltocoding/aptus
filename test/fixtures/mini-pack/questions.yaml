@@ -1,0 +1,230 @@
+# Fixture determinista de pack válido para tests (motor puro + loader).
+# Nombres de dimensión/subtopic GENÉRICOS a propósito (ENG-04): el dominio real
+# solo vive en packs/, nunca en el código ni en fixtures de test.
+- id: alpha-001
+  dimension: dimension-alpha
+  subtopic: subtopic-alpha-1
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno alpha 1: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+    - id: c
+      text: "Opción C"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-002
+  dimension: dimension-alpha
+  subtopic: subtopic-alpha-1
+  difficulty: medium
+  roles: []
+  stem: "Pregunta de relleno alpha 2: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: b
+  explanation: "La opción B es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-003
+  dimension: dimension-alpha
+  subtopic: subtopic-alpha-2
+  difficulty: hard
+  roles: []
+  stem: "Pregunta de relleno alpha 3: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+    - id: c
+      text: "Opción C"
+    - id: d
+      text: "Opción D"
+  correct: c
+  explanation: "La opción C es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-004
+  dimension: dimension-alpha
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno alpha 4: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-005
+  dimension: dimension-alpha
+  difficulty: medium
+  roles: []
+  stem: "Pregunta de relleno alpha 5: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+    - id: c
+      text: "Opción C"
+  correct: b
+  explanation: "La opción B es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-006
+  dimension: dimension-alpha
+  difficulty: hard
+  roles: []
+  stem: "Pregunta de relleno alpha 6: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: alpha-007
+  dimension: dimension-alpha
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno alpha 7: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: b
+  explanation: "La opción B es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-001
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno beta 1: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-002
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: medium
+  roles: []
+  stem: "Pregunta de relleno beta 2: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+    - id: c
+      text: "Opción C"
+  correct: c
+  explanation: "La opción C es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-003
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: hard
+  roles: []
+  stem: "Pregunta de relleno beta 3: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: b
+  explanation: "La opción B es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-004
+  dimension: dimension-beta
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno beta 4: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-005
+  dimension: dimension-beta
+  difficulty: medium
+  roles: []
+  stem: "Pregunta de relleno beta 5: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+    - id: c
+      text: "Opción C"
+  correct: c
+  explanation: "La opción C es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-006
+  dimension: dimension-beta
+  difficulty: hard
+  roles: []
+  stem: "Pregunta de relleno beta 6: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: a
+  explanation: "La opción A es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-007
+  dimension: dimension-beta
+  difficulty: easy
+  roles: []
+  stem: "Pregunta de relleno beta 7: ¿cuál es la opción correcta?"
+  options:
+    - id: a
+      text: "Opción A"
+    - id: b
+      text: "Opción B"
+  correct: b
+  explanation: "La opción B es correcta porque así lo define esta fixture de test."
+  source: fixture
+  date: "2026-01-01"
