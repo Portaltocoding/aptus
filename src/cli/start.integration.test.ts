@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadPack } from "../content/loader.js";
+import { loadPack, loadPackDir } from "../content/loader.js";
 import { selectBalanced } from "../core/session.js";
 import { makeSeededShuffle } from "../core/random.js";
 import { score, type AnsweredQuestion, type Confidence } from "../core/scoring.js";
@@ -10,8 +10,7 @@ import { renderResult, renderCalibration, renderReadiness, renderGaps } from "./
 
 const CONF_CYCLE: Confidence[] = ["alta", "media", "baja"];
 
-const REAL_PACK = new URL("../../packs/ai-ml-readiness/pack.yaml", import.meta.url).pathname;
-const REAL_QUESTIONS = new URL("../../packs/ai-ml-readiness/questions.yaml", import.meta.url).pathname;
+const REAL_PACK_DIR = new URL("../../packs/ai-ml-readiness/", import.meta.url).pathname;
 const REAL_READINESS = new URL("../../packs/ai-ml-readiness/readiness.yaml", import.meta.url).pathname;
 
 // Smoke NO interactivo: ejercita el camino end-to-end motor+contenido+render sin
@@ -62,7 +61,7 @@ describe("start end-to-end (smoke no interactivo)", () => {
 
 describe("readiness + gaps end-to-end (pack y config reales)", () => {
   it("compone readiness por rol y gaps priorizados sobre el pack real", () => {
-    const pack = loadPack(REAL_PACK, REAL_QUESTIONS);
+    const pack = loadPackDir(REAL_PACK_DIR);
     const cfg = loadReadiness(REAL_READINESS);
     const selected = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(99));
 

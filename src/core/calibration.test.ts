@@ -16,6 +16,7 @@ function q(id: string): Question {
     id,
     dimension: "dim",
     difficulty: "easy",
+    type: "concepto",
     roles: [],
     stem: `Enunciado ${id}`,
     options: [

@@ -12,6 +12,7 @@ function makeQuestion(overrides: Partial<Question> & Pick<Question, "id" | "dime
     dimension: overrides.dimension,
     subtopic: overrides.subtopic,
     difficulty: overrides.difficulty ?? "easy",
+    type: overrides.type ?? "concepto",
     roles: overrides.roles ?? [],
     stem: overrides.stem ?? `Pregunta de prueba ${overrides.id}`,
     options: overrides.options ?? [

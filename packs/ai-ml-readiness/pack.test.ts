@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { loadPack } from "../../src/content/loader.js";
+import { loadPackDir } from "../../src/content/loader.js";
 import { selectBalanced } from "../../src/core/session.js";
 import { makeSeededShuffle } from "../../src/core/random.js";
 
-const PACK_YAML = new URL("pack.yaml", import.meta.url).pathname;
-const QUESTIONS_YAML = new URL("questions.yaml", import.meta.url).pathname;
+// El pack vive en este mismo directorio (pack.yaml + questions/*.yaml).
+const PACK_DIR = new URL(".", import.meta.url).pathname;
 
 const EXPECTED_DIMENSIONS = [
   "llm-rag-evals",
@@ -19,17 +19,17 @@ const ALLOWED_SOURCES = new Set(["bootcamp-ml-llm", "externa"]);
 
 describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   it("valida sin errores contra el validador real (loadPack)", () => {
-    expect(() => loadPack(PACK_YAML, QUESTIONS_YAML)).not.toThrow();
+    expect(() => loadPackDir(PACK_DIR)).not.toThrow();
   });
 
   it("declara exactamente las 5 dimensiones objetivo", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     expect(pack.dimensions).toHaveLength(5);
     expect(pack.dimensions).toEqual(EXPECTED_DIMENSIONS);
   });
 
   it("cada dimensión declarada tiene preguntas reales en el banco", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     const dimsConPreguntas = new Set(pack.questions.map((q) => q.dimension));
     for (const dimension of pack.dimensions) {
       expect(dimsConPreguntas.has(dimension), `dimensión '${dimension}' sin preguntas`).toBe(true);
@@ -43,7 +43,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   });
 
   it(`cada dimensión tiene al menos ${MIN_PER_DIMENSION} preguntas`, () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     for (const dimension of pack.dimensions) {
       const count = pack.questions.filter((q) => q.dimension === dimension).length;
       expect(count, `dimensión '${dimension}' tiene ${count} preguntas`).toBeGreaterThanOrEqual(
@@ -53,12 +53,12 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   });
 
   it(`el banco total tiene al menos ${MIN_TOTAL} preguntas`, () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     expect(pack.questions.length).toBeGreaterThanOrEqual(MIN_TOTAL);
   });
 
   it("todas las preguntas tienen un `correct` que referencia un option.id existente", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     for (const q of pack.questions) {
       const ids = new Set(q.options.map((o) => o.id));
       const correctIds = Array.isArray(q.correct) ? q.correct : [q.correct];
@@ -69,7 +69,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   });
 
   it("todas las preguntas tienen una explanation real (no vacía/relleno)", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     for (const q of pack.questions) {
       expect(
         q.explanation.length,
@@ -80,7 +80,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
 
   // --- CONT-04: procedencia auditable (curador = evaluado) ---
   it("cada pregunta declara una `source` auditable (bootcamp-ml-llm | externa)", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     for (const q of pack.questions) {
       expect(ALLOWED_SOURCES.has(q.source), `pregunta '${q.id}': source '${q.source}' no auditable`).toBe(
         true,
@@ -89,7 +89,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   });
 
   it("el banco mezcla fuentes: hay preguntas de bootcamp y externas (permite auditar el sesgo)", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     const sources = new Set(pack.questions.map((q) => q.source));
     expect(sources.has("bootcamp-ml-llm")).toBe(true);
     expect(sources.has("externa")).toBe(true);
@@ -100,7 +100,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
 
   // --- SESS-04: rotación entre intentos ---
   it("dos intentos con seeds distintas no presentan el mismo set de preguntas (rotación)", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     const selA = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(1)).map((q) => q.id);
     const selB = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(2)).map((q) => q.id);
 
@@ -111,7 +111,7 @@ describe("pack real ai-ml-readiness (v2, banco completo)", () => {
   });
 
   it("misma seed → misma selección (determinismo del núcleo, base de la rotación)", () => {
-    const pack = loadPack(PACK_YAML, QUESTIONS_YAML);
+    const pack = loadPackDir(PACK_DIR);
     const sel1 = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(42)).map((q) => q.id);
     const sel2 = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(42)).map((q) => q.id);
     expect(sel1).toEqual(sel2);

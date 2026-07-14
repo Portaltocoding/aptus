@@ -19,6 +19,7 @@ function makeQuestion(id: string, dimension: string): Question {
     id,
     dimension,
     difficulty: "easy",
+    type: "concepto",
     roles: [],
     stem: `Pregunta de prueba ${id}`,
     options: [

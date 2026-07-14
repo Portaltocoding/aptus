@@ -11,6 +11,7 @@ function q(id: string, dimension: string, difficulty: Diff): Question {
     id,
     dimension,
     difficulty,
+    type: "concepto",
     roles: [],
     stem: `Enunciado ${id}`,
     options: [
