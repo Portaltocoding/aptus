@@ -1,5 +1,5 @@
-# Dimensión: llm-rag-evals — 50 preguntas. Curadas, técnicamente correctas.
-# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+# Dimensión: llm-rag-evals — 55 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. difficulty incl. experto (staff). source: bootcamp-ml-llm|externa.
 
 - id: llm-001
   dimension: llm-rag-evals
@@ -1280,5 +1280,136 @@
   explanation: El agente razona y elige una acción; el sistema EJECUTA esa
     herramienta (búsqueda, API, código), devuelve el resultado como observación
     y el modelo decide el siguiente paso, iterando hasta cumplir el objetivo.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: llm-051
+  dimension: llm-rag-evals
+  subtopic: retrieval-avanzado
+  difficulty: experto
+  type: concepto
+  roles: &a2
+    - AI Engineer
+    - LLM Engineer
+    - ML Engineer
+  stem: ¿Qué caracteriza la recuperación 'late interaction' (p. ej. ColBERT)
+    frente a un bi-encoder de un único vector por documento?
+  options:
+    - id: a
+      text: Representa cada documento con múltiples vectores (por token) y calcula la
+        relevancia por interacción tardía (MaxSim) entre tokens de consulta y
+        documento; más preciso a costa de un índice mucho mayor
+    - id: b
+      text: Usa un solo vector promedio, igual que el bi-encoder
+    - id: c
+      text: No utiliza embeddings en absoluto
+    - id: d
+      text: Solo funciona con imágenes
+  correct: a
+  explanation: ColBERT guarda un vector por token (multi-vector) y en consulta
+    hace MaxSim entre los tokens de la consulta y los del documento (interacción
+    tardía), capturando matices que un único vector promediado pierde; el precio
+    es un índice bastante mayor.
+  source: externa
+  date: 2026-07-14
+- id: llm-052
+  dimension: llm-rag-evals
+  subtopic: inferencia-avanzada
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: ¿Cómo acelera el 'speculative decoding' la generación de un LLM sin
+    cambiar la distribución de salida?
+  options:
+    - id: a
+      text: "Un modelo pequeño 'borrador' propone varios tokens que el modelo grande
+        verifica en paralelo, aceptando el prefijo correcto: menos pasos
+        secuenciales del modelo grande"
+    - id: b
+      text: Reduce el número de parámetros del modelo grande
+    - id: c
+      text: Elimina el KV cache
+    - id: d
+      text: Fija la temperature a 0
+  correct: a
+  explanation: El drafter genera k tokens candidatos y el modelo grande los
+    verifica de una sola pasada, aceptando el prefijo válido. Como la
+    verificación es paralela, baja la latencia manteniendo exactamente la misma
+    distribución que el modelo grande.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: llm-053
+  dimension: llm-rag-evals
+  subtopic: alineamiento
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: ¿En qué se diferencia DPO (Direct Preference Optimization) del RLHF
+    clásico con PPO para alinear un LLM con preferencias humanas?
+  options:
+    - id: a
+      text: DPO optimiza directamente sobre pares elegido/rechazado con una pérdida
+        cerrada, sin entrenar un modelo de recompensa ni bucle de RL; RLHF-PPO
+        entrena un reward model y hace RL
+    - id: b
+      text: Son exactamente lo mismo con otro nombre
+    - id: c
+      text: DPO no usa datos de preferencias
+    - id: d
+      text: RLHF no necesita ningún dato humano
+  correct: a
+  explanation: RLHF clásico entrena un reward model y optimiza la política con RL
+    (PPO), complejo e inestable. DPO reformula el objetivo para optimizar
+    directo sobre pares de preferencia con una pérdida tipo clasificación, sin
+    reward model ni RL.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: llm-054
+  dimension: llm-rag-evals
+  subtopic: inferencia-avanzada
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: La autoatención crece O(n^2) con la longitud de secuencia n. ¿Qué aporta
+    FlashAttention?
+  options:
+    - id: a
+      text: Calcula la atención EXACTA de forma IO-aware (por bloques en SRAM, sin
+        materializar la matriz n×n en HBM), ahorrando memoria y tiempo
+    - id: b
+      text: Aproxima la atención perdiendo exactitud
+    - id: c
+      text: Elimina la atención del transformer
+    - id: d
+      text: Solo funciona en CPU
+  correct: a
+  explanation: "FlashAttention reordena el cálculo por bloques que caben en SRAM y
+    evita escribir la matriz n×n en memoria HBM: es atención exacta pero
+    consciente del coste de I/O, con gran ahorro de memoria y latencia. No es
+    una aproximación."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: llm-055
+  dimension: llm-rag-evals
+  subtopic: arquitectura-avanzada
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: En un modelo Mixture-of-Experts (MoE) disperso, ¿qué consigue el enrutado
+    top-k de tokens a expertos?
+  options:
+    - id: a
+      text: "Activar solo unos pocos expertos por token: mucha más capacidad
+        (parámetros totales) con un coste de cómputo por token casi constante"
+    - id: b
+      text: Ejecutar todos los expertos en cada token
+    - id: c
+      text: Reducir el número total de parámetros
+    - id: d
+      text: Eliminar la necesidad de atención
+  correct: a
+  explanation: Un router envía cada token a los k expertos más adecuados; el
+    modelo tiene muchísimos parámetros (capacidad) pero solo activa una fracción
+    por token, manteniendo el cómputo acotado. El reto operativo es el balanceo
+    de carga entre expertos.
   source: bootcamp-ml-llm
   date: 2026-07-14
