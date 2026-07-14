@@ -14,7 +14,7 @@ Aptus se construye de dentro hacia fuera: primero un slice vertical mínimo pero
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Fundamento end-to-end** - Banco mínimo real, motor de scoring puro, sesión select en terminal y resultado básico con N, de punta a punta.
-- [ ] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
+- [x] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
 - [ ] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
 - [ ] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
 - [ ] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
@@ -56,7 +56,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Cada pregunta del banco completo registra su fuente (bootcamp-ml-llm u externa) en la metadata, permitiendo auditar el sesgo de autocuración (curador = evaluado).
   3. El banco es sustancialmente mayor que lo que se muestra en una sola sesión, y dos intentos consecutivos no presentan exactamente el mismo set de preguntas.
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
+
+- [x] 02-01-PLAN.md — Banco completo 5 dimensiones (bootcamp-ml-llm + externas), procedencia auditable (CONT-04) y rotación entre intentos (SESS-04)
 
 ### Phase 3: Confianza y calibración
 

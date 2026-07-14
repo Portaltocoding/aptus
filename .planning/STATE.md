@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: Banco completo desde bootcamp-ml-llm
+current_phase: 3
+current_phase_name: Confianza y calibración
 status: ready
-stopped_at: Completado Phase 1 — walking skeleton end-to-end (01-05)
-last_updated: "2026-07-14T20:50:00.000Z"
+stopped_at: Completado Phase 2 — banco completo 5 dimensiones (02-01)
+last_updated: "2026-07-14T21:05:00.000Z"
 last_activity: 2026-07-14
-last_activity_desc: Completado 01-05 (CLI end-to-end) y cerrada Phase 1; 45/45 tests en verde
+last_activity_desc: Completado 02-01 (banco completo 5 dimensiones) y cerrada Phase 2; 50/50 tests en verde
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
-  percent: 17
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 6
+  percent: 33
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 ## Current Position
 
-Phase: 2 of 6 (Banco completo desde bootcamp-ml-llm) — no iniciada
-Plan: Phase 1 completa (5/5 planes)
-Status: Phase 1 verificada end-to-end; Phase 2 lista para discuss/plan cuando Carlos decida
-Last activity: 2026-07-14 — Completado 01-05 (CLI end-to-end), cerrada Phase 1; 45/45 tests
+Phase: 3 of 6 (Confianza y calibración) — no iniciada
+Plan: Phases 1 y 2 completas
+Status: Phase 2 verificada end-to-end (banco de 5 dimensiones, 66 preguntas); Phase 3 lista cuando Carlos decida
+Last activity: 2026-07-14 — Completado 02-01 (banco completo), cerrada Phase 2; 50/50 tests
 
-Progress: [██░░░░░░░░] 17%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -82,7 +82,7 @@ None yet.
 ### Blockers/Concerns
 
 - Quality gate transversal (todas las fases de resultado): nunca mostrar un score único agregado tipo "empleabilidad"; siempre mostrar N junto a cada score; nada de IRT/CAT en el mapeo score→rol.
-- Fase 2 requiere inspección real de `bootcampLLMs.md` / `BACKUP.md` / `module_maps.json` (no explorados aún) para decidir el proceso de conversión a preguntas select — research flag pendiente de resolver en discuss/plan de esa fase.
+- ~~Fase 2 requiere inspección real de `bootcampLLMs.md` / `BACKUP.md` / `module_maps.json`~~ RESUELTO (Phase 2): inspeccionado `module_maps.json`; el bootcamp cubre 4/5 dimensiones (fullstack es externo). Procedencia por pregunta anclada en consecuencia.
 - Fase 4 requiere investigación de umbrales junior/mid/senior por rol anclados a fuentes externas — research flag pendiente de resolver en discuss/plan de esa fase.
 
 ## Deferred Items
@@ -96,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T20:50:00.000Z
-Stopped at: Completado Phase 1 — walking skeleton end-to-end (01-05). Detenido a petición de Carlos (solo Phase 1).
+Last session: 2026-07-14T21:05:00.000Z
+Stopped at: Completado Phase 2 — banco completo 5 dimensiones (02-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
 Resume file: None

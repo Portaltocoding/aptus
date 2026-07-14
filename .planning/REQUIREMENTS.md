@@ -16,7 +16,7 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 - [x] **CONT-01**: Un pack se define en ficheros de datos (YAML/JSON) fuera del código: banco de preguntas + baselines + arquetipos de rol.
 - [x] **CONT-02**: Cada pregunta tiene: enunciado, opciones select, respuesta(s) correcta(s), explicación, y metadata (tema, subtema, dificultad, rol, fuente, fecha).
 - [x] **CONT-03**: Un validador comprueba la integridad del pack (schema, respuesta correcta presente, metadata obligatoria) antes de usarlo.
-- [ ] **CONT-04**: El pack v1 (readiness AI/ML) se cura a partir de `bootcamp-ml-llm` (bootcampLLMs.md, ordered-answers, module_maps.json) + fuentes externas, cubriendo LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design y comportamental (STAR).
+- [x] **CONT-04**: El pack v1 (readiness AI/ML) se cura a partir de `bootcamp-ml-llm` (bootcampLLMs.md, ordered-answers, module_maps.json) + fuentes externas, cubriendo LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design y comportamental (STAR).
 - [ ] **CONT-05**: Las baselines por rol/nivel se anclan a fuentes externas (competency frameworks, job postings), no solo a la opinión del curador.
 
 ### Session (runner interactivo por terminal)
@@ -24,11 +24,11 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 - [x] **SESS-01**: El usuario responde todas las preguntas con **select** (opción múltiple), navegable, en una sesión de **≥15 min**.
 - [x] **SESS-02**: El motor de sesión selecciona preguntas equilibradas por dimensión y evita muestra insuficiente por dimensión.
 - [ ] **SESS-03**: El usuario puede indicar su **confianza** por pregunta (para la curva confianza-vs-acierto que combate el autoengaño).
-- [ ] **SESS-04**: La sesión rota preguntas entre intentos para mitigar memorización.
+- [x] **SESS-04**: La sesión rota preguntas entre intentos para mitigar memorización.
 
 ### Result (resultado accionable)
 
-- [ ] **RES-01**: El resultado muestra desglose por dimensión con el **N (nº de preguntas)** junto a cada score.
+- [x] **RES-01**: El resultado muestra desglose por dimensión con el **N (nº de preguntas)** junto a cada score.
 - [ ] **RES-02**: El resultado da readiness por rol (junior/mid/senior-ready) contra baseline, **sin** un score único agregado de "empleabilidad".
 - [ ] **RES-03**: El resultado lista **gaps priorizados** ("te falta X, te falta Y") y un **plan concreto** por gap ("haz Z").
 - [ ] **RES-04**: El resultado muestra la curva confianza-vs-acierto (dónde te sobreestimas).
@@ -64,9 +64,9 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 | CONT-03 | Phase 1 | Complete |
 | SESS-01 | Phase 1 | Complete |
 | SESS-02 | Phase 1 | Complete |
-| RES-01 | Phase 1 | Pending |
-| CONT-04 | Phase 2 | Pending |
-| SESS-04 | Phase 2 | Pending |
+| RES-01 | Phase 1 | Complete |
+| CONT-04 | Phase 2 | Complete |
+| SESS-04 | Phase 2 | Complete |
 | SESS-03 | Phase 3 | Pending |
 | RES-04 | Phase 3 | Pending |
 | ENG-03 | Phase 4 | Pending |
