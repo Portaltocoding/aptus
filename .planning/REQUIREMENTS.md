@@ -35,8 +35,8 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 ### Persistence
 
-- [ ] **PERS-01**: Los resultados de cada sesión se guardan localmente.
-- [ ] **PERS-02**: El usuario puede ver la evolución entre sesiones (subir sobre la baseline con el tiempo).
+- [x] **PERS-01**: Los resultados de cada sesión se guardan localmente.
+- [x] **PERS-02**: El usuario puede ver la evolución entre sesiones (subir sobre la baseline con el tiempo).
 
 ## v2 / Deferred
 
@@ -73,8 +73,8 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 | CONT-05 | Phase 4 | Complete |
 | RES-02 | Phase 4 | Complete |
 | RES-03 | Phase 4 | Complete |
-| PERS-01 | Phase 5 | Pending |
-| PERS-02 | Phase 5 | Pending |
+| PERS-01 | Phase 5 | Complete |
+| PERS-02 | Phase 5 | Complete |
 | INTEG-01 (v2, opcional) | Phase 6 | Pending |
 
 **Cobertura v1:** 19/19 requisitos mapeados (100%). No hay huérfanos.

@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 5
-current_phase_name: Persistencia y evolución
+current_phase: 6
+current_phase_name: Integración con jobhunt (opcional, aditiva)
 status: ready
-stopped_at: Completado Phase 4 — readiness por rol con baselines ancladas (04-01)
-last_updated: "2026-07-14T21:40:00.000Z"
+stopped_at: Completado Phase 5 — persistencia y evolución (05-01)
+last_updated: "2026-07-14T22:00:00.000Z"
 last_activity: 2026-07-14
-last_activity_desc: Completado 04-01 (readiness por rol + gaps con plan) y cerrada Phase 4; 80/80 tests en verde
+last_activity_desc: Completado 05-01 (persistencia + evolución) y cerrada Phase 5; 93/93 tests en verde
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
-  percent: 67
+  completed_phases: 5
+  total_plans: 9
+  completed_plans: 9
+  percent: 83
 ---
 
 # Project State
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 ## Current Position
 
-Phase: 5 of 6 (Persistencia y evolución) — no iniciada
-Plan: Phases 1-4 completas
-Status: Phase 4 verificada end-to-end (readiness por rol + gaps con plan); Phase 5 lista cuando Carlos decida
-Last activity: 2026-07-14 — Completado 04-01 (readiness por rol), cerrada Phase 4; 80/80 tests
+Phase: 6 of 6 (Integración con jobhunt, opcional/aditiva) — no iniciada
+Plan: Phases 1-5 completas
+Status: Phase 5 verificada end-to-end (persistencia + evolución + subcomando history); Phase 6 (opcional) lista cuando Carlos decida
+Last activity: 2026-07-14 — Completado 05-01 (persistencia + evolución), cerrada Phase 5; 93/93 tests
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -96,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T21:40:00.000Z
-Stopped at: Completado Phase 4 — readiness por rol con baselines ancladas (04-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
+Last session: 2026-07-14T22:00:00.000Z
+Stopped at: Completado Phase 5 — persistencia y evolución (05-01). Detenido tras la fase, a la espera de que Carlos decida seguir.
 Resume file: None

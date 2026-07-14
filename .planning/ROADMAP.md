@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
 - [x] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
 - [x] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
-- [ ] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
+- [x] **Phase 5: Persistencia y evolución** - Sesiones guardadas localmente y vista de evolución entre sesiones.
 - [ ] **Phase 6: Integración con jobhunt (opcional, aditiva)** - Ponderación de gaps por demanda real de mercado, con degradación elegante si jobhunt no está disponible.
 
 ## Phase Details
@@ -103,7 +103,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Cada sesión completada se guarda localmente sin intervención manual.
   2. Carlos puede consultar el historial de sesiones y ver la evolución de sus scores/readiness por dimensión y por rol entre sesiones sucesivas.
 
-**Plans**: TBD
+**Plans**: 1/1 plans executed
+
+- [x] 05-01-PLAN.md — Persistencia local de sesiones (PERS-01) + evolución entre sesiones y subcomando history (PERS-02)
 
 ### Phase 6: Integración con jobhunt (opcional, aditiva)
 
