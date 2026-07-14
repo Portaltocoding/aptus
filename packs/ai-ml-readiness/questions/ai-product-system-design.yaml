@@ -1,5 +1,5 @@
-# Dimensión: ai-product-system-design — 14 preguntas. Curadas, técnicamente correctas.
-# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+# Dimensión: ai-product-system-design — 50 preguntas. Curadas, técnicamente correctas.
+# type: concepto|diagrama|codigo|escenario. difficulty incl. experto (staff). source: bootcamp-ml-llm (AI product) | externa (system design canónico).
 
 - id: aps-001
   dimension: ai-product-system-design
@@ -371,5 +371,896 @@
     percepción mostrando tokens según se generan) y la salida no fiable (un
     guardrail valida el JSON contra el schema y repara/reintenta antes de
     mandarlo al front). Cada técnica ataca uno."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-015
+  dimension: ai-product-system-design
+  subtopic: escalado
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - AI Product Engineer
+    - Backend Engineer
+  stem: ¿Qué diferencia el escalado horizontal del vertical?
+  options:
+    - id: a
+      text: Horizontal = añadir más máquinas; vertical = hacer más grande una máquina
+        (más CPU/RAM)
+    - id: b
+      text: Al revés
+    - id: c
+      text: Son lo mismo
+    - id: d
+      text: El horizontal solo aplica a bases de datos
+  correct: a
+  explanation: Vertical topa con el límite de una sola máquina y tiene punto único
+    de fallo; horizontal reparte carga entre muchas (mejor tolerancia y escala),
+    a cambio de complejidad (estado distribuido, balanceo).
+  source: externa
+  date: 2026-07-14
+- id: aps-016
+  dimension: ai-product-system-design
+  subtopic: load-balancing
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué hace un balanceador con estrategia 'least connections' frente a
+    'round robin'?
+  options:
+    - id: a
+      text: Envía la petición al servidor con menos conexiones activas, en vez de
+        repartir por turnos ciego
+    - id: b
+      text: Cifra el tráfico
+    - id: c
+      text: Cachea respuestas
+    - id: d
+      text: Elimina servidores
+  correct: a
+  explanation: Round robin reparte por turnos sin mirar la carga; least
+    connections tiene en cuenta cuántas conexiones lleva cada backend, mejor
+    cuando las peticiones duran tiempos muy distintos.
+  source: externa
+  date: 2026-07-14
+- id: aps-017
+  dimension: ai-product-system-design
+  subtopic: escalado
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Para qué sirven las réplicas de lectura (read replicas) en una base de
+    datos?
+  options:
+    - id: a
+      text: Escalar las LECTURAS repartiéndolas entre copias; las escrituras van al
+        primario y se replican
+    - id: b
+      text: Escalar las escrituras
+    - id: c
+      text: Borrar datos antiguos
+    - id: d
+      text: Cifrar la base de datos
+  correct: a
+  explanation: Las réplicas absorben carga de lectura (habitualmente mayoritaria).
+    Introducen lag de replicación, así que una lectura tras una escritura puede
+    ver datos ligeramente antiguos (consistencia eventual).
+  source: externa
+  date: 2026-07-14
+- id: aps-018
+  dimension: ai-product-system-design
+  subtopic: datos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es el sharding (particionado horizontal) de una base de datos?
+  options:
+    - id: a
+      text: Repartir las FILAS entre varios nodos según una clave de partición, para
+        escalar más allá de una sola máquina
+    - id: b
+      text: Duplicar toda la base en cada nodo
+    - id: c
+      text: Cifrar columnas
+    - id: d
+      text: Hacer backups
+  correct: a
+  explanation: El sharding divide los datos por una shard key entre nodos; escala
+    escritura y almacenamiento, pero complica las consultas cross-shard y
+    arriesga 'hot shards' si la clave reparte mal.
+  source: externa
+  date: 2026-07-14
+- id: aps-019
+  dimension: ai-product-system-design
+  subtopic: consistencia
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Qué distingue consistencia fuerte de consistencia eventual?
+  options:
+    - id: a
+      text: "Fuerte: toda lectura ve la última escritura confirmada; eventual: las
+        réplicas convergen con el tiempo y una lectura puede ver datos algo
+        antiguos"
+    - id: b
+      text: Son sinónimos
+    - id: c
+      text: La eventual es siempre más lenta en todo
+    - id: d
+      text: La fuerte no permite réplicas
+  correct: a
+  explanation: Consistencia fuerte da la vista más reciente a costa de
+    latencia/disponibilidad; la eventual prioriza disponibilidad y rendimiento
+    aceptando desfases temporales entre réplicas. La elección depende del caso
+    (saldo bancario vs contador de likes).
+  source: externa
+  date: 2026-07-14
+- id: aps-020
+  dimension: ai-product-system-design
+  subtopic: rendimiento
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué aporta una CDN?
+  options:
+    - id: a
+      text: Sirve contenido (estático y a veces dinámico) desde nodos cercanos al
+        usuario, reduciendo latencia y carga del origen
+    - id: b
+      text: Entrena modelos
+    - id: c
+      text: Sustituye la base de datos
+    - id: d
+      text: Cifra contraseñas
+  correct: a
+  explanation: "Una CDN cachea y sirve desde el edge geográficamente cercano:
+    menos latencia para el usuario y menos tráfico al origen. Clave para assets
+    y, con cuidado de invalidación, para respuestas cacheables."
+  source: externa
+  date: 2026-07-14
+- id: aps-021
+  dimension: ai-product-system-design
+  subtopic: datos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué compromiso introduce añadir un índice a una tabla?
+  options:
+    - id: a
+      text: Acelera las lecturas/búsquedas por esa columna, pero ralentiza algo las
+        escrituras y ocupa más espacio
+    - id: b
+      text: Solo ventajas, sin coste
+    - id: c
+      text: Hace las lecturas más lentas
+    - id: d
+      text: Borra datos
+  correct: a
+  explanation: Un índice es una estructura extra que hay que mantener en cada
+    insert/update/delete; acelera búsquedas/orden por esa clave a cambio de
+    escrituras algo más lentas y más almacenamiento. Indexar de más también
+    penaliza.
+  source: externa
+  date: 2026-07-14
+- id: aps-022
+  dimension: ai-product-system-design
+  subtopic: datos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Cuándo tiene sentido elegir una base NoSQL sobre una relacional?
+  options:
+    - id: a
+      text: Cuando priorizas escala horizontal y un esquema flexible sobre
+        transacciones/JOINs complejos y garantías ACID fuertes
+    - id: b
+      text: Siempre, NoSQL es superior
+    - id: c
+      text: Nunca
+    - id: d
+      text: Solo para imágenes
+  correct: a
+  explanation: NoSQL (documentos, clave-valor, columnar) brilla en escala,
+    flexibilidad de esquema y ciertos patrones de acceso; las relacionales ganan
+    en integridad referencial, transacciones y consultas ad hoc. Es una decisión
+    por caso, no de moda.
+  source: externa
+  date: 2026-07-14
+- id: aps-023
+  dimension: ai-product-system-design
+  subtopic: caching
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En el patrón de caché 'cache-aside', ¿cómo se sirve un dato?
+  options:
+    - id: a
+      text: La app mira la caché; si falla (miss), lee de la BD, guarda en caché y
+        responde
+    - id: b
+      text: Siempre lee de la BD
+    - id: c
+      text: La caché escribe sola en la BD
+    - id: d
+      text: No se usa BD
+  correct: a
+  explanation: "Cache-aside (lazy loading): la aplicación gestiona la caché; en un
+    miss va a la BD y rellena la caché para próximas lecturas. Requiere una
+    estrategia de invalidación/TTL para no servir datos rancios."
+  source: externa
+  date: 2026-07-14
+- id: aps-024
+  dimension: ai-product-system-design
+  subtopic: caching
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: Al expirar una clave muy popular, muchas peticiones simultáneas van a la
+    BD a la vez (cache stampede / thundering herd). ¿Qué lo mitiga?
+  options:
+    - id: a
+      text: Un lock/single-flight para que solo una regenere el valor, más expiración
+        con jitter y/o refresco anticipado (stale-while-revalidate)
+    - id: b
+      text: Quitar la caché
+    - id: c
+      text: Bajar el TTL a cero
+    - id: d
+      text: Añadir más claves
+  correct: a
+  explanation: El stampede ocurre cuando expira una clave caliente y todas las
+    peticiones recalculan a la vez. Se ataca con single-flight (una sola
+    regeneración), TTL con jitter para desincronizar expiraciones y servir el
+    valor viejo mientras se revalida.
+  source: externa
+  date: 2026-07-14
+- id: aps-025
+  dimension: ai-product-system-design
+  subtopic: resiliencia
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al reintentar llamadas a un servicio que falla, ¿por qué usar backoff
+    exponencial CON jitter?
+  options:
+    - id: a
+      text: El backoff evita martillear el servicio y el jitter (aleatoriedad)
+        desincroniza los reintentos para no crear picos coordinados
+    - id: b
+      text: Para reintentar más rápido siempre
+    - id: c
+      text: Para cifrar la petición
+    - id: d
+      text: No aporta nada
+  correct: a
+  explanation: Reintentar de inmediato agrava la caída; el backoff exponencial
+    espaciar los intentos, y el jitter evita que todos los clientes reintenten a
+    la vez (efecto manada) creando nuevos picos sincronizados.
+  source: externa
+  date: 2026-07-14
+- id: aps-026
+  dimension: ai-product-system-design
+  subtopic: resiliencia
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué hace un 'circuit breaker' (cortacircuitos) entre servicios?
+  options:
+    - id: a
+      text: Tras muchos fallos, 'abre' el circuito y falla rápido sin llamar al
+        servicio caído, dándole tiempo a recuperarse
+    - id: b
+      text: Reintenta infinitamente
+    - id: c
+      text: Cifra el tráfico
+    - id: d
+      text: Balancea carga
+  correct: a
+  explanation: El circuit breaker detecta un umbral de fallos y deja de reenviar
+    peticiones al servicio dañado (falla rápido, evita agotar recursos y da
+    margen de recuperación); pasado un tiempo prueba de nuevo (half-open).
+  source: externa
+  date: 2026-07-14
+- id: aps-027
+  dimension: ai-product-system-design
+  subtopic: datos
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Qué problema resuelve el hashing consistente (consistent hashing)?
+  options:
+    - id: a
+      text: Minimiza cuántas claves se remapean al añadir/quitar nodos (p. ej. en un
+        cluster de caché), evitando un rehash masivo
+    - id: b
+      text: Cifra las claves
+    - id: c
+      text: Comprime datos
+    - id: d
+      text: Ordena alfabéticamente
+  correct: a
+  explanation: Con hashing módulo-N, cambiar N remapea casi todas las claves. El
+    consistent hashing coloca nodos y claves en un anillo, de modo que al
+    añadir/quitar un nodo solo se mueve una fracción de las claves. Base de
+    cachés y datastores distribuidos.
+  source: externa
+  date: 2026-07-14
+- id: aps-028
+  dimension: ai-product-system-design
+  subtopic: api
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué ventaja tiene la paginación por cursor frente a la de offset
+    (LIMIT/OFFSET) en listas grandes?
+  options:
+    - id: a
+      text: Es estable y eficiente aunque se inserten/borren filas y en offsets
+        grandes; offset se degrada y puede saltarse o repetir elementos
+    - id: b
+      text: El cursor es siempre más lento
+    - id: c
+      text: Son idénticas
+    - id: d
+      text: Offset no existe
+  correct: a
+  explanation: OFFSET grande obliga a la BD a recorrer y descartar muchas filas
+    (lento) y, si los datos cambian, salta/duplica registros. El cursor (keyset,
+    'dame lo posterior a X') es estable y usa el índice eficientemente.
+  source: externa
+  date: 2026-07-14
+- id: aps-029
+  dimension: ai-product-system-design
+  subtopic: realtime
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Para enviar actualizaciones del servidor al cliente en tiempo casi real y
+    UNIdireccional (p. ej. tokens de un LLM), ¿qué encaja mejor?
+  options:
+    - id: a
+      text: "Server-Sent Events (SSE): flujo unidireccional servidor→cliente sobre
+        HTTP, simple; WebSocket sería para bidireccional"
+    - id: b
+      text: Polling cada minuto
+    - id: c
+      text: Un cron job
+    - id: d
+      text: FTP
+  correct: a
+  explanation: SSE da streaming unidireccional sencillo (ideal para streaming de
+    tokens o notificaciones). WebSocket aporta bidireccionalidad (chat en vivo,
+    colaboración) a cambio de más complejidad; el polling es el último recurso.
+  source: externa
+  date: 2026-07-14
+- id: aps-030
+  dimension: ai-product-system-design
+  subtopic: resiliencia
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: En sistemas distribuidos, 'exactly-once delivery' es casi un mito. ¿Cuál
+    es el enfoque práctico?
+  options:
+    - id: a
+      text: Entrega 'at-least-once' + operaciones IDEMPOTENTES (o deduplicación por
+        id), logrando un efecto 'exactly-once' a nivel de procesamiento
+    - id: b
+      text: Confiar en que la red nunca duplica
+    - id: c
+      text: Reintentar hasta que no falle
+    - id: d
+      text: Enviar cada mensaje una sola vez sin ack
+  correct: a
+  explanation: Garantizar entrega exacta a través de una red poco fiable es
+    inviable; se combina at-least-once (con reintentos/acks) con consumidores
+    idempotentes o deduplicación por id, de modo que reprocesar no cambia el
+    resultado.
+  source: externa
+  date: 2026-07-14
+- id: aps-031
+  dimension: ai-product-system-design
+  subtopic: observabilidad
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Los 'tres pilares' de la observabilidad son logs, métricas y trazas. ¿Qué
+    aportan las TRAZAS distribuidas?
+  options:
+    - id: a
+      text: Seguir una petición a través de múltiples servicios (con spans y un trace
+        id) para localizar dónde se va el tiempo o falla
+    - id: b
+      text: Contar errores por minuto
+    - id: c
+      text: Guardar texto libre de eventos
+    - id: d
+      text: Cifrar los logs
+  correct: a
+  explanation: Las métricas agregan (tasas, latencias), los logs registran eventos
+    puntuales, y las trazas reconstruyen el recorrido de una petición entre
+    servicios (spans + trace id), esenciales para depurar latencia/errores en
+    microservicios.
+  source: externa
+  date: 2026-07-14
+- id: aps-032
+  dimension: ai-product-system-design
+  subtopic: fiabilidad
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué diferencia hay entre SLI, SLO y SLA?
+  options:
+    - id: a
+      text: SLI es la métrica medida (p. ej. % de peticiones <300ms), SLO el objetivo
+        interno sobre ese SLI, y SLA el compromiso contractual con el cliente
+        (con penalización)
+    - id: b
+      text: Son sinónimos
+    - id: c
+      text: El SLA es una métrica y el SLI un contrato
+    - id: d
+      text: Solo aplican a bases de datos
+  correct: a
+  explanation: SLI = indicador medido; SLO = objetivo que te pones sobre ese
+    indicador; SLA = promesa externa (contractual) normalmente más laxa que el
+    SLO, con consecuencias si se incumple. El error budget sale del SLO.
+  source: externa
+  date: 2026-07-14
+- id: aps-033
+  dimension: ai-product-system-design
+  subtopic: despliegue
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿En qué se diferencia un despliegue canary de un blue-green?
+  options:
+    - id: a
+      text: Canary manda a la nueva versión un pequeño % de tráfico y lo sube si va
+        bien; blue-green cambia todo el tráfico de golpe entre dos entornos
+        idénticos
+    - id: b
+      text: Son lo mismo
+    - id: c
+      text: Canary no permite rollback
+    - id: d
+      text: Blue-green es gradual y canary instantáneo
+  correct: a
+  explanation: Canary reduce riesgo exponiendo la nueva versión a una fracción
+    creciente de usuarios (observando métricas); blue-green mantiene dos
+    entornos y conmuta el tráfico completo (rollback rápido volviendo al
+    anterior).
+  source: externa
+  date: 2026-07-14
+- id: aps-034
+  dimension: ai-product-system-design
+  subtopic: resiliencia
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es la 'backpressure' (contrapresión) y por qué importa en un sistema
+    con colas/streams?
+  options:
+    - id: a
+      text: Un mecanismo por el que un consumidor lento comunica/limita el ritmo del
+        productor para no desbordarse (buffers, pausa, rechazo), evitando el
+        colapso por acumulación
+    - id: b
+      text: Aumentar la presión sobre el consumidor
+    - id: c
+      text: Cifrar la cola
+    - id: d
+      text: Duplicar mensajes
+  correct: a
+  explanation: Si el productor va más rápido que el consumidor, sin backpressure
+    la memoria/cola crece hasta reventar. La contrapresión regula el flujo
+    (limitando el productor, aplicando buffers acotados o descartando),
+    manteniendo el sistema estable bajo carga.
+  source: externa
+  date: 2026-07-14
+- id: aps-035
+  dimension: ai-product-system-design
+  subtopic: consistencia
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: PACELC extiende CAP. ¿Qué añade?
+  options:
+    - id: a
+      text: Que incluso SIN partición (Else) hay un trade-off entre Latencia y
+        Consistencia, no solo entre C y A durante una partición
+    - id: b
+      text: Que CAP estaba equivocado
+    - id: c
+      text: Que la disponibilidad no importa
+    - id: d
+      text: Que no hay trade-offs
+  correct: a
+  explanation: "PACELC: si hay Partición (P) eliges entre Disponibilidad y
+    Consistencia (como CAP); en caso contrario (E, Else) sigues eligiendo entre
+    Latencia y Consistencia. Capta que replicar fuerte cuesta latencia aun sin
+    fallos de red."
+  source: externa
+  date: 2026-07-14
+- id: aps-036
+  dimension: ai-product-system-design
+  subtopic: datos
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "Una tabla particionada por 'país' concentra el 80% del tráfico en un
+    país: un shard va saturado y el resto ocioso. ¿Qué nombre tiene y cómo se
+    ataca?"
+  options:
+    - id: a
+      text: Hot partition; se ataca eligiendo una shard key de mayor
+        cardinalidad/uniforme (o compuesta) que reparta mejor la carga
+    - id: b
+      text: Es normal y no se toca
+    - id: c
+      text: Data leakage
+    - id: d
+      text: Overfitting
+  correct: a
+  explanation: Una shard key con distribución desigual crea particiones calientes.
+    Se rediseña la clave hacia una más uniforme (hash, clave compuesta, o
+    separar el tenant grande), para repartir carga y almacenamiento
+    equilibradamente.
+  source: externa
+  date: 2026-07-14
+- id: aps-037
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Cuándo es mejor NO usar un LLM y resolver con lógica determinista?
+  options:
+    - id: a
+      text: "Cuando la tarea es determinista y bien definida (validar un formato,
+        calcular, aplicar una regla): un LLM añade coste, latencia y
+        variabilidad innecesarios"
+    - id: b
+      text: Nunca, siempre conviene un LLM
+    - id: c
+      text: Solo si no hay presupuesto
+    - id: d
+      text: Cuando la tarea es creativa
+  correct: a
+  explanation: Un LLM aporta donde hay ambigüedad/lenguaje natural; para reglas
+    deterministas (regex, validación, cálculo) el código normal es más barato,
+    más rápido y fiable. Elegir la herramienta adecuada es parte del diseño.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-038
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué implica un desarrollo 'eval-driven' de una feature de IA?
+  options:
+    - id: a
+      text: Definir primero un conjunto de evaluación y métricas de 'correcto', e
+        iterar prompt/modelo midiendo contra él en vez de por impresión
+    - id: b
+      text: Desplegar y ver qué pasa
+    - id: c
+      text: No medir nada
+    - id: d
+      text: Escribir solo tests unitarios del código
+  correct: a
+  explanation: "Igual que TDD guía el código, el eval-driven guía la IA: un
+    dataset de evaluación con criterios objetivos permite iterar sin regresiones
+    y comparar cambios de prompt/modelo con datos, no con sensaciones."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-039
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es una 'caché semántica' de respuestas de LLM y qué la diferencia de
+    una caché exacta?
+  options:
+    - id: a
+      text: Cachea por SIMILITUD de significado de la consulta (vía embeddings),
+        sirviendo respuestas a preguntas parecidas, no solo idénticas
+    - id: b
+      text: Cachea solo strings exactos
+    - id: c
+      text: Es lo mismo que un CDN
+    - id: d
+      text: No existe
+  correct: a
+  explanation: Una caché exacta solo acierta con la misma clave literal; la
+    semántica embebe la consulta y sirve la respuesta si hay una consulta previa
+    suficientemente similar (umbral de distancia), ahorrando llamadas en
+    preguntas reformuladas. Cuidado con falsos positivos.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-040
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué prever un modelo de 'fallback' o degradación elegante en una
+    feature con LLM?
+  options:
+    - id: a
+      text: Si el proveedor falla, va lento o supera un límite, se puede degradar
+        (modelo alterno, respuesta cacheada o camino sin IA) sin tirar el
+        producto
+    - id: b
+      text: Para gastar más
+    - id: c
+      text: Porque los LLM nunca fallan
+    - id: d
+      text: Para desactivar los logs
+  correct: a
+  explanation: Los proveedores de LLM tienen caídas, límites de rate y picos de
+    latencia. Un fallback (otro modelo, cache, o una respuesta reducida)
+    mantiene el producto funcionando de forma degradada en vez de romperse.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-041
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué versionar los prompts junto al código?
+  options:
+    - id: a
+      text: Para reproducir el comportamiento pasado, comparar versiones con evals y
+        hacer rollback; el prompt es parte del artefacto que define la salida
+    - id: b
+      text: Para ocupar más disco
+    - id: c
+      text: Porque los prompts no cambian nunca
+    - id: d
+      text: Para cifrarlos
+  correct: a
+  explanation: Un cambio de prompt cambia el comportamiento tanto como un cambio
+    de código. Versionarlo (y ligarlo a sus evals) permite reproducir, auditar,
+    comparar y revertir, en vez de tener 'prompts mágicos' sueltos.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-042
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: Una tarea con LLM tarda 40s y el usuario espera en una request HTTP. ¿Qué
+    patrón encaja mejor?
+  options:
+    - id: a
+      text: "Procesarla de forma asíncrona: encolar el trabajo, responder 202 con un
+        id, y notificar por webhook/polling/stream cuando esté lista"
+    - id: b
+      text: Mantener la request HTTP abierta 40s
+    - id: c
+      text: Subir el timeout a 5 minutos
+    - id: d
+      text: Reintentar la request cada segundo
+  correct: a
+  explanation: "Bloquear una request 40s agota conexiones y da mala UX/timeouts.
+    Se desacopla: encolar el trabajo (worker), devolver de inmediato un id, y
+    entregar el resultado por webhook, polling o streaming. Escala y resiste
+    picos."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-043
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: Para servir un feature con LLM a gran escala con coste y latencia bajo
+    control, ¿qué combinación es la sensata?
+  options:
+    - id: a
+      text: Routing por dificultad (modelo pequeño para lo fácil), caché
+        (exacta/semántica), batching donde aplique, límites/cuotas y un
+        presupuesto de tokens monitorizado
+    - id: b
+      text: Usar siempre el modelo más grande para todo
+    - id: c
+      text: Quitar toda la observabilidad
+    - id: d
+      text: Un único prompt gigante para todo
+  correct: a
+  explanation: "A escala, el coste/latencia se gestiona con varias palancas a la
+    vez: enrutar por dificultad, cachear, batching, imponer cuotas/rate limits y
+    vigilar el gasto de tokens por endpoint. No hay bala de plata; se compone y
+    se mide."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-044
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Sobre datos sensibles y LLMs de terceros, ¿qué práctica es correcta?
+  options:
+    - id: a
+      text: Minimizar/enmascarar PII y secretos antes de enviarlos al modelo, y
+        respetar las políticas de retención/uso de datos del proveedor
+    - id: b
+      text: Enviar todo tal cual, da igual
+    - id: c
+      text: Mandar las claves de API en el prompt
+    - id: d
+      text: Desactivar el cifrado
+  correct: a
+  explanation: Lo que mandas a un proveedor externo sale de tu perímetro. Se
+    minimiza y enmascara PII/secretos, se revisan las políticas de retención y,
+    para datos muy sensibles, se valora un modelo self-hosted o un guardrail de
+    entrada.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-045
+  dimension: ai-product-system-design
+  subtopic: producto
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Quieres añadir 'resumen inteligente' a tu producto. ¿Cuál es el primer
+    paso de producto más sensato?
+  options:
+    - id: a
+      text: Definir qué problema del usuario resuelve y cómo medirás su valor, y
+        validar con un MVP barato (prompt sobre un modelo existente) antes de
+        fine-tuning o infra pesada
+    - id: b
+      text: Entrenar un modelo propio desde cero ya
+    - id: c
+      text: Montar un cluster de GPUs primero
+    - id: d
+      text: Añadirlo porque está de moda
+  correct: a
+  explanation: "Product sense: empezar por el problema y la métrica de valor, y
+    validar con el MVP más barato (prompt + modelo existente). Fine-tuning o
+    infra propia solo si los datos y el retorno lo justifican; evitar
+    sobre-ingeniería."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-046
+  dimension: ai-product-system-design
+  subtopic: producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué definir una 'north-star metric' antes de lanzar una feature de IA?
+  options:
+    - id: a
+      text: Para saber si aporta valor real al usuario/negocio y decidir con datos si
+        iterar, mantener o retirar, en vez de por percepción
+    - id: b
+      text: Para tener más dashboards
+    - id: c
+      text: Porque lo exige la ley
+    - id: d
+      text: No hace falta medir
+  correct: a
+  explanation: Sin una métrica que capture el valor (adopción, tiempo ahorrado,
+    conversión, satisfacción), no puedes saber si la feature funciona ni
+    priorizar. La métrica guía la iteración y evita mantener features que no
+    mueven nada.
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-047
+  dimension: ai-product-system-design
+  subtopic: system-design
+  difficulty: medium
+  type: diagrama
+  roles: *a1
+  stem: |-
+    Servicio con picos de tráfico que tumban el procesamiento síncrono:
+
+      clientes -> API -> [ procesamiento pesado síncrono ] -> respuesta
+
+    ¿Qué introduces para absorber los picos y desacoplar?
+  options:
+    - id: a
+      text: "Una cola entre la API y unos workers: la API encola y responde rápido;
+        los workers procesan a su ritmo (con backpressure)"
+    - id: b
+      text: Más CSS
+    - id: c
+      text: Un segundo dominio
+    - id: d
+      text: Quitar la API
+  correct: a
+  explanation: "Una cola de mensajes desacopla recepción de procesamiento: la API
+    encola y contesta al instante, y un pool de workers consume a su ritmo,
+    absorbiendo ráfagas y aportando reintentos y backpressure."
+  source: externa
+  date: 2026-07-14
+- id: aps-048
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: diagrama
+  roles: *a1
+  stem: >-
+    Pipeline de un endpoint con LLM (falta el paso ? antes de responder):
+
+      entrada del usuario -> prompt + LLM -> salida cruda -> [ ? ] -> respuesta al usuario
+
+    ¿Qué va en [ ? ]?
+  options:
+    - id: a
+      text: "Un guardrail: validar/estructurar la salida (schema, políticas) y reparar
+        o rechazar si no cumple, antes de entregarla"
+    - id: b
+      text: Reentrenar el modelo
+    - id: c
+      text: Borrar la entrada
+    - id: d
+      text: Subir la temperature
+  correct: a
+  explanation: "Entre la salida cruda del modelo y el usuario/sistema aguas abajo
+    va un guardrail determinista: valida contra el schema y las políticas, y
+    repara/reintenta/rechaza lo que no cumple. Acota el no-determinismo del
+    LLM."
+  source: bootcamp-ml-llm
+  date: 2026-07-14
+- id: aps-049
+  dimension: ai-product-system-design
+  subtopic: resiliencia
+  difficulty: experto
+  type: codigo
+  roles: *a1
+  stem: |-
+    for (let i = 0; i < 5; i++) {
+      try { return await call(); }
+      catch { await sleep(1000); }   // espera fija de 1s
+    }
+
+    ¿Qué problema tiene esta lógica de reintentos?
+  options:
+    - id: a
+      text: "Espera fija sin backoff exponencial ni jitter: bajo un fallo masivo todos
+        los clientes reintentan a la vez y sincronizados, agravando la caída"
+    - id: b
+      text: Reintenta demasiado despacio
+    - id: c
+      text: No tiene ningún problema
+    - id: d
+      text: Falta cifrar la llamada
+  correct: a
+  explanation: Una espera fija no da tiempo creciente de recuperación y, peor,
+    sincroniza los reintentos de todos los clientes (efecto manada). Se corrige
+    con backoff exponencial (1s, 2s, 4s...) más jitter aleatorio, y un tope de
+    intentos.
+  source: externa
+  date: 2026-07-14
+- id: aps-050
+  dimension: ai-product-system-design
+  subtopic: ai-producto
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un asistente con LLM va a ejecutar acciones de alto impacto e
+    irreversibles (p. ej. emitir reembolsos). ¿Qué diseño es prudente?
+  options:
+    - id: a
+      text: "Human-in-the-loop: el LLM propone y una persona aprueba antes de ejecutar
+        las acciones críticas (con guardrails y auditoría)"
+    - id: b
+      text: Dejar que el LLM ejecute todo automáticamente
+    - id: c
+      text: Subir la temperature para más creatividad
+    - id: d
+      text: Quitar los logs para ir más rápido
+  correct: a
+  explanation: "En decisiones de alto impacto o irreversibles, el coste de un
+    error del modelo supera el de la revisión: el LLM propone y un humano
+    aprueba (cola de revisión), con guardrails y auditoría. La autonomía total
+    se reserva a lo de bajo riesgo."
   source: bootcamp-ml-llm
   date: 2026-07-14
