@@ -32,7 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Al terminar la sesión, Carlos ve un desglose de resultado por dimensión con el N (número de preguntas) junto a cada score — nunca un score único agregado.
   4. El pack de contenido (banco de preguntas + metadata: tema, subtema, dificultad, rol, fuente, fecha) vive en ficheros YAML/JSON fuera del código, y un validador rechaza el pack antes de poder usarse en una sesión si falta metadata obligatoria o respuesta correcta.
   5. La selección de preguntas de la sesión reparte de forma equilibrada por dimensión, evitando que alguna dimensión quede con muestra insuficiente.
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 01-01-PLAN.md — Andamiaje ESM + contrato zod del pack + PRNG determinista (wave 1)
+- [ ] 01-02-PLAN.md — Cargador + validador de contenido (YAML+zod, fail-fast) + fixtures (wave 2)
+- [ ] 01-03-PLAN.md — Motor de scoring puro + motor de sesión (selección equilibrada + navegación) (wave 2)
+- [ ] 01-04-PLAN.md — Pack real v1 (2 dimensiones, ≥24-30 preguntas reales) (wave 3)
+- [ ] 01-05-PLAN.md — CLI end-to-end: runner select navegable + render con N + subcomando start (wave 3)
 
 ### Phase 2: Banco completo desde bootcamp-ml-llm
 **Goal**: Carlos puede completar una sesión real y sustancial que cubre de verdad las 5 dimensiones objetivo, sobre un banco curado y anclado a fuentes externas, con preguntas que rotan entre intentos para mitigar la memorización.
@@ -95,7 +100,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Fundamento end-to-end | 0/TBD | Not started | - |
+| 1. Fundamento end-to-end | 0/5 | Not started | - |
 | 2. Banco completo desde bootcamp-ml-llm | 0/TBD | Not started | - |
 | 3. Confianza y calibración | 0/TBD | Not started | - |
 | 4. Readiness por rol con baselines ancladas | 0/TBD | Not started | - |
