@@ -6,14 +6,14 @@ current_phase: 1
 current_phase_name: Fundamento end-to-end
 status: executing
 stopped_at: ROADMAP.md y STATE.md creados; REQUIREMENTS.md traceability actualizada
-last_updated: "2026-07-14T17:00:00.179Z"
+last_updated: "2026-07-14T17:04:44.848Z"
 last_activity: 2026-07-14
 last_activity_desc: Completado 01-01 (andamiaje ESM + schema.ts + random.ts)
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 1 of 6 (Fundamento end-to-end)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: Ready to execute
 Last activity: 2026-07-14 — Completado 01-01 (andamiaje ESM + schema.ts + random.ts)
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 22min | 2 tasks | 9 files |
+| Phase 01 P02 | 18min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Integración con jobhunt (INTEG-01) queda como Fase 6, opcional y aditiva — el sistema es completo y útil sin ella.
 - [Phase ?]: typescript fijado a ^6.0.3 (red de seguridad prevista): typescript-eslint@8 no soporta el peer range de TS7, ERESOLVE resuelto sin bloquear el andamiaje
 - [Phase ?]: dimension en QuestionSchema es z.string() (cadena libre), unico z.enum permitido es difficulty, cumple ENG-04
+- [Phase ?]: Fixtures inválidas autocontenidas (pack+questions en un único YAML) para poder invocar loadPack(ruta,ruta) en tests
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-14T16:59:47.455Z
+Last session: 2026-07-14T17:04:26.803Z
 Stopped at: ROADMAP.md y STATE.md creados; REQUIREMENTS.md traceability actualizada
 Resume file: None

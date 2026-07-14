@@ -13,9 +13,9 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 ### Content (packs de conocimiento)
 
-- [ ] **CONT-01**: Un pack se define en ficheros de datos (YAML/JSON) fuera del código: banco de preguntas + baselines + arquetipos de rol.
+- [x] **CONT-01**: Un pack se define en ficheros de datos (YAML/JSON) fuera del código: banco de preguntas + baselines + arquetipos de rol.
 - [x] **CONT-02**: Cada pregunta tiene: enunciado, opciones select, respuesta(s) correcta(s), explicación, y metadata (tema, subtema, dificultad, rol, fuente, fecha).
-- [ ] **CONT-03**: Un validador comprueba la integridad del pack (schema, respuesta correcta presente, metadata obligatoria) antes de usarlo.
+- [x] **CONT-03**: Un validador comprueba la integridad del pack (schema, respuesta correcta presente, metadata obligatoria) antes de usarlo.
 - [ ] **CONT-04**: El pack v1 (readiness AI/ML) se cura a partir de `bootcamp-ml-llm` (bootcampLLMs.md, ordered-answers, module_maps.json) + fuentes externas, cubriendo LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design y comportamental (STAR).
 - [ ] **CONT-05**: Las baselines por rol/nivel se anclan a fuentes externas (competency frameworks, job postings), no solo a la opinión del curador.
 
@@ -59,9 +59,9 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 | ENG-01 | Phase 1 | Pending |
 | ENG-02 | Phase 1 | Pending |
 | ENG-04 | Phase 1 | Complete |
-| CONT-01 | Phase 1 | Pending |
+| CONT-01 | Phase 1 | Complete |
 | CONT-02 | Phase 1 | Complete |
-| CONT-03 | Phase 1 | Pending |
+| CONT-03 | Phase 1 | Complete |
 | SESS-01 | Phase 1 | Pending |
 | SESS-02 | Phase 1 | Pending |
 | RES-01 | Phase 1 | Pending |
