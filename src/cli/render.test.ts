@@ -4,12 +4,14 @@ import {
   renderCalibration,
   renderReadiness,
   renderGaps,
+  renderWeightedGaps,
   renderEvolution,
 } from "./render.js";
 import type { ScoreResult } from "../core/scoring.js";
 import type { CalibrationResult } from "../core/calibration.js";
 import type { RoleReadiness, Gap } from "../core/readiness.js";
 import type { EvolutionReport } from "../core/evolution.js";
+import type { MarketDemand, WeightedGap } from "../core/market.js";
 
 // Fixture de ScoreResult (nombres de dimensión genéricos: el render no conoce
 // el dominio). Incluye una dimensión sin responder para el caso borde de N=0.
@@ -161,6 +163,31 @@ describe("renderGaps", () => {
   it("sin gaps devuelve un mensaje claro", () => {
     const out = renderGaps([]);
     expect(out).toMatch(/sin gaps mayores/i);
+  });
+});
+
+const WEIGHTED: WeightedGap[] = [
+  { dimension: "llm-rag-evals", answered: 5, correct: 1, accuracy: 0.2, study: "Repasa m1-m3.", demandJobs: 180, demandShare: 0.45, priority: 1.16 },
+  { dimension: "ml-clasico", answered: 5, correct: 2, accuracy: 0.4, study: "Repasa m0.", demandJobs: 40, demandShare: 0.1, priority: 0.66 },
+];
+const DEMAND: MarketDemand = { totalJobs: 400, byDimension: { "llm-rag-evals": 180, "ml-clasico": 40 } };
+
+describe("renderWeightedGaps", () => {
+  it("muestra el gap con su acierto y la demanda de mercado (ofertas), más el plan", () => {
+    const out = renderWeightedGaps(WEIGHTED, DEMAND);
+    expect(out).toMatch(/te falta llm-rag-evals/i);
+    expect(out).toContain("180/400"); // demanda de mercado
+    expect(out).toContain("Repasa m1-m3.");
+    expect(out).toMatch(/demanda de mercado/i);
+  });
+
+  it("no muestra un score de encaje/empleabilidad, solo las señales y el orden", () => {
+    const out = renderWeightedGaps(WEIGHTED, DEMAND);
+    expect(out).not.toMatch(/encaje|empleab|probabilidad de contrataci|índice/i);
+  });
+
+  it("sin gaps devuelve el mismo mensaje claro", () => {
+    expect(renderWeightedGaps([], DEMAND)).toMatch(/sin gaps mayores/i);
   });
 });
 

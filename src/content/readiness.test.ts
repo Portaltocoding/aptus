@@ -25,6 +25,17 @@ describe("loadReadiness", () => {
     }
   });
 
+  it("declara keywords de mercado para cada dimensión núcleo (Phase 6)", () => {
+    const cfg = loadReadiness(REAL_READINESS);
+    expect(cfg.market_keywords).toBeDefined();
+    const dims = new Set(cfg.roles.flatMap((r) => r.core));
+    for (const dim of dims) {
+      const kws = cfg.market_keywords![dim];
+      expect(kws, `dimensión '${dim}' sin keywords de mercado`).toBeDefined();
+      expect(kws!.length).toBeGreaterThan(0);
+    }
+  });
+
   it("los umbrales por nivel suben con la dificultad (junior <= mid <= senior)", () => {
     const cfg = loadReadiness(REAL_READINESS);
     const byId = new Map(cfg.levels.map((l) => [l.id, l]));
