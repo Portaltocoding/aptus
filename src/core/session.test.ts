@@ -172,8 +172,20 @@ describe("navegación de sesión (buildSession + transiciones)", () => {
     const answered = toAnswered(state);
 
     expect(answered).toHaveLength(3);
-    expect(answered[0]).toEqual({ questionId: selected[0]!.id, selectedOptionId: "a" });
-    expect(answered[1]).toEqual({ questionId: selected[1]!.id, selectedOptionId: null });
-    expect(answered[2]).toEqual({ questionId: selected[2]!.id, selectedOptionId: "b" });
+    expect(answered[0]).toEqual({
+      questionId: selected[0]!.id,
+      selectedOptionId: "a",
+      confidence: null,
+    });
+    expect(answered[1]).toEqual({
+      questionId: selected[1]!.id,
+      selectedOptionId: null,
+      confidence: null,
+    });
+    expect(answered[2]).toEqual({
+      questionId: selected[2]!.id,
+      selectedOptionId: "b",
+      confidence: null,
+    });
   });
 });

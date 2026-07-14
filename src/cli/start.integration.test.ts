@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import { loadPack } from "../content/loader.js";
 import { selectBalanced } from "../core/session.js";
 import { makeSeededShuffle } from "../core/random.js";
-import { score, type AnsweredQuestion } from "../core/scoring.js";
-import { renderResult } from "./render.js";
+import { score, type AnsweredQuestion, type Confidence } from "../core/scoring.js";
+import { calibration } from "../core/calibration.js";
+import { renderResult, renderCalibration } from "./render.js";
+
+const CONF_CYCLE: Confidence[] = ["alta", "media", "baja"];
 
 // Smoke NO interactivo: ejercita el camino end-to-end motor+contenido+render sin
 // `@inquirer` (la interactividad viva del select se verifica manualmente en UAT).
@@ -16,10 +19,11 @@ describe("start end-to-end (smoke no interactivo)", () => {
     const pack = loadPack(MINI_PACK_YAML, MINI_PACK_QUESTIONS);
     const selected = selectBalanced(pack.questions, 20, 8, makeSeededShuffle(123));
 
-    // Respuestas deterministas: contestar todo eligiendo la primera opción.
-    const answered: AnsweredQuestion[] = selected.map((q) => ({
+    // Respuestas deterministas: primera opción, con confianza rotando por índice.
+    const answered: AnsweredQuestion[] = selected.map((q, i) => ({
       questionId: q.id,
       selectedOptionId: q.options[0]!.id,
+      confidence: CONF_CYCLE[i % CONF_CYCLE.length]!,
     }));
 
     const result = score(answered, selected);
@@ -34,6 +38,12 @@ describe("start end-to-end (smoke no interactivo)", () => {
     expect((output.match(/%/g) ?? []).length).toBe(result.byDimension.length);
     // Nunca un score agregado tipo empleabilidad / probabilidad de contratación.
     expect(output).not.toMatch(/overall|agregad|empleab|global|hire|probabilidad de contrataci/i);
+
+    // La calibración (confianza-vs-acierto) se compone end-to-end con los mismos datos.
+    const calibOut = renderCalibration(calibration(answered, selected));
+    expect(calibOut).toMatch(/confianza declarada vs acierto real/i);
+    expect(calibOut).toContain("Alta");
+    expect(calibOut).not.toMatch(/empleab|probabilidad de contrataci/i);
   });
 
   it("la selección equilibrada cubre ambas dimensiones del fixture", () => {
