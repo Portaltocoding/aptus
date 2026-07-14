@@ -73,3 +73,14 @@ study:
   ai-product-system-design: "Repasa m4-m7 y m11 del bootcamp-ml-llm (agent vs workflow, coste/latencia, evals como contrato, influir sin autoridad); para lo canónico, el System Design Primer."
   comportamental-star: "Prepara 4-5 historias STAR versátiles (conflicto, fracaso, liderazgo sin autoridad, impacto) con Resultado cuantificado; base en m12 del bootcamp."
   fullstack-next-nest-ts: "Docs oficiales: Next.js (App Router/RSC/Server Actions), NestJS (providers/guards/pipes/DTO con class-validator) y el TypeScript Handbook (unknown, satisfies, discriminated unions)."
+
+# Palabras clave por dimensión para medir la demanda de mercado (Phase 6, INTEG-01):
+# se buscan (case-insensitive, ES+EN) en el texto de las ofertas escaneadas por
+# jobhunt para ponderar la PRIORIDAD de los gaps. No genera ningún score de encaje;
+# solo reordena los gaps ya calculados. Es opcional: si falta, no hay ponderación.
+market_keywords:
+  llm-rag-evals: ["llm", "rag", "retrieval", "embedding", "prompt", "gpt", "openai", "claude", "langchain", "llamaindex", "vector", "fine-tun", "genai", "generative ai", "ia generativa"]
+  ml-clasico: ["machine learning", "aprendizaje automático", "scikit", "regresión", "regression", "clasificación", "xgboost", "random forest", "pytorch", "tensorflow", "feature engineering", "estadística"]
+  fullstack-next-nest-ts: ["next.js", "nextjs", "react", "nestjs", "node.js", "nodejs", "typescript", "full stack", "fullstack", "full-stack", "frontend", "backend"]
+  ai-product-system-design: ["system design", "diseño de sistemas", "arquitectura", "microservic", "escalab", "scalab", "product", "producto", "roadmap", "stakeholder", "event-driven", "distributed"]
+  comportamental-star: ["comunicación", "communication", "liderazgo", "leadership", "trabajo en equipo", "teamwork", "soft skills", "colaborac", "mentor"]

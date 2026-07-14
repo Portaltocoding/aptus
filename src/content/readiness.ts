@@ -34,6 +34,8 @@ export const ReadinessConfigSchema = z.object({
   levels: z.array(LevelSchema).min(1),
   roles: z.array(RoleSchema).min(1),
   study: z.record(z.string(), z.string()),
+  // Opcional (Phase 6): keywords por dimensión para medir demanda de mercado.
+  market_keywords: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 export type ReadinessConfig = z.infer<typeof ReadinessConfigSchema>;

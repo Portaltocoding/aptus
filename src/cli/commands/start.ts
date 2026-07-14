@@ -1,20 +1,24 @@
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { loadPack } from "../../content/loader.js";
 import { loadReadiness } from "../../content/readiness.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
+import { loadJobTexts } from "../../content/jobhunt.js";
 import { selectBalanced } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
 import { calibration } from "../../core/calibration.js";
 import { computeReadiness, computeGaps } from "../../core/readiness.js";
 import { buildSessionRecord, evolution } from "../../core/evolution.js";
+import { computeDemand, applyMarketWeight } from "../../core/market.js";
 import { runSession } from "../runner.js";
 import {
   renderResult,
   renderCalibration,
   renderReadiness,
   renderGaps,
+  renderWeightedGaps,
   renderEvolution,
 } from "../render.js";
 
@@ -31,6 +35,10 @@ const PACK_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../pack
 
 // Store local del historial de sesiones (fuera del código, gitignored).
 const HISTORY_PATH = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/history.json");
+
+// Base de datos de jobhunt (solo lectura, opcional): si existe, pondera los gaps
+// por demanda de mercado; si no, Aptus funciona igual sin esa capa (INTEG-01).
+const JOBHUNT_DB_PATH = join(homedir(), "workspace", "jobhunt", "data", "jobs.db");
 
 /**
  * Compone el walking skeleton end-to-end: cargar pack real → seleccionar de
@@ -83,6 +91,16 @@ export async function startCommand(): Promise<void> {
   console.log("\n" + renderResult(result) + "\n");
   console.log(renderCalibration(calib) + "\n");
   console.log(renderReadiness(roles) + "\n");
-  console.log(renderGaps(gaps) + "\n");
+
+  // Gaps: si jobhunt está disponible, ponderar por demanda de mercado (INTEG-01);
+  // si no, mostrar los gaps sin ponderar (degradación elegante, sin error).
+  const jobTexts = loadJobTexts(JOBHUNT_DB_PATH);
+  if (jobTexts !== null && readinessCfg.market_keywords) {
+    const demand = computeDemand(jobTexts, readinessCfg.market_keywords);
+    console.log(renderWeightedGaps(applyMarketWeight(gaps, demand), demand) + "\n");
+  } else {
+    console.log(renderGaps(gaps) + "\n");
+  }
+
   console.log(renderEvolution(evolution(updatedHistory)) + "\n");
 }

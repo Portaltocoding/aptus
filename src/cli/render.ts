@@ -4,6 +4,7 @@ import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
 import type { Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
 import type { EvolutionReport } from "../core/evolution.js";
+import type { MarketDemand, WeightedGap } from "../core/market.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -149,6 +150,30 @@ export function renderGaps(gaps: Gap[]): string {
   });
 
   return "Gaps priorizados y plan de estudio:\n" + lines.join("\n");
+}
+
+/**
+ * Como renderGaps, pero cuando hay datos de jobhunt (Phase 6): reordena por
+ * debilidad × demanda de mercado y muestra en cuántas ofertas reales aparece cada
+ * dimensión. No es un score de encaje: son las dos señales (tu acierto y la
+ * demanda) a la vista, con el plan de estudio.
+ */
+export function renderWeightedGaps(gaps: WeightedGap[], demand: MarketDemand): string {
+  if (gaps.length === 0) {
+    return "Gaps: sin gaps mayores — todas las dimensiones respondidas están en 70% o más.";
+  }
+
+  const lines = gaps.map((g) => {
+    const head = pc.red(`te falta ${g.dimension}`);
+    const acc = `${Math.round(g.accuracy * 100)}% (${g.correct}/${g.answered})`;
+    const mercado = pc.cyan(`mercado: en ${g.demandJobs}/${demand.totalJobs} ofertas`);
+    return `  • ${head} — ${acc}  ·  ${mercado}\n    → ${g.study}`;
+  });
+
+  return (
+    `Gaps priorizados por debilidad × demanda de mercado (${demand.totalJobs} ofertas de jobhunt):\n` +
+    lines.join("\n")
+  );
 }
 
 function deltaCell(delta: number | null): string {
