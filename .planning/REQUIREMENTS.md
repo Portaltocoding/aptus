@@ -6,8 +6,8 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 ### Engine (motor genérico, agnóstico del contenido)
 
-- [ ] **ENG-01**: El motor de scoring es una función pura (sin I/O ni terminal), testeable con fixtures.
-- [ ] **ENG-02**: El motor calcula puntuación por dimensión y subtema a partir de respuestas correctas/incorrectas.
+- [x] **ENG-01**: El motor de scoring es una función pura (sin I/O ni terminal), testeable con fixtures.
+- [x] **ENG-02**: El motor calcula puntuación por dimensión y subtema a partir de respuestas correctas/incorrectas.
 - [ ] **ENG-03**: El motor mapea puntuaciones a readiness por arquetipo de rol (junior/mid/senior-ready) comparando contra la baseline del pack, con umbrales anclados a la dificultad etiquetada de las preguntas (no ajuste "a ojo").
 - [x] **ENG-04**: El motor es agnóstico del dominio: no contiene conocimiento hardcodeado; todo el contenido vive en el pack.
 
@@ -21,8 +21,8 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 ### Session (runner interactivo por terminal)
 
-- [ ] **SESS-01**: El usuario responde todas las preguntas con **select** (opción múltiple), navegable, en una sesión de **≥15 min**.
-- [ ] **SESS-02**: El motor de sesión selecciona preguntas equilibradas por dimensión y evita muestra insuficiente por dimensión.
+- [x] **SESS-01**: El usuario responde todas las preguntas con **select** (opción múltiple), navegable, en una sesión de **≥15 min**.
+- [x] **SESS-02**: El motor de sesión selecciona preguntas equilibradas por dimensión y evita muestra insuficiente por dimensión.
 - [ ] **SESS-03**: El usuario puede indicar su **confianza** por pregunta (para la curva confianza-vs-acierto que combate el autoengaño).
 - [ ] **SESS-04**: La sesión rota preguntas entre intentos para mitigar memorización.
 
@@ -56,14 +56,14 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENG-01 | Phase 1 | Pending |
-| ENG-02 | Phase 1 | Pending |
+| ENG-01 | Phase 1 | Complete |
+| ENG-02 | Phase 1 | Complete |
 | ENG-04 | Phase 1 | Complete |
 | CONT-01 | Phase 1 | Complete |
 | CONT-02 | Phase 1 | Complete |
 | CONT-03 | Phase 1 | Complete |
-| SESS-01 | Phase 1 | Pending |
-| SESS-02 | Phase 1 | Pending |
+| SESS-01 | Phase 1 | Complete |
+| SESS-02 | Phase 1 | Complete |
 | RES-01 | Phase 1 | Pending |
 | CONT-04 | Phase 2 | Pending |
 | SESS-04 | Phase 2 | Pending |
