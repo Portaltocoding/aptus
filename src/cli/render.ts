@@ -2,6 +2,7 @@ import Table from "cli-table3";
 import pc from "picocolors";
 import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
+import type { Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -73,4 +74,59 @@ export function renderCalibration(result: CalibrationResult): string {
   }
 
   return "Calibración (confianza declarada vs acierto real):\n" + table.toString();
+}
+
+function tierCell(t: TierAccuracy): string {
+  if (t.answered === 0) return "—"; // sin preguntas de este tramo: no evaluable
+  return `${Math.round(t.accuracy * 100)}% (${t.correct}/${t.answered})`;
+}
+
+function levelColor(levelId: string | null): (s: string) => string {
+  if (levelId === "senior") return pc.green;
+  if (levelId === "mid") return pc.cyan;
+  if (levelId === "junior") return pc.yellow;
+  return pc.red; // por debajo del primer nivel
+}
+
+/**
+ * Formatea el readiness POR ROL (RES-02): nivel alcanzado + evidencia por
+ * dificultad con su N. NUNCA un score único agregado de "empleabilidad": una fila
+ * por rol, cada una anclada a su desempeño real. Solo presenta; no calcula.
+ */
+export function renderReadiness(roles: RoleReadiness[]): string {
+  const table = new Table({
+    head: ["Rol", "Readiness", "Fácil", "Media", "Difícil", "N"],
+  });
+
+  for (const r of roles) {
+    const byTier = new Map(r.byDifficulty.map((t) => [t.difficulty, t]));
+    table.push([
+      r.label,
+      levelColor(r.levelId)(r.levelLabel),
+      tierCell(byTier.get("easy")!),
+      tierCell(byTier.get("medium")!),
+      tierCell(byTier.get("hard")!),
+      String(r.answered),
+    ]);
+  }
+
+  return "Readiness por rol (lectura orientativa, anclada a tu acierto por dificultad):\n" + table.toString();
+}
+
+/**
+ * Formatea los gaps priorizados y el plan de estudio (RES-03): "te falta X → haz
+ * Z", de la dimensión más débil a la menos. No es un ranking de empleabilidad.
+ */
+export function renderGaps(gaps: Gap[]): string {
+  if (gaps.length === 0) {
+    return "Gaps: sin gaps mayores — todas las dimensiones respondidas están en 70% o más.";
+  }
+
+  const lines = gaps.map((g) => {
+    const head = pc.red(`te falta ${g.dimension}`);
+    const acc = `${Math.round(g.accuracy * 100)}% (${g.correct}/${g.answered})`;
+    return `  • ${head} — ${acc}\n    → ${g.study}`;
+  });
+
+  return "Gaps priorizados y plan de estudio:\n" + lines.join("\n");
 }

@@ -1,0 +1,75 @@
+# Perfiles de rol y baselines de nivel para el readiness (Phase 4, ENG-03/CONT-05).
+#
+# ANCLAJE A FUENTES EXTERNAS (CONT-05), no a la opinión del curador:
+#   - Niveles (junior/mid/senior) anclados al alcance/autonomía/profundidad de los
+#     marcos de leveling de ingeniería (levels.fyi, em-tools.io, altexsoft): junior
+#     domina lo fundamental, mid diseña features completas, senior tiene profundidad.
+#     Se traduce a la DIFICULTAD etiquetada de las preguntas: la barra sube por tramo
+#     (easy→medium→hard) al subir de nivel. La ESTRUCTURA es el anclaje; los cortes
+#     numéricos son bandas convencionales, transparentes y editables aquí.
+#   - Perfiles de rol (qué dimensiones pesan por rol) anclados a descripciones de
+#     puesto y roadmaps 2026 (DataCamp/Scaler AI engineer, KDnuggets LLM engineer,
+#     doit.software ML engineer, min.io full-stack AI, zenvanriel AI product engineer).
+#
+# El motor NUNCA produce un score único de "empleabilidad": da readiness POR ROL,
+# con la evidencia (acierto por dificultad y su N) a la vista.
+
+version: "1.0.0"
+
+# Umbral mínimo de acierto por tramo de dificultad para considerarse "listo" a cada
+# nivel. Un tramo sin preguntas en la sesión (N=0) no se evalúa (se omite su requisito).
+levels:
+  - id: junior
+    label: "Junior-ready"
+    requires:
+      easy: 0.70
+      medium: 0.40
+      hard: 0.00
+  - id: mid
+    label: "Mid-ready"
+    requires:
+      easy: 0.80
+      medium: 0.60
+      hard: 0.35
+  - id: senior
+    label: "Senior-ready"
+    requires:
+      easy: 0.90
+      medium: 0.75
+      hard: 0.60
+
+# Perfiles de rol: dimensiones núcleo (definen el nivel) y secundarias (contexto).
+roles:
+  - id: ai-engineer
+    label: "AI Engineer"
+    core: [llm-rag-evals, ai-product-system-design]
+    secondary: [ml-clasico, fullstack-next-nest-ts]
+    source: "DataCamp/Scaler AI engineer skills 2026: fundamentos SWE + bases de ML (métricas, overfitting, validación) + desarrollo de apps LLM (prompting, tool calling, salidas estructuradas) + RAG."
+  - id: llm-engineer
+    label: "LLM Engineer"
+    core: [llm-rag-evals]
+    secondary: [ai-product-system-design, comportamental-star]
+    source: "KDnuggets LLM engineer roadmap 2026: adaptar/orquestar/servir LLMs pre-entrenados; prompting sistemático, tool calling, RAG, LLMOps (no entrenar desde cero)."
+  - id: ml-engineer
+    label: "ML Engineer"
+    core: [ml-clasico, llm-rag-evals]
+    secondary: [ai-product-system-design]
+    source: "doit.software/DataCamp ML engineer skills 2026: Python, algoritmos de ML, matemática/estadística, evaluación de modelos y MLOps; en 2026 además LLM/RAG."
+  - id: fullstack-engineer
+    label: "Full Stack Engineer"
+    core: [fullstack-next-nest-ts, ai-product-system-design]
+    secondary: [llm-rag-evals]
+    source: "min.io full-stack AI engineer / Jobgether fullstack AI: TypeScript/React/Python y construir features completas + system design (DDD, microservicios, event-driven) + LLM calling."
+  - id: ai-product-engineer
+    label: "AI Product Engineer"
+    core: [ai-product-system-design, llm-rag-evals]
+    secondary: [fullstack-next-nest-ts, comportamental-star]
+    source: "zenvanriel AI product engineer path: product sense + full-stack + LLM + envío end-to-end + comunicación/influencia sin autoridad."
+
+# Plan de estudio por dimensión (RES-03): a dónde ir para cerrar cada gap.
+study:
+  llm-rag-evals: "Repasa m1-m3 (LLM, prompting, RAG, evals) y m8 (internals) del bootcamp-ml-llm; monta un RAG con citations de punta a punta."
+  ml-clasico: "Repasa m0 (fundamentos: loss, overfitting, métricas) y m0plus (algoritmos clásicos) del bootcamp-ml-llm."
+  ai-product-system-design: "Repasa m4-m7 y m11 del bootcamp-ml-llm (agent vs workflow, coste/latencia, evals como contrato, influir sin autoridad); para lo canónico, el System Design Primer."
+  comportamental-star: "Prepara 4-5 historias STAR versátiles (conflicto, fracaso, liderazgo sin autoridad, impacto) con Resultado cuantificado; base en m12 del bootcamp."
+  fullstack-next-nest-ts: "Docs oficiales: Next.js (App Router/RSC/Server Actions), NestJS (providers/guards/pipes/DTO con class-validator) y el TypeScript Handbook (unknown, satisfies, discriminated unions)."

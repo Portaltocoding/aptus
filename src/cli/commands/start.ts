@@ -1,12 +1,14 @@
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { loadPack } from "../../content/loader.js";
+import { loadReadiness } from "../../content/readiness.js";
 import { selectBalanced } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
 import { calibration } from "../../core/calibration.js";
+import { computeReadiness, computeGaps } from "../../core/readiness.js";
 import { runSession } from "../runner.js";
-import { renderResult, renderCalibration } from "../render.js";
+import { renderResult, renderCalibration, renderReadiness, renderGaps } from "../render.js";
 
 // Dimensionado de la sesión (ajustable sin tocar la lógica de selectBalanced).
 // Con 5 dimensiones: 5 preguntas/dimensión → 25 por sesión (~20 min, ≥15 min).
@@ -30,8 +32,10 @@ export async function startCommand(): Promise<void> {
   const questionsYaml = resolve(PACK_DIR, "questions.yaml");
 
   let pack;
+  let readinessCfg;
   try {
     pack = loadPack(packYaml, questionsYaml);
+    readinessCfg = loadReadiness(resolve(PACK_DIR, "readiness.yaml"));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`\n✗ No se puede iniciar la sesión: ${msg}`);
@@ -53,7 +57,11 @@ export async function startCommand(): Promise<void> {
   const answered = await runSession(selected);
   const result = score(answered, selected);
   const calib = calibration(answered, selected);
+  const roles = computeReadiness(answered, selected, readinessCfg);
+  const gaps = computeGaps(answered, selected, readinessCfg);
 
   console.log("\n" + renderResult(result) + "\n");
   console.log(renderCalibration(calib) + "\n");
+  console.log(renderReadiness(roles) + "\n");
+  console.log(renderGaps(gaps) + "\n");
 }
