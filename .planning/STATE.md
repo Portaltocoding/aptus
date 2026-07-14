@@ -39,7 +39,9 @@ Progress v1: [██████████] 100%
 
 - **Multi-tema (PACK-02): LISTO.** Pack = directorio (`pack.yaml` + `questions/<dim>.yaml`, `readiness.yaml` opcional). `aptus packs` lista; `aptus start --pack <nombre>` elige; historial por pack. Crear packs de cualquier tema ya no requiere código.
 - **Tipos de pregunta creativos: LISTO.** Campo `type` (concepto|diagrama|codigo|escenario); enunciados multilínea (diagramas ASCII, snippets de código) renderizados en el select.
-- **Banco mucho mayor: EN CURSO (tandas curadas por Carlos-approval).** Objetivo ~250 (50/dimensión). Actual: **111/250**. Por dimensión: llm-rag-evals **50 ✓**, ml-clasico 18, fullstack 15, ai-product 14, comportamental 14. Tipos: 92 concepto, 9 escenario, 6 diagrama, 4 código. Siguiente tanda: subir **ml-clasico** a 50, luego el resto. Escrito a mano (no workflow), verificando correctitud; ids `<dim>-NNN`.
+- **Seniority afinado (junior/mid/senior/staff): LISTO.** Nueva dificultad `experto` (4 tramos) y nivel **staff** = dominio experto en el núcleo + **amplitud** (breadth) en las dimensiones secundarias del rol. Sin evidencia experto no se concede staff (anti-sobreafirmación). **Test largo por defecto** (~120 obj.; ~85 con el banco actual). **Resultado con resumen narrativo** (ranking de roles + peores puntos + por dónde estudiar) + plan de estudio offline.
+- **Research bajo petición:** offline enriquecido (resumen + plan) **LISTO**; **web opcional PENDIENTE** (probablemente asistido por Claude/deep-research bajo petición, o un `aptus study --research`).
+- **Banco mucho mayor: EN CURSO.** Objetivo ~250 (50/dim). Actual: **116/250**. Por dimensión: llm-rag-evals **55 ✓** (incl. 5 experto), ml-clasico 18, fullstack 15, ai-product 14, comportamental 14. **Faltan preguntas `experto` en las otras 4 dimensiones** para que staff sea evaluable en esos roles (hoy Full Stack tope Senior por falta de experto). Siguiente tanda: subir ml-clasico a 50 (con experto). Escrito a mano, verificando correctitud; ids `<dim>-NNN`.
 
 ## Performance Metrics
 
