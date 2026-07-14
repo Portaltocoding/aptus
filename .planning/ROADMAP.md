@@ -13,7 +13,7 @@ Aptus se construye de dentro hacia fuera: primero un slice vertical mínimo pero
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Fundamento end-to-end** - Banco mínimo real, motor de scoring puro, sesión select en terminal y resultado básico con N, de punta a punta.
+- [x] **Phase 1: Fundamento end-to-end** - Banco mínimo real, motor de scoring puro, sesión select en terminal y resultado básico con N, de punta a punta.
 - [ ] **Phase 2: Banco completo desde bootcamp-ml-llm** - El banco crece hasta cubrir de verdad las 5 dimensiones, curado y anclado a fuentes externas, con rotación entre intentos.
 - [ ] **Phase 3: Confianza y calibración** - Captura de confianza por pregunta y curva confianza-vs-acierto en el resultado.
 - [ ] **Phase 4: Readiness por rol con baselines ancladas** - Lectura honesta de readiness junior/mid/senior por rol contra baselines externas, con gaps priorizados y plan de estudio.
@@ -36,13 +36,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. El pack de contenido (banco de preguntas + metadata: tema, subtema, dificultad, rol, fuente, fecha) vive en ficheros YAML/JSON fuera del código, y un validador rechaza el pack antes de poder usarse en una sesión si falta metadata obligatoria o respuesta correcta.
   5. La selección de preguntas de la sesión reparte de forma equilibrada por dimensión, evitando que alguna dimensión quede con muestra insuficiente.
 
-**Plans**: 3/5 plans executed
+**Plans**: 5/5 plans executed
 
 - [x] 01-01-PLAN.md — Andamiaje ESM + contrato zod del pack + PRNG determinista (wave 1)
 - [x] 01-02-PLAN.md — Cargador + validador de contenido (YAML+zod, fail-fast) + fixtures (wave 2)
 - [x] 01-03-PLAN.md — Motor de scoring puro + motor de sesión (selección equilibrada + navegación) (wave 2)
-- [ ] 01-04-PLAN.md — Pack real v1 (2 dimensiones, ≥24-30 preguntas reales) (wave 3)
-- [ ] 01-05-PLAN.md — CLI end-to-end: runner select navegable + render con N + subcomando start (wave 3)
+- [x] 01-04-PLAN.md — Pack real v1 (2 dimensiones, ≥24-30 preguntas reales) (wave 3)
+- [x] 01-05-PLAN.md — CLI end-to-end: runner select navegable + render con N + subcomando start (wave 3)
 
 ### Phase 2: Banco completo desde bootcamp-ml-llm
 
