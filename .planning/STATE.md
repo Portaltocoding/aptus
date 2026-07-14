@@ -30,10 +30,16 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 
 Phase: 6 of 6 (Integración con jobhunt) — COMPLETA. Milestone v1 completo.
 Plan: Phases 1-6 completas (10/10 planes)
-Status: Milestone v1 completo y verificado end-to-end. Pendiente (a decisión de Carlos): lifecycle de cierre (audit → complete → ship).
-Last activity: 2026-07-14 — Completado 06-01 (ponderación por mercado), cerrada Phase 6; 105/105 tests
+Status: Milestone v1 completo. **v2 EN CURSO** (a petición de Carlos): multi-tema + banco mucho mayor y creativo.
+Last activity: 2026-07-14 — v2: soporte multi-pack (--pack/packs) + tipos creativos + tanda creativa; 109/109 tests
 
-Progress: [██████████] 100%
+Progress v1: [██████████] 100%
+
+## v2 en curso (14 jul 2026)
+
+- **Multi-tema (PACK-02): LISTO.** Pack = directorio (`pack.yaml` + `questions/<dim>.yaml`, `readiness.yaml` opcional). `aptus packs` lista; `aptus start --pack <nombre>` elige; historial por pack. Crear packs de cualquier tema ya no requiere código.
+- **Tipos de pregunta creativos: LISTO.** Campo `type` (concepto|diagrama|codigo|escenario); enunciados multilínea (diagramas ASCII, snippets de código) renderizados en el select.
+- **Banco mucho mayor: EN CURSO (tandas curadas por Carlos-approval).** Objetivo ~250 (50/dimensión). Actual: **79** (66 base + 13 creativas: 4 diagrama, 3 código, 6 escenario). Siguiente: seguir currando tandas curadas por dimensión hasta ~50/dim. Escrito a mano (no workflow), verificando correctitud.
 
 ## Performance Metrics
 

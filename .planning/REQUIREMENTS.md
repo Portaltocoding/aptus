@@ -41,7 +41,7 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 ## v2 / Deferred
 
 - [x] **INTEG-01** (opcional): Adaptador de solo lectura hacia jobhunt (`~/workspace/jobhunt/data/jobs.db`) para ponderar baselines/gaps por demanda real de mercado. Degradación elegante si no existe.
-- [ ] **PACK-02**: Packs adicionales de otros dominios (certificaciones, idiomas, etc.) — reutilizan el motor sin tocar código.
+- [~] **PACK-02**: Packs adicionales de otros dominios (certificaciones, idiomas, etc.) — reutilizan el motor sin tocar código. **Infra lista (v2, 14 jul 2026)**: un pack es un directorio (`pack.yaml` + `questions/*.yaml`, `readiness.yaml` opcional), descubierto con `aptus packs` y elegido con `aptus start --pack <nombre>`; historial por pack. Crear packs concretos ya no requiere tocar código. Falta: currar packs de otros temas cuando se quieran.
 - [ ] **RES-05**: Resurfacing tipo spaced-repetition de los temas peor puntuados.
 
 ## Out of Scope
