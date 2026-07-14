@@ -1,5 +1,5 @@
-# Dimensión: comportamental-star — 14 preguntas. Curadas, técnicamente correctas.
-# type: concepto|diagrama|codigo|escenario. source: bootcamp-ml-llm|externa.
+# Dimensión: comportamental-star — 50 preguntas. Curadas.
+# type: concepto|diagrama|escenario. difficulty incl. experto (señales staff). source: externa (marco universal).
 
 - id: star-001
   dimension: comportamental-star
@@ -347,5 +347,860 @@
     postura y llegar a una decisión (aunque no sea la tuya) con un resultado.
     Ceder siempre, saltarse la jerarquía o negar toda discrepancia dan mala
     señal."
+  source: externa
+  date: 2026-07-14
+- id: star-015
+  dimension: comportamental-star
+  subtopic: presentacion
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - Cualquiera
+  stem: Ante 'háblame de ti', ¿qué estructura funciona mejor?
+  options:
+    - id: a
+      text: "Breve y orientada al puesto: presente (qué haces) → pasado relevante →
+        por qué encajas aquí"
+    - id: b
+      text: Tu biografía completa desde el colegio
+    - id: c
+      text: Solo hobbies
+    - id: d
+      text: Una lista de tecnologías sin contexto
+  correct: a
+  explanation: "El pitch debe ser conciso y relevante: quién eres profesionalmente
+    hoy, un par de hitos relevantes y por qué este rol; no una autobiografía
+    cronológica."
+  source: externa
+  date: 2026-07-14
+- id: star-016
+  dimension: comportamental-star
+  subtopic: resultado
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Tu logro no tiene una métrica dura clara. ¿Cómo cuentas el Resultado sin
+    inventar cifras?
+  options:
+    - id: a
+      text: Con impacto cualitativo concreto y proxies honestos ('desbloqueó al
+        equipo', 'se adoptó en 3 equipos', estimaciones razonadas)
+    - id: b
+      text: Inventarte un porcentaje que suene bien
+    - id: c
+      text: Omitir el resultado
+    - id: d
+      text: Decir que fue 'un éxito' sin más
+  correct: a
+  explanation: Si no hay número exacto, se usa impacto cualitativo verificable o
+    una estimación razonada y honesta (tiempo ahorrado, adopción, desbloqueo).
+    Inventar cifras es arriesgado; no dar resultado deja la historia coja.
+  source: externa
+  date: 2026-07-14
+- id: star-017
+  dimension: comportamental-star
+  subtopic: comunicacion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué es 'signposting' al responder y por qué ayuda?
+  options:
+    - id: a
+      text: Anunciar la estructura ('primero el contexto, luego lo que hice y el
+        resultado'), para que el entrevistador te siga y no divagues
+    - id: b
+      text: Hablar más rápido
+    - id: c
+      text: Usar tecnicismos
+    - id: d
+      text: Evitar responder
+  correct: a
+  explanation: Señalizar la estructura ordena tu respuesta y guía al oyente;
+    reduce la divagación y hace la historia fácil de seguir, especialmente en
+    STAR.
+  source: externa
+  date: 2026-07-14
+- id: star-018
+  dimension: comportamental-star
+  subtopic: logros
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "'Cuéntame tu mayor logro.' ¿Qué historia eliges?"
+  options:
+    - id: a
+      text: Una relevante para el rol, donde tu contribución sea clara y el impacto
+        medible o tangible
+    - id: b
+      text: La más antigua que recuerdes
+    - id: c
+      text: Un logro de equipo donde apenas participaste
+    - id: d
+      text: Algo impresionante pero irrelevante para el puesto
+  correct: a
+  explanation: Un buen logro es relevante al rol, deja claro qué hiciste TÚ y
+    tiene un resultado tangible. Impresionar con algo irrelevante o atribuirte
+    méritos ajenos resta credibilidad.
+  source: externa
+  date: 2026-07-14
+- id: star-019
+  dimension: comportamental-star
+  subtopic: ambiguedad
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Te dan un problema mal definido. ¿Qué demuestra buen criterio?
+  options:
+    - id: a
+      text: Clarificar objetivos y restricciones, hacer explícitas tus asunciones y
+        avanzar en iteraciones en vez de bloquearte
+    - id: b
+      text: Esperar a que te lo den todo perfectamente definido
+    - id: c
+      text: Empezar a programar sin entender el objetivo
+    - id: d
+      text: Quejarte de la falta de especificación
+  correct: a
+  explanation: Ante ambigüedad, los buenos ingenieros acotan (preguntas,
+    asunciones explícitas), priorizan y avanzan iterando. Ni parálisis por falta
+    de spec ni lanzarse a ciegas.
+  source: externa
+  date: 2026-07-14
+- id: star-020
+  dimension: comportamental-star
+  subtopic: prioridades
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Tres personas te piden cosas 'urgentes' a la vez. ¿Qué enfoque cuenta mejor?
+  options:
+    - id: a
+      text: Priorizar por impacto/dependencias, alinear expectativas comunicando qué
+        harás y cuándo, y negociar plazos con datos
+    - id: b
+      text: Hacerlas por orden de quien grita más
+    - id: c
+      text: Intentar todo a la vez y no acabar nada
+    - id: d
+      text: Ignorar dos y no avisar
+  correct: a
+  explanation: Se prioriza por impacto y dependencias, y se gestionan expectativas
+    de forma transparente (qué, cuándo, por qué). La señal es criterio y
+    comunicación, no heroísmo desorganizado.
+  source: externa
+  date: 2026-07-14
+- id: star-021
+  dimension: comportamental-star
+  subtopic: colaboracion
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un compañero (no tu subordinado) no entrega y bloquea al equipo. ¿Qué
+    haces primero?
+  options:
+    - id: a
+      text: Hablarlo con él en privado, entender la causa y ofrecer ayuda; si
+        persiste, escalar de forma constructiva con datos
+    - id: b
+      text: Criticarlo en público
+    - id: c
+      text: Hacer tú su trabajo en silencio para siempre
+    - id: d
+      text: Ignorarlo y que reviente
+  correct: a
+  explanation: Sin autoridad formal, primero se aborda directo y con empatía
+    (causa, ayuda). Si no mejora y afecta al equipo, se escala con hechos, no
+    con quejas. Ni humillar ni tapar indefinidamente.
+  source: externa
+  date: 2026-07-14
+- id: star-022
+  dimension: comportamental-star
+  subtopic: feedback
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al recibir feedback crítico en una review, ¿qué señal es positiva?
+  options:
+    - id: a
+      text: Escuchar sin ponerte a la defensiva, pedir ejemplos concretos y actuar
+        sobre ello
+    - id: b
+      text: Justificarte y rebatir cada punto
+    - id: c
+      text: Ignorarlo
+    - id: d
+      text: Tomártelo como algo personal
+  correct: a
+  explanation: "Buena recepción de feedback: escuchar, buscar entender con
+    ejemplos y convertirlo en acción. Ponerse a la defensiva o ignorarlo señala
+    poca capacidad de crecer."
+  source: externa
+  date: 2026-07-14
+- id: star-023
+  dimension: comportamental-star
+  subtopic: feedback
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Tienes que dar feedback difícil a un compañero. ¿Qué enfoque es más efectivo?
+  options:
+    - id: a
+      text: En privado, específico y sobre conductas concretas y su impacto
+        (situación-conducta-impacto), no sobre la persona
+    - id: b
+      text: En público para que aprenda
+    - id: c
+      text: Vago y general para no herir
+    - id: d
+      text: Guardártelo y que siga igual
+  correct: a
+  explanation: El feedback útil es privado, concreto y descriptivo (qué conducta,
+    qué impacto), orientado a mejorar, no a etiquetar a la persona. Vago no
+    sirve; público humilla.
+  source: externa
+  date: 2026-07-14
+- id: star-024
+  dimension: comportamental-star
+  subtopic: colaboracion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué significa 'disagree and commit'?
+  options:
+    - id: a
+      text: Expresar tu desacuerdo con argumentos, pero una vez tomada la decisión,
+        apoyarla y ejecutarla con lealtad
+    - id: b
+      text: Estar siempre de acuerdo
+    - id: c
+      text: Sabotear la decisión con la que no coincides
+    - id: d
+      text: No opinar nunca
+  correct: a
+  explanation: "Disagree and commit: aportas tu punto de vista honestamente en el
+    debate, pero si la decisión final es otra, la respaldas y ejecutas sin
+    socavarla. Equilibra criterio propio con avance del equipo."
+  source: externa
+  date: 2026-07-14
+- id: star-025
+  dimension: comportamental-star
+  subtopic: conflicto
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: Discrepas técnicamente con un ingeniero senior y ninguno cede. ¿Qué
+    demuestra madurez?
+  options:
+    - id: a
+      text: Fundamentar con datos/pruebas (spike, benchmark), acotar el riesgo, y si
+        sigue el empate, escalar a un decisor o hacer disagree-and-commit
+    - id: b
+      text: Imponer tu opinión por insistencia
+    - id: c
+      text: Ceder sin más para evitar el roce
+    - id: d
+      text: Ir por detrás a implementarlo a tu manera
+  correct: a
+  explanation: En un desacuerdo técnico, se busca objetivar (datos, prototipo,
+    criterios), se acota el coste de equivocarse y, si no hay consenso, se
+    escala o se compromete con la decisión. Ni imponer ni ceder por comodidad ni
+    actuar por detrás.
+  source: externa
+  date: 2026-07-14
+- id: star-026
+  dimension: comportamental-star
+  subtopic: responsabilidad
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Vas a incumplir un plazo importante. ¿Qué haces?
+  options:
+    - id: a
+      text: Avisar cuanto antes con una nueva estimación y un plan de mitigación,
+        asumiendo tu parte
+    - id: b
+      text: Callar y esperar que no se note
+    - id: c
+      text: Culpar a otros
+    - id: d
+      text: Avisar el mismo día del vencimiento
+  correct: a
+  explanation: Comunicar pronto y con transparencia (nuevo plazo, qué reduces,
+    cómo mitigas) permite reaccionar al equipo. Ocultarlo o avisar tarde es lo
+    que más daño hace.
+  source: externa
+  date: 2026-07-14
+- id: star-027
+  dimension: comportamental-star
+  subtopic: prioridades
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Te piden meter más alcance del que cabe en el plazo. ¿Qué respuesta es
+    sólida?
+  options:
+    - id: a
+      text: "Explicar el trade-off (alcance vs plazo vs calidad) y proponer
+        alternativas: recortar alcance, mover fecha o priorizar lo esencial"
+    - id: b
+      text: Decir que sí a todo y quemarte
+    - id: c
+      text: Decir que no en seco sin alternativas
+    - id: d
+      text: Bajar la calidad en silencio
+  correct: a
+  explanation: "Saber decir 'no... pero' con criterio: exponer los trade-offs y
+    ofrecer opciones. Aceptar todo lleva a fallar o a deuda técnica oculta; el
+    'no' seco sin alternativas tampoco ayuda."
+  source: externa
+  date: 2026-07-14
+- id: star-028
+  dimension: comportamental-star
+  subtopic: fracaso
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En una pregunta de fracaso, ¿qué refleja 'mentalidad de crecimiento'?
+  options:
+    - id: a
+      text: Reconocer el error, extraer un aprendizaje concreto y mostrar qué
+        cambiaste después
+    - id: b
+      text: Que la culpa fue del entorno
+    - id: c
+      text: Que nunca fallas
+    - id: d
+      text: Un fracaso irrelevante para no comprometerte
+  correct: a
+  explanation: "La growth mindset ve el fallo como aprendizaje: ownership + qué
+    aprendiste + qué hiciste distinto luego. Negar fallos o culpar fuera muestra
+    lo contrario."
+  source: externa
+  date: 2026-07-14
+- id: star-029
+  dimension: comportamental-star
+  subtopic: iniciativa
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "'Cuéntame una vez que tomaste iniciativa más allá de tu rol.' ¿Qué buscan?"
+  options:
+    - id: a
+      text: "Ownership: viste un problema u oportunidad y actuaste (con criterio y sin
+        pisar a nadie), con un resultado"
+    - id: b
+      text: Que hicieras horas extra sin motivo
+    - id: c
+      text: Que ignoraras tus tareas asignadas
+    - id: d
+      text: Que tomaras decisiones ajenas sin avisar
+  correct: a
+  explanation: "Buscan proactividad con buen juicio: detectar algo que aportaba
+    valor y moverlo, comunicando y colaborando, con un resultado. No es hacer
+    más horas ni actuar por libre sin alinear."
+  source: externa
+  date: 2026-07-14
+- id: star-030
+  dimension: comportamental-star
+  subtopic: producto
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué demuestra 'product sense' o empatía con el usuario en una respuesta?
+  options:
+    - id: a
+      text: Que decidiste partiendo de la necesidad real del usuario (datos,
+        conversaciones), no solo de lo técnicamente elegante
+    - id: b
+      text: Que elegiste la tecnología más nueva
+    - id: c
+      text: Que ignoraste al usuario para ir más rápido
+    - id: d
+      text: Que construiste todo lo que pidieron sin cuestionar
+  correct: a
+  explanation: "Product sense: anclar decisiones en el problema del usuario y el
+    impacto, no en el capricho técnico; a veces implica cuestionar el requisito
+    para resolver la necesidad de fondo."
+  source: externa
+  date: 2026-07-14
+- id: star-031
+  dimension: comportamental-star
+  subtopic: datos
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "'Cuéntame una decisión basada en datos.' ¿Qué historia encaja?"
+  options:
+    - id: a
+      text: Una donde una hipótesis/opinión se contrastó con datos o un experimento y
+        eso cambió (o confirmó) el rumbo
+    - id: b
+      text: Una decisión tomada por intuición pura
+    - id: c
+      text: Una donde ignoraste los datos disponibles
+    - id: d
+      text: Una sin ningún resultado
+  correct: a
+  explanation: "Buscan que uses evidencia: medir, experimentar (A/B, prototipo) y
+    dejar que el dato guíe la decisión, incluso cuando contradice la intuición o
+    la jerarquía."
+  source: externa
+  date: 2026-07-14
+- id: star-032
+  dimension: comportamental-star
+  subtopic: presion
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un incidente en producción con usuarios afectados. ¿Qué transmite buen
+    manejo bajo presión?
+  options:
+    - id: a
+      text: Mantener la calma, priorizar mitigar el impacto, comunicar estado con
+        transparencia y hacer post-mortem sin culpar personas
+    - id: b
+      text: Buscar de inmediato a quién culpar
+    - id: c
+      text: Arreglarlo en silencio sin avisar a nadie
+    - id: d
+      text: Bloquearte hasta que se resuelva solo
+  correct: a
+  explanation: "Bajo presión: mitigar primero, comunicar con claridad y, después,
+    un post-mortem sin culpa (blameless) para aprender. Buscar culpables en
+    caliente empeora todo."
+  source: externa
+  date: 2026-07-14
+- id: star-033
+  dimension: comportamental-star
+  subtopic: motivacion
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: "'¿Por qué quieres este puesto/empresa?' ¿Qué respuesta convence?"
+  options:
+    - id: a
+      text: "Una específica: conexión real entre lo que buscas/aportas y lo que hace
+        esa empresa/rol (haber investigado)"
+    - id: b
+      text: "'Porque necesito trabajo'"
+    - id: c
+      text: Una genérica que valdría para cualquier empresa
+    - id: d
+      text: "'Por el sueldo y ya'"
+  correct: a
+  explanation: "Convence lo específico y bien informado: por qué ESTA empresa/rol
+    encaja con tus objetivos y qué aportas. Lo genérico sugiere que no te has
+    molestado en investigar."
+  source: externa
+  date: 2026-07-14
+- id: star-034
+  dimension: comportamental-star
+  subtopic: adaptabilidad
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: A mitad de proyecto cambian los requisitos de golpe. ¿Qué señal es buena?
+  options:
+    - id: a
+      text: "Adaptarte con flexibilidad: entender el porqué del cambio, re-priorizar y
+        comunicar el nuevo plan sin dramatizar"
+    - id: b
+      text: Resistirte y seguir con lo viejo
+    - id: c
+      text: Quejarte de que 'siempre cambian todo'
+    - id: d
+      text: Empezar de cero sin evaluar qué se reutiliza
+  correct: a
+  explanation: La adaptabilidad se muestra entendiendo el motivo del cambio,
+    ajustando prioridades y comunicando; reaprovechando lo que sirva. Rigidez o
+    queja constante son mala señal.
+  source: externa
+  date: 2026-07-14
+- id: star-035
+  dimension: comportamental-star
+  subtopic: etica
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Te piden algo que consideras poco ético o que perjudica al usuario. ¿Qué
+    haces?
+  options:
+    - id: a
+      text: Plantear tu preocupación con argumentos y proponer una alternativa;
+        escalar si es necesario, dejando constancia
+    - id: b
+      text: Hacerlo sin más porque te lo mandaron
+    - id: c
+      text: Negarte en bloque sin explicar ni proponer nada
+    - id: d
+      text: Difundirlo por redes sociales primero
+  correct: a
+  explanation: Ante un dilema, se expone la preocupación de forma profesional, se
+    propone una vía mejor y, si hace falta, se escala por los canales adecuados.
+    Ni obedecer a ciegas ni un plante sin diálogo.
+  source: externa
+  date: 2026-07-14
+- id: star-036
+  dimension: comportamental-star
+  subtopic: entrevista
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al final de la entrevista te preguntan si TÚ tienes preguntas. ¿Qué conviene?
+  options:
+    - id: a
+      text: "Tener preguntas buenas y específicas (equipo, retos, cómo se mide el
+        éxito, cultura técnica): demuestra interés y te ayuda a evaluar el
+        encaje"
+    - id: b
+      text: No preguntar nada
+    - id: c
+      text: Preguntar solo por vacaciones
+    - id: d
+      text: Repetir lo que ya te explicaron
+  correct: a
+  explanation: Preguntar bien señala interés y criterio, y te sirve para valorar
+    si el sitio te encaja (retos reales, cómo miden el éxito, deuda técnica,
+    cómo es un día). No preguntar nada transmite desinterés.
+  source: externa
+  date: 2026-07-14
+- id: star-037
+  dimension: comportamental-star
+  subtopic: entrevista
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Como candidato, ¿qué sería una 'red flag' razonable de un empleo?
+  options:
+    - id: a
+      text: Respuestas vagas sobre expectativas, rotación alta, procesos caóticos o
+        incapacidad de explicar cómo miden el éxito
+    - id: b
+      text: Que te hagan preguntas técnicas difíciles
+    - id: c
+      text: Que el proceso tenga varias fases
+    - id: d
+      text: Que te pidan un ejemplo de tu trabajo
+  correct: a
+  explanation: "Señales de alarma: falta de claridad en expectativas/rol, mucha
+    rotación, caos organizativo o no saber definir el éxito. Un proceso exigente
+    y estructurado NO es una red flag."
+  source: externa
+  date: 2026-07-14
+- id: star-038
+  dimension: comportamental-star
+  subtopic: negociacion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al negociar salario, ¿qué enfoque es más sólido?
+  options:
+    - id: a
+      text: Anclar en tu valor y en un rango informado por el mercado, evitando dar tú
+        primero una cifra baja; negociar el paquete completo
+    - id: b
+      text: Aceptar la primera oferta siempre
+    - id: c
+      text: Mentir sobre otras ofertas
+    - id: d
+      text: Dar la cifra más baja que aceptarías
+  correct: a
+  explanation: Negociar desde el valor aportado y datos de mercado, sin anclarte
+    tú a la baja, y mirando el paquete completo (base, variable, equity,
+    condiciones). Mentir es arriesgado y contraproducente.
+  source: externa
+  date: 2026-07-14
+- id: star-039
+  dimension: comportamental-star
+  subtopic: entrevista
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Aporta algo un mensaje de seguimiento/agradecimiento tras la entrevista?
+  options:
+    - id: a
+      text: "Sí: breve, agradece, reafirma interés y encaje, y mantiene una buena
+        impresión sin ser insistente"
+    - id: b
+      text: No, es contraproducente siempre
+    - id: c
+      text: Solo si pides feedback exhaustivo
+    - id: d
+      text: Hay que enviar uno cada día
+  correct: a
+  explanation: "Un follow-up breve y sincero refuerza el interés y deja buena
+    impresión. Ni imprescindible ni pesado: uno, con mesura."
+  source: externa
+  date: 2026-07-14
+- id: star-040
+  dimension: comportamental-star
+  subtopic: onboarding
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "'¿Cómo te pones al día rápido en un código/equipo nuevo?' ¿Qué demuestra
+    madurez?"
+  options:
+    - id: a
+      text: Leer/ejecutar el proyecto, hacer preguntas concretas, aportar valor pronto
+        en algo pequeño y documentar lo que aprendes
+    - id: b
+      text: Esperar semanas a que te lo expliquen todo
+    - id: c
+      text: Reescribir todo a tu manera el primer día
+    - id: d
+      text: No preguntar para no molestar
+  correct: a
+  explanation: "Ramp-up eficaz: explorar el sistema por tu cuenta, preguntar lo
+    justo y concreto, entregar pronto algo pequeño (una fix, un test) y dejar
+    documentado lo aprendido. Ni pasividad ni arrasar sin entender."
+  source: externa
+  date: 2026-07-14
+- id: star-041
+  dimension: comportamental-star
+  subtopic: comunicacion
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué la autenticidad supera a una respuesta demasiado ensayada?
+  options:
+    - id: a
+      text: Una historia real, con matices y aprendizaje, resulta creíble y permite
+        repreguntar; un guion memorizado suena falso y se cae ante detalles
+    - id: b
+      text: Porque no hay que preparar nada
+    - id: c
+      text: Porque mentir con soltura es mejor
+    - id: d
+      text: Porque las historias reales no importan
+  correct: a
+  explanation: "Preparar sí, pero contar hechos reales: sostienen las repreguntas
+    y transmiten honestidad. Un guion rígido suena impostado y se desmorona
+    cuando el entrevistador profundiza."
+  source: externa
+  date: 2026-07-14
+- id: star-042
+  dimension: comportamental-star
+  subtopic: liderazgo
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: "'Cuéntame cómo ayudaste a crecer a alguien.' ¿Qué señal de seniority
+    buscan?"
+  options:
+    - id: a
+      text: "Impacto más allá de tu output: mentorizar, desbloquear y elevar a otros,
+        con un resultado en la persona/equipo"
+    - id: b
+      text: Que hicieras tú su trabajo
+    - id: c
+      text: Que compitieras con esa persona
+    - id: d
+      text: Que no te involucraras
+  correct: a
+  explanation: "A partir de mid/senior valoran el multiplicador: que eleves a
+    otros (mentoría, code reviews formativas, desbloqueo) con un resultado
+    tangible en su crecimiento, no solo tu producción individual."
+  source: externa
+  date: 2026-07-14
+- id: star-043
+  dimension: comportamental-star
+  subtopic: liderazgo
+  difficulty: experto
+  type: escenario
+  roles: *a1
+  stem: "Nivel staff: necesitas alinear a VARIOS equipos (sin mando sobre ellos)
+    hacia una dirección técnica. ¿Qué historia demuestra ese nivel?"
+  options:
+    - id: a
+      text: "Construir contexto y consenso: exponer el problema y los trade-offs,
+        escuchar a cada equipo, y lograr una decisión compartida que luego se
+        ejecuta"
+    - id: b
+      text: Imponerlo por email a todos
+    - id: c
+      text: Hacerlo tú solo sin contar con los equipos
+    - id: d
+      text: Dejar que cada equipo haga lo suyo sin alineación
+  correct: a
+  explanation: "La señal staff es influir a escala sin autoridad: alinear equipos
+    mediante contexto, trade-offs explícitos y consenso, generando una decisión
+    compartida y sostenible. No es mandar ni actuar en solitario."
+  source: externa
+  date: 2026-07-14
+- id: star-044
+  dimension: comportamental-star
+  subtopic: liderazgo
+  difficulty: experto
+  type: escenario
+  roles: *a1
+  stem: Defendiste un enfoque, el liderazgo eligió otro, y tú lideras la
+    ejecución. ¿Qué demuestra madurez senior?
+  options:
+    - id: a
+      text: "Disagree-and-commit real: apoyar la decisión de forma genuina, ejecutarla
+        bien y asumir el resultado como propio, sin 'ya lo dije'"
+    - id: b
+      text: Ejecutarla a medias para demostrar que estabas en lo cierto
+    - id: c
+      text: Recordar a todos que tú opinabas distinto
+    - id: d
+      text: Delegar y desentenderte
+  correct: a
+  explanation: "Comprometerse de verdad tras discrepar: liderar la ejecución con
+    lealtad y ownership del resultado, sin sabotaje pasivo ni 'te lo dije'. Es
+    una señal fuerte de madurez y de poner al equipo por delante del ego."
+  source: externa
+  date: 2026-07-14
+- id: star-045
+  dimension: comportamental-star
+  subtopic: impacto
+  difficulty: experto
+  type: concepto
+  roles: *a1
+  stem: ¿Qué distingue una señal de nivel staff de una de nivel senior en las
+    preguntas de impacto?
+  options:
+    - id: a
+      text: "El alcance: senior resuelve problemas complejos de su área; staff mejora
+        sistemas/procesos y eleva a varios equipos, con impacto organizativo"
+    - id: b
+      text: Solo el número de años
+    - id: c
+      text: Que el staff programa más rápido
+    - id: d
+      text: Que el senior no colabora
+  correct: a
+  explanation: "No es más habilidad de teclado sino ALCANCE e impacto: staff opera
+    a nivel de sistema/organización (estándares, arquitectura transversal,
+    elevar el nivel de varios equipos), más allá del ámbito de un senior."
+  source: externa
+  date: 2026-07-14
+- id: star-046
+  dimension: comportamental-star
+  subtopic: ambiguedad
+  difficulty: experto
+  type: escenario
+  roles: *a1
+  stem: Te dan un problema de negocio enorme y ambiguo, sin solución obvia (típico
+    de staff). ¿Qué enfoque demuestra ese nivel?
+  options:
+    - id: a
+      text: Enmarcar el problema (qué resolvemos y por qué), descomponerlo, alinear a
+        los implicados y definir un camino iterativo con hitos medibles
+    - id: b
+      text: Pedir que te lo concreten del todo antes de empezar
+    - id: c
+      text: Lanzarte a una solución técnica sin entender el problema
+    - id: d
+      text: Delegar todo sin dar dirección
+  correct: a
+  explanation: El trabajo staff empieza por DEFINIR el problema y su porqué,
+    descomponerlo, crear alineamiento y trazar un camino iterativo con hitos.
+    Convertir la ambigüedad en un plan compartido es la competencia clave.
+  source: externa
+  date: 2026-07-14
+- id: star-047
+  dimension: comportamental-star
+  subtopic: conflicto
+  difficulty: experto
+  type: escenario
+  roles: *a1
+  stem: Dos stakeholders senior quieren direcciones opuestas y el proyecto está
+    bloqueado. ¿Qué demuestra nivel?
+  options:
+    - id: a
+      text: "Facilitar: sacar a la luz los intereses de fondo de cada uno, buscar
+        objetivos comunes y datos, y conducir a una decisión que ambos puedan
+        apoyar (o escalar con una recomendación)"
+    - id: b
+      text: Ponerte del lado del más poderoso
+    - id: c
+      text: Evitar el conflicto y dejarlo bloqueado
+    - id: d
+      text: Decidir tú por tu cuenta ignorándolos
+  correct: a
+  explanation: "Mediar entre seniors: entender los intereses reales (no solo
+    posiciones), anclar en objetivos comunes y datos, y conducir a una decisión
+    apoyada por ambos o escalar con una recomendación clara. Ni tomar partido
+    por poder ni evadir."
+  source: externa
+  date: 2026-07-14
+- id: star-048
+  dimension: comportamental-star
+  subtopic: fracaso
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: Lideraste un proyecto que finalmente se canceló. ¿Cómo lo cuentas bien?
+  options:
+    - id: a
+      text: "Con honestidad: qué aprendiste, qué valor se rescató (aprendizaje,
+        tecnología reutilizada, decisión de parar a tiempo) y cómo cuidaste al
+        equipo"
+    - id: b
+      text: Ocultando que se canceló
+    - id: c
+      text: Culpando enteramente a la dirección
+    - id: d
+      text: Diciendo que fue un éxito rotundo
+  correct: a
+  explanation: "Un proyecto cancelado bien contado muestra madurez: aprendizaje,
+    valor rescatado (a veces parar a tiempo ES la decisión correcta) y cómo
+    gestionaste la moral del equipo. Negarlo o culpar a otros resta."
+  source: externa
+  date: 2026-07-14
+- id: star-049
+  dimension: comportamental-star
+  subtopic: metodo-star
+  difficulty: medium
+  type: diagrama
+  roles: *a1
+  stem: |-
+    Estructura de una respuesta STAR:
+
+      [ Situación ] -> [ Tarea ] -> [ ? ] -> [ Resultado ]
+
+    ¿Qué va en [ ? ], y dónde debe ir el grueso del tiempo?
+  options:
+    - id: a
+      text: "Acción: lo que hiciste TÚ; es donde va el grueso de la respuesta, junto
+        con el Resultado"
+    - id: b
+      text: Otra Situación más de contexto
+    - id: c
+      text: La conclusión final
+    - id: d
+      text: Las preguntas para el entrevistador
+  correct: a
+  explanation: Tras Situación y Tarea (contexto breve), la ACCIÓN (lo que hiciste
+    tú) es el corazón de la respuesta, y el Resultado la cierra con impacto. El
+    error común es gastar el tiempo en el contexto y quedarse corto en
+    Acción/Resultado.
+  source: externa
+  date: 2026-07-14
+- id: star-050
+  dimension: comportamental-star
+  subtopic: conflicto
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: "'Cuéntame de una vez que perdiste un debate/decisión.' ¿Qué respuesta da
+    buena señal?"
+  options:
+    - id: a
+      text: Aceptaste la decisión, la apoyaste, y cuentas qué aprendiste (o incluso
+        que la otra opción resultó mejor)
+    - id: b
+      text: Que nunca has perdido un debate
+    - id: c
+      text: Que seguiste peleándola indefinidamente
+    - id: d
+      text: Que te enfadaste y te desentendiste
+  correct: a
+  explanation: "Perder con elegancia: reconocer que a veces la otra postura era
+    mejor, comprometerte con la decisión y extraer aprendizaje. Muestra
+    humildad, colaboración y foco en el resultado del equipo, no en tener
+    razón."
   source: externa
   date: 2026-07-14
