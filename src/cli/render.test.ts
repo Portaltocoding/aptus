@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { renderResult, renderCalibration, renderReadiness, renderGaps } from "./render.js";
+import {
+  renderResult,
+  renderCalibration,
+  renderReadiness,
+  renderGaps,
+  renderEvolution,
+} from "./render.js";
 import type { ScoreResult } from "../core/scoring.js";
 import type { CalibrationResult } from "../core/calibration.js";
 import type { RoleReadiness, Gap } from "../core/readiness.js";
+import type { EvolutionReport } from "../core/evolution.js";
 
 // Fixture de ScoreResult (nombres de dimensión genéricos: el render no conoce
 // el dominio). Incluye una dimensión sin responder para el caso borde de N=0.
@@ -154,5 +161,43 @@ describe("renderGaps", () => {
   it("sin gaps devuelve un mensaje claro", () => {
     const out = renderGaps([]);
     expect(out).toMatch(/sin gaps mayores/i);
+  });
+});
+
+describe("renderEvolution", () => {
+  it("con 0 sesiones avisa de que no hay historial", () => {
+    const report: EvolutionReport = {
+      sessionCount: 0,
+      currentTimestamp: null,
+      previousTimestamp: null,
+      byDimension: [],
+      byRole: [],
+    };
+    expect(renderEvolution(report)).toMatch(/no hay sesiones/i);
+  });
+
+  it("con 1 sesión anuncia que la comparación llega a partir de la segunda", () => {
+    const report: EvolutionReport = {
+      sessionCount: 1,
+      currentTimestamp: "t1",
+      previousTimestamp: null,
+      byDimension: [{ dimension: "d1", current: 0.6, previous: null, delta: null }],
+      byRole: [{ roleId: "r1", label: "R1", current: "Junior-ready", previous: null, changed: false }],
+    };
+    expect(renderEvolution(report)).toMatch(/primera sesión/i);
+  });
+
+  it("con 2 sesiones muestra la tabla con delta y los cambios de nivel por rol", () => {
+    const report: EvolutionReport = {
+      sessionCount: 2,
+      currentTimestamp: "t2",
+      previousTimestamp: "t1",
+      byDimension: [{ dimension: "d1", current: 0.6, previous: 0.4, delta: 0.2 }],
+      byRole: [{ roleId: "r1", label: "R1", current: "Mid-ready", previous: "Junior-ready", changed: true }],
+    };
+    const out = renderEvolution(report);
+    expect(out).toContain("d1");
+    expect(out).toContain("↑"); // delta positivo
+    expect(out).toContain("Junior-ready → Mid-ready");
   });
 });
