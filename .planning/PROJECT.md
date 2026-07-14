@@ -2,7 +2,9 @@
 
 ## What This Is
 
-Aptus es un test de **aptitud técnica** por terminal para Carlos Portal (AI Product Engineer, Barcelona). Un CLI interactivo que, en una sesión de mínimo 15 minutos, plantea preguntas curadas tipo select sobre los temas de los roles a los que aplica (LLM/RAG/evals, ML clásico, fullstack Next.js/NestJS/TypeScript, AI product & system design, y comportamental STAR) y produce un **índice de aptitud honesto por rol**: en qué arquetipos está junior/mid/senior-ready, con sus gaps y un plan para cerrarlos.
+Aptus es un **motor genérico de evaluación de aptitud por terminal**, data-driven por **packs de conocimiento** intercambiables. El motor (runner select, baselines, scoring por dimensión, gaps, plan, persistencia) es agnóstico del tema; cada dominio evaluable es un *pack* (banco de preguntas + baselines + arquetipos, en YAML/JSON).
+
+El **primer pack** — y caso de uso que valida el concepto — es el readiness técnico de Carlos Portal (AI Product Engineer, Barcelona) para empleo: una sesión de ≥15 min con preguntas curadas tipo select sobre LLM/RAG/evals, ML clásico, fullstack (Next/Nest/TS), AI product & system design y comportamental (STAR), que produce un **índice de aptitud honesto por rol** (junior/mid/senior-ready) con gaps y plan. Futuros packs (certificaciones, idiomas, otras áreas) reutilizan el mismo motor sin tocar código.
 
 ## Core Value
 
