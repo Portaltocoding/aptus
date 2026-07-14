@@ -39,7 +39,7 @@ Progress v1: [██████████] 100%
 
 - **Multi-tema (PACK-02): LISTO.** Pack = directorio (`pack.yaml` + `questions/<dim>.yaml`, `readiness.yaml` opcional). `aptus packs` lista; `aptus start --pack <nombre>` elige; historial por pack. Crear packs de cualquier tema ya no requiere código.
 - **Tipos de pregunta creativos: LISTO.** Campo `type` (concepto|diagrama|codigo|escenario); enunciados multilínea (diagramas ASCII, snippets de código) renderizados en el select.
-- **Banco mucho mayor: EN CURSO (tandas curadas por Carlos-approval).** Objetivo ~250 (50/dimensión). Actual: **79** (66 base + 13 creativas: 4 diagrama, 3 código, 6 escenario). Siguiente: seguir currando tandas curadas por dimensión hasta ~50/dim. Escrito a mano (no workflow), verificando correctitud.
+- **Banco mucho mayor: EN CURSO (tandas curadas por Carlos-approval).** Objetivo ~250 (50/dimensión). Actual: **111/250**. Por dimensión: llm-rag-evals **50 ✓**, ml-clasico 18, fullstack 15, ai-product 14, comportamental 14. Tipos: 92 concepto, 9 escenario, 6 diagrama, 4 código. Siguiente tanda: subir **ml-clasico** a 50, luego el resto. Escrito a mano (no workflow), verificando correctitud; ids `<dim>-NNN`.
 
 ## Performance Metrics
 
