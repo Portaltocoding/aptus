@@ -15,12 +15,17 @@ const pack = loadPackDir(REAL_PACK_DIR);
 const config = loadReadiness(REAL_READINESS);
 const keywords = config.market_keywords!;
 
+// Oferta realista: una que de verdad pide una dimensión la menciona varias veces,
+// no una de pasada (ver MIN_CORE_HITS). Las fixtures de juguete daban núcleos que
+// las ofertas reales de jobhunt demostraron que no se sostienen.
 const JD_AI = [
   "Senior AI Engineer — Acme Labs",
   "Requisitos",
   "- LLM en producción: RAG, embeddings, evals como contrato.",
   "- Prompt engineering sistemático y tool calling.",
-  "- System design: arquitectura, coste y latencia con stakeholders.",
+  "- System design de la plataforma: arquitectura, coste y latencia.",
+  "- Criterio de producto: priorizar el roadmap con stakeholders.",
+  "- Decisiones de arquitectura y escalabilidad documentadas.",
   "Valorable",
   "- Nociones de machine learning clásico.",
 ].join("\n");

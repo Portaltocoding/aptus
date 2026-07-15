@@ -7,6 +7,7 @@ import type { EvolutionReport } from "../core/evolution.js";
 import type { MarketDemand, WeightedGap } from "../core/market.js";
 import type { JdGap, JdProfile, JdVerdict } from "../core/jd.js";
 import { MAX_BOX, nextDueAt, type ReviewItem, type ReviewProgress } from "../core/resurfacing.js";
+import type { JobsScan } from "../core/jobs-scan.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -455,6 +456,78 @@ export function renderReviewOutcome(before: ReviewItem[], after: ReviewItem[], a
     `  • En total: ${consolidadas} consolidada(s), ${flojas} aún en la caja 1.\n` +
     cuando
   );
+}
+
+/**
+ * Formatea el escaneo en bloque de las ofertas de jobhunt. El orden es por
+ * ESCALONES (una cantidad real: niveles que te sobran o te faltan), y cada fila
+ * lleva su veredicto entero al lado para que se pueda auditar. Nunca un
+ * porcentaje de encaje ni una probabilidad de que te cojan.
+ *
+ * Lo no evaluable se CUENTA y se dice: esconderlo haría parecer que el pack cubre
+ * todo el mercado, que es la mentira más fácil de contar aquí.
+ */
+export function renderJobsScan(scan: JobsScan, shown: number): string {
+  const evaluables = scan.ranked.length + scan.withoutLevel.length;
+  const lines: string[] = [
+    pc.bold(
+      `Ofertas de jobhunt: ${scan.totalScanned} escaneadas · ${evaluables} evaluables con este pack · ` +
+        `${scan.notEvaluable.length} no evaluables.`,
+    ),
+  ];
+
+  if (scan.ranked.length > 0) {
+    const table = new Table({ head: ["#", "Oferta", "Pide", "Alcanzas", "Escalones"] });
+    scan.ranked.slice(0, shown).forEach((s, i) => {
+      const d = s.verdict!.levelDelta!;
+      const escalones = d > 0 ? pc.green(`+${d}`) : d === 0 ? pc.green("0") : pc.red(String(d));
+      const aviso = s.profile.coverage.low ? pc.yellow(" ⚠") : "";
+      const empresa = s.company ? ` @ ${s.company}` : "";
+      table.push([
+        String(i + 1),
+        `${s.title}${empresa}${aviso}`,
+        s.verdict!.targetLevelLabel ?? "—",
+        levelColor(s.verdict!.achievedLevelId)(s.verdict!.achievedLevelLabel),
+        escalones,
+      ]);
+    });
+    lines.push(table.toString());
+
+    // Nunca recortar en silencio: si se enseñan 20 de 300, hay que decirlo.
+    if (scan.ranked.length > shown) {
+      lines.push(pc.dim(`  (se muestran ${shown} de ${scan.ranked.length}; usa --limit para ver más)`));
+    }
+    if (scan.ranked.slice(0, shown).some((s) => s.profile.coverage.low)) {
+      lines.push(pc.yellow("  ⚠ = esa oferta va mayoritariamente de cosas que este pack no mide: su fila es optimista."));
+    }
+  }
+
+  if (scan.withoutLevel.length > 0) {
+    const ejemplos = scan.withoutLevel
+      .slice(0, 3)
+      .map((s) => s.title)
+      .join(", ");
+    lines.push(
+      `\n  · ${scan.withoutLevel.length} oferta(s) no declaran seniority, así que no hay nivel con el que compararlas ` +
+        `(${ejemplos}${scan.withoutLevel.length > 3 ? "…" : ""}). Míralas con \`aptus jd\`.`,
+    );
+  }
+
+  if (scan.notEvaluable.length > 0) {
+    lines.push(
+      `  · ${scan.notEvaluable.length} oferta(s) no piden nada que este pack sepa medir: van de otra cosa y no salen arriba.`,
+    );
+  }
+
+  lines.push(
+    pc.dim(
+      "\n  · El orden es por escalones (niveles que te faltan o te sobran para lo que pide\n" +
+        "    cada oferta), no un % de encaje ni una probabilidad de que te cojan. Cada fila\n" +
+        "    enseña su veredicto para que lo puedas auditar; el detalle, con `aptus jd`.",
+    ),
+  );
+
+  return lines.join("\n");
 }
 
 function deltaCell(delta: number | null): string {

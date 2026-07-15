@@ -1,0 +1,104 @@
+import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { loadPackDir } from "../../content/loader.js";
+import { loadReadiness } from "../../content/readiness.js";
+import { loadHistory } from "../../content/history.js";
+import { loadJobs } from "../../content/jobhunt.js";
+import { measurements } from "../../core/evolution.js";
+import { scanJobs } from "../../core/jobs-scan.js";
+import { renderJobsScan } from "../render.js";
+import { DEFAULT_PACK } from "./start.js";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const PACKS_ROOT = join(ROOT, "packs");
+const DATA_DIR = join(ROOT, "data");
+
+// Misma base de datos (solo lectura) que usa la ponderación de mercado.
+const JOBHUNT_DB_PATH = join(homedir(), "workspace", "jobhunt", "data", "jobs.db");
+
+const DEFAULT_LIMIT = 20;
+
+/**
+ * Subcomando `jobs`: evalúa DE UNA VEZ las ofertas ya escaneadas por jobhunt
+ * contra tu readiness, en vez de ir pasándolas a mano una a una por `aptus jd`.
+ *
+ * Cada oferta recorre exactamente el mismo camino que `aptus jd` y con la MISMA
+ * evidencia (tu última sesión de medición), que es lo que las hace comparables
+ * entre sí. Solo lectura: no escribe en jobhunt ni en el historial.
+ */
+export async function jobsCommand(packName: string = DEFAULT_PACK, limit: number = DEFAULT_LIMIT): Promise<void> {
+  const packDir = join(PACKS_ROOT, packName);
+  const readinessPath = join(packDir, "readiness.yaml");
+  const historyPath = join(DATA_DIR, packName, "history.json");
+
+  if (!existsSync(readinessPath)) {
+    console.error(`\n✗ El pack '${packName}' no trae readiness.yaml: sin perfiles ni niveles no hay nada que evaluar.`);
+    process.exitCode = 1;
+    return;
+  }
+
+  let pack;
+  let cfg;
+  let history;
+  try {
+    pack = loadPackDir(packDir);
+    cfg = loadReadiness(readinessPath);
+    history = loadHistory(historyPath);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (!cfg.market_keywords) {
+    console.error(
+      `\n✗ El readiness.yaml de '${packName}' no declara market_keywords, que es lo que traduce el texto de una oferta a dimensiones.`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  // Degradación elegante: sin jobhunt, aptus sigue funcionando igual (INTEG-01).
+  const jobs = loadJobs(JOBHUNT_DB_PATH);
+  if (jobs === null) {
+    console.log(
+      `\nNo hay ofertas de jobhunt que evaluar: no se puede leer ${JOBHUNT_DB_PATH}.\n` +
+        `  Escanea ofertas con jobhunt y vuelve, o evalúa una suelta con \`aptus jd <fichero>\`.\n`,
+    );
+    return;
+  }
+
+  // Las descartadas en jobhunt no se evalúan: ya dijiste que no te interesan.
+  const activas = jobs.filter((j) => j.status !== "dismissed");
+  if (activas.length === 0) {
+    console.log(`\nNo hay ofertas activas en jobhunt (${jobs.length} escaneadas, todas descartadas).\n`);
+    return;
+  }
+
+  // Misma regla que `aptus jd`: la evidencia sale de la última MEDICIÓN con
+  // respuestas. Un repaso va cargado de tus fallos y daría un ranking peor del real.
+  const withAnswers = [...measurements(history)]
+    .reverse()
+    .find((r) => r.answers !== undefined && r.answers.length > 0);
+  if (!withAnswers) {
+    console.log(
+      `\nAún no hay una sesión de medición con respuestas de '${packName}', y sin evidencia no se puede evaluar ninguna oferta.\n` +
+        `  Haz una con \`aptus start --pack ${packName}\` y vuelve.\n`,
+    );
+    return;
+  }
+
+  const answers = withAnswers.answers!;
+  const answeredIds = new Set(answers.map((a) => a.questionId));
+  const bank = pack.questions.filter((q) => answeredIds.has(q.id));
+
+  const scan = scanJobs(activas, cfg.market_keywords, cfg, answers, bank);
+
+  console.log(`\n${renderJobsScan(scan, limit)}\n`);
+  console.log(
+    `Evidencia: tu sesión del ${new Date(withAnswers.timestamp).toLocaleString("es-ES")} (${answers.length} respuestas), ` +
+      `la misma para todas las ofertas.\n`,
+  );
+}

@@ -103,6 +103,24 @@ describe("extractJdProfile (extracción léxica)", () => {
     expect(p.totalHits).toBe(0);
   });
 
+  it("una palabra que dispara dos keywords solapadas cuenta UNA vez", () => {
+    // Bug real del pack: "producto" contiene "product", y "escalabilidad" contiene a
+    // la vez "escalab" y "scalab". Sumando por keyword, una palabra valía por dos y
+    // la dimensión con más pares español/inglés se llevaba el núcleo de cualquier oferta.
+    const keywords = { prod: ["product", "producto"] };
+    const p = extractJdProfile("Engineer\nCriterio de producto.", keywords, LEVELS);
+
+    expect(p.matched[0]!.hits).toBe(1); // una palabra, una mención
+    expect(p.matched[0]!.keywords).toEqual(["product", "producto"]); // ambas son evidencia
+  });
+
+  it("dos menciones separadas de verdad sí cuentan dos", () => {
+    const keywords = { prod: ["product", "producto"] };
+    const p = extractJdProfile("Engineer\nCriterio de producto y visión de producto.", keywords, LEVELS);
+
+    expect(p.matched[0]!.hits).toBe(2);
+  });
+
   it("las shares suman 1 cuando hay menciones", () => {
     const jd = "Full Stack + LLM\nReact, TypeScript, LLM, RAG.";
     const p = extractJdProfile(jd, KEYWORDS, LEVELS);
@@ -187,6 +205,47 @@ describe("extractJdProfile: requisito vs «valorable»", () => {
     // La línea del "plus" es opcional, pero la siguiente sigue siendo requisito.
     expect(p.matched.find((m) => m.dimension === "ml")!.optionalOnly).toBe(true);
     expect(p.matched.find((m) => m.dimension === "llm")!.optionalOnly).toBe(false);
+  });
+});
+
+describe("extractJdProfile: suelo absoluto de menciones para el núcleo", () => {
+  it("con evidencia mínima no hay núcleo por mucho que la share sea del 100%", () => {
+    // Caso real (Airbus): 3 menciones sueltas daban el 100% del peso y convertían
+    // una oferta de fabricación en un puesto de esa dimensión.
+    const p = extractJdProfile("Manufacturing Engineer\nAlgo de llm. Un rag. Otro llm.", KEYWORDS, LEVELS);
+    const llm = p.matched.find((m) => m.dimension === "llm")!;
+
+    expect(llm.hits).toBe(3);
+    expect(llm.share).toBe(1); // se lo lleva todo...
+    expect(llm.weight).not.toBe("core"); // ...pero 3 menciones no son un puesto
+    expect(buildJdRole(p).core).toEqual([]);
+  });
+
+  it("a partir del suelo, la dimensión ya puede ser núcleo", () => {
+    const p = extractJdProfile("AI Engineer\nllm, rag, prompt y más llm.", KEYWORDS, LEVELS);
+
+    expect(p.matched.find((m) => m.dimension === "llm")!.weight).toBe("core");
+  });
+});
+
+describe("extractJdProfile: falsos amigos del seniority", () => {
+  it("'Mid-Market' es un segmento de mercado, no un puesto mid", () => {
+    // Caso real (Elevenlabs) visto en las ofertas de jobhunt.
+    const p = extractJdProfile("Account Executive - Italy - Mid-Market\nllm, rag, prompt, llm.", KEYWORDS, LEVELS);
+
+    expect(p.targetLevelId).toBeNull();
+  });
+
+  it("'mid-size company' tampoco es un nivel", () => {
+    const p = extractJdProfile("Engineer\nSomos una mid-size company. llm, rag, prompt, llm.", KEYWORDS, LEVELS);
+
+    expect(p.targetLevelId).toBeNull();
+  });
+
+  it("pero un puesto mid de verdad se sigue leyendo", () => {
+    const p = extractJdProfile("Mid-level LLM Engineer\nllm, rag, prompt, llm.", KEYWORDS, LEVELS);
+
+    expect(p.targetLevelId).toBe("mid");
   });
 });
 
@@ -327,7 +386,7 @@ describe("jdVerdict", () => {
   }
 
   it("dice que llegas cuando alcanzas el nivel que pide la oferta", () => {
-    const v = verdictFor("Junior LLM Engineer\nLLM y RAG.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
 
     expect(v.targetLevelId).toBe("junior");
     expect(v.meetsTarget).toBe(true);
@@ -336,7 +395,7 @@ describe("jdVerdict", () => {
 
   it("cuenta los escalones que faltan cuando la oferta pide más de lo que demuestras", () => {
     // Falla lo difícil: no hay senior.
-    const v = verdictFor("Senior LLM Engineer\nLLM y RAG.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "b")]);
+    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "b")]);
 
     expect(v.targetLevelId).toBe("senior");
     expect(v.meetsTarget).toBe(false);
@@ -344,14 +403,14 @@ describe("jdVerdict", () => {
   });
 
   it("superar el nivel pedido también cuenta como llegar", () => {
-    const v = verdictFor("Junior LLM Engineer\nLLM y RAG.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
 
     expect(v.achievedLevelId).toBe("senior");
     expect(v.meetsTarget).toBe(true);
   });
 
   it("sin nivel declarado en la oferta no hay comparación (null, no un false engañoso)", () => {
-    const v = verdictFor("LLM Engineer\nLLM y RAG.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
 
     expect(v.meetsTarget).toBeNull();
     expect(v.levelsShort).toBeNull();
@@ -362,7 +421,7 @@ describe("jdVerdict", () => {
     const levels = [...LEVELS, staff];
     const cfg: ReadinessConfig = { ...CONFIG, levels };
 
-    const p = extractJdProfile("Staff LLM Engineer\nSolo LLM y RAG.", KEYWORDS, levels);
+    const p = extractJdProfile("Staff LLM Engineer\nSolo LLM, RAG y prompt.", KEYWORDS, levels);
     const r = computeJdReadiness([ans("e1", "a")], bank, cfg, p)!;
     const v = jdVerdict(r, p, levels);
 
@@ -372,7 +431,7 @@ describe("jdVerdict", () => {
   });
 
   it("sin niveles que exijan amplitud no hay nada que avisar", () => {
-    const v = verdictFor("Senior LLM Engineer\nLLM y RAG.", [ans("e1", "a")]);
+    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a")]);
 
     expect(v.capReason).toBeNull(); // LEVELS no declara breadth en ningún nivel
   });

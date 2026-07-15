@@ -2,29 +2,88 @@ import { existsSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 
 /**
- * Adaptador de SOLO LECTURA hacia jobhunt (Phase 6, INTEG-01). Lee los textos de
- * las ofertas escaneadas para medir la demanda de mercado por dimensión.
+ * Adaptador de SOLO LECTURA hacia jobhunt (Phase 6, INTEG-01). Lee las ofertas
+ * escaneadas para medir la demanda de mercado por dimensión (`loadJobTexts`) y
+ * para evaluarlas una a una contra tu readiness (`loadJobs`).
  *
  * Degradación elegante (criterio 2): si la base de datos no existe o no se puede
  * leer por cualquier motivo, devuelve `null` y Aptus sigue exactamente igual sin
- * la ponderación de mercado. Nunca lanza ni escribe: es puramente lectura.
+ * esa capa. Nunca lanza ni escribe: es puramente lectura.
+ *
+ * NO se importa el scoring propio de jobhunt (`score`, `score_cv_match`…): eso es
+ * su criterio, no el nuestro, y mezclarlo metería por la puerta de atrás justo el
+ * "% de encaje" que este proyecto no quiere.
  */
-export function loadJobTexts(dbPath: string): string[] | null {
+
+export interface JobRow {
+  id: string | null;
+  title: string;
+  company: string | null;
+  url: string | null;
+  status: string | null;
+  description: string;
+}
+
+interface RichRow {
+  id: string | null;
+  title: string | null;
+  company: string | null;
+  job_url: string | null;
+  status: string | null;
+  description: string | null;
+}
+
+interface MinimalRow {
+  title: string | null;
+  description: string | null;
+}
+
+/**
+ * Lee las ofertas con sus metadatos. Si el esquema no trae las columnas ricas
+ * (bases de datos mínimas, fixtures de test), reintenta con title+description y
+ * deja el resto en null: mejor una oferta sin empresa que ninguna oferta.
+ */
+export function loadJobs(dbPath: string): JobRow[] | null {
   if (!existsSync(dbPath)) return null;
 
   try {
     const db = new DatabaseSync(dbPath, { readOnly: true });
     try {
-      const rows = db.prepare("SELECT title, description FROM jobs").all() as {
-        title: string | null;
-        description: string | null;
-      }[];
-      return rows.map((r) => `${r.title ?? ""} ${r.description ?? ""}`);
+      try {
+        const rows = db
+          .prepare("SELECT id, title, company, job_url, status, description FROM jobs")
+          .all() as unknown as RichRow[];
+        return rows.map((r) => ({
+          id: r.id,
+          title: r.title ?? "",
+          company: r.company,
+          url: r.job_url,
+          status: r.status,
+          description: r.description ?? "",
+        }));
+      } catch {
+        // Esquema mínimo: solo lo que garantiza el contrato original.
+        const rows = db.prepare("SELECT title, description FROM jobs").all() as unknown as MinimalRow[];
+        return rows.map((r) => ({
+          id: null,
+          title: r.title ?? "",
+          company: null,
+          url: null,
+          status: null,
+          description: r.description ?? "",
+        }));
+      }
     } finally {
       db.close();
     }
   } catch {
-    // Cualquier problema (schema distinto, fichero corrupto, permisos): degradar.
+    // Cualquier problema (fichero corrupto, permisos, sin tabla jobs): degradar.
     return null;
   }
+}
+
+/** Los textos de las ofertas, para medir la demanda de mercado por dimensión. */
+export function loadJobTexts(dbPath: string): string[] | null {
+  const jobs = loadJobs(dbPath);
+  return jobs === null ? null : jobs.map((j) => `${j.title} ${j.description}`);
 }

@@ -50,6 +50,24 @@ export const CORE_RATIO = 0.5;
 export const INCIDENTAL_SHARE = 0.1;
 
 /**
+ * Menciones ABSOLUTAS mínimas para que una dimensión pueda ser núcleo del puesto.
+ * `share` es relativo, y con una base minúscula miente: una oferta de fabricación
+ * con 3 menciones sueltas de "product" daba a esa dimensión el 100% del peso y se
+ * convertía, a ojos de aptus, en un puesto de producto. Visto en las ofertas
+ * reales de jobhunt (Airbus, 15 jul). Con tan poca evidencia no hay núcleo: la
+ * oferta va de otra cosa.
+ */
+export const MIN_CORE_HITS = 4;
+
+/**
+ * Falsos amigos del seniority: expresiones donde una palabra de nivel NO habla de
+ * nivel. "Account Executive - Mid-Market" es un segmento de mercado, no un puesto
+ * mid (visto en las ofertas reales de jobhunt, 15 jul). Se limpian del texto ANTES
+ * de buscar el nivel.
+ */
+const LEVEL_NOISE = /\bmid[-\s](?:market|size|sized|term|cap|caps)\b/gi;
+
+/**
  * Cuánto pesa una mención que solo aparece en un "valorable"/"nice to have" frente
  * a una en los requisitos. No es cero: la oferta lo menciona, algo pide. Pero no
  * puede pesar lo mismo que un requisito duro.
@@ -156,6 +174,10 @@ export interface JdVerdict {
   targetLevelLabel: string | null;
   meetsTarget: boolean | null; // null = la oferta no declara seniority: nada que comparar
   levelsShort: number | null; // escalones que faltan (0 si llegas o lo superas)
+  // Escalones de diferencia CON SIGNO: +1 = superas en uno lo que pide, -2 = te
+  // faltan dos. Es `levelsShort` sin recortar en 0, para poder ordenar varias
+  // ofertas por una cantidad real y auditable (niveles), nunca por un "% de encaje".
+  levelDelta: number | null;
   // Niveles que esta oferta no permite evaluar por no pedir amplitud (ver
   // `capReason`). El motor exige dimensiones secundarias para conceder staff; si la
   // oferta no pide ninguna con peso, ese nivel no es evaluable para ella y hay que
@@ -170,16 +192,50 @@ export interface JdGap extends Gap {
   priority: number; // clave de orden interna: debilidad × (1 + share). No es un score.
 }
 
-/** Cuenta apariciones de `needle` en `haystack` (ambos ya en minúsculas). */
-function countOccurrences(haystack: string, needle: string): number {
-  if (needle.length === 0) return 0;
-  let count = 0;
-  let idx = 0;
-  while ((idx = haystack.indexOf(needle, idx)) !== -1) {
-    count += 1;
-    idx += needle.length;
+/**
+ * Cuenta cuántos LUGARES DISTINTOS del texto mencionan algo de `needles`, no la
+ * suma de apariciones keyword a keyword.
+ *
+ * La diferencia importa y costó un bug real: las keywords de un pack se solapan
+ * ("producto" contiene "product"; "escalabilidad" contiene a la vez "escalab" y
+ * "scalab"), así que sumar por keyword hacía que UNA palabra contase por dos. Las
+ * dimensiones con más pares español/inglés se inflaban solas y se llevaban el
+ * núcleo de cualquier oferta. Solapando los tramos y fusionándolos, una mención es
+ * una mención.
+ *
+ * Devuelve también qué keywords dispararon: son la evidencia auditable.
+ */
+function countMentions(haystack: string, needles: string[]): { hits: number; matched: string[] } {
+  const spans: [number, number][] = [];
+  const matched: string[] = [];
+
+  for (const needle of needles) {
+    const lowered = needle.toLowerCase();
+    if (lowered.length === 0) continue;
+    let idx = 0;
+    let found = false;
+    while ((idx = haystack.indexOf(lowered, idx)) !== -1) {
+      spans.push([idx, idx + lowered.length]);
+      found = true;
+      idx += lowered.length;
+    }
+    if (found) matched.push(needle);
   }
-  return count;
+
+  // Fusiona tramos solapados: cada tramo resultante es UNA mención.
+  spans.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  let hits = 0;
+  let lastEnd = -1;
+  for (const [start, end] of spans) {
+    if (start >= lastEnd) {
+      hits += 1;
+      lastEnd = end;
+    } else {
+      lastEnd = Math.max(lastEnd, end);
+    }
+  }
+
+  return { hits, matched };
 }
 
 function escapeRegex(s: string): string {
@@ -310,8 +366,9 @@ function findBlindSpots(
   });
 
   const terms = [...new Set(spots)].sort();
-  const hits = terms.reduce((acc, t) => acc + countOccurrences(lowered, t.toLowerCase()), 0);
-  return { terms, hits };
+  // Mismo criterio que las dimensiones: lugares distintos, no suma de términos
+  // (aquí también se solapan: "postgresql" contiene "postgres").
+  return { terms, hits: countMentions(lowered, terms).hits };
 }
 
 /**
@@ -337,20 +394,17 @@ export function extractJdProfile(
   const neutral = textOf("neutral");
 
   const counted = Object.entries(keywords).map(([dimension, words]) => {
-    const matchedKeywords: string[] = [];
-    let hard = 0; // menciones en requisitos o en prosa neutra
-    let soft = 0; // menciones en "valorable"
+    // Se cuenta por separado en cada tramo (requisito / neutro / valorable) para
+    // poder pesar distinto lo que solo es un "nice to have".
+    const enRequisitos = countMentions(required, words);
+    const enNeutro = countMentions(neutral, words);
+    const enValorable = countMentions(optional, words);
 
-    for (const word of words) {
-      const needle = word.toLowerCase();
-      const inHard = countOccurrences(required, needle) + countOccurrences(neutral, needle);
-      const inSoft = countOccurrences(optional, needle);
-      if (inHard + inSoft > 0) {
-        hard += inHard;
-        soft += inSoft;
-        matchedKeywords.push(word);
-      }
-    }
+    const hard = enRequisitos.hits + enNeutro.hits;
+    const soft = enValorable.hits;
+    const matchedKeywords = words.filter((w) =>
+      [...enRequisitos.matched, ...enNeutro.matched, ...enValorable.matched].includes(w),
+    );
 
     return {
       dimension,
@@ -372,7 +426,8 @@ export function extractJdProfile(
       const share = totalWeighted > 0 ? c.weightedHits / totalWeighted : 0;
       let weight: DimensionWeight;
       if (share < INCIDENTAL_SHARE) weight = "incidental";
-      else if (c.weightedHits >= maxWeighted * CORE_RATIO && !c.optionalOnly) weight = "core";
+      else if (c.weightedHits >= maxWeighted * CORE_RATIO && !c.optionalOnly && c.hits >= MIN_CORE_HITS)
+        weight = "core";
       else weight = "secondary";
 
       return { ...c, share, weight };
@@ -391,7 +446,9 @@ export function extractJdProfile(
   // un 1. Se deja en 1 (nada que reprochar a la cobertura) y que hable `density`.
   const ratio = tecnico > 0 ? totalHits / tecnico : 1;
 
-  const target = levelFromWords(jdText, levels) ?? levelFromYears(jdText, levels);
+  // Se limpian los falsos amigos ("Mid-Market") antes de leer el nivel, no después.
+  const paraNivel = jdText.replace(LEVEL_NOISE, " ");
+  const target = levelFromWords(paraNivel, levels) ?? levelFromYears(paraNivel, levels);
 
   return {
     title: extractJdTitle(jdText),
@@ -476,6 +533,7 @@ export function jdVerdict(
       targetLevelLabel: null,
       meetsTarget: null,
       levelsShort: null,
+      levelDelta: null,
       capReason,
     };
   }
@@ -488,6 +546,7 @@ export function jdVerdict(
     targetLevelLabel: profile.targetLevelLabel,
     meetsTarget: achievedIdx >= targetIdx,
     levelsShort: Math.max(0, targetIdx - achievedIdx),
+    levelDelta: achievedIdx - targetIdx,
     capReason,
   };
 }

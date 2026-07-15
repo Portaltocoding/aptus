@@ -7,6 +7,7 @@ import { verifyPackCommand } from "./cli/commands/verify-pack.js";
 import { reportCommand } from "./cli/commands/report.js";
 import { jdCommand } from "./cli/commands/jd.js";
 import { reviewCommand } from "./cli/commands/review.js";
+import { jobsCommand } from "./cli/commands/jobs.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -62,6 +63,15 @@ program
   .option("-p, --pack <name>", "pack con el que evaluar la oferta", DEFAULT_PACK)
   .action(async (fichero: string, opts: { pack: string }) => {
     await jdCommand(fichero, opts.pack);
+  });
+
+program
+  .command("jobs")
+  .description("Evalúa en bloque las ofertas ya escaneadas por jobhunt contra tu readiness")
+  .option("-p, --pack <name>", "pack con el que evaluarlas", DEFAULT_PACK)
+  .option("-l, --limit <n>", "cuántas mostrar", (v: string) => Number.parseInt(v, 10), 20)
+  .action(async (opts: { pack: string; limit: number }) => {
+    await jobsCommand(opts.pack, opts.limit);
   });
 
 program
