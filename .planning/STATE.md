@@ -145,7 +145,7 @@ Items acknowledged and carried forward from previous milestone close:
 | v2 | RES-05 (resurfacing spaced-repetition) | ✅ Hecho 15 jul 2026 (`aptus review`) | Roadmap v1 |
 | v3 | CALIB-01 (lo que tu CV afirma vs lo que demuestras) | Diferido — **necesita sesión real** | v2 close |
 | v3 | JD-03 (jubilar la extracción léxica: el LLM lee, aptus mide) | Diferido | v2 close |
-| v3 | INTEG-02 (frontera aptus / jobhunt-careerops / cv-trainer-mcp) | Diferido | v2 close |
+| v3 | INTEG-02 (frontera entre sistemas) | ~ cv-trainer-mcp RETIRADO 15 jul (datos/ vacío: nunca se usó). Quedan 2: jobhunt = mercado, aptus = conocimiento | v2 close |
 | v3 | RES-06 (research web bajo petición) | Diferido — sin definir | Roadmap v1 |
 | v3 | PACKGEN-02 (generador in-tool con LLM, Enfoque B) | Diferido a conciencia | 14 jul |
 | v3 | JOBS-02 (las 126 ofertas sin seniority se caen de los cubos) | Diferido | v2 close |
