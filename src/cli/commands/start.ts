@@ -83,8 +83,10 @@ export async function startCommand(packName: string = DEFAULT_PACK): Promise<voi
   const calib = calibration(answered, selected);
   const roles = readinessCfg ? computeReadiness(answered, selected, readinessCfg) : [];
 
-  // Persistir la sesión (PERS-01) y mostrar la evolución (PERS-02).
-  const record = buildSessionRecord(new Date().toISOString(), result, roles);
+  // Persistir la sesión (PERS-01) y mostrar la evolución (PERS-02). Se guardan
+  // también las respuestas crudas para poder reevaluar esta sesión contra una
+  // oferta concreta (`aptus jd`) sin tener que repetir el test.
+  const record = buildSessionRecord(new Date().toISOString(), result, roles, answered);
   const updatedHistory = [...history, record];
   saveHistory(historyPath, updatedHistory);
 

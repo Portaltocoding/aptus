@@ -1,4 +1,4 @@
-import type { ScoreResult } from "./scoring.js";
+import type { AnsweredQuestion, ScoreResult } from "./scoring.js";
 import type { RoleReadiness } from "./readiness.js";
 
 /**
@@ -26,6 +26,10 @@ export interface SessionRecord {
   timestamp: string; // ISO, generado en la capa de I/O
   byDimension: SessionDimensionScore[];
   readiness: SessionRoleReadiness[];
+  // Respuestas crudas: permiten reevaluar la sesión contra una oferta concreta
+  // (`aptus jd`) sin repetir el test. Opcional: los registros anteriores a este
+  // campo no las traen y el resto del sistema funciona igual sin ellas.
+  answers?: AnsweredQuestion[];
 }
 
 export interface DimensionTrend {
@@ -56,9 +60,11 @@ export function buildSessionRecord(
   timestamp: string,
   score: ScoreResult,
   readiness: RoleReadiness[],
+  answers?: AnsweredQuestion[],
 ): SessionRecord {
   return {
     timestamp,
+    ...(answers === undefined ? {} : { answers }),
     byDimension: score.byDimension.map((d) => ({
       dimension: d.dimension,
       answered: d.answered,

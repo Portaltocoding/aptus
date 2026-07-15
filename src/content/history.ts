@@ -25,10 +25,21 @@ const SessionRoleReadinessSchema = z.object({
   levelLabel: z.string(),
 });
 
+// Respuestas crudas de la sesión. OPCIONAL a propósito: los historiales escritos
+// antes de que existiera este campo siguen siendo válidos y se cargan igual (solo
+// no se pueden reevaluar contra una oferta). Sin esto, evaluar una JD nueva
+// obligaría a repetir el test entero.
+const AnsweredQuestionSchema = z.object({
+  questionId: z.string(),
+  selectedOptionId: z.string().nullable(),
+  confidence: z.enum(["baja", "media", "alta"]).nullable().optional(),
+});
+
 const SessionRecordSchema = z.object({
   timestamp: z.string(),
   byDimension: z.array(SessionDimensionScoreSchema),
   readiness: z.array(SessionRoleReadinessSchema),
+  answers: z.array(AnsweredQuestionSchema).optional(),
 });
 
 const HistorySchema = z.array(SessionRecordSchema);

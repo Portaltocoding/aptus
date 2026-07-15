@@ -2,9 +2,10 @@ import Table from "cli-table3";
 import pc from "picocolors";
 import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
-import type { Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
+import type { Difficulty, Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
 import type { EvolutionReport } from "../core/evolution.js";
 import type { MarketDemand, WeightedGap } from "../core/market.js";
+import type { JdGap, JdProfile, JdVerdict } from "../core/jd.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -213,6 +214,183 @@ export function renderWeightedGaps(gaps: WeightedGap[], demand: MarketDemand): s
     `Gaps priorizados por debilidad × demanda de mercado (${demand.totalJobs} ofertas de jobhunt):\n` +
     lines.join("\n")
   );
+}
+
+/**
+ * Formatea lo que la oferta pide: qué dimensiones detecta, con cuánta fuerza y
+ * —sobre todo— CON QUÉ EVIDENCIA (las keywords que dispararon). La extracción es
+ * léxica y puede equivocarse, así que las keywords se muestran siempre para poder
+ * auditarlas a ojo. Solo presenta: el análisis vive en core/jd.ts.
+ */
+export function renderJdProfile(profile: JdProfile): string {
+  const lines: string[] = [pc.bold(`Oferta: ${profile.title || "(sin titular)"}`)];
+
+  if (profile.targetLevelId !== null) {
+    lines.push(
+      `  Nivel que pide: ${pc.bold(profile.targetLevelLabel!)} (detectado por "${profile.targetEvidence}")`,
+    );
+  } else {
+    lines.push(`  Nivel que pide: ${pc.yellow("no lo declara")} — no se compara contra ningún nivel objetivo.`);
+  }
+
+  const PESO: Record<string, (s: string) => string> = {
+    core: pc.bold,
+    secondary: (s) => s,
+    incidental: pc.dim,
+  };
+  const ETIQUETA: Record<string, string> = {
+    core: "núcleo",
+    secondary: "secundaria",
+    incidental: "incidental",
+  };
+
+  const table = new Table({ head: ["Dimensión", "Peso en la oferta", "Menciones", "Keywords que la disparan"] });
+  for (const m of profile.matched) {
+    const peso = PESO[m.weight]!(ETIQUETA[m.weight]!);
+    const soloValorable = m.optionalOnly ? pc.yellow(" · solo en «valorable»") : "";
+    table.push([
+      m.dimension,
+      `${peso} ${bar(m.share, 10)} ${Math.round(m.share * 100)}%${soloValorable}`,
+      String(m.hits),
+      m.keywords.join(", "),
+    ]);
+  }
+
+  const avisos: string[] = [];
+
+  // Lo más importante que puede decir esta vista: lo que la oferta pide y NO se
+  // mide. Sin esto, el veredicto sale calculado solo sobre lo que el pack conoce y
+  // engaña a tu favor.
+  if (profile.coverage.blindSpots.length > 0) {
+    avisos.push(
+      pc.yellow("  ⚠ Puntos ciegos — la oferta también pide esto y aptus NO lo mide:\n") +
+        `    ${profile.coverage.blindSpots.join(", ")}\n` +
+        "    El readiness de abajo NO los tiene en cuenta: es más optimista que la oferta real.",
+    );
+  }
+  if (profile.coverage.low) {
+    const c = profile.coverage;
+    // Se dice QUÉ señal ha saltado y con qué números: un aviso que no se puede
+    // auditar es un aviso que se acaba ignorando.
+    const medibles = c.mappedHits === 1 ? "1 mención medible" : `${c.mappedHits} menciones medibles`;
+    const motivo =
+      c.ratio < 1 && c.mappedHits + c.blindHits > 0
+        ? `de lo técnico que reconozco en ella, solo mido el ${Math.round(c.ratio * 100)}% ` +
+          `(${medibles} frente a ${c.blindHits} que no mido)`
+        : `apenas toca lo que mido: ${c.density.toFixed(1)} menciones por cada 100 palabras, en ${c.words}`;
+    avisos.push(pc.red(`  ⚠ Esta oferta va de otra cosa — ${motivo}.\n    Tómate el veredicto de abajo con pinzas.`));
+  }
+
+  const notas: string[] = [];
+  if (profile.unmatched.length > 0) {
+    notas.push(`  · La oferta no menciona: ${profile.unmatched.join(", ")} — fuera del perfil de este puesto.`);
+  }
+  notas.push(
+    pc.dim(
+      "  · Extracción léxica: cuenta keywords, no entiende la oferta. No distingue\n" +
+        '    "imprescindible RAG" de "no hace falta RAG". Revisa las keywords antes de fiarte.',
+    ),
+  );
+
+  return (
+    lines.join("\n") +
+    "\n\nLo que pide la oferta:\n" +
+    table.toString() +
+    "\n" +
+    [...avisos, ...notas].join("\n")
+  );
+}
+
+/**
+ * Formatea el readiness para ESTE puesto: el veredicto contra el nivel que pide la
+ * oferta y la evidencia por dificultad con su N detrás. NUNCA un "% de encaje" ni
+ * una probabilidad de que te cojan (RES-02): el mismo rasero que el readiness por
+ * rol, aplicado al rol ad-hoc que sale de la oferta.
+ */
+export function renderJdReadiness(readiness: RoleReadiness, verdict: JdVerdict): string {
+  const alcanzado = levelColor(verdict.achievedLevelId)(verdict.achievedLevelLabel);
+
+  let veredicto: string;
+  if (verdict.meetsTarget === null) {
+    veredicto = `  Para este puesto alcanzas ${alcanzado}. La oferta no dice qué nivel busca, así que no hay objetivo contra el que medirte.`;
+  } else if (verdict.meetsTarget) {
+    veredicto =
+      `  La oferta pide ${pc.bold(verdict.targetLevelLabel!)} y para su perfil alcanzas ${alcanzado} — ` +
+      pc.green("llegas al nivel que pide") +
+      ".";
+  } else {
+    const n = verdict.levelsShort!;
+    const escalones = n === 1 ? "te falta 1 escalón" : `te faltan ${n} escalones`;
+    veredicto =
+      `  La oferta pide ${pc.bold(verdict.targetLevelLabel!)} y para su perfil alcanzas ${alcanzado} — ` +
+      pc.red(escalones) +
+      ".";
+  }
+
+  const byTier = new Map(readiness.byDifficulty.map((t) => [t.difficulty, t]));
+  const table = new Table({ head: ["Fácil", "Media", "Difícil", "Experto", "N (núcleo de la oferta)"] });
+  const cell = (d: Difficulty): string => {
+    const t = byTier.get(d);
+    return t ? tierCell(t) : "—";
+  };
+  table.push([cell("easy"), cell("medium"), cell("hard"), cell("experto"), String(readiness.answered)]);
+
+  const dims = (label: string, list: typeof readiness.byDimension): string => {
+    if (list.length === 0) return "";
+    const detalle = list
+      .map((d) =>
+        d.answered > 0
+          ? `${d.dimension} ${Math.round(d.accuracy * 100)}% (${d.correct}/${d.answered})`
+          : `${d.dimension} — (sin preguntas respondidas)`,
+      )
+      .join("  ·  ");
+    return `\n  ${label}: ${detalle}`;
+  };
+
+  // Si la oferta no pide amplitud, hay niveles que no son evaluables para ella por
+  // construcción. Se dice; no se capa el resultado en silencio.
+  const tope = verdict.capReason === null ? "" : `\n  ${pc.dim("· " + verdict.capReason)}`;
+
+  // El veredicto mide CONOCIMIENTO sobre las dimensiones del pack. Ni experiencia
+  // en producción, ni incidentes, ni mentoría — que es media oferta senior.
+  const alcance = pc.dim(
+    "  · Mide tu conocimiento en las dimensiones del pack, no tu experiencia:\n" +
+      "    producción, incidentes o mentoría no entran aquí y pesan en un puesto real.",
+  );
+
+  return (
+    "Readiness para ESTE puesto (misma vara que el readiness por rol: tu acierto por dificultad):\n" +
+    veredicto +
+    "\n" +
+    table.toString() +
+    dims("Núcleo de la oferta", readiness.byDimension) +
+    dims("Secundarias (amplitud)", readiness.secondary) +
+    tope +
+    "\n" +
+    alcance
+  );
+}
+
+/**
+ * Como renderGaps, pero acotado a lo que ESTA oferta pide y ordenado por debilidad
+ * × cuánto lo pide. Un fallo en algo que la oferta no menciona no sale aquí: no es
+ * un gap para este puesto. No es un ranking de empleabilidad.
+ */
+export function renderJdGaps(gaps: JdGap[]): string {
+  if (gaps.length === 0) {
+    return "Gaps para este puesto: ninguno — vas al 70% o más en todo lo que la oferta pide y has respondido.";
+  }
+
+  const lines = gaps.map((g) => {
+    const head = pc.red(`te falta ${g.dimension}`);
+    const acc = `${Math.round(g.accuracy * 100)}% (${g.correct}/${g.answered})`;
+    const pide = g.optionalOnly
+      ? pc.dim("la oferta solo lo pone como «valorable»")
+      : pc.cyan(`la oferta lo pide: ${Math.round(g.share * 100)}% de sus menciones`);
+    return `  • ${head} — ${acc}  ·  ${pide}\n    → ${g.study}`;
+  });
+
+  return "Gaps para este puesto (debilidad × cuánto lo pide la oferta):\n" + lines.join("\n");
 }
 
 function deltaCell(delta: number | null): string {
