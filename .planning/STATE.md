@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
+milestone: v2.0
+milestone_name: multi-tema + evaluación contra el mercado real
 current_phase: 6
 current_phase_name: Integración con jobhunt
 status: complete
-stopped_at: context exhaustion at 75% (2026-07-14)
+stopped_at: v2 cerrado; bloqueado a la espera de una sesión de medición real
 last_updated: "2026-07-14T23:24:21.384Z"
 last_activity: 2026-07-15
-last_activity_desc: "v2: 'aptus review' — repaso espaciado (RES-05) aislado de la medición; 192/192 tests"
+last_activity_desc: "v2 CERRADO: jd + review + jobs; 218/218 tests. Bloqueante: no existe ninguna sesión real."
 progress:
   total_phases: 6
   completed_phases: 6
@@ -24,18 +24,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-14)
 
 **Core value:** Decirle a Carlos con honestidad, a nivel de conocimiento, cómo de preparado está para cada rol (AI Engineer, LLM Engineer, ML Engineer, Fullstack, Product Engineer), con gaps accionables — nunca una "probabilidad de contratación" inventada.
-**Current focus:** Phase 1 — Fundamento end-to-end
+**Current focus:** v2 cerrado. **El siguiente paso NO es código: es que Carlos haga una sesión de medición real** (`aptus start`, ~120 preguntas). Nada de v3 se puede decidir sin evidencia.
 
 ## Current Position
 
-Phase: 6 of 6 (Integración con jobhunt) — COMPLETA. Milestone v1 completo.
-Plan: Phases 1-6 completas (10/10 planes)
-Status: Milestone v1 completo. **v2 EN CURSO** (a petición de Carlos): multi-tema + banco mucho mayor y creativo.
-Last activity: 2026-07-15 — v2: `aptus review` — repaso espaciado (RES-05), aislado de la medición; 192/192 tests
+Milestone v1: COMPLETO (6/6 fases, 10/10 planes).
+Milestone **v2: CERRADO** el 15 jul 2026 — multi-tema, banco de 255, flujo de packs, `jd`, `review`, `jobs`. 218/218 tests.
+Last activity: 2026-07-15 — v2 cerrado; `aptus jobs` + cubos por veredicto + keywords débiles.
 
 Progress v1: [██████████] 100%
+Progress v2: [██████████] 100%
 
-## v2 en curso (14 jul 2026)
+## ⚠ BLOQUEANTE — leer antes de escribir una línea de código
+
+**Aptus nunca se ha ejecutado de verdad.** A 15 jul 2026 `data/` está vacío: no existe ninguna sesión de medición. TODO lo verificado estos dos días (readiness, las 402 ofertas en cubos, el repaso) usó historiales SINTÉTICOS generados para probar. Hoy `aptus jd`, `aptus jobs` y `aptus review` responden "haz una sesión y vuelve".
+
+El siguiente paso del proyecto **no es una feature**: es que Carlos haga `aptus start` (~120 preguntas, ~1 h). Hasta entonces:
+- No hay nada que integrar con jobhunt/cv-trainer (no hay evidencia que exponer).
+- No se puede decidir JD-03 ni CALIB-01 con criterio.
+- El core value del proyecto ("decirle a Carlos con honestidad cómo de preparado está") sigue sin cumplirse ni una vez.
+
+Patrón observado (14-15 jul): cada vez que se preguntó "¿qué sigue?", la respuesta fue otra feature, nunca la sesión. Construir el instrumento es más agradecido que subirse a la báscula. Que conste, sin reproche.
+
+Camino verificado el 15 jul (round-trip completo, sin el prompt): 120 preguntas, 24 por dimensión, respuestas + confianza persistidas y releídas, `kind` ausente = medición, readiness para los 5 roles. La sesión real no se perderá al guardar.
+
+## v2 — CERRADO (15 jul 2026)
 
 - **Multi-tema (PACK-02): LISTO.** Pack = directorio (`pack.yaml` + `questions/<dim>.yaml`, `readiness.yaml` opcional). `aptus packs` lista; `aptus start --pack <nombre>` elige; historial por pack. Crear packs de cualquier tema ya no requiere código.
 - **Tipos de pregunta creativos: LISTO.** Campo `type` (concepto|diagrama|codigo|escenario); enunciados multilínea (diagramas ASCII, snippets de código) renderizados en el select.
@@ -130,6 +143,12 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|--------|-------------|
 | v2 | PACK-02 (packs adicionales de otros dominios) | ✅ Infra hecha 14 jul 2026 | Roadmap v1 |
 | v2 | RES-05 (resurfacing spaced-repetition) | ✅ Hecho 15 jul 2026 (`aptus review`) | Roadmap v1 |
+| v3 | CALIB-01 (lo que tu CV afirma vs lo que demuestras) | Diferido — **necesita sesión real** | v2 close |
+| v3 | JD-03 (jubilar la extracción léxica: el LLM lee, aptus mide) | Diferido | v2 close |
+| v3 | INTEG-02 (frontera aptus / jobhunt-careerops / cv-trainer-mcp) | Diferido | v2 close |
+| v3 | RES-06 (research web bajo petición) | Diferido — sin definir | Roadmap v1 |
+| v3 | PACKGEN-02 (generador in-tool con LLM, Enfoque B) | Diferido a conciencia | 14 jul |
+| v3 | JOBS-02 (las 126 ofertas sin seniority se caen de los cubos) | Diferido | v2 close |
 
 ## Session Continuity
 

@@ -38,11 +38,32 @@ Motor genérico de evaluación de aptitud por terminal + packs de conocimiento. 
 - [x] **PERS-01**: Los resultados de cada sesión se guardan localmente.
 - [x] **PERS-02**: El usuario puede ver la evolución entre sesiones (subir sobre la baseline con el tiempo).
 
-## v2 / Deferred
+## v2 — CERRADO (15 jul 2026)
 
+Tema de v2: **multi-tema + banco grande + evaluación contra el mercado real**.
+
+- [x] **PACK-02**: Multi-pack (ver abajo). Infra lista; currar packs nuevos ya no toca código.
+- [x] **BANK-01**: Banco ~250 curado a mano. Hecho: **255 preguntas**, 5 dimensiones a 50+, todas con tramo `experto`, tipos concepto/diagrama/código/escenario.
+- [x] **SEN-01**: Seniority hasta staff: 4 tramos de dificultad + `breadth` (amplitud en secundarias). Sin evidencia experto no hay staff.
+- [x] **PACKFLOW-01**: Bucle asistido de creación de packs: `aptus new-pack` → fuentes en `sources/` → skill `build-pack` (Claude cura) → `aptus verify-pack` (auditPack: "curadas, no relleno").
+- [x] **JD-01**: `aptus jd <fichero>` — readiness contra una oferta concreta. La JD se traduce a un ROL AD-HOC y se pasa por el motor de readiness de siempre. Sin score de encaje.
+- [x] **JD-02**: Guardas de honestidad del JD: puntos ciegos (`tech-lexicon`), cobertura (ratio + densidad), requisito vs «valorable», menciones incidentales, keywords débiles, falsos amigos del seniority. Todas nacieron de un fallo observado, no de una teoría.
+- [x] **RES-05**: `aptus review` — repaso espaciado (Leitner) de lo peor puntuado, aislado de la medición (`kind`).
+- [x] **JOBS-01**: `aptus jobs` — escaneo en bloque de las 402 ofertas de jobhunt, agrupadas en cubos por veredicto. Solo lectura; no importa el scoring de jobhunt.
 - [x] **INTEG-01** (opcional): Adaptador de solo lectura hacia jobhunt (`~/workspace/jobhunt/data/jobs.db`) para ponderar baselines/gaps por demanda real de mercado. Degradación elegante si no existe.
 - [~] **PACK-02**: Packs adicionales de otros dominios (certificaciones, idiomas, etc.) — reutilizan el motor sin tocar código. **Infra lista (v2, 14 jul 2026)**: un pack es un directorio (`pack.yaml` + `questions/*.yaml`, `readiness.yaml` opcional), descubierto con `aptus packs` y elegido con `aptus start --pack <nombre>`; historial por pack. Crear packs concretos ya no requiere tocar código. Falta: currar packs de otros temas cuando se quieran.
 - [x] **RES-05**: Resurfacing tipo spaced-repetition de los temas peor puntuados. **Hecho (v2, 15 jul 2026)**: `aptus review` — Leitner (5 cajas; acertar sube, fallar devuelve a la 1) sobre las respuestas crudas del historial. Modo ESTUDIO, no medición: la tanda carga hacia lo peor puntuado (al revés que `selectBalanced`), así que no da readiness ni gaps y se marca `kind: "review"` para que evolución, informe y `aptus jd` la ignoren.
+
+## v3 — Diferido (abierto, sin fecha)
+
+**Precondición de todo v3: una sesión de medición REAL.** A 15 jul 2026 no existe ninguna (`data/` vacío); todo lo verificado hasta ahora usó historiales sintéticos. Sin evidencia real, `jd`/`jobs`/`review` no producen nada y no se puede decidir nada de lo de abajo con criterio.
+
+- [ ] **CALIB-01** (el interesante): comparar lo que tu CV AFIRMA (jobhunt/careerops, cv-trainer-mcp) con lo que DEMUESTRAS (aptus). Esa distancia es la señal más valiosa que puede dar ninguno de los tres sistemas, y hoy no la da nadie. Es la calibración confianza-vs-acierto de aptus, pero a nivel de carrera.
+- [ ] **JD-03**: jubilar la extracción léxica. Los 6 umbrales (`CORE_RATIO`, `INCIDENTAL_SHARE`, `MIN_CORE_HITS`, `OPTIONAL_WEIGHT`, `LOW_DENSITY`, `MIN_COVERAGE`) + `weak_keywords` son el síntoma de pelear la batalla equivocada: leer prosa es lo que un LLM hace bien y contar palabras hace mal. Cada bug de las 402 ofertas reales ("product" ×14, "Mid-Market", "reporting to a Team Lead", "data science staff") fue la misma derrota. Arreglo propuesto: **el LLM lee, aptus mide** — la extracción pasa a ser CONTENIDO CURADO y auditable (mismo patrón que los packs: Claude cura → el tool verifica), no código en tiempo de ejecución. No rompe ENG-01: lo cacheado es contenido y el cálculo sobre él sigue siendo determinista.
+- [ ] **INTEG-02**: frontera entre los tres sistemas. Hoy se solapan: tres evaluadores de ofertas (careerops A-F, cv-trainer `analizar_contra_oferta`, `aptus jd`), dos almacenes de ofertas (`jobs.db` y `oferta_guardar`) y dos planes de mejora (`punto_ciego`/`plan_anadir` vs los gaps de aptus). Reglas acordadas: una fuente de verdad por hecho; aptus lee `jobs.db` pero NUNCA escribe; nadie promedia el 0-5 de jobhunt con el readiness (promediar una afirmación con una evidencia da un número sin significado); un solo plan de mejora.
+- [ ] **RES-06**: research web bajo petición (el offline ya está: resumen + plan). Sigue siendo lo más vago de la lista; definir qué se espera antes de tocarlo.
+- [ ] **PACKGEN-02**: generador in-tool con LLM (Enfoque B). Diferido a conciencia desde el 14 jul; el bucle asistido cubre el caso.
+- [ ] **JOBS-02**: las 126 ofertas (31%) que no declaran seniority se caen de los cubos. Son evaluables (sabes qué alcanzarías para su perfil), solo que no hay objetivo con el que comparar. Probablemente lo resuelve JD-03.
 
 ## Out of Scope
 
