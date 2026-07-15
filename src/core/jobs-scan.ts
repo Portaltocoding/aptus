@@ -11,15 +11,17 @@ import { computeJdReadiness, extractJdProfile, jdVerdict, type JdProfile, type J
  * `aptus jd` (perfil léxico → rol ad-hoc → readiness → veredicto). Esto solo
  * itera y agrupa.
  *
- * SOBRE EL ORDEN (decisión de Carlos, 15 jul, con la pega puesta encima de la
- * mesa): la lista va ordenada por `levelDelta`, los escalones de diferencia entre
- * el nivel que pide la oferta y el que alcanzas para su perfil. Es una cantidad
- * REAL y auditable —niveles, no un número inventado— y sale del veredicto que ya
- * existía; aquí no se fabrica ningún score. Aun así, conviene no olvidar que una
- * lista ordenada de ofertas SE LEE como un ranking de encaje, que es lo que
- * REQUIREMENTS.md manda vigilar ("que no reaparezca disfrazado: match %,
- * employability index"). Por eso cada fila enseña su veredicto entero (qué pide,
- * qué alcanzas) y jamás un porcentaje.
+ * SOBRE LA PRESENTACIÓN: se agrupa en CUBOS por veredicto (llegas / te falta 1 /
+ * te faltan 2+), no en una lista ordenada. Se probó ordenar por escalones y con
+ * las 402 ofertas reales quedó claro que era mala idea: arriba salían los puestos
+ * para los que estás MÁS sobrecualificado (todo junior, +2) y se hundía la Senior
+ * AI Engineer que era la interesante. Respondía "¿para qué estoy más pasado de
+ * nivel?" en vez de "¿qué me conviene mirar?", y además una lista ordenada de
+ * ofertas se lee como el ranking de encaje que REQUIREMENTS.md manda vigilar.
+ *
+ * Dentro de cada cubo el orden es ALFABÉTICO, a propósito: cualquier otro criterio
+ * volvería a insinuar un ranking. El cubo dice qué relación tienes con el nivel que
+ * pide la oferta; elegir entre las de un cubo es cosa tuya, no del programa.
  *
  * Y nada de silencios: las ofertas que no se pueden evaluar NO se tiran, se
  * cuentan y se dicen. Ocultarlas haría parecer que el pack cubre el mercado.
@@ -36,8 +38,12 @@ export interface ScannedJob {
 }
 
 export interface JobsScan {
-  /** Evaluadas y con nivel declarado, de más listo a menos (por escalones). */
-  ranked: ScannedJob[];
+  /** Alcanzas el nivel que piden (o lo superas). */
+  meets: ScannedJob[];
+  /** Te falta exactamente un escalón: lo que tienes a tiro. */
+  oneShort: ScannedJob[];
+  /** Te faltan dos o más escalones. */
+  farther: ScannedJob[];
   /** Evaluadas pero la oferta no dice qué nivel busca: no hay con qué compararlas. */
   withoutLevel: ScannedJob[];
   /** La oferta no pide nada que este pack sepa medir. */
@@ -55,7 +61,7 @@ function scanOne(
 ): ScannedJob {
   // El titular importa: de él sale el seniority y la etiqueta del rol ad-hoc.
   const text = `${job.title}\n${job.description}`;
-  const profile = extractJdProfile(text, keywords, config.levels);
+  const profile = extractJdProfile(text, keywords, config.levels, config.weak_keywords ?? {});
   const readiness = computeJdReadiness(answered, bank, config, profile);
 
   return {
@@ -80,12 +86,19 @@ export function scanJobs(
   const notEvaluable = scanned.filter((s) => s.readiness === null);
   const evaluable = scanned.filter((s) => s.readiness !== null);
   const withoutLevel = evaluable.filter((s) => s.verdict!.levelDelta === null);
+  const conNivel = evaluable.filter((s) => s.verdict!.levelDelta !== null);
 
-  const ranked = evaluable
-    .filter((s) => s.verdict!.levelDelta !== null)
-    // Más listo primero. A igualdad de escalones, orden estable por título para que
-    // dos ejecuciones den lo mismo.
-    .sort((a, b) => b.verdict!.levelDelta! - a.verdict!.levelDelta! || a.title.localeCompare(b.title));
+  // Alfabético dentro del cubo: cualquier otro criterio insinuaría un ranking.
+  const alfabetico = (a: ScannedJob, b: ScannedJob): number => a.title.localeCompare(b.title);
+  const enCubo = (test: (delta: number) => boolean): ScannedJob[] =>
+    conNivel.filter((s) => test(s.verdict!.levelDelta!)).sort(alfabetico);
 
-  return { ranked, withoutLevel, notEvaluable, totalScanned: jobs.length };
+  return {
+    meets: enCubo((d) => d >= 0),
+    oneShort: enCubo((d) => d === -1),
+    farther: enCubo((d) => d <= -2),
+    withoutLevel: [...withoutLevel].sort(alfabetico),
+    notEvaluable: [...notEvaluable].sort(alfabetico),
+    totalScanned: jobs.length,
+  };
 }

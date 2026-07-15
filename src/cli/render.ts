@@ -2,12 +2,12 @@ import Table from "cli-table3";
 import pc from "picocolors";
 import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
-import type { Difficulty, Gap, RoleReadiness, TierAccuracy } from "../core/readiness.js";
+import { GAP_THRESHOLD, type Difficulty, type Gap, type RoleReadiness, type TierAccuracy } from "../core/readiness.js";
 import type { EvolutionReport } from "../core/evolution.js";
 import type { MarketDemand, WeightedGap } from "../core/market.js";
 import type { JdGap, JdProfile, JdVerdict } from "../core/jd.js";
 import { MAX_BOX, nextDueAt, type ReviewItem, type ReviewProgress } from "../core/resurfacing.js";
-import type { JobsScan } from "../core/jobs-scan.js";
+import type { JobsScan, ScannedJob } from "../core/jobs-scan.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -468,7 +468,7 @@ export function renderReviewOutcome(before: ReviewItem[], after: ReviewItem[], a
  * todo el mercado, que es la mentira más fácil de contar aquí.
  */
 export function renderJobsScan(scan: JobsScan, shown: number): string {
-  const evaluables = scan.ranked.length + scan.withoutLevel.length;
+  const evaluables = scan.meets.length + scan.oneShort.length + scan.farther.length + scan.withoutLevel.length;
   const lines: string[] = [
     pc.bold(
       `Ofertas de jobhunt: ${scan.totalScanned} escaneadas · ${evaluables} evaluables con este pack · ` +
@@ -476,54 +476,65 @@ export function renderJobsScan(scan: JobsScan, shown: number): string {
     ),
   ];
 
-  if (scan.ranked.length > 0) {
-    const table = new Table({ head: ["#", "Oferta", "Pide", "Alcanzas", "Escalones"] });
-    scan.ranked.slice(0, shown).forEach((s, i) => {
-      const d = s.verdict!.levelDelta!;
-      const escalones = d > 0 ? pc.green(`+${d}`) : d === 0 ? pc.green("0") : pc.red(String(d));
-      const aviso = s.profile.coverage.low ? pc.yellow(" ⚠") : "";
+  /** Un cubo: las ofertas y su veredicto. Sin numerar y en alfabético: no es un ranking. */
+  const cubo = (titulo: string, jobs: ScannedJob[], conGap: boolean): void => {
+    if (jobs.length === 0) return;
+    lines.push(`\n${titulo} (${jobs.length})`);
+
+    for (const s of jobs.slice(0, shown)) {
       const empresa = s.company ? ` @ ${s.company}` : "";
-      table.push([
-        String(i + 1),
-        `${s.title}${empresa}${aviso}`,
-        s.verdict!.targetLevelLabel ?? "—",
-        levelColor(s.verdict!.achievedLevelId)(s.verdict!.achievedLevelLabel),
-        escalones,
-      ]);
-    });
-    lines.push(table.toString());
-
-    // Nunca recortar en silencio: si se enseñan 20 de 300, hay que decirlo.
-    if (scan.ranked.length > shown) {
-      lines.push(pc.dim(`  (se muestran ${shown} de ${scan.ranked.length}; usa --limit para ver más)`));
+      const aviso = s.profile.coverage.low ? pc.yellow(" ⚠") : "";
+      const v = s.verdict!;
+      lines.push(`  • ${s.title}${empresa}${aviso}`);
+      lines.push(
+        pc.dim(`    pide ${v.targetLevelLabel} · alcanzas `) + levelColor(v.achievedLevelId)(v.achievedLevelLabel),
+      );
+      // En las que tienes a tiro, lo accionable es por dónde se cierra el hueco.
+      // Solo si de verdad hay un punto flojo: llamar "peor punto" a un 88% sería
+      // ruido disfrazado de consejo.
+      if (conGap) {
+        const peor = [...s.readiness!.byDimension]
+          .filter((d) => d.answered > 0 && d.accuracy < GAP_THRESHOLD)
+          .sort((a, b) => a.accuracy - b.accuracy)[0];
+        if (peor) {
+          lines.push(pc.dim(`    peor punto: ${peor.dimension} ${Math.round(peor.accuracy * 100)}%`));
+        }
+      }
     }
-    if (scan.ranked.slice(0, shown).some((s) => s.profile.coverage.low)) {
-      lines.push(pc.yellow("  ⚠ = esa oferta va mayoritariamente de cosas que este pack no mide: su fila es optimista."));
-    }
-  }
 
+    // Nunca recortar en silencio.
+    if (jobs.length > shown) {
+      lines.push(pc.dim(`  (se muestran ${shown} de ${jobs.length}; usa --limit para ver más)`));
+    }
+  };
+
+  cubo(pc.green(pc.bold("LLEGAS AL NIVEL QUE PIDEN")), scan.meets, false);
+  cubo(pc.yellow(pc.bold("TE FALTA 1 ESCALÓN — lo que tienes a tiro")), scan.oneShort, true);
+  cubo(pc.red(pc.bold("TE FALTAN 2 O MÁS")), scan.farther, true);
+
+  const notas: string[] = [];
   if (scan.withoutLevel.length > 0) {
-    const ejemplos = scan.withoutLevel
-      .slice(0, 3)
-      .map((s) => s.title)
-      .join(", ");
-    lines.push(
-      `\n  · ${scan.withoutLevel.length} oferta(s) no declaran seniority, así que no hay nivel con el que compararlas ` +
-        `(${ejemplos}${scan.withoutLevel.length > 3 ? "…" : ""}). Míralas con \`aptus jd\`.`,
+    notas.push(
+      `  · ${scan.withoutLevel.length} oferta(s) no declaran seniority: no hay nivel con el que compararlas. Míralas con \`aptus jd\`.`,
     );
   }
-
   if (scan.notEvaluable.length > 0) {
-    lines.push(
-      `  · ${scan.notEvaluable.length} oferta(s) no piden nada que este pack sepa medir: van de otra cosa y no salen arriba.`,
+    notas.push(
+      `  · ${scan.notEvaluable.length} oferta(s) no piden nada que este pack sepa medir: van de otra cosa.`,
     );
   }
+  if (notas.length > 0) lines.push("\n" + notas.join("\n"));
 
   lines.push(
     pc.dim(
-      "\n  · El orden es por escalones (niveles que te faltan o te sobran para lo que pide\n" +
-        "    cada oferta), no un % de encaje ni una probabilidad de que te cojan. Cada fila\n" +
-        "    enseña su veredicto para que lo puedas auditar; el detalle, con `aptus jd`.",
+      "\n  · Los cubos dicen tu relación con el nivel que pide cada oferta; dentro van en\n" +
+        "    alfabético. No hay ranking, ni % de encaje, ni probabilidad de que te cojan:\n" +
+        "    elegir entre las de un cubo es cosa tuya. El detalle, con `aptus jd`." +
+        (scan.meets.some((s) => s.profile.coverage.low) ||
+        scan.oneShort.some((s) => s.profile.coverage.low) ||
+        scan.farther.some((s) => s.profile.coverage.low)
+          ? "\n  · ⚠ = la oferta va mayoritariamente de cosas que este pack no mide: su veredicto es optimista."
+          : ""),
     ),
   );
 

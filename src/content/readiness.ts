@@ -41,6 +41,16 @@ export const ReadinessConfigSchema = z.object({
   study: z.record(z.string(), z.string()),
   // Opcional (Phase 6): keywords por dimensión para medir demanda de mercado.
   market_keywords: z.record(z.string(), z.array(z.string())).optional(),
+  // Opcional (v2, 15 jul): cuáles de esas keywords son DÉBILES — palabras de
+  // oficina que aparecen en cualquier oferta ("product", "stakeholder"). Siguen
+  // contando como mención, pero por sí solas no pueden hacer núcleo a una
+  // dimensión. Sin esto, una oferta de pruebas de vehículos que dice "product" 14
+  // veces se evaluaba como un puesto de producto.
+  //
+  // Existen porque `market_keywords` se creó para ponderar demanda sobre TODO el
+  // corpus de ofertas, donde el ruido se promedia; al reutilizarlas para clasificar
+  // UNA oferta, ese ruido decide. Cada uso necesita su propia tolerancia.
+  weak_keywords: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 export type ReadinessConfig = z.infer<typeof ReadinessConfigSchema>;

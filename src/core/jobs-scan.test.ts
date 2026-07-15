@@ -50,8 +50,8 @@ function job(title: string, description: string, extra: Partial<JobRow> = {}): J
 }
 
 describe("scanJobs", () => {
-  it("ordena de más listo a menos por escalones, no por un score inventado", () => {
-    // Con todo el banco correcto se alcanza senior (índice 2).
+  it("agrupa por veredicto en vez de ordenar por escalones", () => {
+    // Con todo el banco correcto se alcanza senior (índice 2). Las tres las llegas.
     const jobs = [
       job("Senior LLM Engineer", DESC_LLM), // pide senior → delta 0
       job("Junior LLM Engineer", DESC_LLM), // pide junior → delta +2
@@ -59,13 +59,42 @@ describe("scanJobs", () => {
     ];
     const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(scan.ranked.map((s) => s.verdict!.levelDelta)).toEqual([2, 1, 0]);
-    expect(scan.ranked[0]!.title).toBe("Junior LLM Engineer");
+    expect(scan.meets).toHaveLength(3);
+    expect(scan.oneShort).toEqual([]);
+    expect(scan.farther).toEqual([]);
+  });
+
+  it("dentro del cubo van en alfabético: el orden no insinúa un ranking", () => {
+    // Ordenar por escalones ponía arriba los puestos para los que estás MÁS
+    // sobrecualificado (visto con las 402 ofertas reales de jobhunt): respondía
+    // "¿para qué estoy pasado de nivel?" en vez de "¿qué me conviene mirar?".
+    const jobs = [
+      job("Zeta Junior LLM Engineer", DESC_LLM), // delta +2
+      job("Alfa Senior LLM Engineer", DESC_LLM), // delta 0
+    ];
+    const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
+
+    expect(scan.meets.map((s) => s.title)).toEqual(["Alfa Senior LLM Engineer", "Zeta Junior LLM Engineer"]);
+  });
+
+  it("separa lo que tienes a tiro de lo que te queda lejos", () => {
+    // Solo acierta lo fácil: se queda por debajo de junior.
+    const flojo: AnsweredQuestion[] = [
+      { questionId: "e1", selectedOptionId: "a" },
+      { questionId: "m1", selectedOptionId: "b" },
+      { questionId: "h1", selectedOptionId: "b" },
+    ];
+    const jobs = [job("Junior LLM Engineer", DESC_LLM), job("Senior LLM Engineer", DESC_LLM)];
+    const scan = scanJobs(jobs, KEYWORDS, CONFIG, flojo, BANK);
+
+    expect(scan.meets).toEqual([]);
+    expect(scan.oneShort.map((s) => s.title)).toEqual(["Junior LLM Engineer"]);
+    expect(scan.farther.map((s) => s.title)).toEqual(["Senior LLM Engineer"]);
   });
 
   it("cada fila conserva su veredicto entero, auditable", () => {
     const scan = scanJobs([job("Senior LLM Engineer", DESC_LLM)], KEYWORDS, CONFIG, TODO_BIEN, BANK);
-    const v = scan.ranked[0]!.verdict!;
+    const v = scan.meets[0]!.verdict!;
 
     expect(v.targetLevelLabel).toBe("Senior-ready");
     expect(v.achievedLevelLabel).toBe("Senior-ready");
@@ -75,7 +104,7 @@ describe("scanJobs", () => {
   it("aparta las ofertas sin seniority declarado en vez de colocarlas a ojo", () => {
     const scan = scanJobs([job("LLM Engineer", DESC_LLM)], KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(scan.ranked).toEqual([]);
+    expect(scan.meets).toEqual([]);
     expect(scan.withoutLevel).toHaveLength(1);
   });
 
@@ -83,7 +112,7 @@ describe("scanJobs", () => {
     const jobs = [job("Senior LLM Engineer", DESC_LLM), job("Cocinero de paellas", "Arroces.")];
     const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(scan.ranked).toHaveLength(1);
+    expect(scan.meets).toHaveLength(1);
     expect(scan.notEvaluable).toHaveLength(1);
     expect(scan.notEvaluable[0]!.title).toBe("Cocinero de paellas");
     expect(scan.totalScanned).toBe(2); // el total nunca miente
@@ -98,29 +127,30 @@ describe("scanJobs", () => {
     ];
     const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(scan.ranked.length + scan.withoutLevel.length + scan.notEvaluable.length).toBe(scan.totalScanned);
+    const enCubos = scan.meets.length + scan.oneShort.length + scan.farther.length;
+    expect(enCubos + scan.withoutLevel.length + scan.notEvaluable.length).toBe(scan.totalScanned);
   });
 
   it("el titular cuenta: de él sale el seniority de la oferta", () => {
     const scan = scanJobs([job("Junior LLM Engineer", DESC_LLM)], KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(scan.ranked[0]!.profile.targetLevelId).toBe("junior");
+    expect(scan.meets[0]!.profile.targetLevelId).toBe("junior");
   });
 
-  it("es determinista: a igualdad de escalones, orden estable por título", () => {
+  it("es determinista: el orden no depende de cómo lleguen las ofertas", () => {
     const jobs = [job("Zeta Senior LLM", DESC_LLM), job("Alfa Senior LLM", DESC_LLM)];
     const a = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
     const b = scanJobs([...jobs].reverse(), KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    expect(a.ranked.map((s) => s.title)).toEqual(["Alfa Senior LLM", "Zeta Senior LLM"]);
-    expect(b.ranked.map((s) => s.title)).toEqual(a.ranked.map((s) => s.title));
+    expect(a.meets.map((s) => s.title)).toEqual(["Alfa Senior LLM", "Zeta Senior LLM"]);
+    expect(b.meets.map((s) => s.title)).toEqual(a.meets.map((s) => s.title));
   });
 
   it("marca la oferta cuya cobertura es baja: su fila es optimista y hay que saberlo", () => {
     const jobs = [job("Senior Platform Engineer", "Kubernetes, Kafka, Spark y Terraform en AWS. Algún LLM.")];
     const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
-    const todas = [...scan.ranked, ...scan.withoutLevel, ...scan.notEvaluable];
+    const todas = [...scan.meets, ...scan.oneShort, ...scan.farther, ...scan.withoutLevel, ...scan.notEvaluable];
     expect(todas[0]!.profile.coverage.low).toBe(true);
   });
 
@@ -129,7 +159,7 @@ describe("scanJobs", () => {
     const scan = scanJobs(jobs, KEYWORDS, CONFIG, TODO_BIEN, BANK);
 
     // Mismo desempeño detrás de las dos: solo cambia lo que pide cada oferta.
-    expect(scan.ranked[0]!.readiness!.answered).toBe(scan.ranked[1]!.readiness!.answered);
-    expect(scan.ranked[0]!.verdict!.achievedLevelId).toBe(scan.ranked[1]!.verdict!.achievedLevelId);
+    expect(scan.meets[0]!.readiness!.answered).toBe(scan.meets[1]!.readiness!.answered);
+    expect(scan.meets[0]!.verdict!.achievedLevelId).toBe(scan.meets[1]!.verdict!.achievedLevelId);
   });
 });

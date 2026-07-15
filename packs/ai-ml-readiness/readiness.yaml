@@ -88,6 +88,22 @@ study:
 # se buscan (case-insensitive, ES+EN) en el texto de las ofertas escaneadas por
 # jobhunt para ponderar la PRIORIDAD de los gaps. No genera ningún score de encaje;
 # solo reordena los gaps ya calculados. Es opcional: si falta, no hay ponderación.
+# Keywords DÉBILES: subconjunto de las de arriba que son palabras de oficina —
+# salen en casi cualquier oferta y no dicen gran cosa sobre el puesto. Siguen
+# contando como mención (para la share y los gaps), pero por sí solas NO pueden
+# hacer NÚCLEO a una dimensión al evaluar una oferta concreta (`aptus jd`/`jobs`).
+#
+# Por qué hacen falta: `market_keywords` se pensó para medir demanda sobre TODO el
+# corpus, donde este ruido se promedia y da igual. Al reutilizarlas para clasificar
+# UNA oferta, el ruido decide: una oferta de pruebas de vehículos (Caterpillar) dice
+# "product" 14 veces y se evaluaba como puesto de producto. Visto con las ofertas
+# reales de jobhunt el 15 jul 2026.
+weak_keywords:
+  ai-product-system-design: ["product", "producto", "stakeholder", "arquitectura", "roadmap"]
+  comportamental-star: ["comunicación", "communication", "colaborac", "trabajo en equipo", "teamwork"]
+  ml-clasico: ["estadística"]
+  fullstack-next-nest-ts: ["frontend", "backend"]
+
 market_keywords:
   llm-rag-evals: ["llm", "rag", "retrieval", "embedding", "prompt", "gpt", "openai", "claude", "langchain", "llamaindex", "vector", "fine-tun", "genai", "generative ai", "ia generativa"]
   ml-clasico: ["machine learning", "aprendizaje automático", "scikit", "regresión", "regression", "clasificación", "xgboost", "random forest", "pytorch", "tensorflow", "feature engineering", "estadística"]

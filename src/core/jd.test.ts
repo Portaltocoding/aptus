@@ -228,6 +228,40 @@ describe("extractJdProfile: suelo absoluto de menciones para el núcleo", () => 
   });
 });
 
+describe("extractJdProfile: keywords débiles (palabras de oficina)", () => {
+  const KW = { producto: ["product", "system design"], llm: ["llm", "rag", "prompt"] };
+  const WEAK = { producto: ["product"] };
+
+  it("una dimensión sostenida SOLO por palabras genéricas no puede ser núcleo", () => {
+    // Caso real (Caterpillar, pruebas de vehículos): "product" 14 veces convertía la
+    // oferta en un puesto de producto. La palabra no dice nada del puesto.
+    const jd = "Vehicle Test Engineer\nProduct quality, product validation, product testing y product safety.";
+    const p = extractJdProfile(jd, KW, LEVELS, WEAK);
+    const prod = p.matched.find((m) => m.dimension === "producto")!;
+
+    expect(prod.hits).toBe(4); // las menciones existen y se cuentan...
+    expect(prod.weakOnly).toBe(true);
+    expect(prod.weight).not.toBe("core"); // ...pero no hacen un puesto
+    expect(buildJdRole(p).core).toEqual([]);
+  });
+
+  it("con una sola keyword fuerte, la dimensión ya puede ser núcleo", () => {
+    const jd = "Platform Engineer\nSystem design, product, product y product.";
+    const p = extractJdProfile(jd, KW, LEVELS, WEAK);
+    const prod = p.matched.find((m) => m.dimension === "producto")!;
+
+    expect(prod.weakOnly).toBe(false); // "system design" no es genérica
+    expect(prod.weight).toBe("core");
+  });
+
+  it("sin weak_keywords declaradas, nada es débil (retrocompatible)", () => {
+    const jd = "Vehicle Test Engineer\nProduct quality, product validation, product testing y product safety.";
+    const p = extractJdProfile(jd, KW, LEVELS); // sin 4º argumento
+
+    expect(p.matched.find((m) => m.dimension === "producto")!.weakOnly).toBe(false);
+  });
+});
+
 describe("extractJdProfile: falsos amigos del seniority", () => {
   it("'Mid-Market' es un segmento de mercado, no un puesto mid", () => {
     // Caso real (Elevenlabs) visto en las ofertas de jobhunt.
@@ -464,5 +498,42 @@ describe("computeJdGaps", () => {
 
     const gaps = computeJdGaps([ans("l1", "b")], bank, CONFIG, p);
     expect(gaps[0]!.keywords).toEqual(["llm", "rag"]);
+  });
+});
+
+describe("extractJdProfile: el nivel de OTRA gente no es el tuyo", () => {
+  const STAFF = { id: "staff", label: "Staff-ready", requires: { easy: 0.9, medium: 0.8, hard: 0.7, experto: 0.55 }, breadth: 0.6 };
+  const LV = [...LEVELS, STAFF];
+
+  it("'sin un data science staff' es plantilla, no un puesto de staff", () => {
+    // Caso real (Aizon): un puesto de becario salía como Staff-ready.
+    const p = extractJdProfile("AI Engineer\nModelos en tiempo real sin un gran data science staff. llm, rag, prompt, llm.", KEYWORDS, LV);
+
+    expect(p.targetLevelId).toBeNull();
+  });
+
+  it("pero un 'Staff Engineer' de verdad se sigue leyendo", () => {
+    const p = extractJdProfile("Staff Engineer\nllm, rag, prompt, llm.", KEYWORDS, LV);
+
+    expect(p.targetLevelId).toBe("staff");
+  });
+
+  it("reportar a un Team Lead no te hace staff (es más bien lo contrario)", () => {
+    const p = extractJdProfile("AI Engineer\nReporting to an ACS AI Team Lead, harás llm, rag, prompt y llm.", KEYWORDS, LV);
+
+    expect(p.targetLevelId).toBeNull();
+  });
+
+  it("'Intern' en el titular es junior, aunque el cuerpo nombre a un Team Lead", () => {
+    // Caso real (Aizon): "AI Consultant Intern" que reportaba a un AI Team Lead.
+    const p = extractJdProfile("AI Consultant Intern\nReporting to an AI Team Lead. llm, rag, prompt, llm.", KEYWORDS, LV);
+
+    expect(p.targetLevelId).toBe("junior");
+  });
+
+  it("'internal' no dispara 'intern'", () => {
+    const p = extractJdProfile("AI Engineer\nHerramientas internal para llm, rag, prompt y llm.", KEYWORDS, LV);
+
+    expect(p.targetLevelId).toBeNull();
   });
 });

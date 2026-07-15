@@ -60,12 +60,24 @@ export const INCIDENTAL_SHARE = 0.1;
 export const MIN_CORE_HITS = 4;
 
 /**
- * Falsos amigos del seniority: expresiones donde una palabra de nivel NO habla de
- * nivel. "Account Executive - Mid-Market" es un segmento de mercado, no un puesto
- * mid (visto en las ofertas reales de jobhunt, 15 jul). Se limpian del texto ANTES
- * de buscar el nivel.
+ * Falsos amigos del seniority: sitios donde una palabra de nivel NO habla del nivel
+ * DEL PUESTO. Todos vistos en las ofertas reales de jobhunt (15 jul); se limpian
+ * del texto ANTES de buscar el nivel.
+ *
+ * El patrón común de los dos últimos: la palabra describe a OTRA gente (la
+ * plantilla, tu futuro jefe), no a ti. Un puesto que reporta a un team lead es, si
+ * acaso, lo contrario de un puesto de staff.
  */
-const LEVEL_NOISE = /\bmid[-\s](?:market|size|sized|term|cap|caps)\b/gi;
+const LEVEL_NOISE: RegExp[] = [
+  // "Account Executive - Mid-Market": segmento de mercado, no un puesto mid.
+  /\bmid[-\s](?:market|size|sized|term|cap|caps)\b/gi,
+  // "without a big data science staff": staff = plantilla. El lookahead conserva
+  // los "Staff Engineer" de verdad, que siempre llevan el rol detrás.
+  /\bstaff\b(?!\s+(?:engineer|software|ai|ml|data|developer|scientist|backend|frontend|research))/gi,
+  // "Reporting to an ACS AI Team Lead": el nivel de tu jefe no es el tuyo.
+  /\breporting to\b[^.\n]{0,80}/gi,
+  /\breportando a\b[^.\n]{0,80}/gi,
+];
 
 /**
  * Cuánto pesa una mención que solo aparece en un "valorable"/"nice to have" frente
@@ -102,7 +114,11 @@ export const LOW_DENSITY = 2.0;
  * staff, por eso solo cuentan "tech/team lead".
  */
 const LEVEL_ALIASES: Record<string, string[]> = {
-  junior: ["junior", "jr.", "jr", "entry-level", "entry level", "trainee", "becario", "becaria"],
+  junior: [
+    "junior", "jr.", "jr", "entry-level", "entry level", "trainee", "becario", "becaria",
+    // "intern" e "internship" van sueltos: \bintern\b no dispara con "internal".
+    "intern", "internship", "prácticas", "practicas",
+  ],
   mid: ["mid", "mid-level", "mid level", "semi-senior", "semisenior", "ssr", "intermedio"],
   senior: ["senior", "sr.", "sr"],
   staff: ["staff", "tech lead", "team lead", "principal engineer"],
@@ -142,6 +158,7 @@ export interface JdDimensionMatch {
   weightedHits: number; // menciones ponderadas ("valorable" pesa menos)
   keywords: string[]; // keywords distintas que dispararon (EVIDENCIA auditable)
   optionalOnly: boolean; // toda su evidencia sale de un "valorable": nunca es núcleo
+  weakOnly: boolean; // toda su evidencia son palabras de oficina genéricas: nunca es núcleo
   share: number; // weightedHits / total (0..1): cuánto pesa en lo que pide la oferta
   weight: DimensionWeight;
 }
@@ -380,6 +397,7 @@ export function extractJdProfile(
   jdText: string,
   keywords: Record<string, string[]>,
   levels: ReadinessLevel[],
+  weakKeywords: Record<string, string[]> = {},
 ): JdProfile {
   const lines = splitLines(jdText);
   const textOf = (cls: LineClass): string =>
@@ -406,12 +424,18 @@ export function extractJdProfile(
       [...enRequisitos.matched, ...enNeutro.matched, ...enValorable.matched].includes(w),
     );
 
+    // ¿Queda algo si se quitan las palabras de oficina? Si no, la dimensión se
+    // sostiene solo sobre ruido y no puede ser el núcleo del puesto.
+    const weak = new Set((weakKeywords[dimension] ?? []).map((w) => w.toLowerCase()));
+    const strongKeywords = matchedKeywords.filter((w) => !weak.has(w.toLowerCase()));
+
     return {
       dimension,
       hits: hard + soft,
       weightedHits: hard + OPTIONAL_WEIGHT * soft,
       keywords: matchedKeywords,
       optionalOnly: hard === 0 && soft > 0,
+      weakOnly: matchedKeywords.length > 0 && strongKeywords.length === 0,
     };
   });
 
@@ -424,9 +448,18 @@ export function extractJdProfile(
     .sort((a, b) => b.weightedHits - a.weightedHits || a.dimension.localeCompare(b.dimension))
     .map((c) => {
       const share = totalWeighted > 0 ? c.weightedHits / totalWeighted : 0;
+      // Para ser el NÚCLEO del puesto hay que pasar cuatro filtros, y cada uno
+      // tapa una forma real de mentir: peso relativo suficiente, evidencia
+      // absoluta suficiente, que no sea solo un "valorable", y que no se sostenga
+      // solo sobre palabras de oficina.
       let weight: DimensionWeight;
       if (share < INCIDENTAL_SHARE) weight = "incidental";
-      else if (c.weightedHits >= maxWeighted * CORE_RATIO && !c.optionalOnly && c.hits >= MIN_CORE_HITS)
+      else if (
+        c.weightedHits >= maxWeighted * CORE_RATIO &&
+        c.hits >= MIN_CORE_HITS &&
+        !c.optionalOnly &&
+        !c.weakOnly
+      )
         weight = "core";
       else weight = "secondary";
 
@@ -446,8 +479,8 @@ export function extractJdProfile(
   // un 1. Se deja en 1 (nada que reprochar a la cobertura) y que hable `density`.
   const ratio = tecnico > 0 ? totalHits / tecnico : 1;
 
-  // Se limpian los falsos amigos ("Mid-Market") antes de leer el nivel, no después.
-  const paraNivel = jdText.replace(LEVEL_NOISE, " ");
+  // Se limpian los falsos amigos ("Mid-Market", "our staff") antes de leer el nivel.
+  const paraNivel = LEVEL_NOISE.reduce((txt, re) => txt.replace(re, " "), jdText);
   const target = levelFromWords(paraNivel, levels) ?? levelFromYears(paraNivel, levels);
 
   return {

@@ -64,7 +64,7 @@ export async function jdCommand(jdPath: string, packName: string = DEFAULT_PACK)
     return;
   }
 
-  const profile = extractJdProfile(jdText, cfg.market_keywords, cfg.levels);
+  const profile = extractJdProfile(jdText, cfg.market_keywords, cfg.levels, cfg.weak_keywords ?? {});
 
   if (profile.matched.length === 0) {
     console.log(`\n${renderJdProfile(profile)}\n`);
