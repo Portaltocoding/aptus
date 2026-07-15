@@ -6,6 +6,7 @@ import { newPackCommand } from "./cli/commands/new-pack.js";
 import { verifyPackCommand } from "./cli/commands/verify-pack.js";
 import { reportCommand } from "./cli/commands/report.js";
 import { jdCommand } from "./cli/commands/jd.js";
+import { reviewCommand } from "./cli/commands/review.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -45,6 +46,14 @@ program
   .description("Valida y audita la calidad de un pack (curadas, no relleno)")
   .action(async (name?: string) => {
     await verifyPackCommand(name);
+  });
+
+program
+  .command("review")
+  .description("Repasa (repetición espaciada) lo que peor llevas — estudio, no medición")
+  .option("-p, --pack <name>", "pack que repasar", DEFAULT_PACK)
+  .action(async (opts: { pack: string }) => {
+    await reviewCommand(opts.pack);
   });
 
 program

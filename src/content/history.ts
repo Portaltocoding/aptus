@@ -40,6 +40,9 @@ const SessionRecordSchema = z.object({
   byDimension: z.array(SessionDimensionScoreSchema),
   readiness: z.array(SessionRoleReadinessSchema),
   answers: z.array(AnsweredQuestionSchema).optional(),
+  // Ausente = "measure" (ver SessionKind): los historiales previos al repaso son
+  // todos de medición, así que siguen siendo válidos tal cual.
+  kind: z.enum(["measure", "review"]).optional(),
 });
 
 const HistorySchema = z.array(SessionRecordSchema);

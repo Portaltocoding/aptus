@@ -6,6 +6,7 @@ import type { Difficulty, Gap, RoleReadiness, TierAccuracy } from "../core/readi
 import type { EvolutionReport } from "../core/evolution.js";
 import type { MarketDemand, WeightedGap } from "../core/market.js";
 import type { JdGap, JdProfile, JdVerdict } from "../core/jd.js";
+import { MAX_BOX, nextDueAt, type ReviewItem, type ReviewProgress } from "../core/resurfacing.js";
 
 /**
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
@@ -391,6 +392,69 @@ export function renderJdGaps(gaps: JdGap[]): string {
   });
 
   return "Gaps para este puesto (debilidad × cuánto lo pide la oferta):\n" + lines.join("\n");
+}
+
+/**
+ * Formatea el plan de la tanda de repaso (RES-05): qué toca, hacia qué temas carga
+ * y cuánto hay en seguimiento. Deja claro que esto NO mide: es estudio.
+ */
+export function renderReviewPlan(
+  due: ReviewItem[],
+  byDim: ReviewProgress[],
+  tracked: number,
+  target: number,
+): string {
+  const tanda = Math.min(due.length, target);
+  const lines: string[] = [
+    pc.bold(`Repaso: ${tanda} pregunta(s) de las ${due.length} que tocan hoy (${tracked} en seguimiento).`),
+  ];
+
+  const table = new Table({ head: ["Dimensión", "Toca repasar", "De ellas, falladas la última vez"] });
+  for (const d of byDim) {
+    table.push([d.dimension, String(d.due), d.weak > 0 ? pc.red(String(d.weak)) : "0"]);
+  }
+  lines.push(table.toString());
+
+  lines.push(
+    pc.dim(
+      "  · Va cargado a propósito hacia lo que peor llevas, así que no mide nada:\n" +
+        "    no verás readiness ni gaps, y esta sesión no cuenta para tu evolución.",
+    ),
+  );
+
+  return lines.join("\n");
+}
+
+/**
+ * Formatea el movimiento de cajas tras la tanda: qué se consolida y qué vuelve al
+ * principio. Es el único "progreso" honesto del repaso — no un score.
+ */
+export function renderReviewOutcome(before: ReviewItem[], after: ReviewItem[], asked: string[]): string {
+  const prev = new Map(before.map((i) => [i.questionId, i]));
+  const now = new Map(after.map((i) => [i.questionId, i]));
+
+  let subieron = 0;
+  let cayeron = 0;
+  for (const id of asked) {
+    const a = prev.get(id);
+    const b = now.get(id);
+    if (a === undefined || b === undefined) continue;
+    if (b.box > a.box) subieron += 1;
+    else if (b.box < a.box) cayeron += 1;
+  }
+
+  const consolidadas = after.filter((i) => i.box >= MAX_BOX).length;
+  const flojas = after.filter((i) => i.box === 1).length;
+
+  const proximo = nextDueAt(after);
+  const cuando = proximo ? `  Siguiente repaso: ${new Date(proximo).toLocaleString("es-ES")}.` : "";
+
+  return (
+    "Repaso — cómo se mueve lo que estudias:\n" +
+    `  • ${pc.green(`${subieron} suben de caja`)} (tardarán más en volver)  ·  ${pc.red(`${cayeron} vuelven a la caja 1`)} (las verás pronto).\n` +
+    `  • En total: ${consolidadas} consolidada(s), ${flojas} aún en la caja 1.\n` +
+    cuando
+  );
 }
 
 function deltaCell(delta: number | null): string {

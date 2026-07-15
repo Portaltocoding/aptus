@@ -1,4 +1,4 @@
-import type { SessionRecord } from "../core/evolution.js";
+import { measurements, type SessionRecord } from "../core/evolution.js";
 
 /**
  * Generador puro del informe HTML (sin I/O): toma el historial persistido y
@@ -68,7 +68,12 @@ function evolutionChart(history: SessionRecord[], dims: string[]): string {
   </svg><div class="legend">${legend}</div>`;
 }
 
-export function buildHtmlReport(packName: string, history: SessionRecord[]): string {
+export function buildHtmlReport(packName: string, fullHistory: SessionRecord[]): string {
+  // Solo mediciones: una sesión de repaso (RES-05) va cargada de tus fallos, así
+  // que ni es "tu resultado" ni puede pintarse como un bajón en la gráfica. Se
+  // filtra aquí dentro por la misma razón que en `evolution`: que no se pueda
+  // olvidar desde fuera.
+  const history = measurements(fullHistory);
   const last = history[history.length - 1];
   const dims = last ? last.byDimension.map((d) => d.dimension) : [];
 

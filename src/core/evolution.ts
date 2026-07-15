@@ -22,14 +22,40 @@ export interface SessionRoleReadiness {
   levelLabel: string;
 }
 
+/**
+ * Qué era la sesión. Una de MEDICIÓN muestrea equilibrado (`selectBalanced`) y de
+ * ella salen scores y readiness comparables. Una de REPASO (RES-05) está cargada a
+ * propósito hacia tus fallos, así que su resultado NO es comparable con nada: es
+ * estudio, no medida.
+ */
+export type SessionKind = "measure" | "review";
+
 export interface SessionRecord {
   timestamp: string; // ISO, generado en la capa de I/O
   byDimension: SessionDimensionScore[];
   readiness: SessionRoleReadiness[];
   // Respuestas crudas: permiten reevaluar la sesión contra una oferta concreta
-  // (`aptus jd`) sin repetir el test. Opcional: los registros anteriores a este
-  // campo no las traen y el resto del sistema funciona igual sin ellas.
+  // (`aptus jd`) sin repetir el test, y reconstruir el estado de repaso (RES-05).
+  // Opcional: los registros anteriores a este campo no las traen y el resto del
+  // sistema funciona igual sin ellas.
   answers?: AnsweredQuestion[];
+  // Ausente = "measure": así los registros anteriores a este campo (todos de
+  // medición, porque el repaso no existía) siguen siendo válidos y se leen bien.
+  kind?: SessionKind;
+}
+
+/** Una sesión de medición (por defecto): la única de la que salen tendencias. */
+export function isMeasurement(record: SessionRecord): boolean {
+  return (record.kind ?? "measure") === "measure";
+}
+
+/**
+ * Solo las sesiones de medición. Filtrar es OBLIGATORIO antes de comparar o de
+ * derivar readiness: una sesión de repaso, cargada de tus fallos, fabricaría una
+ * regresión falsa cada vez que estudias.
+ */
+export function measurements(history: SessionRecord[]): SessionRecord[] {
+  return history.filter(isMeasurement);
 }
 
 export interface DimensionTrend {
@@ -61,10 +87,14 @@ export function buildSessionRecord(
   score: ScoreResult,
   readiness: RoleReadiness[],
   answers?: AnsweredQuestion[],
+  kind: SessionKind = "measure",
 ): SessionRecord {
   return {
     timestamp,
     ...(answers === undefined ? {} : { answers }),
+    // Solo se escribe cuando es repaso: "measure" es el valor por defecto al leer,
+    // así que omitirlo mantiene el fichero idéntico al de siempre.
+    ...(kind === "review" ? { kind } : {}),
     byDimension: score.byDimension.map((d) => ({
       dimension: d.dimension,
       answered: d.answered,
@@ -85,7 +115,11 @@ export function buildSessionRecord(
  * sesiones devuelve un informe vacío; con 1, `previous`/`delta` son null (no hay
  * con qué comparar todavía).
  */
-export function evolution(history: SessionRecord[]): EvolutionReport {
+export function evolution(fullHistory: SessionRecord[]): EvolutionReport {
+  // Se filtra AQUÍ DENTRO, no en quien llama: olvidarse de hacerlo corrompe la
+  // tendencia en silencio, y ese fallo no tiene por qué ser posible.
+  const history = measurements(fullHistory);
+
   const sessionCount = history.length;
   if (sessionCount === 0) {
     return { sessionCount: 0, currentTimestamp: null, previousTimestamp: null, byDimension: [], byRole: [] };

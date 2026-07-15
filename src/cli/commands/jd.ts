@@ -5,6 +5,7 @@ import { loadPackDir } from "../../content/loader.js";
 import { loadReadiness } from "../../content/readiness.js";
 import { loadHistory } from "../../content/history.js";
 import { loadJdText } from "../../content/jd.js";
+import { measurements } from "../../core/evolution.js";
 import { computeJdGaps, computeJdReadiness, extractJdProfile, jdVerdict } from "../../core/jd.js";
 import { renderJdGaps, renderJdProfile, renderJdReadiness } from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
@@ -74,19 +75,28 @@ export async function jdCommand(jdPath: string, packName: string = DEFAULT_PACK)
     return;
   }
 
-  // La evidencia sale de la última sesión que guardó respuestas crudas. Los
-  // historiales viejos (anteriores a que se guardaran) no sirven para esto.
-  const withAnswers = [...history].reverse().find((r) => r.answers !== undefined && r.answers.length > 0);
+  // La evidencia sale de la última sesión de MEDICIÓN que guardó respuestas crudas.
+  // Las de repaso (RES-05) no valen: van cargadas de tus fallos a propósito, así que
+  // darían un readiness peor que el real. Los historiales anteriores a que se
+  // guardaran las respuestas tampoco sirven.
+  const medidas = measurements(history);
+  const withAnswers = [...medidas].reverse().find((r) => r.answers !== undefined && r.answers.length > 0);
   if (!withAnswers) {
     console.log(`\n${renderJdProfile(profile)}\n`);
-    const sesiones =
-      history.length === 1
-        ? `Tu única sesión de '${packName}' es anterior`
-        : `Tus ${history.length} sesiones de '${packName}' son anteriores`;
-    const motivo =
-      history.length === 0
-        ? `Aún no has hecho ningún test de '${packName}'.`
-        : `${sesiones} a que se guardaran las respuestas, y sin ellas no se puede reevaluar.`;
+
+    let motivo: string;
+    if (medidas.length === 0) {
+      motivo =
+        history.length === 0
+          ? `Aún no has hecho ningún test de '${packName}'.`
+          : `Solo tienes sesiones de repaso de '${packName}', y no valen como evidencia: van cargadas de tus fallos a propósito.`;
+    } else {
+      motivo =
+        medidas.length === 1
+          ? `Tu única sesión de medición de '${packName}' es anterior a que se guardaran las respuestas, y sin ellas no se puede reevaluar.`
+          : `Tus ${medidas.length} sesiones de medición de '${packName}' son anteriores a que se guardaran las respuestas, y sin ellas no se puede reevaluar.`;
+    }
+
     console.log(`${motivo}\n  Haz una con \`aptus start --pack ${packName}\` y vuelve a pasar la oferta.\n`);
     return;
   }

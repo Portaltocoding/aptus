@@ -8,7 +8,7 @@ status: complete
 stopped_at: context exhaustion at 75% (2026-07-14)
 last_updated: "2026-07-14T23:24:21.384Z"
 last_activity: 2026-07-15
-last_activity_desc: "v2: 'aptus jd <fichero>' — readiness contra una oferta concreta (rol ad-hoc desde la JD); 149/149 tests"
+last_activity_desc: "v2: 'aptus review' — repaso espaciado (RES-05) aislado de la medición; 192/192 tests"
 progress:
   total_phases: 6
   completed_phases: 6
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 Phase: 6 of 6 (Integración con jobhunt) — COMPLETA. Milestone v1 completo.
 Plan: Phases 1-6 completas (10/10 planes)
 Status: Milestone v1 completo. **v2 EN CURSO** (a petición de Carlos): multi-tema + banco mucho mayor y creativo.
-Last activity: 2026-07-15 — v2: `aptus jd <fichero>` — readiness contra una oferta concreta; 149/149 tests
+Last activity: 2026-07-15 — v2: `aptus review` — repaso espaciado (RES-05), aislado de la medición; 192/192 tests
 
 Progress v1: [██████████] 100%
 
@@ -56,6 +56,10 @@ Progress v1: [██████████] 100%
   5. **Años de experiencia** ("5+ años") como plan B del seniority cuando la oferta no dice "senior"; la palabra explícita manda. Y el render recuerda que esto mide CONOCIMIENTO, no experiencia (producción/incidentes/mentoría no entran y pesan en un puesto real).
   - Test de integración `src/cli/jd.integration.test.ts` contra el pack real, con el contrato de honestidad protegido (evidencia a la vista, nunca un score de encaje).
   - **Pendiente conocido:** el conteo de menciones premia la verborrea; `CORE_RATIO`/`INCIDENTAL_SHARE`/umbrales de cobertura son convenciones transparentes, no anclajes externos.
+- **RES-05 (repaso espaciado): LISTO (15 jul).** `aptus review [--pack]`. Estaba diferido desde v1 por falta de dato: el historial solo guardaba agregados por dimensión, así que sabías que fallaste el 40% de LLM pero no QUÉ preguntas. El campo `answers` añadido para `aptus jd` lo desbloqueó sin querer.
+  - **Leitner, no SM-2**, a propósito: SM-2 pide una "calidad del recuerdo" 0-5 que aquí habría que inventarse desde un acierto binario, y este proyecto no fabrica números que no sostiene. Leitner necesita justo lo que hay: acierto/fallo y cuándo. 5 cajas (1/3/7/16/35 días); acertar sube, fallar devuelve a la caja 1.
+  - **AISLAMIENTO medición vs repaso (lo importante).** Una tanda de repaso va cargada de tus fallos a propósito → su resultado NO es comparable con una sesión equilibrada. Si cayera en el historial como una sesión normal: `evolution` te marcaría una regresión falsa cada vez que estudias (hay un test-testigo que mide ese desplome fingido de 60 puntos), el informe la tomaría como "tu resultado" y `aptus jd` la usaría de evidencia dando un readiness peor que el real. Solución: `SessionKind` (`kind` ausente = "measure", retrocompatible) + `measurements()`, y el filtro va DENTRO de `evolution()` y `buildHtmlReport()` — no en quien llama — porque olvidarlo corrompe en silencio. `aptus history` cuenta mediciones y repasos por separado.
+  - El repaso NO equilibra por dimensión (es lo contrario de `selectBalanced`, que muestrea parejo porque de él depende la medición del readiness). Tanda corta (15) porque es estudio.
 - **Idea siguiente (natural, casi gratis):** evaluar EN BLOQUE las ofertas ya escaneadas en `jobs.db` de jobhunt. No para rankearlas por "encaje" (prohibido), sino para responder: "de las 40 ofertas escaneadas, estas 6 piden justo aquello en lo que eres fuerte".
 - **Generación de packs (multi-tema real):** hoy el motor corre CUALQUIER pack, pero armar un pack nuevo = currar sus YAML (lo hace Claude a mano, curado). NO hay generador in-tool que tome "tema + info" y produzca el pack. Idea futura: flujo de generación asistido (Claude/deep-research) con verificación de correctitud para no romper el principio "curadas, no relleno". Ver conversación 14 jul.
 
@@ -115,8 +119,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| v2 | PACK-02 (packs adicionales de otros dominios) | Deferred | Roadmap v1 |
-| v2 | RES-05 (resurfacing spaced-repetition) | Deferred | Roadmap v1 |
+| v2 | PACK-02 (packs adicionales de otros dominios) | ✅ Infra hecha 14 jul 2026 | Roadmap v1 |
+| v2 | RES-05 (resurfacing spaced-repetition) | ✅ Hecho 15 jul 2026 (`aptus review`) | Roadmap v1 |
 
 ## Session Continuity
 
