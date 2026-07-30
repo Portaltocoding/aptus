@@ -12,6 +12,15 @@ import { jdCommand } from "./commands/jd.js";
 import { jobsCommand } from "./commands/jobs.js";
 import { ingestCommand } from "./commands/ingest.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
+import {
+  expandirRuta,
+  nextMenuStep,
+  nextTrasEjecutar,
+  type Invocacion,
+  type MenuAction,
+  type MenuPrompt,
+  type Next,
+} from "./menu-flow.js";
 import { heading, promptTheme } from "./theme.js";
 
 /**
@@ -26,18 +35,6 @@ import { heading, promptTheme } from "./theme.js";
  * Los comandos con flags siguen existiendo exactamente igual: este menú los llama,
  * no los reimplementa.
  */
-
-type MenuAction =
-  | "start"
-  | "review"
-  | "history"
-  | "report"
-  | "jd"
-  | "jobs"
-  | "packs"
-  | "verify"
-  | "ingest"
-  | "salir";
 
 const CHOICES: { value: MenuAction; name: string; description: string }[] = [
   {
@@ -128,72 +125,33 @@ async function askPath(mensaje: string): Promise<string | typeof ESCAPED> {
   );
 }
 
-const expandir = (v: string): string => resolve(v.trim().replace(/^~/, process.env.HOME ?? "~"));
+/** Traduce un sub-prompt del plan a su prompt real. `ESCAPED` si se sale con ESC. */
+async function preguntar(prompt: MenuPrompt): Promise<string | typeof ESCAPED> {
+  switch (prompt.id) {
+    case "pack":
+      return await askPack(prompt.mensaje);
 
-/**
- * Qué hacer tras la acción. `volver` es para lo que se ha cancelado a mitad: no
- * hay nada que leer, así que pedir "enter para volver al menú" sería ruido.
- */
-type Next = "salir" | "volver" | "pausar";
-
-/** Ejecuta la acción elegida. */
-async function dispatch(action: MenuAction): Promise<Next> {
-  switch (action) {
-    case "salir":
-      return "salir";
-
-    case "start": {
-      // El asistente de la sesión pregunta el pack por su cuenta.
-      const outcome = await startCommand({ interactive: true });
-      return outcome === "cancelada" ? "volver" : "pausar";
+    case "rutaOferta":
+    case "rutaMaterial":
+    case "carpeta": {
+      const ruta = await askPath(prompt.mensaje);
+      return ruta === ESCAPED ? ESCAPED : expandirRuta(ruta, process.env.HOME);
     }
 
-    case "review": {
-      const pack = await askPack("¿Qué pack repasar?");
-      if (pack === ESCAPED) return "volver";
-      await reviewCommand(pack);
-      return "pausar";
-    }
+    case "nombrePack":
+      return await withEscape((signal) =>
+        input(
+          {
+            message:
+              pc.bold("  ¿Nombre del pack destino?") + pc.dim("  (enter = el de la carpeta)"),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
 
-    case "history": {
-      const pack = await askPack("¿Historial de qué pack?");
-      if (pack === ESCAPED) return "volver";
-      await historyCommand(pack);
-      return "pausar";
-    }
-
-    case "report": {
-      const pack = await askPack("¿Informe de qué pack?");
-      if (pack === ESCAPED) return "volver";
-      await reportCommand(pack);
-      return "pausar";
-    }
-
-    case "packs":
-      await packsCommand();
-      return "pausar";
-
-    case "verify": {
-      const pack = await askPack("¿Qué pack auditar?");
-      if (pack === ESCAPED) return "volver";
-      await verifyPackCommand(pack);
-      return "pausar";
-    }
-
-    case "jobs": {
-      const pack = await askPack("¿Con qué pack evaluarlas?");
-      if (pack === ESCAPED) return "volver";
-      await jobsCommand(pack, 20);
-      return "pausar";
-    }
-
-    case "jd": {
-      const ruta = await askPath("¿Dónde está el fichero de la oferta?");
-      if (ruta === ESCAPED) return "volver";
-      const pack = await askPack("¿Con qué pack evaluarla?");
-      if (pack === ESCAPED) return "volver";
-
-      const modo = await withEscape((signal) =>
+    case "modoJd":
+      return await withEscape((signal) =>
         select(
           {
             message: pc.bold("  ¿Qué quieres de esa oferta?") + pc.dim(`  (${ESC_HINT})`),
@@ -214,60 +172,86 @@ async function dispatch(action: MenuAction): Promise<Next> {
           { signal },
         ),
       );
-      if (modo === ESCAPED) return "volver";
 
-      let memoria: string | undefined;
-      if (modo === "brief") {
-        const conMemoria = await withEscape((signal) =>
-          select(
-            {
-              message: pc.bold("  ¿Cruzarlo con material tuyo?") + pc.dim(`  (${ESC_HINT})`),
-              choices: [
-                { value: "no", name: "No, solo la oferta" },
-                {
-                  value: "si",
-                  name: "Sí, dime dónde está mi material",
-                  description: "notas, vault, apuntes — no se copian",
-                },
-              ],
-              theme: promptTheme,
-            },
-            { signal },
-          ),
-        );
-        if (conMemoria === ESCAPED) return "volver";
-        if (conMemoria === "si") {
-          const ruta2 = await askPath("¿Dónde está tu material?");
-          if (ruta2 === ESCAPED) return "volver";
-          memoria = expandir(ruta2);
-        }
-      }
-
-      await jdCommand(expandir(ruta), { pack, brief: modo === "brief", memoria });
-      return "pausar";
-    }
-
-    case "ingest": {
-      const carpeta = await askPath("¿Qué carpeta ingiero?");
-      if (carpeta === ESCAPED) return "volver";
-      const nombre = await withEscape((signal) =>
-        input(
+    case "cruzarMaterial":
+      return await withEscape((signal) =>
+        select(
           {
-            message:
-              pc.bold("  ¿Nombre del pack destino?") + pc.dim("  (enter = el de la carpeta)"),
+            message: pc.bold("  ¿Cruzarlo con material tuyo?") + pc.dim(`  (${ESC_HINT})`),
+            choices: [
+              { value: "no", name: "No, solo la oferta" },
+              {
+                value: "si",
+                name: "Sí, dime dónde está mi material",
+                description: "notas, vault, apuntes — no se copian",
+              },
+            ],
             theme: promptTheme,
           },
           { signal },
         ),
       );
-      if (nombre === ESCAPED) return "volver";
+  }
+}
 
-      await ingestCommand(expandir(carpeta), {
-        pack: nombre.trim().length > 0 ? nombre.trim() : undefined,
+/** Ejecuta una invocación ya resuelta. Aquí no se decide nada: solo se llama. */
+async function ejecutar(invocacion: Invocacion): Promise<string | null> {
+  switch (invocacion.comando) {
+    case "start":
+      // El asistente de la sesión pregunta el pack por su cuenta.
+      return await startCommand({ interactive: true });
+    case "review":
+      await reviewCommand(invocacion.pack);
+      return null;
+    case "history":
+      await historyCommand(invocacion.pack);
+      return null;
+    case "report":
+      await reportCommand(invocacion.pack);
+      return null;
+    case "verify":
+      await verifyPackCommand(invocacion.pack);
+      return null;
+    case "packs":
+      await packsCommand();
+      return null;
+    case "jobs":
+      await jobsCommand(invocacion.pack, invocacion.limite);
+      return null;
+    case "jd":
+      await jdCommand(invocacion.ruta, {
+        pack: invocacion.pack,
+        brief: invocacion.brief,
+        memoria: invocacion.memoria ?? undefined,
+      });
+      return null;
+    case "ingest":
+      await ingestCommand(invocacion.carpeta, {
+        pack: invocacion.pack ?? undefined,
         copy: true,
       });
-      return "pausar";
+      return null;
+  }
+}
+
+/**
+ * Recorre el asistente de la acción: pregunta lo que pida el plan y ejecuta cuando
+ * ya no pide más. ESC en CUALQUIER sub-prompt cancela la acción entera — esa regla
+ * vive en el plan, no repartida por aquí.
+ */
+async function dispatch(action: MenuAction): Promise<Next> {
+  const respuestas: string[] = [];
+
+  for (;;) {
+    const paso = nextMenuStep(action, respuestas);
+    if (paso.tipo === "salir") return "salir";
+    if (paso.tipo === "ejecutar") {
+      return nextTrasEjecutar(paso.invocacion, await ejecutar(paso.invocacion));
     }
+
+    const respuesta = await preguntar(paso.prompt);
+    if (respuesta === ESCAPED) return "volver";
+    respuestas.push(respuesta);
   }
 }
 
