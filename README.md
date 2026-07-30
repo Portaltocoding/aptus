@@ -16,23 +16,56 @@ dimensiones y sirve de caso de validación del concepto.
 
 ## Qué hace una sesión
 
+`aptus start` abre un asistente antes de preguntar nada: sobre qué pack te
+evalúas, qué dimensiones entran, a qué nivel de dificultad y cuántas preguntas.
+Antes de empezar dice con qué se está alimentando el motor y avisa si el filtro
+deja una muestra demasiado corta para concluir nada.
+
 ```
-$ aptus start
+Qué vamos a evaluar ───────────────────────────────────────────────────
 
-  ai-ml-readiness · 5 dimensiones · sesión de 25 preguntas
+›   ¿Qué dimensiones entran?  (espacio marca · a todas · enter confirma)
+  ◉ llm-rag-evals          55 preguntas en el banco
+  ◉ ml-clasico
+  ◯ fullstack-next-nest-ts
 
-  [llm-rag-evals · chunking · easy]
+›   ¿A qué nivel de dificultad?
+❯ Todas — de fácil a experto     la única que puede acreditar cualquier nivel
+  Base — fácil y media           para asentar fundamentos; no acredita senior
+  Alta — difícil y experto       para ver si aguantas arriba
+
+Sesión ────────────────────────────────────────────────────────────────
+  AI/ML Readiness (ai-ml-readiness)
+  Alimentando el motor con: 2 dimensión(es): llm-rag-evals, ml-clasico · todos los tramos
+  Banco tras el filtro: 105 preguntas → sesión de 60
+```
+
+Y la sesión en sí:
+
+```
+Pregunta 3/60  ▓░░░░░░░░░░░░░░░░░
+  llm-rag-evals · chunking · media
 
   En un pipeline RAG, ¿cuál es el motivo principal de usar 'chunk overlap'
   al trocear los documentos?
 
-    a) Reducir el tamaño total del índice vectorial
-    b) Evitar que información relevante quede cortada en el límite entre fragmentos
-    c) Acelerar la generación de embeddings
-    d) Eliminar la necesidad de un modelo de reranking
+  Reducir el tamaño total del índice vectorial
+❯ Evitar que información relevante quede cortada en el límite entre fragmentos
+  Acelerar la generación de embeddings
+  Eliminar la necesidad de un modelo de reranking
 
-  ¿Cómo de seguro estás?  › alta / media / baja
+  ¿Cómo de seguro estás de tu respuesta?
+❯ Alta    Estoy muy seguro — sé por qué es esa
+  Media   Creo que sí, pero no la firmaría
+  Baja    Voy a medias / estoy adivinando
 ```
+
+**Las opciones se barajan al presentarlas.** Escribiendo preguntas a mano la
+correcta acaba casi siempre la primera —en este pack, 223 de 255— y un test que se
+adivina por posición no mide nada. Se baraja al mostrar, con la semilla de la
+sesión: los `option.id` y el `correct` del YAML no se tocan, así que el scoring,
+el historial y el repaso no se enteran. `aptus verify-pack` avisa si un pack
+concentra las correctas en una posición.
 
 Al terminar no sale un número. Sale un desglose:
 
@@ -58,8 +91,72 @@ Al terminar no sale un número. Sale un desglose:
 | `aptus verify-pack [nombre]` | audita la calidad de un pack (curadas, no relleno) |
 | `aptus jd <fichero>` | evalúa tu readiness contra una oferta concreta |
 | `aptus jobs` | evalúa en bloque ofertas ya escaneadas (integración opcional) |
+| `aptus ingest <carpeta>` | ingiere material y saca el brief de un pack nuevo |
+| `aptus draft <tema>` | borrador de preguntas con LLM (revisión obligatoria) |
+| `aptus promote <tema> <dim>` | mueve un borrador revisado a questions/ |
 
 Todos aceptan `-p, --pack <nombre>`. El pack por defecto es `ai-ml-readiness`.
+
+`aptus start` acepta además, para saltarse el asistente (útil en scripts):
+
+| flag | qué hace |
+|---|---|
+| `-d, --dims <lista>` | dimensiones separadas por comas |
+| `-D, --difficulty <nivel>` | `todas` \| `base` \| `alta` \| `experto`, o tramos sueltos (`easy,hard`) |
+| `-n, --questions <n>` | cuántas preguntas |
+| `-y, --yes` | no preguntar nada: valores por defecto |
+
+Sin TTY (pipes, CI) el asistente no se abre nunca.
+
+## De una fuente a un pack
+
+Construir un pack tiene dos mitades, y están separadas a propósito: una es mecánica
+y determinista, la otra juzga.
+
+```
+fuente ──▶ aptus ingest / aptus jd --brief ──▶ BRIEF.md ──▶ curación ──▶ drafts/ ──▶ aptus promote ──▶ questions/
+           (determinista, sin red)                          (a mano o LLM)          (auditoría)      (ya evalúa)
+```
+
+**La mitad mecánica** recorre el material, lo indexa y propone temas contando
+títulos y bytes. No entiende nada, y lo dice: el `BRIEF.md` que escribe lleva sus
+propios límites impresos dentro.
+
+```bash
+aptus ingest ~/curso/sistemas-distribuidos   # carpeta → sources/ + BRIEF.md
+aptus jd oferta.txt --brief                  # oferta → brief de lo que te falta
+```
+
+Con `aptus jd --brief`, los **puntos ciegos** de la oferta —lo que pide y ningún
+pack sabe medir— son el índice del pack que te falta. Y con `--memoria` se cruza
+con tu material propio, que responde a la pregunta siguiente: de todo eso, ¿de qué
+tienes ya notas y de qué no tienes nada?
+
+```bash
+aptus jd oferta.txt --brief --memoria ~/vault
+```
+```
+  ✓ 2 tema(s) ya los mide 'ai-ml-readiness' · 6 tema(s) nuevos que la oferta pide y nadie mide.
+    • kafka       ← 1 doc(s) tuyos
+    • kubernetes  ← sin material tuyo
+    • terraform   ← sin material tuyo
+```
+
+**La mitad que juzga** escribe las preguntas. A mano, o con `aptus draft`, que es
+lo único de aptus que sale a la red. Su salida va a `drafts/` — fuera de donde el
+loader mira, así que **un borrador no puede evaluarte**. Cada pregunta se valida
+contra el mismo schema que un pack real, y lo que no pasa se descarta y se dice.
+
+```bash
+aptus draft mi-tema -d colas-de-mensajes -n 12   # → packs/mi-tema/drafts/
+# ...lo lees entero, corriges lo que esté mal...
+aptus promote mi-tema colas-de-mensajes          # → questions/, si pasa la auditoría
+```
+
+Ese paso manual es el punto: todo el valor de aptus es que no te mienta sobre lo que
+sabes, y una pregunta generada y no revisada te mide contra una respuesta que quizá
+está mal. `promote` audita antes de mover y deshace el movimiento si hay errores.
+Sin `ANTHROPIC_API_KEY` el resto del CLI funciona exactamente igual.
 
 ## Instalación
 
@@ -90,7 +187,7 @@ packs/         los datos: un directorio por tema
 La regla que sostiene el diseño: **el núcleo es puro**. Nada en `src/core/` lee el
 reloj, genera aleatoriedad ni toca disco. El `now` y la función de barajado se
 inyectan desde la capa de I/O, así que mismo input produce siempre mismo output.
-Por eso los 218 tests corren en menos de dos segundos sin un solo mock.
+Por eso los 292 tests corren en menos de dos segundos sin un solo mock.
 
 ## Anatomía de un pack
 
@@ -147,7 +244,7 @@ Basta con una tabla `jobs` que tenga `title` y `description`; si además trae
 ## Desarrollo
 
 ```bash
-npm test         # 218 tests, 21 ficheros
+npm test         # 292 tests, 26 ficheros
 npm run typecheck
 npm run lint
 ```

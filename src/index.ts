@@ -8,6 +8,8 @@ import { reportCommand } from "./cli/commands/report.js";
 import { jdCommand } from "./cli/commands/jd.js";
 import { reviewCommand } from "./cli/commands/review.js";
 import { jobsCommand } from "./cli/commands/jobs.js";
+import { ingestCommand } from "./cli/commands/ingest.js";
+import { draftCommand, promoteCommand } from "./cli/commands/draft.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -82,8 +84,45 @@ program
   .command("jd <fichero>")
   .description("Evalúa tu readiness contra una oferta concreta (pega su texto en un fichero)")
   .option("-p, --pack <name>", "pack con el que evaluar la oferta", DEFAULT_PACK)
-  .action(async (fichero: string, opts: { pack: string }) => {
-    await jdCommand(fichero, opts.pack);
+  .option("-b, --brief", "en vez de evaluarte, saca el brief del pack que haría falta", false)
+  .option("-m, --memoria <carpeta>", "cruza el brief con tu material propio (vault, apuntes)")
+  .action(async (fichero: string, opts: { pack: string; brief: boolean; memoria?: string }) => {
+    await jdCommand(fichero, { pack: opts.pack, brief: opts.brief, memoria: opts.memoria });
+  });
+
+// Ingesta: la mitad MECÁNICA de construir un pack (recorrer material, indexarlo y
+// proponer temas). Determinista y sin red; la parte que juzga va aparte, a
+// propósito, para que se vea cuál es cuál.
+program
+  .command("ingest <carpeta>")
+  .description("Ingiere una carpeta de material y saca el brief de un pack nuevo")
+  .option("-p, --pack <name>", "pack destino (por defecto, el nombre de la carpeta)")
+  .option("--no-copy", "no copiar el material a packs/<tema>/sources/")
+  .action(async (carpeta: string, opts: { pack?: string; copy: boolean }) => {
+    await ingestCommand(carpeta, { pack: opts.pack, copy: opts.copy });
+  });
+
+// `draft` es lo ÚNICO que sale a la red y necesita credenciales. Escribe en
+// drafts/, fuera de donde el loader mira: un borrador de LLM no puede evaluarte
+// hasta que lo revisas y lo promueves a mano.
+program
+  .command("draft <tema>")
+  .description(
+    "Borrador de preguntas con LLM a partir del brief y el material (revisión obligatoria)",
+  )
+  .requiredOption("-d, --dimension <dim>", "dimensión para la que escribir el borrador")
+  .option("-n, --count <n>", "cuántas pedir", (v: string) => Number.parseInt(v, 10), 12)
+  .action(async (tema: string, opts: { dimension: string; count: number }) => {
+    await draftCommand(tema, { dimension: opts.dimension, count: opts.count });
+  });
+
+program
+  .command("promote <tema> <dimension>")
+  .description(
+    "Mueve un borrador ya revisado de drafts/ a questions/ — pasa la auditoría o no entra",
+  )
+  .action(async (tema: string, dimension: string) => {
+    await promoteCommand(tema, dimension);
   });
 
 program
