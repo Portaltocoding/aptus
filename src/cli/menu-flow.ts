@@ -28,6 +28,7 @@ export type MenuAction =
   | "draft"
   | "promote"
   | "borrar-sesion"
+  | "repasar-fallos"
   | "salir";
 
 /**
@@ -84,7 +85,7 @@ export type Invocacion =
       readonly cantidad: number;
     }
   | { readonly comando: "promote"; readonly pack: string; readonly dimension: string }
-  | { readonly comando: "borrar-sesion"; readonly pack: string };
+  | { readonly comando: "borrar-sesion" | "repasar-fallos"; readonly pack: string };
 
 export type MenuStep =
   | { readonly tipo: "preguntar"; readonly prompt: MenuPrompt }
@@ -134,6 +135,7 @@ export function nextMenuStep(
     case "report":
     case "verify":
     case "borrar-sesion":
+    case "repasar-fallos":
       return r0 === undefined
         ? { tipo: "preguntar", prompt: { id: "pack", mensaje: mensajePack(action) } }
         : { tipo: "ejecutar", invocacion: { comando: action, pack: r0 } };
@@ -188,7 +190,11 @@ export function nextMenuStep(
       // Nombre vacío = enter = "el de la carpeta", que lo resuelve el comando.
       return {
         tipo: "ejecutar",
-        invocacion: { comando: "ingest", carpeta: r0, pack: r1.trim().length > 0 ? r1.trim() : null },
+        invocacion: {
+          comando: "ingest",
+          carpeta: r0,
+          pack: r1.trim().length > 0 ? r1.trim() : null,
+        },
       };
     }
 
@@ -298,6 +304,8 @@ function mensajePack(action: MenuAction): string {
       return "¿Qué pack auditar?";
     case "borrar-sesion":
       return "¿De qué pack borras una sesión?";
+    case "repasar-fallos":
+      return "¿De qué pack repasas los fallos?";
     default:
       return "¿Con qué pack evaluarlas?";
   }

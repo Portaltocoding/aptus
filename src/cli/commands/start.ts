@@ -12,6 +12,8 @@ import { calibration } from "../../core/calibration.js";
 import { computeReadiness, computeGaps } from "../../core/readiness.js";
 import { buildSessionRecord, evolution } from "../../core/evolution.js";
 import { computeDemand, applyMarketWeight } from "../../core/market.js";
+import { deriveMistakes } from "../../core/mistakes.js";
+import { mistakesHeading, offerMistakes } from "../mistakes-flow.js";
 import { runSession } from "../runner.js";
 import {
   renderResult,
@@ -51,12 +53,7 @@ export async function startCommand(
 ): Promise<StartOutcome> {
   let setup;
   try {
-    setup = await resolveSetup(
-      defaultPackLocator(),
-      opts,
-      SESSION_TARGET_QUESTIONS,
-      DEFAULT_PACK,
-    );
+    setup = await resolveSetup(defaultPackLocator(), opts, SESSION_TARGET_QUESTIONS, DEFAULT_PACK);
   } catch (err) {
     console.error(
       `\n✗ No se puede iniciar la sesión: ${err instanceof Error ? err.message : String(err)}`,
@@ -167,5 +164,16 @@ export async function startCommand(
   }
 
   console.log(renderEvolution(evolution(updatedHistory)) + "\n");
+
+  // Lo último, y OFRECIDO: hasta ahora se veían porcentajes y nunca qué fallaste
+  // ni por qué, con las explicaciones curadas del pack ahí sin usarse. Va después
+  // de los resultados porque primero interesa dónde estás; y se pregunta porque
+  // sesenta fallos de golpe es un muro que nadie lee.
+  const fallos = deriveMistakes(answered, selected);
+  if (fallos.reviewable > 0) {
+    console.log(mistakesHeading());
+    await offerMistakes(fallos);
+  }
+
   return "completada";
 }
