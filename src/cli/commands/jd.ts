@@ -8,7 +8,7 @@ import { loadJdText } from "../../content/jd.js";
 import { historyPath as historyPathOf, packDirForRead } from "../../content/paths.js";
 import { measurements } from "../../core/evolution.js";
 import { computeJdGaps, computeJdReadiness, extractJdProfile, jdVerdict } from "../../core/jd.js";
-import { attachMaterial, briefFromJd, renderBrief } from "../../core/brief.js";
+import { attachMaterial, briefFileName, briefFromJd, renderBrief } from "../../core/brief.js";
 import { ingestDirectory } from "../../content/ingest.js";
 import { renderJdGaps, renderJdProfile, renderJdReadiness } from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
@@ -201,9 +201,11 @@ async function emitBrief(
     }
   }
 
+  // Mismo nombre que cualquier otro brief: si luego se mueve a un pack,
+  // `aptus draft -d <tema>` lo encuentra sin renombrar nada (PACKFLOW-02).
   const destino = resolve(
     dirname(resolve(jdPath)),
-    `${basename(jdPath).replace(/\.[^.]+$/, "")}.brief.md`,
+    briefFileName(basename(jdPath).replace(/\.[^.]+$/, "")),
   );
   writeFileSync(destino, renderBrief(brief), "utf8");
 

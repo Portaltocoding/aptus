@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   attachMaterial,
+  briefFileName,
   briefFromCorpus,
   briefFromJd,
+  resolveBriefFile,
   extractHeadings,
   renderBrief,
   toKebab,
@@ -232,5 +234,51 @@ describe("renderBrief", () => {
       "p",
     );
     expect(renderBrief(sinCiegos)).toMatch(/Ninguno: todo lo detectado ya lo mide/);
+  });
+});
+
+describe("briefFileName", () => {
+  it("un brief de pack entero es BRIEF.md", () => {
+    expect(briefFileName(null)).toBe("BRIEF.md");
+  });
+
+  it("un brief de un tema lleva el tema en el nombre", () => {
+    expect(briefFileName("colas-de-mensajes")).toBe("BRIEF-colas-de-mensajes.md");
+  });
+
+  it("normaliza el tema: el nombre no depende de cómo se escriba", () => {
+    expect(briefFileName("Colas de Mensajes")).toBe("BRIEF-colas-de-mensajes.md");
+  });
+});
+
+describe("resolveBriefFile", () => {
+  it("sin ningún brief no inventa ruta: devuelve null", () => {
+    expect(resolveBriefFile("kafka", ["pack.yaml", "questions"])).toBeNull();
+    expect(resolveBriefFile(null, ["pack.yaml"])).toBeNull();
+  });
+
+  it("el brief del tema manda sobre el del pack: es más específico", () => {
+    expect(resolveBriefFile("kafka", ["BRIEF.md", "BRIEF-kafka.md"])).toBe("BRIEF-kafka.md");
+  });
+
+  it("sin brief del tema se cae al del pack, que es mejor que nada", () => {
+    expect(resolveBriefFile("kafka", ["BRIEF.md"])).toBe("BRIEF.md");
+  });
+
+  it("el brief de OTRO tema no vale: sería material equivocado", () => {
+    expect(resolveBriefFile("kafka", ["BRIEF-terraform.md"])).toBeNull();
+  });
+
+  it("sin tema solo cuenta el del pack", () => {
+    expect(resolveBriefFile(null, ["BRIEF-kafka.md", "BRIEF.md"])).toBe("BRIEF.md");
+    expect(resolveBriefFile(null, ["BRIEF-kafka.md"])).toBeNull();
+  });
+
+  it("un brief de tema escrito por el flujo de tema nuevo SÍ lo encuentra draft", () => {
+    // Era el fallo real: `draft` solo miraba BRIEF.md, así que BRIEF-<dim>.md
+    // no lo leía nadie y se escribía para nada.
+    const enElPack = ["pack.yaml", "sources", briefFileName("colas-de-mensajes")];
+
+    expect(resolveBriefFile("colas-de-mensajes", enElPack)).toBe("BRIEF-colas-de-mensajes.md");
   });
 });

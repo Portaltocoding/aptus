@@ -9,3 +9,6 @@ data/
 
 # Andamiaje de planificación (GSD): útil en local, ruido en el repo público.
 .planning/
+
+# `drafts/` NO se ignora a propósito (PACKFLOW-02): un borrador es contenido en
+# revisión, y que aparezca en el diff es lo que hace que alguien lo lea.

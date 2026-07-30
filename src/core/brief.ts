@@ -67,6 +67,39 @@ export function toKebab(text: string): string {
 }
 
 /**
+ * Nombre canónico de un brief. UNO solo, venga de donde venga (PACKFLOW-02).
+ *
+ * Había tres nombres para lo mismo: `ingest` escribía `BRIEF.md`, el flujo de tema
+ * nuevo `BRIEF-<dim>.md` y `jd --brief` un `<oferta>.brief.md`. No era solo feo:
+ * `aptus draft` solo buscaba `BRIEF.md`, así que el brief de un tema nuevo no lo
+ * leía NADIE — se escribía para nada.
+ *
+ * El criterio: `BRIEF.md` si cubre el pack entero, `BRIEF-<tema>.md` si cubre un
+ * tema. Un brief de oferta es el índice del pack que esa oferta necesitaría, así
+ * que su "tema" es la propia oferta: se llama igual y, en cuanto se mueve dentro
+ * de un pack, `draft -d <tema>` lo encuentra sin renombrar nada.
+ */
+export function briefFileName(dimension: string | null): string {
+  return dimension === null ? "BRIEF.md" : `BRIEF-${toKebab(dimension)}.md`;
+}
+
+/**
+ * Qué brief leer para una dimensión, entre los ficheros que hay en el pack.
+ *
+ * El brief del tema manda sobre el del pack: es más específico. Si no existe, se
+ * cae al del pack, que es mejor que nada. Sin ninguno, `null` — y quien llama
+ * decide, que para eso esto no toca disco.
+ */
+export function resolveBriefFile(
+  dimension: string | null,
+  ficheros: readonly string[],
+): string | null {
+  const candidatos =
+    dimension === null ? [briefFileName(null)] : [briefFileName(dimension), briefFileName(null)];
+  return candidatos.find((c) => ficheros.includes(c)) ?? null;
+}
+
+/**
  * Brief a partir de una oferta ya analizada. Es la ruta más directa que existe:
  * `extractJdProfile` ya sabe qué dimensiones pide la oferta, con qué peso y con
  * qué evidencia, y —lo que de verdad importa aquí— qué pide que el pack NO mide.

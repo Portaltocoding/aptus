@@ -6,7 +6,7 @@ import { stringify } from "yaml";
 import { copyToSources, ingestDirectory } from "../content/ingest.js";
 import { declareDimension } from "../content/pack-edit.js";
 import { draftQuestions, researchTopic } from "../content/draft.js";
-import { briefFromCorpus, renderBrief, toKebab } from "../core/brief.js";
+import { briefFileName, briefFromCorpus, renderBrief, toKebab } from "../core/brief.js";
 import {
   admiteBorrador,
   investigacionSourceName,
@@ -93,7 +93,7 @@ export async function newDimensionFlow(
       validate: (v: string) => validateDimensionName(v, existing),
     });
     const dimension = toKebab(bruto);
-    const briefFile = `BRIEF-${dimension}.md`;
+    const briefFile = briefFileName(dimension);
 
     const fuente: MaterialSource = await pickSource();
 

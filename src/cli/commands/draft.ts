@@ -13,6 +13,7 @@ import { stringify } from "yaml";
 import { loadPackDir } from "../../content/loader.js";
 import { packDirForWrite } from "../../content/paths.js";
 import { draftQuestions } from "../../content/draft.js";
+import { resolveBriefFile } from "../../core/brief.js";
 import { auditPack } from "../../core/pack-audit.js";
 import { heading } from "../theme.js";
 
@@ -60,8 +61,10 @@ export async function draftCommand(packName: string, opts: DraftOptions): Promis
 
   // El material y las preguntas ya escritas se leen ANTES de gastar una llamada:
   // si el pack no carga, mejor fallar aquí que a mitad.
-  const briefPath = join(packDir, "BRIEF.md");
-  const brief = existsSync(briefPath) ? readFileSync(briefPath, "utf8") : null;
+  // El brief del TEMA manda sobre el del pack; antes solo se miraba `BRIEF.md`, así
+  // que el brief de un tema nuevo no lo leía nadie y se escribía para nada (PACKFLOW-02).
+  const briefFile = resolveBriefFile(opts.dimension ?? null, readdirSync(packDir));
+  const brief = briefFile === null ? null : readFileSync(join(packDir, briefFile), "utf8");
 
   const sourcesDir = join(packDir, "sources");
   let material = "";

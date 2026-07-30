@@ -137,6 +137,13 @@ fuente ──▶ aptus ingest / aptus jd --brief ──▶ BRIEF.md ──▶ cu
            (determinista, sin red)                          (a mano o LLM)          (auditoría)      (ya evalúa)
 ```
 
+Un brief se llama **igual venga de donde venga**: `BRIEF.md` si cubre el pack entero,
+`BRIEF-<tema>.md` si cubre un tema. Nada más. `aptus draft -d <tema>` busca primero el
+del tema y se cae al del pack, así que un brief escrito nunca queda sin que lo lea
+nadie. El brief de una oferta es el índice del pack que esa oferta necesitaría, así
+que se llama igual (`BRIEF-<oferta>.md`) y basta con moverlo dentro de un pack para
+que `draft` lo encuentre.
+
 **La mitad mecánica** recorre el material, lo indexa y propone temas contando
 títulos y bytes. No entiende nada, y lo dice: el `BRIEF.md` que escribe lleva sus
 propios límites impresos dentro.
@@ -176,6 +183,13 @@ Ese paso manual es el punto: todo el valor de aptus es que no te mienta sobre lo
 sabes, y una pregunta generada y no revisada te mide contra una respuesta que quizá
 está mal. `promote` audita antes de mover y deshace el movimiento si hay errores.
 Sin `ANTHROPIC_API_KEY` el resto del CLI funciona exactamente igual.
+
+**`drafts/` SÍ se versiona.** Son contenido en revisión, no ficheros temporales: que
+un borrador aparezca en un diff es justo lo que hace que alguien lo lea, y esa lectura
+es el paso que separa "lo ha escrito un modelo" de "esto ya puede evaluarte".
+Ignorarlo volvería invisible la revisión, y lo invisible no se hace. Lo que no se
+versiona es `data/` —el historial, que son datos personales— y ahí sí hay una razón
+para esconderlo.
 
 ## Instalación
 

@@ -4,7 +4,7 @@ import pc from "picocolors";
 import { loadPackDir } from "../../content/loader.js";
 import { ensureDir, packDirForWrite } from "../../content/paths.js";
 import { copyToSources, ingestDirectory } from "../../content/ingest.js";
-import { briefFromCorpus, renderBrief, toKebab } from "../../core/brief.js";
+import { briefFileName, briefFromCorpus, renderBrief, toKebab } from "../../core/brief.js";
 import { heading } from "../theme.js";
 
 export interface IngestOptions {
@@ -109,7 +109,7 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
   }
 
   ensureDir(packDir);
-  const briefPath = join(packDir, "BRIEF.md");
+  const briefPath = join(packDir, briefFileName(null));
   writeFileSync(briefPath, markdown, "utf8");
 
   // Esqueleto de pack.yaml si el tema es nuevo: sin él no hay pack sobre el que
@@ -120,8 +120,8 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
     writeFileSync(
       join(packDir, "pack.yaml"),
       `# Pack creado por 'aptus ingest' desde ${dir}.\n` +
-        "# Declara aquí tus dimensiones: agrupa los temas de BRIEF.md en 3-6 con nombre\n" +
-        "# propio. Hasta que no estén declaradas, verify-pack avisará de cada pregunta.\n" +
+        `# Declara aquí tus dimensiones: agrupa los temas de ${briefFileName(null)} en 3-6 con\n` +
+        "# nombre propio. Hasta que no estén declaradas, verify-pack avisará de cada pregunta.\n" +
         `name: "${packName}"\n` +
         'version: "0.1.0"\n' +
         "dimensions: []\n",
