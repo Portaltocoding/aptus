@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { Command } from "commander";
 import { startCommand, DEFAULT_PACK } from "./cli/commands/start.js";
 import { historyCommand } from "./cli/commands/history.js";
@@ -12,8 +14,16 @@ import { ingestCommand } from "./cli/commands/ingest.js";
 import { draftCommand, promoteCommand } from "./cli/commands/draft.js";
 import { mainMenu } from "./cli/menu.js";
 
+// La versión se lee en ejecución del package.json del propio paquete. Un nivel
+// arriba funciona igual desde `src/index.ts` (repo) que desde `dist/index.js`
+// (instalado), y evita el `import` con atributo de tipo JSON, que no compilaría
+// porque package.json cae fuera de `rootDir`.
+const { version } = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
+
 const program = new Command();
-program.name("aptus").description("Motor de test de aptitud por terminal");
+program.name("aptus").description("Motor de test de aptitud por terminal").version(version);
 
 // `start` no fija `--pack` por defecto a propósito: sin flag, el asistente
 // pregunta qué pack, qué dimensiones y qué dificultad. Con flags (o con `--yes`,

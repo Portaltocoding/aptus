@@ -3,9 +3,14 @@
   "version": "0.1.0",
   "description": "Motor de evaluación de aptitud por terminal, data driven mediante packs de conocimiento intercambiables",
   "type": "module",
+  "bin": {
+    "aptus": "dist/index.js"
+  },
   "scripts": {
-    "start": "tsx src/index.ts start",
+    "start": "tsx src/index.ts",
+    "dev": "tsx src/index.ts",
     "build": "tsc -p tsconfig.build.json",
+    "postbuild": "chmod +x dist/index.js",
     "prepare": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
