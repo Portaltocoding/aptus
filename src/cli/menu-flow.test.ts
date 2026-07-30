@@ -155,6 +155,124 @@ describe("ingerir material", () => {
   });
 });
 
+// SESS-06: construir packs desde el menú. Las tres entradas llaman a los mismos
+// comandos; lo que se testea aquí es lo que el menú DECIDE antes de llamarlos.
+describe("crear un pack (new-pack)", () => {
+  it("pide el nombre y lo crea", () => {
+    expect(runMenuAction("new-pack", ["sistemas-distribuidos"])).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "new-pack", nombre: "sistemas-distribuidos" },
+    });
+  });
+
+  it("recorta espacios pegados sin querer", () => {
+    expect(runMenuAction("new-pack", ["  sistemas  "])).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "new-pack", nombre: "sistemas" },
+    });
+  });
+
+  it.each(["Sistemas Distribuidos", "../fuera", "con/barra", ""])(
+    "'%s' no llega al disco: se avisa antes de componer ninguna ruta",
+    (nombre) => {
+      const out = runMenuAction("new-pack", [nombre]);
+
+      expect(out.tipo).toBe("aviso");
+      expect(out.tipo === "aviso" && out.titulo).toMatch(/inválido/i);
+    },
+  );
+
+  it("ESC en el nombre vuelve sin crear nada", () => {
+    expect(runMenuAction("new-pack", [ESCAPED])).toEqual({ tipo: "volver" });
+  });
+});
+
+describe("borrador con LLM (draft)", () => {
+  const conKey = { tieneApiKey: true };
+  const sinKey = { tieneApiKey: false };
+
+  it("sin credenciales no pregunta NADA: lo dice antes, no al final", () => {
+    const paso = nextMenuStep("draft", [], sinKey);
+
+    expect(paso.tipo).toBe("aviso");
+    expect(paso.tipo === "aviso" && paso.cuerpo).toMatch(/ANTHROPIC_API_KEY/);
+  });
+
+  it("sin credenciales el aviso llega con cero respuestas dadas", () => {
+    // Lo importante no es el texto, es que no te haya hecho recorrer el asistente.
+    expect(runMenuAction("draft", [], sinKey).tipo).toBe("aviso");
+  });
+
+  it("con credenciales pide pack y dimensión, y usa el mismo defecto que el flag -n", () => {
+    expect(runMenuAction("draft", ["mi-pack", "llm-rag-evals"], conKey)).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "draft", pack: "mi-pack", dimension: "llm-rag-evals", cantidad: 12 },
+    });
+  });
+
+  it("el orden de los sub-prompts es pack → dimensión", () => {
+    const ids = [[], ["mi-pack"]].map((r) => {
+      const paso = nextMenuStep("draft", r, conKey);
+      return paso.tipo === "preguntar" ? paso.prompt.id : "";
+    });
+
+    expect(ids).toEqual(["pack", "dimension"]);
+  });
+
+  it("sin dimensión no hay borrador que pedir", () => {
+    expect(runMenuAction("draft", ["mi-pack", "   "], conKey).tipo).toBe("aviso");
+  });
+
+  it.each([0, 1])("ESC en el sub-prompt %i vuelve sin gastar una llamada", (posicion) => {
+    const respuestas: (string | typeof ESCAPED)[] = ["mi-pack", "llm-rag-evals"];
+    respuestas[posicion] = ESCAPED;
+
+    expect(runMenuAction("draft", respuestas.slice(0, posicion + 1), conKey)).toEqual({
+      tipo: "volver",
+    });
+  });
+});
+
+describe("promover un borrador (promote)", () => {
+  it("no promueve hasta confirmar que lo has leído", () => {
+    const paso = nextMenuStep("promote", ["mi-pack", "llm-rag-evals"]);
+
+    expect(paso).toEqual({
+      tipo: "preguntar",
+      prompt: { id: "confirmarPromote", pack: "mi-pack", dimension: "llm-rag-evals" },
+    });
+  });
+
+  it("confirmando, promueve", () => {
+    expect(runMenuAction("promote", ["mi-pack", "llm-rag-evals", "si"])).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "promote", pack: "mi-pack", dimension: "llm-rag-evals" },
+    });
+  });
+
+  it("sin confirmar NO promueve, y dice por qué importa", () => {
+    const out = runMenuAction("promote", ["mi-pack", "llm-rag-evals", "no"]);
+
+    expect(out.tipo).toBe("aviso");
+    expect(out.tipo === "aviso" && out.cuerpo).toMatch(/drafts\/llm-rag-evals\.yaml/);
+    // Lo que la auditoría NO puede comprobar es justo lo que hay que leer.
+    expect(out.tipo === "aviso" && out.cuerpo).toMatch(/mira la forma/);
+  });
+
+  it("cualquier respuesta que no sea 'si' es un no: promover no se hace por inercia", () => {
+    for (const r of ["", "quizá", "SI", "s"]) {
+      expect(runMenuAction("promote", ["mi-pack", "dim", r]).tipo).toBe("aviso");
+    }
+  });
+
+  it.each([0, 1, 2])("ESC en el sub-prompt %i no mueve ningún fichero", (posicion) => {
+    const respuestas: (string | typeof ESCAPED)[] = ["mi-pack", "llm-rag-evals", "si"];
+    respuestas[posicion] = ESCAPED;
+
+    expect(runMenuAction("promote", respuestas.slice(0, posicion + 1))).toEqual({ tipo: "volver" });
+  });
+});
+
 describe("qué pasa después de ejecutar", () => {
   it("una sesión cancelada vuelve al menú sin pausa: no hay nada que leer", () => {
     expect(nextTrasEjecutar({ comando: "start" }, "cancelada")).toBe("volver");

@@ -1,3 +1,4 @@
+import { PACK_NAME_RE } from "../content/paths.js";
 import { ESCAPED, type Escapable } from "./keys.js";
 
 /**
@@ -23,7 +24,23 @@ export type MenuAction =
   | "packs"
   | "verify"
   | "ingest"
+  | "new-pack"
+  | "draft"
+  | "promote"
   | "salir";
+
+/**
+ * Lo que el menú necesita saber del mundo para decidir. Entra como DATO para que
+ * la decisión siga siendo pura: si `draft` se puede intentar o no depende de si
+ * hay credenciales, y eso se comprueba ANTES de recorrer su asistente —no después
+ * de habértelo hecho entero para fallar al final.
+ */
+export interface MenuContext {
+  tieneApiKey: boolean;
+}
+
+/** Por defecto se asume que sí: quien decide de verdad (menu.ts) lo pasa siempre. */
+const CONTEXTO_POR_DEFECTO: MenuContext = { tieneApiKey: true };
 
 /**
  * Qué hacer tras la acción. `volver` es para lo que se ha cancelado a mitad: no
@@ -39,7 +56,10 @@ export type MenuPrompt =
   | { readonly id: "cruzarMaterial" }
   | { readonly id: "rutaMaterial"; readonly mensaje: string }
   | { readonly id: "carpeta"; readonly mensaje: string }
-  | { readonly id: "nombrePack" };
+  | { readonly id: "nombrePack" }
+  | { readonly id: "nombreNuevoPack" }
+  | { readonly id: "dimension"; readonly mensaje: string }
+  | { readonly id: "confirmarPromote"; readonly pack: string; readonly dimension: string };
 
 /** Lo que hay que ejecutar cuando ya están todas las respuestas. */
 export type Invocacion =
@@ -54,15 +74,33 @@ export type Invocacion =
       readonly brief: boolean;
       readonly memoria: string | null;
     }
-  | { readonly comando: "ingest"; readonly carpeta: string; readonly pack: string | null };
+  | { readonly comando: "ingest"; readonly carpeta: string; readonly pack: string | null }
+  | { readonly comando: "new-pack"; readonly nombre: string }
+  | {
+      readonly comando: "draft";
+      readonly pack: string;
+      readonly dimension: string;
+      readonly cantidad: number;
+    }
+  | { readonly comando: "promote"; readonly pack: string; readonly dimension: string };
 
 export type MenuStep =
   | { readonly tipo: "preguntar"; readonly prompt: MenuPrompt }
   | { readonly tipo: "ejecutar"; readonly invocacion: Invocacion }
-  | { readonly tipo: "salir" };
+  | { readonly tipo: "salir" }
+  /**
+   * No se ejecuta nada y se explica por qué. Es un paso de primera clase y no un
+   * `console.log` suelto porque las dos razones por las que aquí NO se sigue —no
+   * hay credenciales para `draft`, no has leído el borrador que ibas a promover—
+   * son decisiones, y las decisiones del menú se testean.
+   */
+  | { readonly tipo: "aviso"; readonly titulo: string; readonly cuerpo: string };
 
 /** Cuántas ofertas escanea `jobs` desde el menú (el comando con flags admite otro). */
 const JOBS_LIMITE = 20;
+
+/** Cuántas preguntas pide `draft` desde el menú (el mismo defecto que el flag `-n`). */
+const DRAFT_CANTIDAD = 12;
 
 /**
  * Siguiente paso de una acción dadas las respuestas ya recogidas, en orden.
@@ -71,7 +109,11 @@ const JOBS_LIMITE = 20;
  * prefijo de respuestas produce siempre el mismo paso, y un test puede plantarse
  * en cualquier punto del asistente sin simular los anteriores.
  */
-export function nextMenuStep(action: MenuAction, respuestas: readonly string[]): MenuStep {
+export function nextMenuStep(
+  action: MenuAction,
+  respuestas: readonly string[],
+  ctx: MenuContext = CONTEXTO_POR_DEFECTO,
+): MenuStep {
   const [r0, r1, r2, r3] = respuestas;
 
   switch (action) {
@@ -146,6 +188,98 @@ export function nextMenuStep(action: MenuAction, respuestas: readonly string[]):
         invocacion: { comando: "ingest", carpeta: r0, pack: r1.trim().length > 0 ? r1.trim() : null },
       };
     }
+
+    case "new-pack": {
+      if (r0 === undefined) return { tipo: "preguntar", prompt: { id: "nombreNuevoPack" } };
+      const nombre = r0.trim();
+      // El nombre compone una ruta, así que se valida aquí y no al llegar al
+      // disco: el mismo criterio que `assertPackName`, dicho antes de escribir.
+      if (!PACK_NAME_RE.test(nombre)) {
+        return {
+          tipo: "aviso",
+          titulo: `Nombre de pack inválido: '${nombre}'`,
+          cuerpo:
+            "Un nombre de pack es minúsculas, números y guiones, y empieza por letra o número.\n" +
+            "  Sirve de nombre de carpeta, así que ni espacios, ni acentos, ni barras.",
+        };
+      }
+      return { tipo: "ejecutar", invocacion: { comando: "new-pack", nombre } };
+    }
+
+    case "draft": {
+      // ANTES de preguntar nada: `draft` es lo único de aptus que sale a la red.
+      // Recorrerte el asistente entero para fallar en la llamada sería hacerte
+      // trabajar para nada.
+      if (!ctx.tieneApiKey) {
+        return {
+          tipo: "aviso",
+          titulo: "Escribir un borrador con LLM necesita credenciales, y aquí no hay",
+          cuerpo:
+            "Es lo ÚNICO de aptus que sale a la red: exporta ANTHROPIC_API_KEY (o entra con\n" +
+            "  `ant auth login`) y vuelve a abrir el menú. Todo lo demás funciona igual sin ella.\n" +
+            "  Mientras tanto, un pack se cura igual a mano: `ingest` → escribir las preguntas.",
+        };
+      }
+      if (r0 === undefined) {
+        return { tipo: "preguntar", prompt: { id: "pack", mensaje: "¿En qué pack escribo?" } };
+      }
+      if (r1 === undefined) {
+        return {
+          tipo: "preguntar",
+          prompt: { id: "dimension", mensaje: "¿De qué dimensión?" },
+        };
+      }
+      const dimension = r1.trim();
+      if (dimension.length === 0) {
+        return {
+          tipo: "aviso",
+          titulo: "Sin dimensión no hay borrador",
+          cuerpo: "El borrador se pide para UNA dimensión: es lo que enfoca lo que se escribe.",
+        };
+      }
+      return {
+        tipo: "ejecutar",
+        invocacion: { comando: "draft", pack: r0, dimension, cantidad: DRAFT_CANTIDAD },
+      };
+    }
+
+    case "promote": {
+      if (r0 === undefined) {
+        return { tipo: "preguntar", prompt: { id: "pack", mensaje: "¿De qué pack?" } };
+      }
+      if (r1 === undefined) {
+        return {
+          tipo: "preguntar",
+          prompt: { id: "dimension", mensaje: "¿Qué dimensión promuevo?" },
+        };
+      }
+      const dimension = r1.trim();
+      if (dimension.length === 0) {
+        return {
+          tipo: "aviso",
+          titulo: "Sin dimensión no hay nada que promover",
+          cuerpo: "Se promueve un borrador concreto: `drafts/<dimensión>.yaml`.",
+        };
+      }
+      // Promover es lo que convierte unas preguntas en evaluables. Preguntar si lo
+      // has leído no es ceremonia: la auditoría valida la FORMA (schema, cobertura,
+      // sesgo posicional) y no puede saber si la respuesta marcada es la correcta.
+      // Ese es justo el error que te mediría contra una mentira.
+      if (r2 === undefined) {
+        return { tipo: "preguntar", prompt: { id: "confirmarPromote", pack: r0, dimension } };
+      }
+      if (r2 !== "si") {
+        return {
+          tipo: "aviso",
+          titulo: "No se ha promovido nada",
+          cuerpo:
+            `El borrador sigue en drafts/${dimension}.yaml, donde el loader no lo mira: no te\n` +
+            "  puede evaluar. Léelo entero —respuesta marcada y explicación, una a una— y vuelve.\n" +
+            "  La auditoría de `promote` mira la forma, no si la respuesta correcta lo es.",
+        };
+      }
+      return { tipo: "ejecutar", invocacion: { comando: "promote", pack: r0, dimension } };
+    }
   }
 }
 
@@ -168,7 +302,8 @@ function mensajePack(action: MenuAction): string {
 export type MenuOutcome =
   | { readonly tipo: "salir" }
   | { readonly tipo: "volver" } // ESC a mitad: NO se ejecuta nada
-  | { readonly tipo: "ejecutar"; readonly invocacion: Invocacion };
+  | { readonly tipo: "ejecutar"; readonly invocacion: Invocacion }
+  | { readonly tipo: "aviso"; readonly titulo: string; readonly cuerpo: string };
 
 /**
  * Recorre la acción con las respuestas dadas (que pueden traer ESCAPED). Es lo que
@@ -178,11 +313,12 @@ export type MenuOutcome =
 export function runMenuAction(
   action: MenuAction,
   respuestas: readonly Escapable<string>[],
+  ctx: MenuContext = CONTEXTO_POR_DEFECTO,
 ): MenuOutcome {
   const dadas: string[] = [];
 
   for (let i = 0; i <= respuestas.length; i++) {
-    const paso = nextMenuStep(action, dadas);
+    const paso = nextMenuStep(action, dadas, ctx);
     if (paso.tipo !== "preguntar") return paso;
 
     const siguiente = respuestas[i];

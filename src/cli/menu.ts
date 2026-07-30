@@ -11,6 +11,8 @@ import { verifyPackCommand } from "./commands/verify-pack.js";
 import { jdCommand } from "./commands/jd.js";
 import { jobsCommand } from "./commands/jobs.js";
 import { ingestCommand } from "./commands/ingest.js";
+import { newPackCommand } from "./commands/new-pack.js";
+import { draftCommand, promoteCommand } from "./commands/draft.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
 import {
   expandirRuta,
@@ -82,8 +84,34 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
     name: "Ingerir material",
     description: "Una carpeta → el brief de un pack nuevo.",
   },
+  {
+    value: "new-pack",
+    name: "Crear un pack nuevo",
+    description: "El esqueleto de un tema: pack.yaml, questions/ y sources/.",
+  },
+  {
+    value: "draft",
+    name: "Borrador de preguntas con LLM",
+    description: "Lo único que sale a la red: necesita ANTHROPIC_API_KEY.",
+  },
+  {
+    value: "promote",
+    name: "Promover un borrador",
+    description: "drafts/ → questions/: lo hace evaluable. Léelo antes.",
+  },
   { value: "salir", name: "Salir", description: "Cerrar aptus." },
 ];
+
+/**
+ * ¿Hay con qué llamar a la API? Se mira ANTES de entrar en `draft` para poder
+ * decirlo en el menú en vez de fallar al final del asistente. Es la misma
+ * comprobación que hace el SDK al construir el cliente.
+ */
+function tieneApiKey(env: NodeJS.ProcessEnv = process.env): boolean {
+  return [env.ANTHROPIC_API_KEY, env.ANTHROPIC_AUTH_TOKEN].some(
+    (v) => typeof v === "string" && v.trim().length > 0,
+  );
+}
 
 /** Pregunta un pack de los que hay, con ESC para volver. */
 async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
@@ -144,6 +172,59 @@ async function preguntar(prompt: MenuPrompt): Promise<string | typeof ESCAPED> {
           {
             message:
               pc.bold("  ¿Nombre del pack destino?") + pc.dim("  (enter = el de la carpeta)"),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
+
+    case "nombreNuevoPack":
+      return await withEscape((signal) =>
+        input(
+          {
+            message:
+              pc.bold("  ¿Cómo se llama el pack?") +
+              pc.dim(`  (minúsculas, números y guiones · ${ESC_HINT})`),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
+
+    case "dimension":
+      return await withEscape((signal) =>
+        input(
+          {
+            message: pc.bold(`  ${prompt.mensaje}`) + pc.dim(`  (${ESC_HINT})`),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
+
+    case "confirmarPromote":
+      // La pregunta va con el aviso dentro: promover es lo que convierte un
+      // borrador en algo que te mide, y decir "sí" sin haberlo leído es
+      // exactamente la mentira que aptus existe para no contarte.
+      return await withEscape((signal) =>
+        select(
+          {
+            message:
+              pc.bold(`  ¿Has leído entero el borrador de '${prompt.dimension}'?`) +
+              pc.dim(`  (${ESC_HINT})`),
+            choices: [
+              {
+                value: "no",
+                name: "Todavía no",
+                description: `léelo en ${prompt.pack}/drafts/${prompt.dimension}.yaml — mientras siga ahí, no te evalúa`,
+              },
+              {
+                value: "si",
+                name: "Sí: respuesta marcada y explicación, una a una",
+                description:
+                  "promuévelo — la auditoría mira la forma, no si la respuesta correcta lo es",
+              },
+            ],
             theme: promptTheme,
           },
           { signal },
@@ -231,6 +312,18 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
         copy: true,
       });
       return null;
+    case "new-pack":
+      await newPackCommand(invocacion.nombre);
+      return null;
+    case "draft":
+      await draftCommand(invocacion.pack, {
+        dimension: invocacion.dimension,
+        count: invocacion.cantidad,
+      });
+      return null;
+    case "promote":
+      await promoteCommand(invocacion.pack, invocacion.dimension);
+      return null;
   }
 }
 
@@ -241,10 +334,16 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
  */
 async function dispatch(action: MenuAction): Promise<Next> {
   const respuestas: string[] = [];
+  const ctx = { tieneApiKey: tieneApiKey() };
 
   for (;;) {
-    const paso = nextMenuStep(action, respuestas);
+    const paso = nextMenuStep(action, respuestas, ctx);
     if (paso.tipo === "salir") return "salir";
+    if (paso.tipo === "aviso") {
+      console.log("\n" + heading(paso.titulo));
+      console.log(pc.dim("\n  " + paso.cuerpo + "\n"));
+      return "pausar";
+    }
     if (paso.tipo === "ejecutar") {
       return nextTrasEjecutar(paso.invocacion, await ejecutar(paso.invocacion));
     }
