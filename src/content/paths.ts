@@ -102,6 +102,79 @@ export function mergePackNames(delPaquete: string[], delUsuario: string[]): stri
   return [...new Set([...delPaquete, ...delUsuario])].sort();
 }
 
+// ─── Elegir raíz de pack (puro) ──────────────────────────────────────────────
+
+/** De dónde ha salido un pack: del producto o del usuario. */
+export type PackOrigin = "paquete" | "usuario";
+
+/** Presencia del pack en cada raíz, como DATO: así la decisión sigue siendo pura. */
+export interface PackPresence {
+  enUsuario: boolean;
+  enPaquete: boolean;
+}
+
+/**
+ * Nombre de pack válido. Es la misma exigencia que ya hacía `scaffoldPack`, pero
+ * vive aquí porque ahora se comprueba ANTES de componer ninguna ruta: un nombre
+ * llega por la CLI, y `..`, `/` o una ruta absoluta no pueden alcanzar un `join`.
+ */
+export const PACK_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+export function assertPackName(name: string): void {
+  if (!PACK_NAME_RE.test(name)) {
+    throw new Error(`Nombre de pack inválido: '${name}'. Usa minúsculas, números y guiones.`);
+  }
+}
+
+/** Se intentó escribir sobre un pack que solo existe dentro de la instalación. */
+export class PackReadOnlyError extends Error {
+  constructor(
+    readonly packName: string,
+    userPacksDir: string,
+  ) {
+    super(
+      `El pack '${packName}' viene dentro de la instalación de aptus y es de solo lectura.\n` +
+        `  Para trabajarlo como tuyo: cópialo a ${userPacksDir}/${packName}, ` +
+        `o define APTUS_PACKS_DIR apuntando a tu directorio de packs.`,
+    );
+    this.name = "PackReadOnlyError";
+  }
+}
+
+/** Dónde LEER un pack: el del usuario sombrea al del producto. */
+export function choosePackDir(
+  name: string,
+  presencia: PackPresence,
+  rutas: AptusPaths,
+): { dir: string; origin: PackOrigin } | null {
+  if (presencia.enUsuario) return { dir: join(rutas.userPacksDir, name), origin: "usuario" };
+  if (presencia.enPaquete) return { dir: join(rutas.bundledPacksDir, name), origin: "paquete" };
+  return null;
+}
+
+/**
+ * Dónde ESCRIBIR un pack. Lanza `PackReadOnlyError` si el pack solo existe dentro
+ * del paquete: es lo que impide que `new-pack`, `ingest`, `draft` o `promote`
+ * escriban en `node_modules`.
+ */
+export function choosePackDirForWrite(
+  name: string,
+  presencia: PackPresence,
+  rutas: AptusPaths,
+): string {
+  assertPackName(name);
+  const destino = join(rutas.userPacksDir, name);
+
+  // Desde el repo las dos raíces son la misma: escribir ahí es lo de siempre y
+  // nada es de solo lectura.
+  if (rutas.userPacksDir === rutas.bundledPacksDir) return destino;
+
+  if (!presencia.enUsuario && presencia.enPaquete) {
+    throw new PackReadOnlyError(name, rutas.userPacksDir);
+  }
+  return destino;
+}
+
 // ─── Capa impura: entorno y disco ────────────────────────────────────────────
 
 /**
@@ -172,4 +245,62 @@ export function singleRootLocator(root: string): PackLocator {
     list: () => listPacks(root),
     dir: (name) => (existsSync(join(root, name, "pack.yaml")) ? join(root, name) : null),
   };
+}
+
+/** ¿Hay un pack con ese nombre bajo esa raíz? Presencia = tiene `pack.yaml`. */
+function hayPack(root: string, name: string): boolean {
+  return existsSync(join(root, name, "pack.yaml"));
+}
+
+function presencia(name: string): PackPresence {
+  const { bundledPacksDir, userPacksDir } = aptusPaths();
+  return { enUsuario: hayPack(userPacksDir, name), enPaquete: hayPack(bundledPacksDir, name) };
+}
+
+export interface PackEntry {
+  name: string;
+  origin: PackOrigin;
+  dir: string;
+}
+
+/** Los packs visibles: los del producto MÁS los del usuario, sin duplicados. */
+export function listPackEntries(): PackEntry[] {
+  const rutas = aptusPaths();
+  const nombres = mergePackNames(
+    listPacks(rutas.bundledPacksDir),
+    // Cuando las raíces coinciden (repo) no se lista dos veces.
+    rutas.userPacksDir === rutas.bundledPacksDir ? [] : listPacks(rutas.userPacksDir),
+  );
+  return nombres.flatMap((name) => {
+    const elegido = choosePackDir(name, presencia(name), rutas);
+    return elegido === null ? [] : [{ name, origin: elegido.origin, dir: elegido.dir }];
+  });
+}
+
+/** Directorio del que LEER el pack, o `null` si no está en ninguna raíz. */
+export function packDirForRead(name: string): string | null {
+  return choosePackDir(name, presencia(name), aptusPaths())?.dir ?? null;
+}
+
+/** Directorio en el que ESCRIBIR el pack. Lanza `PackReadOnlyError` si es del producto. */
+export function packDirForWrite(name: string): string {
+  return choosePackDirForWrite(name, presencia(name), aptusPaths());
+}
+
+/** Localizador sobre las dos raíces: lo que consume el asistente de arranque. */
+export function defaultPackLocator(): PackLocator {
+  return {
+    list: () => listPackEntries().map((e) => e.name),
+    dir: (name) => packDirForRead(name),
+  };
+}
+
+/** Directorio de resultados de un pack (aislado por tema), fuera de la instalación. */
+export function packDataDir(name: string): string {
+  return join(aptusPaths().dataDir, name);
+}
+
+/** Fichero de historial de un pack. */
+export function historyPath(name: string): string {
+  return join(packDataDir(name), "history.json");
 }

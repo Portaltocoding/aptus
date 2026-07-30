@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { isAbsolute, join, sep } from "node:path";
-import { mergePackNames, resolvePaths, type PathsInput } from "./paths.js";
+import {
+  PackReadOnlyError,
+  choosePackDir,
+  choosePackDirForWrite,
+  mergePackNames,
+  resolvePaths,
+  type PathsInput,
+} from "./paths.js";
 
 /**
  * Tests de la resolución de rutas: PUROS, sin tocar disco ni leer el entorno.
@@ -157,5 +164,95 @@ describe("mergePackNames", () => {
 
   it("sin packs en ninguna raíz devuelve lista vacía", () => {
     expect(mergePackNames([], [])).toEqual([]);
+  });
+});
+
+describe("choosePackDir — de dónde se LEE un pack", () => {
+  const rutas = resolvePaths(entrada());
+
+  it("si está en el usuario, gana el del usuario (sombrea al del producto)", () => {
+    expect(choosePackDir("x", { enUsuario: true, enPaquete: true }, rutas)).toEqual({
+      dir: join(rutas.userPacksDir, "x"),
+      origin: "usuario",
+    });
+    expect(choosePackDir("x", { enUsuario: true, enPaquete: false }, rutas)).toEqual({
+      dir: join(rutas.userPacksDir, "x"),
+      origin: "usuario",
+    });
+  });
+
+  it("si solo está en el paquete, se lee del paquete", () => {
+    expect(choosePackDir("x", { enUsuario: false, enPaquete: true }, rutas)).toEqual({
+      dir: join(rutas.bundledPacksDir, "x"),
+      origin: "paquete",
+    });
+  });
+
+  it("si no está en ninguno, null", () => {
+    expect(choosePackDir("x", { enUsuario: false, enPaquete: false }, rutas)).toBeNull();
+  });
+
+  it("desde el repo, las dos raíces coinciden y sale el directorio de siempre", () => {
+    const repo = resolvePaths(entrada({ isDevCheckout: true }));
+    const elegido = choosePackDir("x", { enUsuario: true, enPaquete: true }, repo);
+    expect(elegido?.dir).toBe(join(PAQUETE, "packs", "x"));
+  });
+});
+
+describe("choosePackDirForWrite — dónde se ESCRIBE un pack", () => {
+  const rutas = resolvePaths(entrada());
+
+  it("si ya está en el usuario, se escribe ahí", () => {
+    expect(choosePackDirForWrite("x", { enUsuario: true, enPaquete: false }, rutas)).toBe(
+      join(rutas.userPacksDir, "x"),
+    );
+    expect(choosePackDirForWrite("x", { enUsuario: true, enPaquete: true }, rutas)).toBe(
+      join(rutas.userPacksDir, "x"),
+    );
+  });
+
+  it("si no existe en ninguno, se creará en el del usuario", () => {
+    expect(choosePackDirForWrite("x", { enUsuario: false, enPaquete: false }, rutas)).toBe(
+      join(rutas.userPacksDir, "x"),
+    );
+  });
+
+  it("si SOLO está en el paquete, lanza en vez de escribir en la instalación", () => {
+    // Es lo que impide que new-pack, ingest, draft o promote toquen node_modules.
+    expect(() =>
+      choosePackDirForWrite("ai-ml-readiness", { enUsuario: false, enPaquete: true }, rutas),
+    ).toThrow(PackReadOnlyError);
+  });
+
+  it("el error de solo lectura nombra el pack y dice la salida", () => {
+    try {
+      choosePackDirForWrite("ai-ml-readiness", { enUsuario: false, enPaquete: true }, rutas);
+      expect.unreachable("tenía que lanzar");
+    } catch (err) {
+      const msg = (err as Error).message;
+      expect(msg).toContain("ai-ml-readiness");
+      expect(msg).toContain("APTUS_PACKS_DIR");
+      expect(msg).toContain(rutas.userPacksDir);
+    }
+  });
+
+  it("rechaza nombres que no son kebab ANTES de componer ninguna ruta", () => {
+    // Un nombre con separadores no puede llegar nunca a join().
+    for (const malo of ["../fuera", "a/b", "/abs", "Mayus", "con espacio", "", "-empieza-mal"]) {
+      expect(() =>
+        choosePackDirForWrite(malo, { enUsuario: false, enPaquete: false }, rutas),
+      ).toThrow(/inválido/i);
+    }
+  });
+
+  it("desde el repo, escribir se comporta como siempre: al directorio de packs del repo", () => {
+    const repo = resolvePaths(entrada({ isDevCheckout: true }));
+    expect(choosePackDirForWrite("nuevo", { enUsuario: false, enPaquete: false }, repo)).toBe(
+      join(PAQUETE, "packs", "nuevo"),
+    );
+    // Y un pack que ya está en el repo no es de solo lectura: las raíces coinciden.
+    expect(choosePackDirForWrite("nuevo", { enUsuario: true, enPaquete: true }, repo)).toBe(
+      join(PAQUETE, "packs", "nuevo"),
+    );
   });
 });
