@@ -2,20 +2,23 @@ import { confirm, select } from "@inquirer/prompts";
 import pc from "picocolors";
 import type { Question } from "../content/schema.js";
 import type { AnsweredQuestion, Confidence } from "../core/scoring.js";
-import {
-  answerCurrent,
-  buildSession,
-  goBack,
-  goForward,
-  isComplete,
-  setConfidenceCurrent,
-  toAnswered,
-  type SessionState,
-} from "../core/session.js";
 import { promptTheme, questionHeader, questionTheme } from "./theme.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
-
-const BACK = "__back__";
+import {
+  BACK,
+  answerDefault,
+  answeredCount,
+  backAvailable,
+  confidenceDefault,
+  currentQuestion,
+  exitWarning,
+  flowResult,
+  initialFlow,
+  isFinished,
+  stepFlow,
+  type FlowInput,
+  type FlowState,
+} from "./session-flow.js";
 
 const CONFIDENCE_CHOICES: { value: Confidence; name: string; description: string }[] = [
   { value: "alta", name: "Alta", description: "Estoy muy seguro — sé por qué es esa" },
@@ -23,28 +26,76 @@ const CONFIDENCE_CHOICES: { value: Confidence; name: string; description: string
   { value: "baja", name: "Baja", description: "Voy a medias / estoy adivinando" },
 ];
 
-/**
- * ESC a mitad de sesión: se pregunta antes de tirar lo respondido.
- *
- * Sin confirmación, un ESC de más borraría veinte preguntas contestadas y no
- * habría forma de recuperarlas — el runner no persiste nada hasta el final.
- */
-async function confirmarSalida(respondidas: number): Promise<boolean> {
-  let aviso: string;
-  if (respondidas === 0) aviso = "  ¿Salir de la sesión?";
-  else if (respondidas === 1) aviso = "  ¿Salir de la sesión? Se pierde la respuesta que llevas.";
-  else aviso = `  ¿Salir de la sesión? Se pierden las ${respondidas} respuestas que llevas.`;
+/** Pregunta actual con sus opciones y, si hay adónde volver, la choice `◀ Volver`. */
+async function preguntar(state: FlowState): Promise<FlowInput> {
+  const q = currentQuestion(state)!;
+  const choices = [
+    ...q.options.map((o) => ({ value: o.id, name: o.text })),
+    ...(backAvailable(state) ? [{ value: BACK, name: pc.dim("◀ Volver a la pregunta anterior") }] : []),
+  ];
 
-  return await confirm({ message: pc.yellow(aviso), default: false, theme: promptTheme });
+  const cabecera = questionHeader(
+    state.session.index + 1,
+    state.session.questions.length,
+    q.dimension,
+    q.subtopic,
+    q.difficulty,
+  );
+
+  const answer = await withEscape((signal) =>
+    select(
+      {
+        // Cabecera tenue, enunciado en negrita, opciones en color normal: los
+        // tres niveles se distinguen de un vistazo sin leer nada.
+        message: `${cabecera}\n\n  ${pc.bold(q.stem)}\n`,
+        choices,
+        default: answerDefault(state), // reposiciona el cursor si ya se respondió
+        theme: questionTheme,
+        pageSize: 10,
+      },
+      { signal },
+    ),
+  );
+
+  if (answer === ESCAPED) return { tipo: "escape" };
+  if (answer === BACK) return { tipo: "volver" };
+  return { tipo: "respuesta", optionId: answer };
+}
+
+async function preguntarConfianza(state: FlowState): Promise<FlowInput> {
+  const valor = await withEscape((signal) =>
+    select(
+      {
+        message:
+          pc.dim("  ¿Cómo de seguro estás de tu respuesta?") +
+          pc.dim(`  (${ESC_HINT} a la pregunta)`),
+        choices: CONFIDENCE_CHOICES,
+        default: confidenceDefault(state),
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
+
+  return valor === ESCAPED ? { tipo: "escape" } : { tipo: "confianza", valor };
+}
+
+async function confirmarSalida(state: FlowState): Promise<FlowInput> {
+  const salir = await confirm({
+    message: pc.yellow(`  ${exitWarning(answeredCount(state))}`),
+    default: false,
+    theme: promptTheme,
+  });
+
+  return { tipo: "confirmacion", salir };
 }
 
 /**
- * Runner interactivo `select` navegable. NO reimplementa la máquina de estados:
- * envuelve las transiciones puras de `src/core/session.ts` con prompts de I/O.
- * Tras elegir respuesta se captura la confianza declarada (SESS-03) con un
- * segundo `select`, sin romper el flujo. `@inquirer/prompts` no tiene "volver
- * atrás" nativo, así que se ofrece una choice `◀ Volver` (visible solo si
- * `index > 0`) y se usa `default` (un value) para reposicionar el cursor.
+ * Runner interactivo `select` navegable. Capa fina de I/O: NO decide nada.
+ * Traduce prompts de `@inquirer/prompts` a entradas de `./session-flow.ts`, que es
+ * quien tiene la lógica de navegación (avanzar, volver, ESC, abandono) en funciones
+ * puras testeables sin terminal, y que a su vez envuelve las transiciones del motor
+ * puro `src/core/session.ts`.
  *
  * La presentación (cabecera, colores, cursor) vive en `./theme.ts`: aquí solo se
  * compone. Las opciones llegan ya barajadas desde la composición (`shuffleOptions`),
@@ -55,70 +106,22 @@ async function confirmarSalida(respondidas: number): Promise<boolean> {
  * con eso (volver al menú), pero NADA se puntúa ni se guarda.
  */
 export async function runSession(questions: Question[]): Promise<AnsweredQuestion[] | null> {
-  let state: SessionState = buildSession(questions);
+  let state = initialFlow(questions);
 
   try {
-    while (!isComplete(state)) {
-      const q = state.questions[state.index]!;
-      const choices = [
-        ...q.options.map((o) => ({ value: o.id, name: o.text })),
-        ...(state.index > 0
-          ? [{ value: BACK, name: pc.dim("◀ Volver a la pregunta anterior") }]
-          : []),
-      ];
-
-      const cabecera = questionHeader(
-        state.index + 1,
-        state.questions.length,
-        q.dimension,
-        q.subtopic,
-        q.difficulty,
-      );
-
-      const answer = await withEscape((signal) =>
-        select(
-          {
-            // Cabecera tenue, enunciado en negrita, opciones en color normal: los
-            // tres niveles se distinguen de un vistazo sin leer nada.
-            message: `${cabecera}\n\n  ${pc.bold(q.stem)}\n`,
-            choices,
-            default: state.answers.get(q.id), // reposiciona el cursor si ya se respondió
-            theme: questionTheme,
-            pageSize: 10,
-          },
-          { signal },
-        ),
-      );
-
-      if (answer === ESCAPED) {
-        if (await confirmarSalida(state.answers.size)) return null;
-        continue; // se queda en la misma pregunta
+    while (!isFinished(state)) {
+      let input: FlowInput;
+      switch (state.step) {
+        case "pregunta":
+          input = await preguntar(state);
+          break;
+        case "confianza":
+          input = await preguntarConfianza(state);
+          break;
+        default:
+          input = await confirmarSalida(state);
       }
-
-      if (answer === BACK) {
-        state = goBack(state);
-        continue;
-      }
-
-      // La confianza también sale con ESC, pero ahí ESC significa "me he
-      // equivocado de respuesta": se vuelve a la pregunta sin registrarla.
-      const confidence = await withEscape((signal) =>
-        select(
-          {
-            message:
-              pc.dim("  ¿Cómo de seguro estás de tu respuesta?") +
-              pc.dim(`  (${ESC_HINT} a la pregunta)`),
-            choices: CONFIDENCE_CHOICES,
-            default: state.confidences.get(q.id),
-            theme: promptTheme,
-          },
-          { signal },
-        ),
-      );
-
-      if (confidence === ESCAPED) continue;
-
-      state = goForward(setConfidenceCurrent(answerCurrent(state, answer), confidence));
+      state = stepFlow(state, input);
     }
   } catch (err) {
     // Ctrl+C: salida limpia, sin persistir nada a medias ni imprimir stack trace.
@@ -129,5 +132,5 @@ export async function runSession(questions: Question[]): Promise<AnsweredQuestio
     throw err;
   }
 
-  return toAnswered(state);
+  return flowResult(state);
 }
