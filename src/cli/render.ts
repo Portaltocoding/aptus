@@ -113,7 +113,10 @@ export function renderReadiness(roles: RoleReadiness[]): string {
     const byTier = new Map(r.byDifficulty.map((t) => [t.difficulty, t]));
     table.push([
       r.label,
-      levelColor(r.levelId)(r.levelLabel),
+      // Sin una sola respuesta de sus dimensiones núcleo, este rol NO es que no
+      // llegue: es que no se ha evaluado. Decir "Aún no junior-ready" sobre N=0
+      // sería el mismo tipo de mentira que un score agregado.
+      r.answered === 0 ? pc.dim("sin evidencia") : levelColor(r.levelId)(r.levelLabel),
       cell(byTier, "easy"),
       cell(byTier, "medium"),
       cell(byTier, "hard"),
@@ -151,7 +154,13 @@ export function renderReadiness(roles: RoleReadiness[]): string {
  */
 export function renderSummary(roles: RoleReadiness[], gaps: Gap[], levelOrder: string[]): string {
   const rank = (id: string | null): number => (id === null ? -1 : levelOrder.indexOf(id));
-  const ordered = [...roles].sort((a, b) => rank(b.levelId) - rank(a.levelId));
+
+  // Los roles sin ninguna respuesta de sus dimensiones núcleo se sacan del
+  // ranking y se nombran aparte: colarlos al final como "los menos listos" sería
+  // convertir la falta de datos en un veredicto.
+  const evaluados = roles.filter((r) => r.answered > 0);
+  const sinEvidencia = roles.filter((r) => r.answered === 0);
+  const ordered = [...evaluados].sort((a, b) => rank(b.levelId) - rank(a.levelId));
 
   const lines: string[] = [pc.bold("Resumen")];
 
@@ -160,6 +169,15 @@ export function renderSummary(roles: RoleReadiness[], gaps: Gap[], levelOrder: s
     lines.push(`  • Tu readiness más alto: ${top.label} — ${levelColor(top.levelId)(top.levelLabel)}.`);
     const ranking = ordered.map((r) => `${r.label} (${r.levelLabel})`).join("  >  ");
     lines.push(`  • Ranking (de más a menos listo): ${ranking}`);
+  }
+
+  if (sinEvidencia.length > 0) {
+    lines.push(
+      pc.dim(
+        `  • Sin evidencia en esta sesión: ${sinEvidencia.map((r) => r.label).join(", ")} — ` +
+          "no salieron preguntas de sus dimensiones núcleo, así que no se dice nada de ellos.",
+      ),
+    );
   }
 
   if (gaps.length > 0) {

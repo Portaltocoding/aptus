@@ -1,11 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { loadPackDir } from "../../content/loader.js";
+import pc from "picocolors";
 import { loadReadiness, type ReadinessConfig } from "../../content/readiness.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
 import { loadJobTexts, jobsDbPath } from "../../content/jobhunt.js";
-import { selectBalanced } from "../../core/session.js";
+import { selectBalanced, shuffleOptions } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
 import { calibration } from "../../core/calibration.js";
@@ -22,6 +22,8 @@ import {
   renderEvolution,
   renderSummary,
 } from "../render.js";
+import { describeSetup, resolveSetup, sampleWarning, type SetupOptions } from "../setup.js";
+import { heading } from "../theme.js";
 
 // Test LARGO por defecto: para evaluar en serio a través de los rangos de
 // seniority (junior→staff) hace falta bastante muestra por dimensión y dificultad.
@@ -36,25 +38,40 @@ const DATA_DIR = join(ROOT, "data");
 export const DEFAULT_PACK = "ai-ml-readiness";
 
 /**
- * Compone la sesión end-to-end sobre el pack elegido: cargar pack → seleccionar
- * equilibrado → sesión select navegable → puntuar → renderizar (dimensiones,
- * calibración, y si el pack trae readiness: readiness por rol + gaps). Persiste la
- * sesión (historial por pack) y muestra la evolución. La aleatoriedad/reloj viven
- * aquí, en la capa de I/O. `readiness.yaml` es opcional: un pack de cualquier tema
- * puede traer solo preguntas.
+ * Compone la sesión end-to-end sobre el pack elegido: asistente (qué pack, qué
+ * dimensiones, qué dificultad) → seleccionar equilibrado → barajar opciones →
+ * sesión select navegable → puntuar → renderizar (dimensiones, calibración, y si
+ * el pack trae readiness: readiness por rol + gaps). Persiste la sesión (historial
+ * por pack) y muestra la evolución. La aleatoriedad/reloj viven aquí, en la capa
+ * de I/O. `readiness.yaml` es opcional: un pack de cualquier tema puede traer solo
+ * preguntas.
  */
-export async function startCommand(packName: string = DEFAULT_PACK): Promise<void> {
+export async function startCommand(opts: SetupOptions = { interactive: true }): Promise<void> {
+  let setup;
+  try {
+    setup = await resolveSetup(PACKS_ROOT, opts, SESSION_TARGET_QUESTIONS, DEFAULT_PACK);
+  } catch (err) {
+    console.error(
+      `\n✗ No se puede iniciar la sesión: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+  if (setup === null) {
+    console.log("\nSesión cancelada antes de empezar. No se ha guardado nada.\n");
+    return;
+  }
+
+  const { packName } = setup;
+
   // Aislamiento por tema: cada pack tiene su carpeta de contenido (packs/<pack>/)
   // y su carpeta de resultados (data/<pack>/). Nunca se cruzan entre temas.
-  const packDir = join(PACKS_ROOT, packName);
-  const readinessPath = join(packDir, "readiness.yaml");
+  const readinessPath = join(PACKS_ROOT, packName, "readiness.yaml");
   const historyPath = join(DATA_DIR, packName, "history.json");
 
-  let pack;
   let readinessCfg: ReadinessConfig | null = null;
   let history;
   try {
-    pack = loadPackDir(packDir);
     if (existsSync(readinessPath)) readinessCfg = loadReadiness(readinessPath);
     // Se carga ANTES de la sesión para fallar rápido si el historial está corrupto.
     history = loadHistory(historyPath);
@@ -65,13 +82,32 @@ export async function startCommand(packName: string = DEFAULT_PACK): Promise<voi
     return;
   }
 
-  console.log(
-    `\nPack: ${pack.name} (${packName}) — ${pack.questions.length} preguntas, ${pack.dimensions.length} dimensiones`,
-  );
+  console.log("\n" + heading("Sesión") + "\n" + describeSetup(setup));
+
+  // Si el filtro deja una muestra que no da para concluir nada, se dice ANTES de
+  // responder 40 preguntas y no al final escondido en un N pequeño.
+  const aviso = sampleWarning(setup.bank, setup.target);
+  if (aviso !== null) console.log(`  ${pc.yellow("⚠")} ${pc.yellow(aviso)}`);
+  console.log("");
 
   const seed = Date.now() >>> 0;
   const shuffle = makeSeededShuffle(seed);
-  const selected = selectBalanced(pack.questions, SESSION_TARGET_QUESTIONS, MIN_PER_DIMENSION, shuffle);
+
+  // El mínimo por dimensión no puede pasarse del total pedido: si no, elegir
+  // "sesión corta" devolvería igualmente el mínimo × nº de dimensiones.
+  const dimsEnBanco = new Set(setup.bank.map((q) => q.dimension)).size;
+  const minPorDim = Math.max(
+    1,
+    Math.min(MIN_PER_DIMENSION, Math.floor(setup.target / dimsEnBanco)),
+  );
+
+  // Barajar las opciones al presentar: el banco tiene la correcta casi siempre la
+  // primera (sesgo de quien las escribe), y sin esto el test se adivina por
+  // posición. Los ids no se tocan, así que el scoring y el historial no se enteran.
+  const selected = shuffleOptions(
+    selectBalanced(setup.bank, setup.target, minPorDim, shuffle),
+    shuffle,
+  );
 
   const answered = await runSession(selected);
   const result = score(answered, selected);
@@ -89,7 +125,15 @@ export async function startCommand(packName: string = DEFAULT_PACK): Promise<voi
 
   // TL;DR narrativo primero: ranking, peores puntos y por dónde estudiar.
   if (readinessCfg) {
-    console.log("\n" + renderSummary(roles, gaps, readinessCfg.levels.map((l) => l.id)) + "\n");
+    console.log(
+      "\n" +
+        renderSummary(
+          roles,
+          gaps,
+          readinessCfg.levels.map((l) => l.id),
+        ) +
+        "\n",
+    );
   }
   console.log(renderResult(result) + "\n");
   console.log(renderCalibration(calib) + "\n");

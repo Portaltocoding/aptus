@@ -2,6 +2,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { loadPackDir } from "../../content/loader.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
+import { shuffleOptions } from "../../core/session.js";
+import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
 import { calibration } from "../../core/calibration.js";
 import { buildSessionRecord } from "../../core/evolution.js";
@@ -71,7 +73,12 @@ export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<vo
 
   console.log(`\n${renderReviewPlan(due, reviewByDimension(due), before.length, REVIEW_TARGET_QUESTIONS)}\n`);
 
-  const selected = selectReview(due, pack.questions, REVIEW_TARGET_QUESTIONS);
+  // Mismo barajado de opciones que en `start`: si en el repaso la correcta
+  // volviera a caer siempre la primera, se estaría estudiando la posición.
+  const selected = shuffleOptions(
+    selectReview(due, pack.questions, REVIEW_TARGET_QUESTIONS),
+    makeSeededShuffle(now.getTime() >>> 0),
+  );
   const answered = await runSession(selected);
   const result = score(answered, selected);
 

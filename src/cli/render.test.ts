@@ -6,6 +6,7 @@ import {
   renderGaps,
   renderWeightedGaps,
   renderEvolution,
+  renderSummary,
 } from "./render.js";
 import type { ScoreResult } from "../core/scoring.js";
 import type { CalibrationResult } from "../core/calibration.js";
@@ -228,5 +229,36 @@ describe("renderEvolution", () => {
     expect(out).toContain("d1");
     expect(out).toContain("↑"); // delta positivo
     expect(out).toContain("Junior-ready → Mid-ready");
+  });
+});
+
+describe("readiness sin evidencia (N=0)", () => {
+  const rolVacio = (label: string): RoleReadiness => ({
+    roleId: label.toLowerCase().replace(/\s/g, "-"),
+    label,
+    levelId: null,
+    levelLabel: "Aún no junior-ready",
+    byDifficulty: (["easy", "medium", "hard", "experto"] as const).map((difficulty) => ({
+      difficulty,
+      answered: 0,
+      correct: 0,
+      accuracy: 0,
+    })),
+    byDimension: [],
+    secondary: [],
+    answered: 0,
+  });
+
+  it("un rol sin respuestas se marca 'sin evidencia', no 'aún no junior-ready'", () => {
+    const out = renderReadiness([rolVacio("ML Engineer")]);
+    expect(out).toContain("sin evidencia");
+    expect(out).not.toContain("Aún no junior-ready");
+  });
+
+  it("el resumen saca del ranking a los roles sin evidencia y los nombra aparte", () => {
+    const out = renderSummary([rolVacio("ML Engineer")], [], ["junior", "mid", "senior"]);
+    expect(out).toContain("Sin evidencia en esta sesión");
+    expect(out).toContain("ML Engineer");
+    expect(out).not.toContain("Ranking");
   });
 });

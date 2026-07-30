@@ -7,6 +7,8 @@ import {
   goBack,
   isComplete,
   toAnswered,
+  shuffleOptions,
+  filterQuestions,
 } from "./session.js";
 import { makeSeededShuffle } from "./random.js";
 import type { Question } from "../content/schema.js";
@@ -188,5 +190,93 @@ describe("navegación de sesión (buildSession + transiciones)", () => {
       selectedOptionId: "b",
       confidence: null,
     });
+  });
+});
+
+/** Pregunta de 4 opciones con la correcta SIEMPRE la primera: el sesgo real del banco. */
+function makeBiased(id: string, dimension: string, difficulty: Question["difficulty"]): Question {
+  return {
+    ...makeQuestion(id, dimension),
+    difficulty,
+    options: [
+      { id: "a", text: "La correcta" },
+      { id: "b", text: "Distractor 1" },
+      { id: "c", text: "Distractor 2" },
+      { id: "d", text: "Distractor 3" },
+    ],
+    correct: "a",
+  };
+}
+
+describe("shuffleOptions", () => {
+  it("no toca los ids ni la respuesta correcta: solo el orden de presentación", () => {
+    const bank = [makeBiased("q-1", "dim", "easy")];
+    const [shuffled] = shuffleOptions(bank, makeSeededShuffle(7));
+
+    expect(shuffled!.correct).toBe("a");
+    expect(shuffled!.options.map((o) => o.id).sort()).toEqual(["a", "b", "c", "d"]);
+    // El texto sigue pegado a su id: reordenar no puede desparejar opción y contenido.
+    expect(shuffled!.options.find((o) => o.id === "a")!.text).toBe("La correcta");
+  });
+
+  it("rompe el sesgo de posición: la correcta deja de caer siempre la primera", () => {
+    const bank = Array.from({ length: 200 }, (_, i) => makeBiased(`q-${i}`, "dim", "easy"));
+
+    const primeras = shuffleOptions(bank, makeSeededShuffle(99)).filter((q) => q.options[0]!.id === q.correct).length;
+
+    // Con 4 opciones lo esperable es ~25%. Antes de barajar era el 100%.
+    expect(primeras).toBeGreaterThan(20);
+    expect(primeras).toBeLessThan(80);
+  });
+
+  it("misma seed -> mismo orden de opciones (determinista)", () => {
+    const bank = Array.from({ length: 20 }, (_, i) => makeBiased(`q-${i}`, "dim", "easy"));
+
+    const a = shuffleOptions(bank, makeSeededShuffle(3));
+    const b = shuffleOptions(bank, makeSeededShuffle(3));
+
+    expect(a.map((q) => q.options.map((o) => o.id))).toEqual(b.map((q) => q.options.map((o) => o.id)));
+  });
+
+  it("no muta el banco original", () => {
+    const bank = [makeBiased("q-1", "dim", "easy")];
+    const antes = bank[0]!.options.map((o) => o.id);
+
+    shuffleOptions(bank, makeSeededShuffle(1));
+
+    expect(bank[0]!.options.map((o) => o.id)).toEqual(antes);
+  });
+});
+
+describe("filterQuestions", () => {
+  const bank = [
+    makeBiased("a-1", "alpha", "easy"),
+    makeBiased("a-2", "alpha", "experto"),
+    makeBiased("b-1", "beta", "easy"),
+    makeBiased("b-2", "beta", "hard"),
+  ];
+
+  it("un filtro vacío no filtra nada", () => {
+    expect(filterQuestions(bank, {})).toHaveLength(4);
+    expect(filterQuestions(bank, { dimensions: [], difficulties: [] })).toHaveLength(4);
+    expect(filterQuestions(bank, { dimensions: null, difficulties: null })).toHaveLength(4);
+  });
+
+  it("acota por dimensión", () => {
+    expect(filterQuestions(bank, { dimensions: ["alpha"] }).map((q) => q.id)).toEqual(["a-1", "a-2"]);
+  });
+
+  it("acota por tramo de dificultad", () => {
+    expect(filterQuestions(bank, { difficulties: ["easy"] }).map((q) => q.id)).toEqual(["a-1", "b-1"]);
+  });
+
+  it("cruza ambos filtros", () => {
+    expect(filterQuestions(bank, { dimensions: ["beta"], difficulties: ["hard", "experto"] }).map((q) => q.id)).toEqual([
+      "b-2",
+    ]);
+  });
+
+  it("un cruce sin material devuelve vacío, no lanza", () => {
+    expect(filterQuestions(bank, { dimensions: ["alpha"], difficulties: ["hard"] })).toEqual([]);
   });
 });

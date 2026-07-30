@@ -11,6 +11,48 @@ import type { AnsweredQuestion, Confidence } from "./scoring.js";
 
 export type ShuffleFn = <T>(items: T[]) => T[];
 
+export type Difficulty = Question["difficulty"];
+
+/** Qué acota la sesión: subconjunto de dimensiones y/o de tramos de dificultad. */
+export interface QuestionFilter {
+  dimensions?: readonly string[] | null; // null/vacío = todas
+  difficulties?: readonly Difficulty[] | null; // null/vacío = todos los tramos
+}
+
+/**
+ * Acota el banco a lo que se va a evaluar (dimensiones y tramos de dificultad).
+ * Un filtro vacío o nulo no filtra nada. NO garantiza que quede material
+ * suficiente: si el cruce deja el banco vacío devuelve una lista vacía, y avisar
+ * de eso es responsabilidad de la composición, no de esta función pura.
+ */
+export function filterQuestions(bank: Question[], filter: QuestionFilter): Question[] {
+  const dims =
+    filter.dimensions && filter.dimensions.length > 0 ? new Set(filter.dimensions) : null;
+  const diffs =
+    filter.difficulties && filter.difficulties.length > 0 ? new Set(filter.difficulties) : null;
+
+  return bank.filter(
+    (q) => (dims === null || dims.has(q.dimension)) && (diffs === null || diffs.has(q.difficulty)),
+  );
+}
+
+/**
+ * Baraja el ORDEN DE PRESENTACIÓN de las opciones de cada pregunta.
+ *
+ * Existe porque el banco tiene un sesgo posicional brutal —al escribir preguntas
+ * a mano la correcta acaba casi siempre la primera— y un test cuya respuesta se
+ * adivina por posición no mide nada. Se baraja al presentar, no en el YAML: así
+ * el sesgo queda neutralizado en CUALQUIER pack, presente o futuro, sin depender
+ * de la disciplina de quien lo escriba.
+ *
+ * `option.id` y `correct` NO se tocan: el scoring, el historial y el repaso
+ * siguen hablando de ids, así que reordenar aquí es puramente cosmético y las
+ * sesiones antiguas siguen siendo comparables.
+ */
+export function shuffleOptions(questions: Question[], shuffle: ShuffleFn): Question[] {
+  return questions.map((q) => ({ ...q, options: shuffle(q.options) }));
+}
+
 /**
  * Reparte preguntas por dimensión con un mínimo garantizado cuando el
  * pool lo permite. Si `pool.length < minPerDimension` para alguna

@@ -12,13 +12,34 @@ import { jobsCommand } from "./cli/commands/jobs.js";
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
 
+// `start` no fija `--pack` por defecto a propósito: sin flag, el asistente
+// pregunta qué pack, qué dimensiones y qué dificultad. Con flags (o con `--yes`,
+// o sin TTY) no pregunta nada y va directo, que es lo que necesitan los scripts.
 program
   .command("start")
-  .description("Inicia una sesión de test sobre un pack")
-  .option("-p, --pack <name>", "pack de conocimiento a usar", DEFAULT_PACK)
-  .action(async (opts: { pack: string }) => {
-    await startCommand(opts.pack);
-  });
+  .description("Inicia una sesión de test (asistente interactivo si no pasas flags)")
+  .option("-p, --pack <name>", "pack de conocimiento a usar")
+  .option("-d, --dims <lista>", "dimensiones separadas por comas (por defecto, todas)")
+  .option("-D, --difficulty <nivel>", "todas|base|alta|experto, o tramos: easy,medium,hard,experto")
+  .option("-n, --questions <n>", "cuántas preguntas", (v: string) => Number.parseInt(v, 10))
+  .option("-y, --yes", "no preguntar nada: usa los valores por defecto", false)
+  .action(
+    async (opts: {
+      pack?: string;
+      dims?: string;
+      difficulty?: string;
+      questions?: number;
+      yes: boolean;
+    }) => {
+      await startCommand({
+        pack: opts.yes ? (opts.pack ?? DEFAULT_PACK) : opts.pack,
+        dims: opts.dims,
+        difficulty: opts.difficulty,
+        questions: opts.questions,
+        interactive: !opts.yes,
+      });
+    },
+  );
 
 program
   .command("history")
