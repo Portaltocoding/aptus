@@ -6,6 +6,11 @@
   "bin": {
     "aptus": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "packs",
+    "!packs/**/*.test.ts"
+  ],
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "tsx src/index.ts",
