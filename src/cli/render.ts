@@ -1,5 +1,6 @@
 import Table from "cli-table3";
 import pc from "picocolors";
+import { cellBarWidth, tableWidths } from "./theme.js";
 import type { ScoreResult } from "../core/scoring.js";
 import { CALIBRATION_GAP_THRESHOLD, type CalibrationResult } from "../core/calibration.js";
 import { GAP_THRESHOLD, type Difficulty, type Gap, type RoleReadiness, type TierAccuracy } from "../core/readiness.js";
@@ -13,7 +14,7 @@ import type { JobsScan, ScannedJob } from "../core/jobs-scan.js";
  * Barra unicode coloreada por umbral (verde/amarillo/rojo). Estética sobria,
  * sin arte. Es solo presentación: no deriva ni ajusta ningún score.
  */
-function bar(pct: number, width = 20): string {
+function bar(pct: number, width = cellBarWidth()): string {
   const filled = Math.max(0, Math.min(width, Math.round(pct * width)));
   const glyphs = "█".repeat(filled) + "░".repeat(width - filled);
   const colorFn = pct >= 0.7 ? pc.green : pct >= 0.4 ? pc.yellow : pc.red;
@@ -27,9 +28,7 @@ function bar(pct: number, width = 20): string {
  * formatea: el cálculo vive por completo en `src/core/scoring.ts`.
  */
 export function renderResult(result: ScoreResult): string {
-  const table = new Table({
-    head: ["Dimensión", "Resultado", "N (respondidas/presentadas)"],
-  });
+  const table = tabla(["Dimensión", "Resultado", "N (respondidas/presentadas)"]);
 
   for (const d of result.byDimension) {
     table.push([
@@ -59,9 +58,7 @@ export function renderCalibration(result: CalibrationResult): string {
     return "Calibración: no declaraste confianza en esta sesión, no hay curva que mostrar.";
   }
 
-  const table = new Table({
-    head: ["Confianza", "Declarada", "Acierto real", "N", "Lectura"],
-  });
+  const table = tabla(["Confianza", "Declarada", "Acierto real", "N", "Lectura"]);
 
   for (const b of result.byConfidence) {
     let lectura: string;
@@ -79,6 +76,22 @@ export function renderCalibration(result: CalibrationResult): string {
   }
 
   return "Calibración (confianza declarada vs acierto real):\n" + table.toString();
+}
+
+/**
+ * Toda tabla del informe pasa por aquí (SESS-07): en un terminal más estrecho que
+ * el ancho de referencia reparte las columnas y deja que el texto salte de línea
+ * dentro de la celda; si cabe, mide por contenido como siempre.
+ */
+function tabla(head: string[]): Table.Table {
+  const anchos = tableWidths(head.length);
+  // `colWidths: undefined` NO es "sin anchos" para cli-table3: pisa su valor por
+  // defecto (`[]`) y revienta al medir. Cuando cabe, la clave no se pone.
+  return new Table(
+    anchos === undefined
+      ? { head }
+      : { head, colWidths: anchos, wordWrap: true, wrapOnWordBoundary: true },
+  );
 }
 
 function tierCell(t: TierAccuracy): string {
@@ -100,9 +113,7 @@ function levelColor(levelId: string | null): (s: string) => string {
  * por rol, cada una anclada a su desempeño real. Solo presenta; no calcula.
  */
 export function renderReadiness(roles: RoleReadiness[]): string {
-  const table = new Table({
-    head: ["Rol", "Readiness", "Fácil", "Media", "Difícil", "Experto", "N"],
-  });
+  const table = tabla(["Rol", "Readiness", "Fácil", "Media", "Difícil", "Experto", "N"]);
 
   const cell = (byTier: Map<string, TierAccuracy>, d: string): string => {
     const t = byTier.get(d);
@@ -264,7 +275,7 @@ export function renderJdProfile(profile: JdProfile): string {
     incidental: "incidental",
   };
 
-  const table = new Table({ head: ["Dimensión", "Peso en la oferta", "Menciones", "Keywords que la disparan"] });
+  const table = tabla(["Dimensión", "Peso en la oferta", "Menciones", "Keywords que la disparan"]);
   for (const m of profile.matched) {
     const peso = PESO[m.weight]!(ETIQUETA[m.weight]!);
     const soloValorable = m.optionalOnly ? pc.yellow(" · solo en «valorable»") : "";
@@ -348,7 +359,7 @@ export function renderJdReadiness(readiness: RoleReadiness, verdict: JdVerdict):
   }
 
   const byTier = new Map(readiness.byDifficulty.map((t) => [t.difficulty, t]));
-  const table = new Table({ head: ["Fácil", "Media", "Difícil", "Experto", "N (núcleo de la oferta)"] });
+  const table = tabla(["Fácil", "Media", "Difícil", "Experto", "N (núcleo de la oferta)"]);
   const cell = (d: Difficulty): string => {
     const t = byTier.get(d);
     return t ? tierCell(t) : "—";
@@ -443,7 +454,7 @@ export function renderReviewPlan(
     );
   }
 
-  const table = new Table({ head: ["Dimensión", "Toca repasar", "De ellas, falladas la última vez"] });
+  const table = tabla(["Dimensión", "Toca repasar", "De ellas, falladas la última vez"]);
   for (const d of byDim) {
     table.push([d.dimension, String(d.due), d.weak > 0 ? pc.red(String(d.weak)) : "0"]);
   }
@@ -595,7 +606,7 @@ export function renderEvolution(report: EvolutionReport): string {
     return "Evolución: primera sesión guardada. La comparación aparecerá a partir de la segunda.";
   }
 
-  const table = new Table({ head: ["Dimensión", "Ahora", "Antes", "Δ (puntos)"] });
+  const table = tabla(["Dimensión", "Ahora", "Antes", "Δ (puntos)"]);
   for (const d of report.byDimension) {
     table.push([
       d.dimension,
