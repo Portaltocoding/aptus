@@ -185,8 +185,6 @@ async function pickPack(
   return cargar(elegido);
 }
 
-/** Valor centinela del checkbox: no es una dimensión, es "quiero crear una". */
-export const NUEVA_DIMENSION = "__nueva__";
 
 /** Una dimensión elegible, con lo que hay detrás de ella. */
 export interface DimensionOption {
@@ -207,8 +205,6 @@ export interface DimensionPick {
   mensaje: string;
   disponibles: DimensionOption[];
   deshabilitadas?: DimensionDisabled[];
-  /** Entrada "＋ tema nuevo…". Solo la pone quien puede atenderla. */
-  nueva?: { etiqueta: string; detalle: string };
 }
 
 /**
@@ -241,16 +237,6 @@ export async function pickDimensionsFrom(o: DimensionPick): Promise<Escapable<st
             disabled: pc.dim(d.motivo),
             description: d.detalle,
           })),
-          ...(o.nueva
-            ? [
-                {
-                  value: NUEVA_DIMENSION,
-                  name: pc.cyan(o.nueva.etiqueta),
-                  checked: false,
-                  description: o.nueva.detalle,
-                },
-              ]
-            : []),
         ],
         required: true,
         theme: promptTheme,
@@ -261,14 +247,57 @@ export async function pickDimensionsFrom(o: DimensionPick): Promise<Escapable<st
   );
 
   if (elegidas === ESCAPED) return ESCAPED;
-  if (elegidas.includes(NUEVA_DIMENSION)) return [NUEVA_DIMENSION];
   return elegidas.length === o.disponibles.length ? null : elegidas;
 }
 
 /**
- * Qué dimensiones entran en la sesión. La lista incluye SIEMPRE una entrada para
- * crear un tema nuevo: sin ella, el asistente solo deja elegir entre lo que ya
- * existe y no hay ninguna pista de que aptus sepa construir temas.
+ * Lo primero que se pregunta: MEDIR o CONSTRUIR. Son dos intenciones distintas y
+ * hasta ahora compartían pantalla — "escribir un tema nuevo" era una opción más
+ * del checkbox de dimensiones, la última y sin marcar, con las dimensiones del
+ * pack ya marcadas encima.
+ *
+ * Eso hacía que ir dando enter —lo natural cuando cada pantalla te dice que sí—
+ * confirmara las dimensiones de siempre y arrancara un test del tema viejo. Quien
+ * venía a montar un tema nuevo acababa respondiendo un examen que no había
+ * pedido, sin ninguna pista de en qué momento se había desviado. Un checkbox
+ * responde "¿cuáles de estos?"; esta decisión es "¿qué vengo a hacer?", y
+ * mezclarlas convertía la opción menos usada en una trampa.
+ */
+async function pickModo(pack: Pack, evaluables: number): Promise<Escapable<"evaluar" | "nuevo">> {
+  const dims = pack.dimensions.length;
+
+  return await withEscape((signal) =>
+    select<"evaluar" | "nuevo">(
+      {
+        message: pc.bold("  ¿Qué quieres hacer?") + pc.dim(`  (${ESC_HINT})`),
+        choices: [
+          {
+            value: "evaluar",
+            name: "Evaluarme sobre lo que ya hay",
+            // Sin nada evaluable, ofrecerlo sería mandarte a un callejón: el
+            // asistente seguiría hasta fallar por banco vacío.
+            disabled: evaluables === 0 ? pc.dim("este pack aún no tiene preguntas") : false,
+            description:
+              evaluables === 0
+                ? "El pack no tiene ninguna dimensión con preguntas todavía."
+                : `${evaluables} de ${dims} dimensión(es) tienen banco. Eliges cuáles entran y a qué dificultad.`,
+          },
+          {
+            value: "nuevo",
+            name: pc.cyan("Montar un tema nuevo"),
+            description:
+              "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo. No evalúa nada todavía.",
+          },
+        ],
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
+}
+
+/**
+ * Qué dimensiones entran en la sesión.
  *
  * Las dimensiones declaradas pero sin preguntas se muestran deshabilitadas en vez
  * de ocultarse: que un tema exista y no sea evaluable es información útil —te dice
@@ -290,11 +319,6 @@ async function pickDimensions(pack: Pack): Promise<Escapable<string[] | null>> {
         motivo: "no evaluable todavía",
         detalle: "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
       })),
-    nueva: {
-      etiqueta: "＋ escribir un tema nuevo…",
-      detalle:
-        "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
-    },
   });
 }
 
@@ -428,7 +452,11 @@ export async function resolveSetup(
       // Los pasos se recorren con un índice en vez de en línea recta para que ESC
       // pueda RETROCEDER uno. Equivocarte en la dificultad no debería costarte
       // volver a empezar desde la terminal.
-      const pasos: ("dims" | "difficulty" | "target")[] = [];
+      // Medir o construir se pregunta ANTES que nada: son dos intenciones
+      // distintas, y cuando compartían pantalla con el filtro de dimensiones
+      // bastaba ir dando enter para acabar en un test del tema viejo.
+      const evaluables = new Set(pack.questions.map((q) => q.dimension)).size;
+      const pasos: ("modo" | "dims" | "difficulty" | "target")[] = ["modo"];
       if (opts.dims === undefined) pasos.push("dims");
       if (opts.difficulty === undefined) pasos.push("difficulty");
       if (opts.questions === undefined) pasos.push("target");
@@ -440,17 +468,15 @@ export async function resolveSetup(
         if (i < 0) return null;
         const paso = pasos[i]!;
 
-        if (paso === "dims") {
-          const elegidas = await pickDimensions(pack);
-          if (elegidas === ESCAPED) return null; // primer paso: ESC sale del asistente
-          dimensions = elegidas;
+        if (paso === "modo") {
+          const modo = await pickModo(pack, evaluables);
+          if (modo === ESCAPED) return null; // primer paso: ESC sale del asistente
 
-          // "Tema nuevo" no es un filtro de sesión: es construir el pack. Si el
-          // flujo se cancela, se vuelve a esta misma pantalla en vez de tirar
-          // abajo el asistente entero por haber entrado sin querer.
-          if (dimensions !== null && dimensions.includes(NUEVA_DIMENSION)) {
+          if (modo === "nuevo") {
             // Escribir un tema nuevo es ESCRIBIR en el pack: si el pack viene
             // dentro de la instalación, esto lanza en vez de tocar node_modules.
+            // Si el flujo se cancela se vuelve a ESTA pantalla, no se tira abajo
+            // el asistente entero por haber entrado sin querer.
             const hecho = await runNewDimension(
               packs.dirForWrite(packName),
               packName,
@@ -459,6 +485,13 @@ export async function resolveSetup(
             if (!hecho) continue;
             return null;
           }
+        } else if (paso === "dims") {
+          const elegidas = await pickDimensions(pack);
+          if (elegidas === ESCAPED) {
+            i -= 1;
+            continue;
+          }
+          dimensions = elegidas;
         } else if (paso === "difficulty") {
           const elegida = await pickDifficulty();
           if (elegida === ESCAPED) {
