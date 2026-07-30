@@ -13,12 +13,12 @@
   options:
     - id: a
       text: Required<T>
-    - id: b
-      text: Partial<T>
     - id: c
       text: Readonly<T>
     - id: d
       text: Pick<T, K>
+    - id: b
+      text: Partial<T>
   correct: b
   explanation: "Partial<T> mapea cada propiedad a opcional (prop?: tipo).
     Required<T> hace lo contrario, Readonly<T> las hace inmutables y Pick<T,K>
@@ -34,16 +34,16 @@
   stem: ¿Cuál es la diferencia práctica clave entre los tipos 'unknown' y 'any' en
     TypeScript?
   options:
+    - id: d
+      text: "'unknown' no existe en TypeScript, es de Flow"
+    - id: c
+      text: "'any' solo se puede usar en tipos de retorno y 'unknown' solo en
+        parámetros"
     - id: a
       text: Son sinónimos, 'unknown' es solo un alias más moderno de 'any'
     - id: b
       text: "'unknown' es type-safe: obliga a estrechar el tipo (narrowing) antes de
         operar con el valor, mientras 'any' desactiva toda comprobación"
-    - id: c
-      text: "'any' solo se puede usar en tipos de retorno y 'unknown' solo en
-        parámetros"
-    - id: d
-      text: "'unknown' no existe en TypeScript, es de Flow"
   correct: b
   explanation: "'unknown' acepta cualquier valor pero no permite acceder a
     propiedades ni llamarlo sin antes estrechar el tipo (typeof, instanceof,
@@ -61,14 +61,14 @@
     tiene un campo literal 'kind'. ¿Cómo se llama el patrón que permite a
     TypeScript estrechar el tipo dentro de un switch sobre 'shape.kind'?
   options:
+    - id: d
+      text: Mapped type
+    - id: c
+      text: Conditional type
     - id: a
       text: Discriminated union (union etiquetada)
     - id: b
       text: Intersection type
-    - id: c
-      text: Conditional type
-    - id: d
-      text: Mapped type
   correct: a
   explanation: Una discriminated union usa un campo literal común (el
     discriminante, aquí 'kind') para que el compilador estreche automáticamente
@@ -85,15 +85,15 @@
   stem: "¿Qué aporta el operador 'satisfies' de TypeScript frente a una anotación
     de tipo normal ': T'?"
   options:
+    - id: b
+      text: Convierte el valor a T en tiempo de ejecución (cast real)
+    - id: d
+      text: Es equivalente a 'as T' pero más lento
     - id: a
       text: Comprueba que el valor cumple el tipo T pero conserva el tipo literal más
         estrecho inferido del valor, en vez de ensancharlo a T
-    - id: b
-      text: Convierte el valor a T en tiempo de ejecución (cast real)
     - id: c
       text: Hace que el valor sea readonly
-    - id: d
-      text: Es equivalente a 'as T' pero más lento
   correct: a
   explanation: "'satisfies' valida la compatibilidad con T sin descartar la
     información literal: p. ej. un objeto de config queda validado contra el
@@ -111,15 +111,15 @@
   stem: En Next.js, ¿qué diferencia hay entre SSG (Static Site Generation) y SSR
     (Server-Side Rendering)?
   options:
-    - id: a
-      text: SSG renderiza en el navegador; SSR en el servidor
+    - id: c
+      text: Son lo mismo, solo cambia el nombre según la versión
     - id: b
       text: SSG genera el HTML en tiempo de build (una vez); SSR lo genera en el
         servidor en cada petición
-    - id: c
-      text: Son lo mismo, solo cambia el nombre según la versión
     - id: d
       text: SSR solo funciona sin JavaScript y SSG requiere JavaScript
+    - id: a
+      text: SSG renderiza en el navegador; SSR en el servidor
   correct: b
   explanation: SSG produce HTML estático en el build y lo sirve igual a todos
     (ideal para contenido que cambia poco). SSR ejecuta el render en el servidor
@@ -137,15 +137,15 @@
   stem: En el App Router de Next.js, ¿qué caracteriza a un React Server Component
     (RSC) por defecto?
   options:
-    - id: a
-      text: Se ejecuta en el servidor, no envía su JS al cliente y no puede usar hooks
-        de estado como useState/useEffect
-    - id: b
-      text: Se ejecuta solo en el cliente y siempre requiere 'use client'
     - id: c
       text: Es idéntico a un componente cliente pero con otro nombre
     - id: d
       text: Solo puede renderizar texto plano, no otros componentes
+    - id: b
+      text: Se ejecuta solo en el cliente y siempre requiere 'use client'
+    - id: a
+      text: Se ejecuta en el servidor, no envía su JS al cliente y no puede usar hooks
+        de estado como useState/useEffect
   correct: a
   explanation: "En el App Router los componentes son Server Components por
     defecto: corren en el servidor, pueden hacer fetch/acceso a datos
@@ -161,14 +161,14 @@
     - Full Stack Engineer
   stem: ¿Qué hace Incremental Static Regeneration (ISR) en Next.js?
   options:
-    - id: a
-      text: Regenera todo el sitio en cada request
     - id: b
       text: Permite regenerar páginas estáticas en segundo plano tras un intervalo
         ('revalidate'), sirviendo la versión cacheada hasta que la nueva esté
         lista
     - id: c
       text: Deshabilita el cache por completo
+    - id: a
+      text: Regenera todo el sitio en cada request
     - id: d
       text: Convierte las páginas en client-side rendering
   correct: b
@@ -189,15 +189,15 @@
     idiomática de que la UI refleje el cambio sin recargar toda la página a
     mano?
   options:
+    - id: d
+      text: "No es posible: las Server Actions no pueden refrescar datos"
+    - id: c
+      text: Guardar el estado en localStorage y leerlo en el próximo render
+    - id: b
+      text: Hacer window.location.reload() al final de la acción
     - id: a
       text: Llamar a revalidatePath() o revalidateTag() para invalidar el cache del
         segmento afectado y que Next.js vuelva a renderizarlo
-    - id: b
-      text: Hacer window.location.reload() al final de la acción
-    - id: c
-      text: Guardar el estado en localStorage y leerlo en el próximo render
-    - id: d
-      text: "No es posible: las Server Actions no pueden refrescar datos"
   correct: a
   explanation: revalidatePath/revalidateTag invalidan el cache de datos/segmento
     tras la mutación, de modo que el siguiente render en servidor trae los datos
@@ -213,12 +213,12 @@
     - Full Stack Engineer
   stem: ¿Cuál es una causa típica de un 'hydration mismatch' en Next.js/React?
   options:
+    - id: b
+      text: Usar demasiados componentes
     - id: a
       text: Renderizar en el servidor un HTML distinto al que produce el cliente en el
         primer render (p. ej. usar Date.now(), Math.random() o window durante el
         render)
-    - id: b
-      text: Usar demasiados componentes
     - id: c
       text: Tener el bundle de JS demasiado pequeño
     - id: d
@@ -240,15 +240,15 @@
   stem: En NestJS, ¿qué principio arquitectónico está en el centro de cómo se
     conectan controllers, services y repositories?
   options:
-    - id: a
-      text: "Inyección de dependencias (DI): los providers se declaran y Nest los
-        inyecta por su token/tipo, en vez de instanciarlos a mano"
-    - id: b
-      text: Herencia múltiple entre controllers
     - id: c
       text: Variables globales compartidas entre módulos
     - id: d
       text: Singletons creados manualmente con 'new' en cada archivo
+    - id: b
+      text: Herencia múltiple entre controllers
+    - id: a
+      text: "Inyección de dependencias (DI): los providers se declaran y Nest los
+        inyecta por su token/tipo, en vez de instanciarlos a mano"
   correct: a
   explanation: "NestJS se apoya en un contenedor de inyección de dependencias: los
     providers (services, repositories) se registran en módulos y Nest resuelve e
@@ -269,13 +269,13 @@
       text: El Guard decide si una petición puede continuar
         (autorización/autenticación); el Pipe transforma o valida los datos de
         entrada antes de llegar al handler
-    - id: b
-      text: Son intercambiables, hacen exactamente lo mismo
+    - id: d
+      text: El Pipe controla el acceso y el Guard registra logs
     - id: c
       text: El Guard formatea la respuesta y el Pipe gestiona la conexión a la base de
         datos
-    - id: d
-      text: El Pipe controla el acceso y el Guard registra logs
+    - id: b
+      text: Son intercambiables, hacen exactamente lo mismo
   correct: a
   explanation: "Un Guard implementa canActivate() y decide si la request procede
     (típico: auth/roles). Un Pipe opera sobre los argumentos del handler para
@@ -292,15 +292,15 @@
     - Backend Engineer
   stem: ¿Cómo se valida idiomáticamente el body de una petición en NestJS?
   options:
+    - id: d
+      text: Validando en el frontend y desactivando la validación en el backend
     - id: a
       text: Con un DTO decorado con class-validator y el ValidationPipe global, que
         rechaza la petición si el payload no cumple el esquema
-    - id: b
-      text: Comprobando cada campo con if/else dentro del controller
     - id: c
       text: Confiando en que el cliente envíe siempre datos válidos
-    - id: d
-      text: Validando en el frontend y desactivando la validación en el backend
+    - id: b
+      text: Comprobando cada campo con if/else dentro del controller
   correct: a
   explanation: El patrón idiomático es definir un DTO con decoradores de
     class-validator (@IsString, @IsEmail, etc.) y activar el ValidationPipe (a
@@ -326,15 +326,15 @@
 
     ¿Qué ocurre al montar este componente?
   options:
+    - id: b
+      text: Nada raro, n se queda en 1
     - id: a
       text: "Bucle infinito de renders: el effect corre en cada render y setN provoca
         otro render"
-    - id: b
-      text: Nada raro, n se queda en 1
-    - id: c
-      text: Error de compilación de TypeScript
     - id: d
       text: n se queda en 0 para siempre
+    - id: c
+      text: Error de compilación de TypeScript
   correct: a
   explanation: "Sin array de dependencias, el effect se ejecuta tras CADA render;
     como llama a setN, dispara un nuevo render que vuelve a ejecutar el effect:
@@ -360,10 +360,10 @@
       text: Pipe (valida/transforma el payload, p. ej. ValidationPipe con el DTO)
     - id: b
       text: Otro Controller
-    - id: c
-      text: La conexión a la base de datos
     - id: d
       text: El navegador del cliente
+    - id: c
+      text: La conexión a la base de datos
   correct: a
   explanation: El orden en Nest es middleware -> guards -> interceptors -> pipes
     -> handler. El Pipe valida y transforma los argumentos (típicamente el
@@ -380,15 +380,15 @@
   stem: En el App Router de Next.js pones useState en un componente sin la
     directiva 'use client' y falla. ¿Por qué?
   options:
+    - id: c
+      text: Falta importar React manualmente
+    - id: d
+      text: Next.js no soporta estado en el cliente
     - id: a
       text: Es un Server Component por defecto; los hooks de estado solo van en Client
         Components ('use client')
     - id: b
       text: useState ya no existe en React
-    - id: c
-      text: Falta importar React manualmente
-    - id: d
-      text: Next.js no soporta estado en el cliente
   correct: a
   explanation: En el App Router los componentes son Server Components por defecto
     y no tienen estado ni efectos de cliente. Para usar useState/useEffect hay
@@ -404,13 +404,13 @@
     - Full Stack Engineer
   stem: ¿Qué diferencia hay entre los utility types Pick<T,K> y Omit<T,K>?
   options:
-    - id: a
-      text: Pick construye un tipo con SOLO las claves K; Omit construye uno con todas
-        MENOS las claves K
     - id: b
       text: Son idénticos
     - id: c
       text: Pick borra claves y Omit las añade
+    - id: a
+      text: Pick construye un tipo con SOLO las claves K; Omit construye uno con todas
+        MENOS las claves K
     - id: d
       text: Solo funcionan con arrays
   correct: a
@@ -426,13 +426,13 @@
   roles: *a1
   stem: ¿Cuál es una diferencia práctica entre 'interface' y 'type' en TypeScript?
   options:
+    - id: c
+      text: Las interface no permiten extender
+    - id: b
+      text: Los type no pueden describir objetos
     - id: a
       text: Las interface admiten 'declaration merging' (varias declaraciones del
         mismo nombre se fusionan); los type no
-    - id: b
-      text: Los type no pueden describir objetos
-    - id: c
-      text: Las interface no permiten extender
     - id: d
       text: Son intercambiables sin ninguna diferencia
   correct: a
@@ -450,15 +450,15 @@
   stem: "¿Para qué sirve una restricción en un genérico, como `<T extends { id:
     string }>`?"
   options:
-    - id: a
-      text: Limita T a tipos que cumplen esa forma, permitiendo acceder a esas
-        propiedades dentro de la función con seguridad de tipos
-    - id: b
-      text: Convierte T en 'any'
     - id: c
       text: Obliga a que T sea string
     - id: d
       text: Desactiva el chequeo de tipos
+    - id: b
+      text: Convierte T en 'any'
+    - id: a
+      text: Limita T a tipos que cumplen esa forma, permitiendo acceder a esas
+        propiedades dentro de la función con seguridad de tipos
   correct: a
   explanation: La constraint `extends` acota qué tipos acepta el genérico y
     habilita el acceso a los miembros garantizados (aquí `.id`), manteniendo la
@@ -473,15 +473,15 @@
   roles: *a1
   stem: ¿Qué obtienes con `keyof T` y con un acceso indexado `T[K]`?
   options:
+    - id: d
+      text: Solo funcionan en runtime
+    - id: c
+      text: Ambos devuelven 'any'
+    - id: b
+      text: keyof T es el número de claves; T[K] su longitud
     - id: a
       text: keyof T es la unión de las claves de T; T[K] es el tipo del valor en esa
         clave
-    - id: b
-      text: keyof T es el número de claves; T[K] su longitud
-    - id: c
-      text: Ambos devuelven 'any'
-    - id: d
-      text: Solo funcionan en runtime
   correct: a
   explanation: keyof T da la unión literal de nombres de propiedad; el acceso
     indexado T[K] da el tipo del valor asociado. Son la base de utilidades
@@ -499,12 +499,12 @@
     - id: a
       text: Reducir un tipo amplio a uno más concreto en una rama de código con guards
         (typeof, instanceof, in, comprobaciones de igualdad)
-    - id: b
-      text: Ampliar cualquier tipo a 'any'
     - id: c
       text: Borrar tipos en runtime
     - id: d
       text: Un tipo de bucle
+    - id: b
+      text: Ampliar cualquier tipo a 'any'
   correct: a
   explanation: "El compilador estrecha el tipo dentro de bloques según los guards:
     p. ej. `if (typeof x === 'string')` hace que x sea string en esa rama. Es
@@ -532,12 +532,12 @@
     - id: a
       text: "Chequeo de exhaustividad: si se añade un miembro a la union y no se
         maneja, TypeScript da error de compilación"
-    - id: b
-      text: Lanza una excepción en runtime siempre
     - id: c
       text: Convierte s en any
     - id: d
       text: No hace nada útil
+    - id: b
+      text: Lanza una excepción en runtime siempre
   correct: a
   explanation: Si la union crece y falta un case, `s` en el default ya no es
     `never` y la asignación a `never` falla en compilación. Es el patrón
@@ -553,11 +553,11 @@
   stem: "¿Qué efecto tiene `as const` sobre un literal, p. ej. `const cfg = {
     modo: 'oscuro' } as const`?"
   options:
+    - id: b
+      text: Lo convierte en any
     - id: a
       text: Hace el valor readonly e infiere los tipos más estrechos (literales) en
         vez de ensancharlos (p. ej. 'oscuro' en vez de string)
-    - id: b
-      text: Lo convierte en any
     - id: c
       text: Lo copia en profundidad en runtime
     - id: d
@@ -579,10 +579,10 @@
     - id: a
       text: Un tipo que transforma cada propiedad de otro iterando sobre sus claves
         (aquí hace todas opcionales, como Partial)
-    - id: b
-      text: Un array de tipos
     - id: c
       text: Un tipo que solo existe en runtime
+    - id: b
+      text: Un array de tipos
     - id: d
       text: Una función genérica
   correct: a
@@ -602,15 +602,15 @@
 
     ¿Qué hace `infer R` aquí?
   options:
+    - id: b
+      text: Declara una variable en runtime
     - id: a
       text: Captura (infiere) el tipo de retorno de la función F dentro del tipo
         condicional, para devolverlo
-    - id: b
-      text: Declara una variable en runtime
-    - id: c
-      text: Fuerza R a ser any
     - id: d
       text: Es un error de sintaxis
+    - id: c
+      text: Fuerza R a ser any
   correct: a
   explanation: En un conditional type, `infer R` introduce una variable de tipo
     que el compilador deduce por unificación del patrón; aquí extrae el tipo de
@@ -626,13 +626,13 @@
   stem: Con `strictNullChecks` activo, ¿qué aporta el encadenamiento opcional
     `a?.b?.c` frente a `a.b.c`?
   options:
-    - id: a
-      text: Cortocircuita a undefined si algún eslabón es null/undefined, evitando el
-        error en tiempo de ejecución y de tipos
     - id: b
       text: Lanza una excepción si algo es null
     - id: c
       text: Convierte todo a any
+    - id: a
+      text: Cortocircuita a undefined si algún eslabón es null/undefined, evitando el
+        error en tiempo de ejecución y de tipos
     - id: d
       text: Es solo azúcar sin efecto de tipos
   correct: a
@@ -678,12 +678,12 @@
     - id: a
       text: string[] | number[] — el condicional se distribuye sobre cada miembro de
         la unión
-    - id: b
-      text: (string | number)[]
     - id: c
       text: never
     - id: d
       text: any[]
+    - id: b
+      text: (string | number)[]
   correct: a
   explanation: "Cuando el tipo comprobado es un parámetro genérico desnudo y
     recibe una unión, el conditional type se aplica miembro a miembro
@@ -699,15 +699,15 @@
   roles: *a1
   stem: ¿Para qué sirve la prop `key` al renderizar una lista en React?
   options:
+    - id: d
+      text: Es obligatoria solo en producción
     - id: a
       text: Da identidad estable a cada elemento para que React reconcilie
         eficientemente qué cambió, se movió o se borró
-    - id: b
-      text: Es el texto que se muestra
     - id: c
       text: Define el color del elemento
-    - id: d
-      text: Es obligatoria solo en producción
+    - id: b
+      text: Es el texto que se muestra
   correct: a
   explanation: Las keys identifican los elementos entre renders; con keys estables
     React actualiza/mueve en vez de recrear. Usar el índice como key causa bugs
@@ -722,13 +722,13 @@
   roles: *a1
   stem: ¿Cuándo aportan valor `useMemo`/`useCallback`?
   options:
+    - id: c
+      text: Para hacer peticiones HTTP
+    - id: b
+      text: Siempre, en cada variable
     - id: a
       text: Para memoizar cálculos caros o mantener referencias estables que evitan
         re-renders/recomputaciones innecesarias; no para todo
-    - id: b
-      text: Siempre, en cada variable
-    - id: c
-      text: Para hacer peticiones HTTP
     - id: d
       text: Para reemplazar useState
   correct: a
@@ -746,15 +746,15 @@
   roles: *a1
   stem: ¿Qué distingue un input 'controlado' de uno 'no controlado' en React?
   options:
+    - id: b
+      text: El no controlado no funciona
+    - id: d
+      text: El controlado no usa estado
     - id: a
       text: El controlado tiene su valor en el estado de React (value + onChange); el
         no controlado lo mantiene el propio DOM (se lee con ref)
-    - id: b
-      text: El no controlado no funciona
     - id: c
       text: Son lo mismo
-    - id: d
-      text: El controlado no usa estado
   correct: a
   explanation: En el controlado, React es la fuente de verdad (value ligado al
     estado). En el no controlado, el DOM guarda el valor y lo lees puntualmente
@@ -769,11 +769,11 @@
   roles: *a1
   stem: ¿En qué se diferencia `useRef` de `useState`?
   options:
+    - id: b
+      text: Son idénticos
     - id: a
       text: Mutar una ref (ref.current) NO provoca re-render; cambiar el estado SÍ.
         useRef sirve para valores mutables persistentes o acceso al DOM
-    - id: b
-      text: Son idénticos
     - id: c
       text: useRef re-renderiza y useState no
     - id: d
@@ -793,16 +793,16 @@
   stem: Un `useEffect` con `setInterval` que lee `count` muestra siempre el valor
     inicial aunque count cambie. ¿Cuál es la causa típica?
   options:
-    - id: a
-      text: "Stale closure: el intervalo capturó el `count` del primer render; se
-        arregla con la forma funcional de setState o dependencias/cleanup
-        correctos"
+    - id: d
+      text: Falta subir la versión de React
     - id: b
       text: React está roto
     - id: c
       text: setInterval no existe
-    - id: d
-      text: Falta subir la versión de React
+    - id: a
+      text: "Stale closure: el intervalo capturó el `count` del primer render; se
+        arregla con la forma funcional de setState o dependencias/cleanup
+        correctos"
   correct: a
   explanation: El callback del intervalo cierra sobre el `count` del render en que
     se creó (stale closure). Se resuelve usando setCount(c => c + 1), o
@@ -820,12 +820,12 @@
     - id: a
       text: Si la lista se reordena, inserta o filtra, los índices se reasignan y
         React asocia estado/DOM al elemento equivocado
-    - id: b
-      text: Porque los índices son lentos de calcular
-    - id: c
-      text: Porque React prohíbe los números
     - id: d
       text: No causa ningún problema
+    - id: c
+      text: Porque React prohíbe los números
+    - id: b
+      text: Porque los índices son lentos de calcular
   correct: a
   explanation: La key debe identificar al ITEM, no su posición. Con índices, al
     reordenar/insertar, React cree que el elemento de una posición es 'el mismo'
@@ -840,15 +840,15 @@
   roles: *a1
   stem: ¿Qué problema resuelve la Context API de React?
   options:
+    - id: c
+      text: Sustituir a TypeScript
     - id: a
       text: "El 'prop drilling': pasar datos a componentes profundos sin encadenar
         props por cada nivel intermedio"
-    - id: b
-      text: Hacer peticiones HTTP
-    - id: c
-      text: Sustituir a TypeScript
     - id: d
       text: Renderizar en el servidor
+    - id: b
+      text: Hacer peticiones HTTP
   correct: a
   explanation: Context provee un valor a un subárbol sin pasarlo prop a prop.
     Bueno para temas transversales (tema, auth, i18n); abusar de él para estado
@@ -864,11 +864,11 @@
   stem: ¿Por qué pasar `{}` u `() => {}` en línea como prop puede provocar
     re-renders de un hijo memoizado (React.memo)?
   options:
+    - id: b
+      text: Porque los objetos no se pueden pasar como props
     - id: a
       text: Se crea una referencia NUEVA en cada render; React.memo compara por
         igualdad referencial y la ve como prop cambiada
-    - id: b
-      text: Porque los objetos no se pueden pasar como props
     - id: c
       text: Porque memo está roto
     - id: d
@@ -891,12 +891,12 @@
     - id: a
       text: "Convenciones de fichero por segmento de ruta: la página, su layout
         envolvente, el estado de carga (Suspense) y el límite de error"
-    - id: b
-      text: Son solo ejemplos, no tienen significado
     - id: c
       text: Archivos de configuración de webpack
     - id: d
       text: Tests
+    - id: b
+      text: Son solo ejemplos, no tienen significado
   correct: a
   explanation: "El App Router usa convenciones por carpeta/segmento: page (UI de
     la ruta), layout (envoltura persistente), loading (fallback de Suspense) y
@@ -911,15 +911,15 @@
   roles: *a1
   stem: En el App Router, ¿cómo se define un endpoint de API (no una página)?
   options:
+    - id: b
+      text: Con un archivo page.tsx
     - id: a
       text: "Con un route handler: `app/.../route.ts` exportando funciones
         GET/POST/etc."
-    - id: b
-      text: Con un archivo page.tsx
-    - id: c
-      text: No se puede, hay que usar otro framework
     - id: d
       text: Con un componente cliente
+    - id: c
+      text: No se puede, hay que usar otro framework
   correct: a
   explanation: Los route handlers (`route.ts`) exportan funciones por método HTTP
     (GET, POST...) y devuelven Response. Son el equivalente en App Router a las
@@ -935,15 +935,15 @@
   stem: En un Server Component del App Router, ¿qué controla que un `fetch()` se
     cachee o se reejecute?
   options:
+    - id: d
+      text: El tamaño de la respuesta
+    - id: c
+      text: El color del componente
+    - id: b
+      text: Nada, siempre se cachea eternamente
     - id: a
       text: "Opciones como `cache: 'no-store'` (sin caché) o `next: { revalidate: N }`
         (revalidar cada N segundos)"
-    - id: b
-      text: Nada, siempre se cachea eternamente
-    - id: c
-      text: El color del componente
-    - id: d
-      text: El tamaño de la respuesta
   correct: a
   explanation: "Next extiende fetch con control de caché: por defecto puede
     cachear, `no-store` lo desactiva (dinámico) y `revalidate` fija un tiempo de
@@ -960,15 +960,15 @@
   stem: ¿Qué hace que una ruta del App Router pase a renderizarse de forma
     DINÁMICA (en cada petición) en vez de estática?
   options:
+    - id: c
+      text: Usar TypeScript
+    - id: d
+      text: Importar un CSS
     - id: a
       text: "Usar APIs dinámicas (cookies(), headers(), searchParams) o fetch con
         no-store: Next no puede prerenderizarla en build"
     - id: b
       text: Tener muchos componentes
-    - id: c
-      text: Usar TypeScript
-    - id: d
-      text: Importar un CSS
   correct: a
   explanation: Si la ruta depende de la petición (cookies/headers/searchParams) o
     de datos sin caché, no se puede generar en build y pasa a render dinámico
@@ -988,12 +988,12 @@
       text: Data Cache (persiste resultados de fetch entre peticiones/deploys según
         revalidate) y Full Route Cache (HTML/RSC prerenderizado de rutas
         estáticas en build)
+    - id: d
+      text: Next no cachea nada
     - id: b
       text: Solo hay una caché, la del navegador
     - id: c
       text: Todas las cachés son en cliente
-    - id: d
-      text: Next no cachea nada
   correct: a
   explanation: "Next tiene: Request Memoization (dedup de fetch en un render),
     Data Cache (persistente, controlada por revalidate/tags), Full Route Cache
@@ -1010,16 +1010,16 @@
   stem: Pasas una función (callback) como prop desde un Server Component a un
     Client Component y Next lanza un error de serialización. ¿Por qué?
   options:
+    - id: c
+      text: Falta 'use server' en la función
+    - id: b
+      text: Next no permite props
+    - id: d
+      text: Es un bug de React
     - id: a
       text: Las props que cruzan de servidor a cliente deben ser serializables; una
         función no lo es. Hay que mover la lógica al cliente o pasar datos
         serializables / Server Actions
-    - id: b
-      text: Next no permite props
-    - id: c
-      text: Falta 'use server' en la función
-    - id: d
-      text: Es un bug de React
   correct: a
   explanation: El límite servidor→cliente serializa las props (para enviarlas al
     cliente); funciones, clases o valores no serializables no cruzan. Se pasan
@@ -1034,13 +1034,13 @@
   roles: *a1
   stem: ¿Para qué se usa típicamente el `middleware.ts` en Next.js?
   options:
+    - id: c
+      text: Definir el modelo de datos
+    - id: b
+      text: Estilar componentes
     - id: a
       text: Interceptar peticiones antes de resolver la ruta (p. ej. auth,
         redirecciones, i18n) en el edge
-    - id: b
-      text: Estilar componentes
-    - id: c
-      text: Definir el modelo de datos
     - id: d
       text: Ejecutar tests
   correct: a
@@ -1062,14 +1062,14 @@
 
     ¿Qué va en [ ? ]?
   options:
-    - id: a
-      text: Hidratación en el cliente de los Client Components ('use client')
-    - id: b
-      text: Otra petición al servidor por cada click
-    - id: c
-      text: Compilar TypeScript en el navegador
     - id: d
       text: Reiniciar el servidor
+    - id: c
+      text: Compilar TypeScript en el navegador
+    - id: b
+      text: Otra petición al servidor por cada click
+    - id: a
+      text: Hidratación en el cliente de los Client Components ('use client')
   correct: a
   explanation: El servidor renderiza los Server Components y envía HTML + el
     payload RSC; en el cliente, React HIDRATA los Client Components para
@@ -1085,15 +1085,15 @@
   roles: *a1
   stem: ¿Cuál es el rol de un Interceptor en NestJS?
   options:
+    - id: d
+      text: Conectar a la base de datos
+    - id: b
+      text: Validar el payload de entrada
     - id: a
       text: Envolver la ejecución del handler para transformar la respuesta, medir
         tiempos, cachear o mapear excepciones (lógica transversal antes/después)
-    - id: b
-      text: Validar el payload de entrada
     - id: c
       text: Decidir si la petición procede (auth)
-    - id: d
-      text: Conectar a la base de datos
   correct: a
   explanation: "Los interceptors usan un patrón alrededor del handler (RxJS):
     pueden transformar la respuesta, añadir logging/timing o mapear resultados.
@@ -1108,15 +1108,15 @@
   roles: *a1
   stem: ¿Para qué sirve un Exception Filter en NestJS?
   options:
+    - id: d
+      text: Definir rutas
+    - id: c
+      text: Inyectar dependencias
     - id: a
       text: Capturar excepciones lanzadas y traducirlas a una respuesta HTTP
         consistente (código y cuerpo de error)
     - id: b
       text: Filtrar filas de la base de datos
-    - id: c
-      text: Inyectar dependencias
-    - id: d
-      text: Definir rutas
   correct: a
   explanation: "Los exception filters centralizan el manejo de errores: capturan
     excepciones (o una clase concreta) y devuelven una respuesta uniforme,
@@ -1135,10 +1135,10 @@
       text: "Singleton: una única instancia compartida en toda la aplicación"
     - id: b
       text: Uno nuevo por cada petición siempre
-    - id: c
-      text: Uno por cada método invocado
     - id: d
       text: No se instancian nunca
+    - id: c
+      text: Uno por cada método invocado
   correct: a
   explanation: Por defecto los providers son singleton (una instancia para toda la
     app). Se puede pedir scope REQUEST (una por petición) o TRANSIENT cuando
@@ -1154,11 +1154,11 @@
   stem: ¿Para qué sirve un 'custom provider' con `useFactory` o `useValue` y un
     token de inyección?
   options:
+    - id: b
+      text: Para desactivar la inyección de dependencias
     - id: a
       text: Registrar dependencias no triviales (valores, instancias construidas
         condicionalmente, config) bajo un token que luego se inyecta
-    - id: b
-      text: Para desactivar la inyección de dependencias
     - id: c
       text: Para definir rutas HTTP
     - id: d
@@ -1202,15 +1202,15 @@
   stem: Dos servicios de NestJS se necesitan mutuamente y falla la inyección por
     dependencia circular. ¿Cuál es la solución idiomática?
   options:
+    - id: d
+      text: Es imposible de resolver
+    - id: c
+      text: Fusionar todo en un único archivo gigante
+    - id: b
+      text: Instanciarlos con 'new' a mano
     - id: a
       text: Usar `forwardRef(() => OtroServicio)` en ambos lados para que Nest
         resuelva la referencia diferida
-    - id: b
-      text: Instanciarlos con 'new' a mano
-    - id: c
-      text: Fusionar todo en un único archivo gigante
-    - id: d
-      text: Es imposible de resolver
   correct: a
   explanation: Ante una dependencia circular, Nest ofrece forwardRef() para
     diferir la resolución del token en ambos providers/módulos. Aun así, una
@@ -1235,11 +1235,11 @@
 
     ¿Qué hace este Guard?
   options:
+    - id: b
+      text: Valida el body de la petición
     - id: a
       text: Autoriza la petición solo si el usuario tiene rol 'admin'; si devuelve
         false, Nest responde 403 y no ejecuta el handler
-    - id: b
-      text: Valida el body de la petición
     - id: c
       text: Transforma la respuesta
     - id: d

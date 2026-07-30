@@ -10,14 +10,14 @@
   stem: En el contexto de entrevistas comportamentales, ¿qué significa el acrónimo
     STAR?
   options:
-    - id: a
-      text: Situation, Task, Action, Result
-    - id: b
-      text: Strategy, Timing, Analysis, Review
-    - id: c
-      text: Skill, Talent, Attitude, Reward
     - id: d
       text: Story, Tone, Approach, Reaction
+    - id: c
+      text: Skill, Talent, Attitude, Reward
+    - id: b
+      text: Strategy, Timing, Analysis, Review
+    - id: a
+      text: Situation, Task, Action, Result
   correct: a
   explanation: STAR estructura una respuesta comportamental en Situación
     (contexto), Tarea (tu responsabilidad/objetivo), Acción (lo que hiciste tú)
@@ -32,15 +32,15 @@
     - Cualquiera
   stem: Al contar el 'Result' de una respuesta STAR, ¿qué la hace más convincente?
   options:
+    - id: d
+      text: Atribuir el resultado al equipo sin decir tu parte
+    - id: c
+      text: Terminar en la Acción y no mencionar el resultado
     - id: a
       text: Cuantificar el impacto siempre que se pueda (p. ej. 'reduje la latencia un
         40%') y añadir qué aprendiste
     - id: b
       text: Dejarlo vago para no comprometerse con cifras
-    - id: c
-      text: Terminar en la Acción y no mencionar el resultado
-    - id: d
-      text: Atribuir el resultado al equipo sin decir tu parte
   correct: a
   explanation: Un Result con métricas concretas demuestra impacto real y
     credibilidad, mucho más que afirmaciones genéricas. Añadir el aprendizaje
@@ -56,11 +56,11 @@
     - Cualquiera
   stem: ¿Cuál es un error frecuente al responder con STAR que conviene evitar?
   options:
+    - id: b
+      text: Explicar la Acción con detalle
     - id: a
       text: Dedicar demasiado tiempo a la Situación y quedarse sin contar la Acción y
         el Resultado
-    - id: b
-      text: Explicar la Acción con detalle
     - id: c
       text: Cuantificar el Resultado
     - id: d
@@ -81,15 +81,15 @@
   stem: Ante 'háblame de un conflicto con un compañero', ¿qué enfoque transmite
     mejor señal?
   options:
-    - id: a
-      text: Centrarse en cómo entendiste la otra postura, qué hiciste para resolverlo
-        y qué aprendiste, sin culpabilizar
     - id: b
       text: Demostrar que la otra persona estaba equivocada y tú tenías razón
     - id: c
       text: Decir que nunca has tenido conflictos
     - id: d
       text: Describir el conflicto sin contar cómo se resolvió
+    - id: a
+      text: Centrarse en cómo entendiste la otra postura, qué hiciste para resolverlo
+        y qué aprendiste, sin culpabilizar
   correct: a
   explanation: "El entrevistador busca madurez y colaboración: empatía con la otra
     postura, acciones concretas para resolver y aprendizaje. Echar culpas o
@@ -109,10 +109,10 @@
     - id: a
       text: Porque el entrevistador evalúa tu contribución individual; 'nosotros'
         constante difumina qué hiciste tú realmente
-    - id: b
-      text: Porque hablar en plural está prohibido en entrevistas
     - id: c
       text: Porque el 'yo' hace la historia más corta
+    - id: b
+      text: Porque hablar en plural está prohibido en entrevistas
     - id: d
       text: No importa, da igual el pronombre
   correct: a
@@ -131,15 +131,15 @@
   stem: Cuando preguntan por un fracaso o error propio, ¿qué señal busca sobre
     todo el entrevistador?
   options:
-    - id: a
-      text: Que asumes responsabilidad (ownership) y muestras qué aprendiste y qué
-        cambiaste después
     - id: b
       text: Que nunca fallas
     - id: c
       text: Un fracaso tan pequeño que no cuente como fracaso
     - id: d
       text: Que la culpa fue de causas externas
+    - id: a
+      text: Que asumes responsabilidad (ownership) y muestras qué aprendiste y qué
+        cambiaste después
   correct: a
   explanation: "La pregunta de fracaso mide autoconciencia y crecimiento:
     reconocer el error, tu parte en él, y qué aprendiste/cambiaste. Negar fallos
@@ -155,16 +155,16 @@
     - Cualquiera
   stem: En STAR, ¿qué distingue la 'Task' de la 'Action'?
   options:
+    - id: b
+      text: Son lo mismo con distinto nombre
+    - id: d
+      text: La Action ocurre antes que la Task
+    - id: c
+      text: La Task es el resultado final y la Action es el contexto
     - id: a
       text: La Task es el objetivo o responsabilidad que te tocaba (el qué había que
         lograr); la Action es lo que concretamente hiciste tú para lograrlo (el
         cómo)
-    - id: b
-      text: Son lo mismo con distinto nombre
-    - id: c
-      text: La Task es el resultado final y la Action es el contexto
-    - id: d
-      text: La Action ocurre antes que la Task
   correct: a
   explanation: Task define el reto/objetivo del que eras responsable en esa
     situación; Action detalla los pasos concretos que TÚ tomaste. Confundirlas
@@ -180,15 +180,15 @@
     - Cualquiera
   stem: Ante '¿cuál es tu mayor debilidad?', ¿qué respuesta es más sólida?
   options:
+    - id: c
+      text: "'No tengo debilidades'"
+    - id: d
+      text: Una debilidad crítica para el puesto sin plan de mejora
     - id: a
       text: Una debilidad real y concreta acompañada de lo que estás haciendo
         activamente para mejorarla
     - id: b
       text: "'Soy demasiado perfeccionista' u otra fortaleza disfrazada"
-    - id: c
-      text: "'No tengo debilidades'"
-    - id: d
-      text: Una debilidad crítica para el puesto sin plan de mejora
   correct: a
   explanation: La respuesta fuerte es honesta y muestra autoconciencia más acción
     de mejora. Las 'fortalezas disfrazadas' suenan a cliché y no engañan; negar
@@ -229,13 +229,13 @@
     - Cualquiera
   stem: Ante '¿por qué dejaste tu anterior trabajo?', ¿cuál es el mejor enfoque?
   options:
-    - id: a
-      text: Enmarcarlo en positivo, hacia lo que buscas (crecimiento, reto, encaje),
-        sin criticar duramente a tu empresa anterior
     - id: b
       text: Despotricar en detalle sobre tu antiguo jefe
     - id: c
       text: Decir que solo te interesa el dinero
+    - id: a
+      text: Enmarcarlo en positivo, hacia lo que buscas (crecimiento, reto, encaje),
+        sin criticar duramente a tu empresa anterior
     - id: d
       text: Evitar la pregunta cambiando de tema
   correct: a
@@ -279,15 +279,15 @@
   stem: ¿Por qué conviene cerrar una respuesta comportamental con el impacto
     medible de tus acciones?
   options:
+    - id: c
+      text: Porque los entrevistadores solo escuchan el final
+    - id: d
+      text: Porque evita tener que explicar la acción
     - id: a
       text: Porque las cifras concretas hacen la historia creíble y memorable, y
         demuestran que tu acción produjo un resultado real
     - id: b
       text: Porque alarga la respuesta
-    - id: c
-      text: Porque los entrevistadores solo escuchan el final
-    - id: d
-      text: Porque evita tener que explicar la acción
   correct: a
   explanation: Cerrar con impacto medible (métricas, ahorro, mejora, adopción)
     ancla la historia en evidencia y la hace memorable. Sin resultado tangible,
@@ -309,12 +309,12 @@
 
     ¿Qué le falta a esta respuesta STAR?
   options:
+    - id: c
+      text: La Tarea (T)
     - id: a
       text: "El Resultado (R): el desenlace/impacto, idealmente cuantificado"
     - id: b
       text: La Situación (S)
-    - id: c
-      text: La Tarea (T)
     - id: d
       text: Nada, está completa
   correct: a
@@ -333,15 +333,15 @@
   stem: "'Cuéntame una vez que discrepaste con tu manager.' ¿Qué enfoque da mejor
     señal?"
   options:
-    - id: a
-      text: Expusiste tu punto con datos, escuchaste el suyo, y cuentas cómo se
-        decidió y qué resultó
+    - id: d
+      text: Dices que nunca has discrepado con un superior
     - id: b
       text: Cediste enseguida para evitar el conflicto
     - id: c
       text: Fuiste por encima de tu manager a su jefe
-    - id: d
-      text: Dices que nunca has discrepado con un superior
+    - id: a
+      text: Expusiste tu punto con datos, escuchaste el suyo, y cuentas cómo se
+        decidió y qué resultó
   correct: a
   explanation: "Buscan criterio y madurez: argumentar con datos, escuchar la otra
     postura y llegar a una decisión (aunque no sea la tuya) con un resultado.
@@ -358,11 +358,11 @@
     - Cualquiera
   stem: Ante 'háblame de ti', ¿qué estructura funciona mejor?
   options:
+    - id: b
+      text: Tu biografía completa desde el colegio
     - id: a
       text: "Breve y orientada al puesto: presente (qué haces) → pasado relevante →
         por qué encajas aquí"
-    - id: b
-      text: Tu biografía completa desde el colegio
     - id: c
       text: Solo hobbies
     - id: d
@@ -382,6 +382,8 @@
   stem: Tu logro no tiene una métrica dura clara. ¿Cómo cuentas el Resultado sin
     inventar cifras?
   options:
+    - id: d
+      text: Decir que fue 'un éxito' sin más
     - id: a
       text: Con impacto cualitativo concreto y proxies honestos ('desbloqueó al
         equipo', 'se adoptó en 3 equipos', estimaciones razonadas)
@@ -389,8 +391,6 @@
       text: Inventarte un porcentaje que suene bien
     - id: c
       text: Omitir el resultado
-    - id: d
-      text: Decir que fue 'un éxito' sin más
   correct: a
   explanation: Si no hay número exacto, se usa impacto cualitativo verificable o
     una estimación razonada y honesta (tiempo ahorrado, adopción, desbloqueo).
@@ -408,12 +408,12 @@
     - id: a
       text: Anunciar la estructura ('primero el contexto, luego lo que hice y el
         resultado'), para que el entrevistador te siga y no divagues
-    - id: b
-      text: Hablar más rápido
     - id: c
       text: Usar tecnicismos
     - id: d
       text: Evitar responder
+    - id: b
+      text: Hablar más rápido
   correct: a
   explanation: Señalizar la estructura ordena tu respuesta y guía al oyente;
     reduce la divagación y hace la historia fácil de seguir, especialmente en
@@ -428,15 +428,15 @@
   roles: *a1
   stem: "'Cuéntame tu mayor logro.' ¿Qué historia eliges?"
   options:
+    - id: c
+      text: Un logro de equipo donde apenas participaste
     - id: a
       text: Una relevante para el rol, donde tu contribución sea clara y el impacto
         medible o tangible
-    - id: b
-      text: La más antigua que recuerdes
-    - id: c
-      text: Un logro de equipo donde apenas participaste
     - id: d
       text: Algo impresionante pero irrelevante para el puesto
+    - id: b
+      text: La más antigua que recuerdes
   correct: a
   explanation: Un buen logro es relevante al rol, deja claro qué hiciste TÚ y
     tiene un resultado tangible. Impresionar con algo irrelevante o atribuirte
@@ -451,13 +451,13 @@
   roles: *a1
   stem: Te dan un problema mal definido. ¿Qué demuestra buen criterio?
   options:
+    - id: c
+      text: Empezar a programar sin entender el objetivo
     - id: a
       text: Clarificar objetivos y restricciones, hacer explícitas tus asunciones y
         avanzar en iteraciones en vez de bloquearte
     - id: b
       text: Esperar a que te lo den todo perfectamente definido
-    - id: c
-      text: Empezar a programar sin entender el objetivo
     - id: d
       text: Quejarte de la falta de especificación
   correct: a
@@ -474,13 +474,13 @@
   roles: *a1
   stem: Tres personas te piden cosas 'urgentes' a la vez. ¿Qué enfoque cuenta mejor?
   options:
+    - id: c
+      text: Intentar todo a la vez y no acabar nada
     - id: a
       text: Priorizar por impacto/dependencias, alinear expectativas comunicando qué
         harás y cuándo, y negociar plazos con datos
     - id: b
       text: Hacerlas por orden de quien grita más
-    - id: c
-      text: Intentar todo a la vez y no acabar nada
     - id: d
       text: Ignorar dos y no avisar
   correct: a
@@ -498,13 +498,13 @@
   stem: Un compañero (no tu subordinado) no entrega y bloquea al equipo. ¿Qué
     haces primero?
   options:
+    - id: c
+      text: Hacer tú su trabajo en silencio para siempre
     - id: a
       text: Hablarlo con él en privado, entender la causa y ofrecer ayuda; si
         persiste, escalar de forma constructiva con datos
     - id: b
       text: Criticarlo en público
-    - id: c
-      text: Hacer tú su trabajo en silencio para siempre
     - id: d
       text: Ignorarlo y que reviente
   correct: a
@@ -524,12 +524,12 @@
     - id: a
       text: Escuchar sin ponerte a la defensiva, pedir ejemplos concretos y actuar
         sobre ello
+    - id: d
+      text: Tomártelo como algo personal
     - id: b
       text: Justificarte y rebatir cada punto
     - id: c
       text: Ignorarlo
-    - id: d
-      text: Tomártelo como algo personal
   correct: a
   explanation: "Buena recepción de feedback: escuchar, buscar entender con
     ejemplos y convertirlo en acción. Ponerse a la defensiva o ignorarlo señala
@@ -547,12 +547,12 @@
     - id: a
       text: En privado, específico y sobre conductas concretas y su impacto
         (situación-conducta-impacto), no sobre la persona
-    - id: b
-      text: En público para que aprenda
     - id: c
       text: Vago y general para no herir
     - id: d
       text: Guardártelo y que siga igual
+    - id: b
+      text: En público para que aprenda
   correct: a
   explanation: El feedback útil es privado, concreto y descriptivo (qué conducta,
     qué impacto), orientado a mejorar, no a etiquetar a la persona. Vago no
@@ -572,10 +572,10 @@
         apoyarla y ejecutarla con lealtad
     - id: b
       text: Estar siempre de acuerdo
-    - id: c
-      text: Sabotear la decisión con la que no coincides
     - id: d
       text: No opinar nunca
+    - id: c
+      text: Sabotear la decisión con la que no coincides
   correct: a
   explanation: "Disagree and commit: aportas tu punto de vista honestamente en el
     debate, pero si la decisión final es otra, la respaldas y ejecutas sin
@@ -591,15 +591,15 @@
   stem: Discrepas técnicamente con un ingeniero senior y ninguno cede. ¿Qué
     demuestra madurez?
   options:
+    - id: c
+      text: Ceder sin más para evitar el roce
+    - id: d
+      text: Ir por detrás a implementarlo a tu manera
     - id: a
       text: Fundamentar con datos/pruebas (spike, benchmark), acotar el riesgo, y si
         sigue el empate, escalar a un decisor o hacer disagree-and-commit
     - id: b
       text: Imponer tu opinión por insistencia
-    - id: c
-      text: Ceder sin más para evitar el roce
-    - id: d
-      text: Ir por detrás a implementarlo a tu manera
   correct: a
   explanation: En un desacuerdo técnico, se busca objetivar (datos, prototipo,
     criterios), se acota el coste de equivocarse y, si no hay consenso, se
@@ -615,13 +615,13 @@
   roles: *a1
   stem: Vas a incumplir un plazo importante. ¿Qué haces?
   options:
+    - id: c
+      text: Culpar a otros
     - id: a
       text: Avisar cuanto antes con una nueva estimación y un plan de mitigación,
         asumiendo tu parte
     - id: b
       text: Callar y esperar que no se note
-    - id: c
-      text: Culpar a otros
     - id: d
       text: Avisar el mismo día del vencimiento
   correct: a
@@ -642,12 +642,12 @@
     - id: a
       text: "Explicar el trade-off (alcance vs plazo vs calidad) y proponer
         alternativas: recortar alcance, mover fecha o priorizar lo esencial"
+    - id: d
+      text: Bajar la calidad en silencio
     - id: b
       text: Decir que sí a todo y quemarte
     - id: c
       text: Decir que no en seco sin alternativas
-    - id: d
-      text: Bajar la calidad en silencio
   correct: a
   explanation: "Saber decir 'no... pero' con criterio: exponer los trade-offs y
     ofrecer opciones. Aceptar todo lleva a fallar o a deuda técnica oculta; el
@@ -662,15 +662,15 @@
   roles: *a1
   stem: En una pregunta de fracaso, ¿qué refleja 'mentalidad de crecimiento'?
   options:
-    - id: a
-      text: Reconocer el error, extraer un aprendizaje concreto y mostrar qué
-        cambiaste después
     - id: b
       text: Que la culpa fue del entorno
     - id: c
       text: Que nunca fallas
     - id: d
       text: Un fracaso irrelevante para no comprometerte
+    - id: a
+      text: Reconocer el error, extraer un aprendizaje concreto y mostrar qué
+        cambiaste después
   correct: a
   explanation: "La growth mindset ve el fallo como aprendizaje: ownership + qué
     aprendiste + qué hiciste distinto luego. Negar fallos o culpar fuera muestra
@@ -688,10 +688,10 @@
     - id: a
       text: "Ownership: viste un problema u oportunidad y actuaste (con criterio y sin
         pisar a nadie), con un resultado"
-    - id: b
-      text: Que hicieras horas extra sin motivo
     - id: c
       text: Que ignoraras tus tareas asignadas
+    - id: b
+      text: Que hicieras horas extra sin motivo
     - id: d
       text: Que tomaras decisiones ajenas sin avisar
   correct: a
@@ -708,15 +708,15 @@
   roles: *a1
   stem: ¿Qué demuestra 'product sense' o empatía con el usuario en una respuesta?
   options:
+    - id: c
+      text: Que ignoraste al usuario para ir más rápido
+    - id: b
+      text: Que elegiste la tecnología más nueva
+    - id: d
+      text: Que construiste todo lo que pidieron sin cuestionar
     - id: a
       text: Que decidiste partiendo de la necesidad real del usuario (datos,
         conversaciones), no solo de lo técnicamente elegante
-    - id: b
-      text: Que elegiste la tecnología más nueva
-    - id: c
-      text: Que ignoraste al usuario para ir más rápido
-    - id: d
-      text: Que construiste todo lo que pidieron sin cuestionar
   correct: a
   explanation: "Product sense: anclar decisiones en el problema del usuario y el
     impacto, no en el capricho técnico; a veces implica cuestionar el requisito
@@ -731,15 +731,15 @@
   roles: *a1
   stem: "'Cuéntame una decisión basada en datos.' ¿Qué historia encaja?"
   options:
+    - id: c
+      text: Una donde ignoraste los datos disponibles
+    - id: d
+      text: Una sin ningún resultado
     - id: a
       text: Una donde una hipótesis/opinión se contrastó con datos o un experimento y
         eso cambió (o confirmó) el rumbo
     - id: b
       text: Una decisión tomada por intuición pura
-    - id: c
-      text: Una donde ignoraste los datos disponibles
-    - id: d
-      text: Una sin ningún resultado
   correct: a
   explanation: "Buscan que uses evidencia: medir, experimentar (A/B, prototipo) y
     dejar que el dato guíe la decisión, incluso cuando contradice la intuición o
@@ -755,15 +755,15 @@
   stem: Un incidente en producción con usuarios afectados. ¿Qué transmite buen
     manejo bajo presión?
   options:
-    - id: a
-      text: Mantener la calma, priorizar mitigar el impacto, comunicar estado con
-        transparencia y hacer post-mortem sin culpar personas
     - id: b
       text: Buscar de inmediato a quién culpar
     - id: c
       text: Arreglarlo en silencio sin avisar a nadie
     - id: d
       text: Bloquearte hasta que se resuelva solo
+    - id: a
+      text: Mantener la calma, priorizar mitigar el impacto, comunicar estado con
+        transparencia y hacer post-mortem sin culpar personas
   correct: a
   explanation: "Bajo presión: mitigar primero, comunicar con claridad y, después,
     un post-mortem sin culpa (blameless) para aprender. Buscar culpables en
@@ -778,15 +778,15 @@
   roles: *a1
   stem: "'¿Por qué quieres este puesto/empresa?' ¿Qué respuesta convence?"
   options:
+    - id: c
+      text: Una genérica que valdría para cualquier empresa
+    - id: d
+      text: "'Por el sueldo y ya'"
     - id: a
       text: "Una específica: conexión real entre lo que buscas/aportas y lo que hace
         esa empresa/rol (haber investigado)"
     - id: b
       text: "'Porque necesito trabajo'"
-    - id: c
-      text: Una genérica que valdría para cualquier empresa
-    - id: d
-      text: "'Por el sueldo y ya'"
   correct: a
   explanation: "Convence lo específico y bien informado: por qué ESTA empresa/rol
     encaja con tus objetivos y qué aportas. Lo genérico sugiere que no te has
@@ -804,10 +804,10 @@
     - id: a
       text: "Adaptarte con flexibilidad: entender el porqué del cambio, re-priorizar y
         comunicar el nuevo plan sin dramatizar"
-    - id: b
-      text: Resistirte y seguir con lo viejo
     - id: c
       text: Quejarte de que 'siempre cambian todo'
+    - id: b
+      text: Resistirte y seguir con lo viejo
     - id: d
       text: Empezar de cero sin evaluar qué se reutiliza
   correct: a
@@ -825,11 +825,11 @@
   stem: Te piden algo que consideras poco ético o que perjudica al usuario. ¿Qué
     haces?
   options:
+    - id: b
+      text: Hacerlo sin más porque te lo mandaron
     - id: a
       text: Plantear tu preocupación con argumentos y proponer una alternativa;
         escalar si es necesario, dejando constancia
-    - id: b
-      text: Hacerlo sin más porque te lo mandaron
     - id: c
       text: Negarte en bloque sin explicar ni proponer nada
     - id: d
@@ -848,14 +848,14 @@
   roles: *a1
   stem: Al final de la entrevista te preguntan si TÚ tienes preguntas. ¿Qué conviene?
   options:
+    - id: c
+      text: Preguntar solo por vacaciones
+    - id: b
+      text: No preguntar nada
     - id: a
       text: "Tener preguntas buenas y específicas (equipo, retos, cómo se mide el
         éxito, cultura técnica): demuestra interés y te ayuda a evaluar el
         encaje"
-    - id: b
-      text: No preguntar nada
-    - id: c
-      text: Preguntar solo por vacaciones
     - id: d
       text: Repetir lo que ya te explicaron
   correct: a
@@ -872,15 +872,15 @@
   roles: *a1
   stem: Como candidato, ¿qué sería una 'red flag' razonable de un empleo?
   options:
+    - id: d
+      text: Que te pidan un ejemplo de tu trabajo
+    - id: c
+      text: Que el proceso tenga varias fases
+    - id: b
+      text: Que te hagan preguntas técnicas difíciles
     - id: a
       text: Respuestas vagas sobre expectativas, rotación alta, procesos caóticos o
         incapacidad de explicar cómo miden el éxito
-    - id: b
-      text: Que te hagan preguntas técnicas difíciles
-    - id: c
-      text: Que el proceso tenga varias fases
-    - id: d
-      text: Que te pidan un ejemplo de tu trabajo
   correct: a
   explanation: "Señales de alarma: falta de claridad en expectativas/rol, mucha
     rotación, caos organizativo o no saber definir el éxito. Un proceso exigente
@@ -895,15 +895,15 @@
   roles: *a1
   stem: Al negociar salario, ¿qué enfoque es más sólido?
   options:
-    - id: a
-      text: Anclar en tu valor y en un rango informado por el mercado, evitando dar tú
-        primero una cifra baja; negociar el paquete completo
     - id: b
       text: Aceptar la primera oferta siempre
     - id: c
       text: Mentir sobre otras ofertas
     - id: d
       text: Dar la cifra más baja que aceptarías
+    - id: a
+      text: Anclar en tu valor y en un rango informado por el mercado, evitando dar tú
+        primero una cifra baja; negociar el paquete completo
   correct: a
   explanation: Negociar desde el valor aportado y datos de mercado, sin anclarte
     tú a la baja, y mirando el paquete completo (base, variable, equity,
@@ -918,15 +918,15 @@
   roles: *a1
   stem: ¿Aporta algo un mensaje de seguimiento/agradecimiento tras la entrevista?
   options:
+    - id: b
+      text: No, es contraproducente siempre
     - id: a
       text: "Sí: breve, agradece, reafirma interés y encaje, y mantiene una buena
         impresión sin ser insistente"
-    - id: b
-      text: No, es contraproducente siempre
-    - id: c
-      text: Solo si pides feedback exhaustivo
     - id: d
       text: Hay que enviar uno cada día
+    - id: c
+      text: Solo si pides feedback exhaustivo
   correct: a
   explanation: "Un follow-up breve y sincero refuerza el interés y deja buena
     impresión. Ni imprescindible ni pesado: uno, con mesura."
@@ -944,10 +944,10 @@
     - id: a
       text: Leer/ejecutar el proyecto, hacer preguntas concretas, aportar valor pronto
         en algo pequeño y documentar lo que aprendes
-    - id: b
-      text: Esperar semanas a que te lo expliquen todo
     - id: c
       text: Reescribir todo a tu manera el primer día
+    - id: b
+      text: Esperar semanas a que te lo expliquen todo
     - id: d
       text: No preguntar para no molestar
   correct: a
@@ -967,10 +967,10 @@
     - id: a
       text: Una historia real, con matices y aprendizaje, resulta creíble y permite
         repreguntar; un guion memorizado suena falso y se cae ante detalles
-    - id: b
-      text: Porque no hay que preparar nada
     - id: c
       text: Porque mentir con soltura es mejor
+    - id: b
+      text: Porque no hay que preparar nada
     - id: d
       text: Porque las historias reales no importan
   correct: a
@@ -988,15 +988,15 @@
   stem: "'Cuéntame cómo ayudaste a crecer a alguien.' ¿Qué señal de seniority
     buscan?"
   options:
+    - id: b
+      text: Que hicieras tú su trabajo
+    - id: d
+      text: Que no te involucraras
+    - id: c
+      text: Que compitieras con esa persona
     - id: a
       text: "Impacto más allá de tu output: mentorizar, desbloquear y elevar a otros,
         con un resultado en la persona/equipo"
-    - id: b
-      text: Que hicieras tú su trabajo
-    - id: c
-      text: Que compitieras con esa persona
-    - id: d
-      text: Que no te involucraras
   correct: a
   explanation: "A partir de mid/senior valoran el multiplicador: que eleves a
     otros (mentoría, code reviews formativas, desbloqueo) con un resultado
@@ -1012,16 +1012,16 @@
   stem: "Nivel staff: necesitas alinear a VARIOS equipos (sin mando sobre ellos)
     hacia una dirección técnica. ¿Qué historia demuestra ese nivel?"
   options:
+    - id: c
+      text: Hacerlo tú solo sin contar con los equipos
+    - id: b
+      text: Imponerlo por email a todos
+    - id: d
+      text: Dejar que cada equipo haga lo suyo sin alineación
     - id: a
       text: "Construir contexto y consenso: exponer el problema y los trade-offs,
         escuchar a cada equipo, y lograr una decisión compartida que luego se
         ejecuta"
-    - id: b
-      text: Imponerlo por email a todos
-    - id: c
-      text: Hacerlo tú solo sin contar con los equipos
-    - id: d
-      text: Dejar que cada equipo haga lo suyo sin alineación
   correct: a
   explanation: "La señal staff es influir a escala sin autoridad: alinear equipos
     mediante contexto, trade-offs explícitos y consenso, generando una decisión
@@ -1037,15 +1037,15 @@
   stem: Defendiste un enfoque, el liderazgo eligió otro, y tú lideras la
     ejecución. ¿Qué demuestra madurez senior?
   options:
+    - id: c
+      text: Recordar a todos que tú opinabas distinto
+    - id: d
+      text: Delegar y desentenderte
     - id: a
       text: "Disagree-and-commit real: apoyar la decisión de forma genuina, ejecutarla
         bien y asumir el resultado como propio, sin 'ya lo dije'"
     - id: b
       text: Ejecutarla a medias para demostrar que estabas en lo cierto
-    - id: c
-      text: Recordar a todos que tú opinabas distinto
-    - id: d
-      text: Delegar y desentenderte
   correct: a
   explanation: "Comprometerse de verdad tras discrepar: liderar la ejecución con
     lealtad y ownership del resultado, sin sabotaje pasivo ni 'te lo dije'. Es
@@ -1061,15 +1061,15 @@
   stem: ¿Qué distingue una señal de nivel staff de una de nivel senior en las
     preguntas de impacto?
   options:
+    - id: c
+      text: Que el staff programa más rápido
     - id: a
       text: "El alcance: senior resuelve problemas complejos de su área; staff mejora
         sistemas/procesos y eleva a varios equipos, con impacto organizativo"
-    - id: b
-      text: Solo el número de años
-    - id: c
-      text: Que el staff programa más rápido
     - id: d
       text: Que el senior no colabora
+    - id: b
+      text: Solo el número de años
   correct: a
   explanation: "No es más habilidad de teclado sino ALCANCE e impacto: staff opera
     a nivel de sistema/organización (estándares, arquitectura transversal,
@@ -1085,15 +1085,15 @@
   stem: Te dan un problema de negocio enorme y ambiguo, sin solución obvia (típico
     de staff). ¿Qué enfoque demuestra ese nivel?
   options:
+    - id: b
+      text: Pedir que te lo concreten del todo antes de empezar
+    - id: d
+      text: Delegar todo sin dar dirección
     - id: a
       text: Enmarcar el problema (qué resolvemos y por qué), descomponerlo, alinear a
         los implicados y definir un camino iterativo con hitos medibles
-    - id: b
-      text: Pedir que te lo concreten del todo antes de empezar
     - id: c
       text: Lanzarte a una solución técnica sin entender el problema
-    - id: d
-      text: Delegar todo sin dar dirección
   correct: a
   explanation: El trabajo staff empieza por DEFINIR el problema y su porqué,
     descomponerlo, crear alineamiento y trazar un camino iterativo con hitos.
@@ -1109,6 +1109,8 @@
   stem: Dos stakeholders senior quieren direcciones opuestas y el proyecto está
     bloqueado. ¿Qué demuestra nivel?
   options:
+    - id: d
+      text: Decidir tú por tu cuenta ignorándolos
     - id: a
       text: "Facilitar: sacar a la luz los intereses de fondo de cada uno, buscar
         objetivos comunes y datos, y conducir a una decisión que ambos puedan
@@ -1117,8 +1119,6 @@
       text: Ponerte del lado del más poderoso
     - id: c
       text: Evitar el conflicto y dejarlo bloqueado
-    - id: d
-      text: Decidir tú por tu cuenta ignorándolos
   correct: a
   explanation: "Mediar entre seniors: entender los intereses reales (no solo
     posiciones), anclar en objetivos comunes y datos, y conducir a una decisión
@@ -1140,10 +1140,10 @@
         equipo"
     - id: b
       text: Ocultando que se canceló
-    - id: c
-      text: Culpando enteramente a la dirección
     - id: d
       text: Diciendo que fue un éxito rotundo
+    - id: c
+      text: Culpando enteramente a la dirección
   correct: a
   explanation: "Un proyecto cancelado bien contado muestra madurez: aprendizaje,
     valor rescatado (a veces parar a tiempo ES la decisión correcta) y cómo
@@ -1163,13 +1163,13 @@
 
     ¿Qué va en [ ? ], y dónde debe ir el grueso del tiempo?
   options:
+    - id: c
+      text: La conclusión final
+    - id: b
+      text: Otra Situación más de contexto
     - id: a
       text: "Acción: lo que hiciste TÚ; es donde va el grueso de la respuesta, junto
         con el Resultado"
-    - id: b
-      text: Otra Situación más de contexto
-    - id: c
-      text: La conclusión final
     - id: d
       text: Las preguntas para el entrevistador
   correct: a
@@ -1188,15 +1188,15 @@
   stem: "'Cuéntame de una vez que perdiste un debate/decisión.' ¿Qué respuesta da
     buena señal?"
   options:
+    - id: c
+      text: Que seguiste peleándola indefinidamente
+    - id: d
+      text: Que te enfadaste y te desentendiste
     - id: a
       text: Aceptaste la decisión, la apoyaste, y cuentas qué aprendiste (o incluso
         que la otra opción resultó mejor)
     - id: b
       text: Que nunca has perdido un debate
-    - id: c
-      text: Que seguiste peleándola indefinidamente
-    - id: d
-      text: Que te enfadaste y te desentendiste
   correct: a
   explanation: "Perder con elegancia: reconocer que a veces la otra postura era
     mejor, comprometerte con la decisión y extraer aprendizaje. Muestra

@@ -11,17 +11,17 @@
   stem: En el compromiso sesgo-varianza (bias-variance tradeoff), un modelo con
     alto sesgo (bias) y baja varianza típicamente...
   options:
-    - id: a
-      text: Se ajusta demasiado a los datos de entrenamiento y generaliza mal
-        (overfitting)
     - id: b
       text: Es demasiado simple para capturar la relación real de los datos,
         produciendo errores sistemáticos tanto en train como en test
         (underfitting)
-    - id: c
-      text: Siempre logra el mejor rendimiento posible en test
     - id: d
       text: No depende del conjunto de datos usado para entrenar
+    - id: a
+      text: Se ajusta demasiado a los datos de entrenamiento y generaliza mal
+        (overfitting)
+    - id: c
+      text: Siempre logra el mejor rendimiento posible en test
   correct: b
   explanation: "Alto sesgo significa que el modelo hace suposiciones demasiado
     simples (p. ej. una recta para una relación no lineal), por lo que no logra
@@ -39,13 +39,13 @@
   stem: ¿Qué señal característica indica que un modelo está sobreajustando
     (overfitting) a los datos de entrenamiento?
   options:
-    - id: a
-      text: Error alto tanto en entrenamiento como en validación
+    - id: c
+      text: Error igual en entrenamiento y validación, ambos altos
     - id: b
       text: Error muy bajo en entrenamiento pero notablemente más alto en
         validación/test
-    - id: c
-      text: Error igual en entrenamiento y validación, ambos altos
+    - id: a
+      text: Error alto tanto en entrenamiento como en validación
     - id: d
       text: El modelo tarda más en entrenar que en predecir
   correct: b
@@ -65,16 +65,16 @@
   stem: ¿Qué efecto tiene añadir un término de regularización L2 (ridge) a la
     función de pérdida de un modelo lineal?
   options:
-    - id: a
-      text: Fuerza a que algunos coeficientes sean exactamente cero, actuando como
-        selección de variables
+    - id: d
+      text: Elimina la necesidad de normalizar las features
     - id: b
       text: Penaliza la magnitud al cuadrado de los coeficientes, encogiéndolos hacia
         cero (sin anularlos necesariamente) y reduciendo la varianza del modelo
     - id: c
       text: Aumenta artificialmente el tamaño del dataset de entrenamiento
-    - id: d
-      text: Elimina la necesidad de normalizar las features
+    - id: a
+      text: Fuerza a que algunos coeficientes sean exactamente cero, actuando como
+        selección de variables
   correct: b
   explanation: La regularización L2 añade lambda * suma(w_i^2) a la pérdida; esto
     penaliza coeficientes grandes y los encoge de forma suave hacia cero,
@@ -95,10 +95,10 @@
       text: Producir soluciones dispersas (sparse), llevando algunos coeficientes
         exactamente a cero, lo que la hace útil para selección automática de
         features
-    - id: b
-      text: Ser matemáticamente idéntica a L2 en sus efectos
     - id: c
       text: Solo poder aplicarse a modelos de árboles
+    - id: b
+      text: Ser matemáticamente idéntica a L2 en sus efectos
     - id: d
       text: Aumentar siempre la varianza del modelo respecto a no regularizar
   correct: a
@@ -118,11 +118,11 @@
   stem: En un problema de clasificación binaria, la 'precision' (precisión) se
     define como...
   options:
-    - id: a
-      text: "TP / (TP + FN): de todos los positivos reales, cuántos se detectaron"
     - id: b
       text: "TP / (TP + FP): de todas las predicciones positivas del modelo, cuántas
         eran realmente positivas"
+    - id: a
+      text: "TP / (TP + FN): de todos los positivos reales, cuántos se detectaron"
     - id: c
       text: "(TP + TN) / total: proporción total de aciertos"
     - id: d
@@ -144,15 +144,15 @@
     - Data Scientist
   stem: El 'recall' (sensibilidad/exhaustividad) en clasificación binaria mide...
   options:
-    - id: a
-      text: TP / (TP + FP)
     - id: b
       text: "TP / (TP + FN): de todos los casos positivos reales, cuántos logró
         detectar el modelo"
-    - id: c
-      text: El porcentaje de predicciones negativas correctas
     - id: d
       text: La media aritmética entre precision y accuracy
+    - id: a
+      text: TP / (TP + FP)
+    - id: c
+      text: El porcentaje de predicciones negativas correctas
   correct: b
   explanation: "Recall (o sensibilidad) responde a: de todos los casos que
     realmente eran positivos, ¿cuántos identificó el modelo correctamente? Se
@@ -170,16 +170,16 @@
   stem: ¿Por qué el F1-score se define como la media armónica de precision y
     recall, en lugar de su media aritmética?
   options:
-    - id: a
-      text: Porque es matemáticamente más simple de calcular
     - id: b
       text: Porque la media armónica penaliza más fuertemente los valores bajos, de
         modo que el F1 solo es alto cuando AMBAS métricas (precision y recall)
         son razonablemente altas, evitando que un valor extremo compense al otro
-    - id: c
-      text: Porque la media armónica siempre da un resultado mayor que la aritmética
     - id: d
       text: Porque el F1-score no tiene relación con precision y recall
+    - id: a
+      text: Porque es matemáticamente más simple de calcular
+    - id: c
+      text: Porque la media armónica siempre da un resultado mayor que la aritmética
   correct: b
   explanation: La media armónica se ve dominada por el valor más bajo de los dos;
     así, un modelo con precision=1.0 y recall=0.1 tendría una media aritmética
@@ -197,17 +197,17 @@
   stem: ¿Cuál es el propósito principal de la validación cruzada k-fold frente a
     usar un único split train/test?
   options:
-    - id: a
-      text: Entrenar k modelos distintos para hacer ensemble obligatoriamente en
-        producción
+    - id: c
+      text: Eliminar por completo la necesidad de un conjunto de test final
     - id: b
       text: Obtener una estimación más robusta y menos dependiente del azar del
         rendimiento del modelo, promediando el desempeño sobre k particiones
         distintas de los datos
-    - id: c
-      text: Eliminar por completo la necesidad de un conjunto de test final
     - id: d
       text: Aumentar artificialmente el tamaño del dataset
+    - id: a
+      text: Entrenar k modelos distintos para hacer ensemble obligatoriamente en
+        producción
   correct: b
   explanation: Un único split train/test puede dar una estimación de rendimiento
     sesgada por cómo cayeron los datos en esa partición concreta. K-fold divide
@@ -226,15 +226,15 @@
   stem: Si el learning rate (tasa de aprendizaje) del descenso de gradiente es
     demasiado alto, el síntoma típico durante el entrenamiento es...
   options:
+    - id: d
+      text: No tiene ningún efecto sobre el entrenamiento
     - id: a
       text: Convergencia extremadamente lenta pero estable
+    - id: c
+      text: El modelo converge instantáneamente al mínimo global en una sola iteración
     - id: b
       text: La función de pérdida oscila, diverge o 'rebota' sin converger, en vez de
         disminuir de forma estable hacia un mínimo
-    - id: c
-      text: El modelo converge instantáneamente al mínimo global en una sola iteración
-    - id: d
-      text: No tiene ningún efecto sobre el entrenamiento
   correct: b
   explanation: Con un learning rate excesivo, cada actualización de los pesos da
     'pasos' demasiado grandes en la superficie de la función de pérdida,
@@ -282,6 +282,8 @@
   stem: Los árboles de decisión sin restricciones (sin poda ni profundidad máxima)
     tienden a...
   options:
+    - id: d
+      text: No poder usarse nunca para clasificación, solo para regresión
     - id: a
       text: Underfitting sistemático, sin importar el dataset
     - id: b
@@ -290,8 +292,6 @@
         límites de profundidad para generalizar bien
     - id: c
       text: Ser insensibles al ruido en los datos
-    - id: d
-      text: No poder usarse nunca para clasificación, solo para regresión
   correct: b
   explanation: Un árbol sin límite puede seguir dividiendo hasta que cada hoja
     contenga un único ejemplo, memorizando el ruido del set de entrenamiento;
@@ -309,16 +309,16 @@
   stem: ¿Por qué un Random Forest (bagging de árboles con selección aleatoria de
     features) suele reducir la varianza respecto a un único árbol de decisión?
   options:
-    - id: a
-      text: Porque cada árbol individual se vuelve por sí solo menos propenso a
-        overfitting
+    - id: c
+      text: Porque usa una sola muestra de datos para todos los árboles, garantizando
+        consistencia
     - id: b
       text: Porque promedia (o vota) las predicciones de muchos árboles entrenados
         sobre distintos subconjuntos de datos y features; si los errores de cada
         árbol están poco correlacionados, tienden a cancelarse al promediar
-    - id: c
-      text: Porque usa una sola muestra de datos para todos los árboles, garantizando
-        consistencia
+    - id: a
+      text: Porque cada árbol individual se vuelve por sí solo menos propenso a
+        overfitting
     - id: d
       text: Porque reduce automáticamente el número de features del dataset original
   correct: b
@@ -339,17 +339,17 @@
     - Data Scientist
   stem: ¿Para qué sirve el 'kernel trick' en una Support Vector Machine (SVM)?
   options:
-    - id: a
-      text: Para acelerar el entrenamiento reduciendo el número de muestras
     - id: b
       text: Para permitir separar clases que no son linealmente separables en el
         espacio original, calculando de forma eficiente el producto escalar
         equivalente a proyectar los datos a un espacio de mayor dimensión sin
         construir explícitamente esa proyección
-    - id: c
-      text: Para convertir un problema de clasificación en uno de regresión
     - id: d
       text: Para eliminar la necesidad de un margen de separación
+    - id: c
+      text: Para convertir un problema de clasificación en uno de regresión
+    - id: a
+      text: Para acelerar el entrenamiento reduciendo el número de muestras
   correct: b
   explanation: "El kernel trick permite calcular el producto escalar que tendrían
     los datos en un espacio de características de dimensión mayor (donde sí
@@ -367,16 +367,16 @@
     - Data Scientist
   stem: ¿Cuál es una limitación conocida del algoritmo k-means?
   options:
-    - id: a
-      text: No requiere especificar de antemano el número de clusters k
+    - id: c
+      text: Solo puede usarse con datos etiquetados (aprendizaje supervisado)
     - id: b
       text: Requiere elegir k de antemano y el resultado final es sensible a la
         inicialización aleatoria de los centroides, pudiendo converger a un
         óptimo local distinto en cada corrida
-    - id: c
-      text: Solo puede usarse con datos etiquetados (aprendizaje supervisado)
     - id: d
       text: Garantiza siempre encontrar la partición óptima global
+    - id: a
+      text: No requiere especificar de antemano el número de clusters k
   correct: b
   explanation: k-means necesita que el número de clusters k se fije de antemano
     (no lo aprende de los datos) y, al depender de una inicialización aleatoria
@@ -395,16 +395,16 @@
   stem: En un dataset con fuerte desbalanceo de clases (p. ej. 99% clase A, 1%
     clase B), ¿por qué la métrica 'accuracy' puede ser engañosa?
   options:
+    - id: c
+      text: Porque accuracy solo existe para problemas de regresión
+    - id: d
+      text: Porque accuracy siempre penaliza más a la clase mayoritaria
     - id: a
       text: Porque accuracy no puede calcularse en problemas binarios
     - id: b
       text: Porque un modelo trivial que siempre predice la clase mayoritaria
         obtendría un 99% de accuracy sin haber aprendido nada útil sobre la
         clase minoritaria
-    - id: c
-      text: Porque accuracy solo existe para problemas de regresión
-    - id: d
-      text: Porque accuracy siempre penaliza más a la clase mayoritaria
   correct: b
   explanation: Con clases muy desbalanceadas, un clasificador que ignore por
     completo la clase minoritaria y prediga siempre la mayoritaria logra una
@@ -434,14 +434,14 @@
 
     ¿Qué está ocurriendo?
   options:
+    - id: d
+      text: Los datos están perfectamente balanceados
+    - id: c
+      text: El learning rate es exactamente 0
     - id: a
       text: "Overfitting: mejora en train mientras empeora en validación"
     - id: b
       text: "Underfitting: no aprende nada"
-    - id: c
-      text: El learning rate es exactamente 0
-    - id: d
-      text: Los datos están perfectamente balanceados
   correct: a
   explanation: "Si el error de train sigue bajando pero el de validación empieza a
     subir, el modelo memoriza el entrenamiento y generaliza peor: overfitting.
@@ -467,13 +467,13 @@
 
     ¿Qué error metodológico hay?
   options:
+    - id: c
+      text: Falta convertir a float32
+    - id: b
+      text: No hay error, es el orden correcto
     - id: a
       text: "Data leakage: el scaler se ajusta viendo también el test; debe hacer fit
         solo con train"
-    - id: b
-      text: No hay error, es el orden correcto
-    - id: c
-      text: Falta convertir a float32
     - id: d
       text: El split siempre debe ir después del fit del modelo
   correct: a
@@ -494,15 +494,15 @@
   stem: Un clasificador de fraude tiene 99% de accuracy, pero el fraude es el 1%
     de los casos y no detecta casi ninguno. ¿Qué métrica deberías mirar?
   options:
+    - id: d
+      text: El número de features de entrada
+    - id: c
+      text: El learning rate del modelo
+    - id: b
+      text: La accuracy, que ya es del 99%
     - id: a
       text: Recall sobre la clase minoritaria (con precision/F1 y la matriz de
         confusión)
-    - id: b
-      text: La accuracy, que ya es del 99%
-    - id: c
-      text: El learning rate del modelo
-    - id: d
-      text: El número de features de entrada
   correct: a
   explanation: Con clases muy desbalanceadas la accuracy engaña (predecir siempre
     'no fraude' da 99%). Importa el recall de la clase positiva (cuántos fraudes
@@ -519,13 +519,13 @@
     - Data Scientist
   stem: ¿Qué distingue el aprendizaje supervisado del no supervisado?
   options:
+    - id: c
+      text: Son lo mismo
     - id: a
       text: El supervisado aprende de datos ETIQUETADOS (X→y); el no supervisado busca
         estructura en datos sin etiquetas
     - id: b
       text: El supervisado no usa datos
-    - id: c
-      text: Son lo mismo
     - id: d
       text: El no supervisado siempre rinde mejor
   correct: a
@@ -542,13 +542,13 @@
   roles: *a1
   stem: ¿Cuál es la diferencia entre un problema de clasificación y uno de regresión?
   options:
+    - id: c
+      text: Son idénticos
+    - id: b
+      text: Es al revés
     - id: a
       text: Clasificación predice una categoría discreta; regresión predice un valor
         continuo
-    - id: b
-      text: Es al revés
-    - id: c
-      text: Son idénticos
     - id: d
       text: La regresión solo sirve para imágenes
   correct: a
@@ -564,14 +564,14 @@
   roles: *a1
   stem: En una matriz de confusión binaria, ¿qué es un 'falso positivo' (FP)?
   options:
+    - id: d
+      text: Acertó un caso negativo
     - id: a
       text: El modelo predijo positivo pero la etiqueta real era negativa
     - id: b
       text: Predijo negativo siendo realmente positivo
     - id: c
       text: Acertó un caso positivo
-    - id: d
-      text: Acertó un caso negativo
   correct: a
   explanation: "FP = predicción positiva sobre un caso realmente negativo (falsa
     alarma). Un FN sería lo contrario: no detectar un positivo real."
@@ -585,13 +585,13 @@
   roles: *a1
   stem: ¿Qué mide el AUC de una curva ROC?
   options:
-    - id: a
-      text: "La capacidad de ordenar clases a través de todos los umbrales:
-        probabilidad de puntuar un positivo por encima de un negativo"
     - id: b
       text: La accuracy fija a umbral 0.5
     - id: c
       text: El tiempo de entrenamiento
+    - id: a
+      text: "La capacidad de ordenar clases a través de todos los umbrales:
+        probabilidad de puntuar un positivo por encima de un negativo"
     - id: d
       text: El número de features
   correct: a
@@ -609,15 +609,15 @@
   stem: Un detector de spam marca demasiados correos buenos como spam. Sin
     reentrenar, ¿qué ajustas para reducir esos falsos positivos?
   options:
+    - id: b
+      text: Bajar el umbral de decisión
+    - id: d
+      text: No se puede hacer nada sin reentrenar
+    - id: c
+      text: Cambiar el idioma del correo
     - id: a
       text: "Subir el umbral de decisión (exigir más confianza para marcar spam): sube
         precision a costa de recall"
-    - id: b
-      text: Bajar el umbral de decisión
-    - id: c
-      text: Cambiar el idioma del correo
-    - id: d
-      text: No se puede hacer nada sin reentrenar
   correct: a
   explanation: "Subir el umbral hace el modelo más conservador al predecir
     positivo: menos falsos positivos (más precision) pero más falsos negativos
@@ -632,13 +632,13 @@
   roles: *a1
   stem: ¿Qué indica que un modelo hace 'underfitting'?
   options:
-    - id: a
-      text: "Rinde mal en train Y en validación: es demasiado simple para el patrón
-        (alto sesgo)"
     - id: b
       text: Rinde perfecto en train y mal en validación
     - id: c
       text: No usa datos de entrenamiento
+    - id: a
+      text: "Rinde mal en train Y en validación: es demasiado simple para el patrón
+        (alto sesgo)"
     - id: d
       text: Tiene demasiados parámetros
   correct: a
@@ -656,6 +656,8 @@
   stem: ¿En qué se diferencian gradient descent por lotes (batch), estocástico
     (SGD) y mini-batch?
   options:
+    - id: d
+      text: Mini-batch no calcula gradientes
     - id: a
       text: Batch usa todo el dataset por paso; SGD un solo ejemplo; mini-batch un
         subconjunto pequeño (equilibrio entre ruido y eficiencia)
@@ -663,8 +665,6 @@
       text: Son idénticos
     - id: c
       text: SGD usa todo el dataset de golpe
-    - id: d
-      text: Mini-batch no calcula gradientes
   correct: a
   explanation: Batch es estable pero caro; SGD es ruidoso pero rápido por paso;
     mini-batch (lo habitual) combina eficiencia en hardware y una actualización
@@ -680,15 +680,15 @@
   stem: ¿Por qué usar one-hot encoding en vez de label encoding para una variable
     categórica NOMINAL (sin orden)?
   options:
+    - id: d
+      text: El label encoding no existe
     - id: a
       text: El label encoding introduce un orden numérico falso (0<1<2) que el modelo
         puede malinterpretar; one-hot lo evita
-    - id: b
-      text: One-hot es más lento sin ninguna ventaja
     - id: c
       text: Son exactamente equivalentes
-    - id: d
-      text: El label encoding no existe
+    - id: b
+      text: One-hot es más lento sin ninguna ventaja
   correct: a
   explanation: Con categorías sin orden (rojo/verde/azul), asignarles 0/1/2
     sugiere una relación de orden/distancia inexistente. One-hot crea una
@@ -728,15 +728,15 @@
   stem: ¿Para qué sirve reservar un conjunto de TEST que no se toca durante el
     desarrollo?
   options:
+    - id: d
+      text: Para duplicar los datos
+    - id: c
+      text: No sirve para nada
+    - id: b
+      text: Para entrenar más rápido
     - id: a
       text: Para estimar sin sesgo el rendimiento en datos no vistos; si lo usas para
         ajustar deja de ser una estimación honesta
-    - id: b
-      text: Para entrenar más rápido
-    - id: c
-      text: No sirve para nada
-    - id: d
-      text: Para duplicar los datos
   correct: a
   explanation: El test es la única muestra 'limpia' de generalización. Si tomas
     decisiones mirándolo, se contamina y su estimación deja de ser fiable (para
@@ -774,13 +774,13 @@
   roles: *a1
   stem: ¿Qué hace PCA (Análisis de Componentes Principales)?
   options:
-    - id: a
-      text: Proyecta los datos a menos dimensiones conservando la mayor varianza
-        posible, con combinaciones lineales ortogonales
     - id: b
       text: Añade dimensiones nuevas
     - id: c
       text: Etiqueta los datos
+    - id: a
+      text: Proyecta los datos a menos dimensiones conservando la mayor varianza
+        posible, con combinaciones lineales ortogonales
     - id: d
       text: Entrena un clasificador supervisado
   correct: a
@@ -803,10 +803,10 @@
         más datos
     - id: b
       text: Que hay demasiadas filas
-    - id: c
-      text: Un bug de numpy
     - id: d
       text: Que el modelo entrena más rápido
+    - id: c
+      text: Un bug de numpy
   correct: a
   explanation: En alta dimensión el volumen crece exponencialmente y los puntos
     quedan casi equidistantes; kNN, clustering y densidades se degradan, y hace
@@ -821,15 +821,15 @@
   roles: *a1
   stem: ¿Cómo clasifica un k-Nearest Neighbors (kNN)?
   options:
+    - id: b
+      text: Ajusta una recta de regresión
+    - id: d
+      text: Construye un único árbol
+    - id: c
+      text: Usa gradient descent para aprender pesos
     - id: a
       text: Asigna la clase mayoritaria entre los k ejemplos de entrenamiento más
         cercanos; no ajusta un modelo paramétrico
-    - id: b
-      text: Ajusta una recta de regresión
-    - id: c
-      text: Usa gradient descent para aprender pesos
-    - id: d
-      text: Construye un único árbol
   correct: a
   explanation: "kNN es 'perezoso': no entrena parámetros, guarda los datos y en
     predicción vota entre los k vecinos más próximos. Sensible a la escala de
@@ -844,14 +844,14 @@
   roles: *a1
   stem: ¿Qué asunción 'ingenua' hace el clasificador Naive Bayes?
   options:
-    - id: a
-      text: Que las features son condicionalmente independientes dada la clase
     - id: b
       text: Que no existen clases
-    - id: c
-      text: Que los datos son siempre imágenes
+    - id: a
+      text: Que las features son condicionalmente independientes dada la clase
     - id: d
       text: Que la relación es siempre lineal
+    - id: c
+      text: Que los datos son siempre imágenes
   correct: a
   explanation: Naive Bayes asume independencia condicional de las features dada la
     clase; irreal, pero funciona sorprendentemente bien (p. ej. clasificación de
@@ -866,13 +866,13 @@
   roles: *a1
   stem: ¿Qué busca un SVM lineal al separar dos clases?
   options:
+    - id: c
+      text: Minimizar el número de features
+    - id: b
+      text: Cualquier recta que separe las clases
     - id: a
       text: "El hiperplano que maximiza el margen: la distancia a los puntos más
         cercanos (vectores de soporte)"
-    - id: b
-      text: Cualquier recta que separe las clases
-    - id: c
-      text: Minimizar el número de features
     - id: d
       text: Maximizar el error de clasificación
   correct: a
@@ -889,13 +889,13 @@
   roles: *a1
   stem: ¿Para qué sirven el método del codo (elbow) o el silhouette en k-means?
   options:
-    - id: a
-      text: Para elegir un número de clústers k razonable, ya que k-means no aprende k
-        por sí solo
     - id: b
       text: Para entrenar más rápido
     - id: c
       text: Para etiquetar los datos
+    - id: a
+      text: Para elegir un número de clústers k razonable, ya que k-means no aprende k
+        por sí solo
     - id: d
       text: Para reducir dimensiones
   correct: a
@@ -912,13 +912,13 @@
   roles: *a1
   stem: ¿Qué ventaja tiene DBSCAN frente a k-means?
   options:
+    - id: c
+      text: Requiere datos etiquetados
+    - id: b
+      text: Es siempre más rápido
     - id: a
       text: Encuentra clústers de forma arbitraria por densidad y detecta outliers,
         sin fijar k de antemano
-    - id: b
-      text: Es siempre más rápido
-    - id: c
-      text: Requiere datos etiquetados
     - id: d
       text: Solo puede formar 2 clústers
   correct: a
@@ -939,12 +939,12 @@
       text: Bagging entrena modelos en paralelo sobre remuestreos y promedia (reduce
         varianza); boosting entrena en secuencia, cada uno corrigiendo los
         errores del anterior (reduce sesgo)
-    - id: b
-      text: Son lo mismo con otro nombre
     - id: c
       text: Bagging es secuencial y boosting paralelo
     - id: d
       text: Boosting solo promedia modelos independientes
+    - id: b
+      text: Son lo mismo con otro nombre
   correct: a
   explanation: Bagging (p. ej. Random Forest) decorrela modelos de alta varianza y
     promedia. Boosting (p. ej. gradient boosting) añade modelos débiles
@@ -959,15 +959,15 @@
   roles: *a1
   stem: ¿Cómo construye el modelo un algoritmo de gradient boosting (p. ej. XGBoost)?
   options:
-    - id: a
-      text: Añade árboles secuencialmente, cada uno ajustado a los residuos/gradiente
-        del error de los anteriores
     - id: b
       text: Promedia árboles entrenados de forma independiente
     - id: c
       text: Entrena una única red neuronal
     - id: d
       text: No utiliza árboles en absoluto
+    - id: a
+      text: Añade árboles secuencialmente, cada uno ajustado a los residuos/gradiente
+        del error de los anteriores
   correct: a
   explanation: Gradient boosting ajusta cada nuevo árbol al gradiente negativo de
     la pérdida (los residuos) del ensemble actual, mejorando de forma
@@ -1029,15 +1029,15 @@
   roles: *a1
   stem: ¿Qué indica un R² (coeficiente de determinación) de 0.0 en regresión?
   options:
+    - id: c
+      text: Que faltan datos
+    - id: b
+      text: Un ajuste perfecto
+    - id: d
+      text: Que hay overfitting con seguridad
     - id: a
       text: El modelo no explica la varianza mejor que predecir siempre la media del
         objetivo
-    - id: b
-      text: Un ajuste perfecto
-    - id: c
-      text: Que faltan datos
-    - id: d
-      text: Que hay overfitting con seguridad
   correct: a
   explanation: R²=1 es ajuste perfecto; R²=0 equivale a predecir la media; R²<0 es
     peor que la media. Mide la fracción de varianza explicada por el modelo.
@@ -1056,11 +1056,11 @@
 
     ¿Qué cambio ataca el desbalanceo DESDE el modelo?
   options:
+    - id: b
+      text: Subir max_iter
     - id: a
       text: class_weight='balanced' (o pesos por clase) para penalizar más los errores
         en la clase minoritaria
-    - id: b
-      text: Subir max_iter
     - id: c
       text: Eliminar la clase minoritaria
     - id: d
@@ -1080,15 +1080,15 @@
   stem: Tu modelo de predicción de baja de clientes da 99.9% de accuracy en
     validación. Descubres que una feature es 'fecha_de_baja'. ¿Qué ha pasado?
   options:
+    - id: c
+      text: Falta regularización
+    - id: d
+      text: Es un resultado normal
     - id: a
       text: "Target leakage: una feature contiene información del futuro/etiqueta que
         no existiría al predecir; hay que quitarla"
     - id: b
       text: El modelo es simplemente excelente
-    - id: c
-      text: Falta regularización
-    - id: d
-      text: Es un resultado normal
   correct: a
   explanation: "Una feature que solo se conoce después del evento (o que codifica
     la etiqueta) filtra el objetivo: accuracy irreal que se desploma en
@@ -1104,15 +1104,15 @@
   roles: *a1
   stem: ¿Qué familia de modelos NO necesita escalado de features?
   options:
+    - id: c
+      text: k-Nearest Neighbors
+    - id: d
+      text: Regresión logística con regularización
     - id: a
       text: "Los basados en árboles (decision tree, random forest, gradient boosting):
         parten por umbrales, insensibles a la escala"
     - id: b
       text: SVM con kernel RBF
-    - id: c
-      text: k-Nearest Neighbors
-    - id: d
-      text: Regresión logística con regularización
   correct: a
   explanation: Los árboles deciden por umbrales de cada feature por separado, así
     que la escala da igual. En cambio kNN, SVM y modelos con
@@ -1128,16 +1128,16 @@
   stem: ¿Por qué la regularización L1 (lasso) tiende a dar pesos exactamente CERO
     (selección de features) y la L2 (ridge) no?
   options:
-    - id: a
-      text: La geometría de la restricción L1 (rombo, con vértices sobre los ejes)
-        hace que el óptimo caiga a menudo en un eje (peso=0); la L2 (círculo)
-        rara vez toca un eje
-    - id: b
-      text: Porque L1 usa más datos
     - id: c
       text: Porque es aleatorio
     - id: d
       text: Porque L2 también produce ceros siempre
+    - id: b
+      text: Porque L1 usa más datos
+    - id: a
+      text: La geometría de la restricción L1 (rombo, con vértices sobre los ejes)
+        hace que el óptimo caiga a menudo en un eje (peso=0); la L2 (círculo)
+        rara vez toca un eje
   correct: a
   explanation: La región factible de L1 es un rombo con esquinas en los ejes; la
     solución óptima suele tocar una esquina, anulando coeficientes (sparsity).
@@ -1153,14 +1153,14 @@
   stem: El error cuadrático esperado de predicción se descompone como E[(y − ŷ)²]
     = ...
   options:
-    - id: a
-      text: sesgo² + varianza + error irreducible
-    - id: b
-      text: solo varianza
     - id: c
       text: sesgo × varianza
+    - id: b
+      text: solo varianza
     - id: d
       text: accuracy + recall
+    - id: a
+      text: sesgo² + varianza + error irreducible
   correct: a
   explanation: "La descomposición sesgo-varianza: sesgo² (error sistemático por un
     modelo demasiado simple), varianza (sensibilidad a los datos de train) y
@@ -1179,10 +1179,10 @@
     - id: a
       text: La varianza de la media de estimadores decrece con B (si no están
         perfectamente correlados), y el bootstrap los decorrela
-    - id: b
-      text: Porque aumenta el sesgo
     - id: c
       text: Porque usa menos datos
+    - id: b
+      text: Porque aumenta el sesgo
     - id: d
       text: El promedio no reduce la varianza
   correct: a
@@ -1200,15 +1200,15 @@
   stem: El 'kernel trick' permite un SVM no lineal sin calcular explícitamente la
     transformación φ(x). ¿Por qué funciona?
   options:
+    - id: d
+      text: Porque borra los datos para linealizarlos
+    - id: c
+      text: Porque no usa productos internos
+    - id: b
+      text: Porque φ es siempre la identidad
     - id: a
       text: La forma dual del SVM solo depende de productos internos ⟨φ(x),φ(z)⟩, que
         un kernel válido (Mercer) calcula directamente como K(x,z)
-    - id: b
-      text: Porque φ es siempre la identidad
-    - id: c
-      text: Porque no usa productos internos
-    - id: d
-      text: Porque borra los datos para linealizarlos
   correct: a
   explanation: En su formulación dual el SVM solo usa productos internos entre
     ejemplos; un kernel de Mercer devuelve ⟨φ(x),φ(z)⟩ sin construir φ (que
@@ -1224,15 +1224,15 @@
   stem: Un modelo tiene buen AUC, pero cuando predice 'probabilidad 0.9' solo
     acierta el 60% de las veces. ¿Qué problema hay y cómo se corrige?
   options:
-    - id: a
-      text: Está mal CALIBRADO; se corrige con calibración post-hoc (Platt/sigmoide o
-        isotónica) sobre un set de validación
-    - id: b
-      text: Tiene overfitting; solo hace falta más datos
     - id: c
       text: Es imposible que ocurra
     - id: d
       text: Hay que cambiar de lenguaje de programación
+    - id: b
+      text: Tiene overfitting; solo hace falta más datos
+    - id: a
+      text: Está mal CALIBRADO; se corrige con calibración post-hoc (Platt/sigmoide o
+        isotónica) sobre un set de validación
   correct: a
   explanation: Buen ranking (AUC) no implica probabilidades fiables. Si al 0.9
     predicho le corresponde un 60% real, hay descalibración; Platt scaling
@@ -1259,15 +1259,15 @@
 
     ¿Qué pasa en la zona de la DERECHA (modelo muy complejo)?
   options:
+    - id: b
+      text: "Underfitting: el modelo es demasiado simple"
     - id: a
       text: "Overfitting: el error de train sigue bajando pero el de test sube
         (varianza alta)"
-    - id: b
-      text: "Underfitting: el modelo es demasiado simple"
-    - id: c
-      text: Es el punto óptimo de complejidad
     - id: d
       text: El error irreducible se hace cero
+    - id: c
+      text: Es el punto óptimo de complejidad
   correct: a
   explanation: "El error de test tiene forma de U: la izquierda (simple) es
     underfitting (sesgo alto), la derecha (complejo) es overfitting (varianza
