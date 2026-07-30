@@ -164,27 +164,55 @@ async function pickPack(
   return cargar(elegido);
 }
 
+/** Valor centinela del checkbox: no es una dimensión, es "quiero crear una". */
+export const NUEVA_DIMENSION = "__nueva__";
+
+/**
+ * Qué dimensiones entran. La lista incluye SIEMPRE una entrada para crear un tema
+ * nuevo: sin ella, el asistente solo deja elegir entre lo que ya existe y no hay
+ * ninguna pista de que aptus sepa construir temas.
+ *
+ * Las dimensiones declaradas pero sin preguntas se muestran deshabilitadas en vez
+ * de ocultarse: que un tema exista y no sea evaluable es información útil —te dice
+ * qué te falta— y esconderlo lo haría parecer inexistente.
+ */
 async function pickDimensions(pack: Pack): Promise<string[] | null> {
   const porDim = countBy(pack.questions, (q) => q.dimension);
-  const disponibles = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) > 0);
-  if (disponibles.length <= 1) return null;
+  const conPreguntas = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) > 0);
+  const vacias = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) === 0);
 
   const elegidas = await checkbox({
     message:
       pc.bold("  ¿Qué dimensiones entran?") +
       pc.dim("  (espacio marca · a todas · enter confirma)"),
-    choices: disponibles.map((d) => ({
-      value: d,
-      name: d,
-      checked: true,
-      description: `${porDim.get(d)} preguntas en el banco`,
-    })),
+    choices: [
+      ...conPreguntas.map((d) => ({
+        value: d,
+        name: d,
+        checked: true,
+        description: `${porDim.get(d)} preguntas en el banco`,
+      })),
+      ...vacias.map((d) => ({
+        value: d,
+        name: `${d} ${pc.dim("(declarada, sin preguntas)")}`,
+        disabled: pc.dim("no evaluable todavía"),
+        description: "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
+      })),
+      {
+        value: NUEVA_DIMENSION,
+        name: pc.cyan("＋ escribir un tema nuevo…"),
+        checked: false,
+        description:
+          "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
+      },
+    ],
     required: true,
     theme: promptTheme,
-    pageSize: 10,
+    pageSize: 12,
   });
 
-  return elegidas.length === disponibles.length ? null : elegidas;
+  if (elegidas.includes(NUEVA_DIMENSION)) return [NUEVA_DIMENSION];
+  return elegidas.length === conPreguntas.length ? null : elegidas;
 }
 
 async function pickDifficulty(): Promise<Difficulty[] | null> {
@@ -239,6 +267,42 @@ async function pickTarget(disponibles: number, pordefecto: number): Promise<numb
 }
 
 /**
+ * Atiende la rama "tema nuevo" y cuenta qué ha quedado hecho y qué falta.
+ *
+ * La sesión NO continúa después: lo que se acaba de crear está sin revisar, y
+ * medirte con preguntas que nadie ha leído sería exactamente la mentira que este
+ * proyecto evita. Se dice qué falta y se corta.
+ */
+async function runNewDimension(
+  packDir: string,
+  packName: string,
+  existing: readonly string[],
+): Promise<void> {
+  const { newDimensionFlow } = await import("./new-dimension.js");
+  const res = await newDimensionFlow(packDir, packName, existing);
+
+  if (res === null) {
+    console.log("\nTema nuevo cancelado.\n");
+    return;
+  }
+
+  console.log("\n" + heading(`Tema '${res.dimension}'`));
+  if (res.written.length > 0) {
+    console.log(pc.dim("\n  Escrito:"));
+    for (const f of res.written) console.log(`    · ${f}`);
+  }
+  console.log(pc.dim("\n  Falta para que sea evaluable:"));
+  for (const p of res.pending) console.log(`    · ${p}`);
+  console.log(
+    pc.dim(
+      "\n  · La sesión no sigue: lo que se acaba de crear está sin revisar, y medirte\n" +
+        "    con preguntas que nadie ha leído sería justo lo que aptus evita.\n" +
+        `  · Cuando esté listo, vuelve con \`aptus start --pack ${packName}\`.\n`,
+    ),
+  );
+}
+
+/**
  * Compone el asistente completo. Devuelve `null` si el usuario cancela (Ctrl+C):
  * cancelar en el asistente no debe arrancar ninguna sesión ni escribir nada.
  */
@@ -269,6 +333,14 @@ export async function resolveSetup(
     if (interactivo) {
       console.log("\n" + heading("Qué vamos a evaluar") + "\n");
       if (opts.dims === undefined) dimensions = await pickDimensions(pack);
+
+      // "Tema nuevo" no es un filtro de sesión: es construir el pack. Se atiende
+      // aquí y se corta la sesión — lo que salga de ahí aún no puede evaluarte.
+      if (dimensions !== null && dimensions.includes(NUEVA_DIMENSION)) {
+        await runNewDimension(join(packsRoot, packName), packName, pack.dimensions);
+        return null;
+      }
+
       if (opts.difficulty === undefined) difficulties = await pickDifficulty();
 
       const disponibles = filterQuestions(pack.questions, { dimensions, difficulties }).length;

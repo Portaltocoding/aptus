@@ -106,6 +106,63 @@ export interface DraftResult {
   rejected: { id: string; reason: string }[];
 }
 
+/**
+ * Investiga un tema en la web y devuelve un resumen que sirva de material.
+ *
+ * Va en una llamada APARTE de la que escribe las preguntas, y no por capricho: la
+ * búsqueda web puede pausar el turno (`pause_turn`) y encadenar varias rondas, y
+ * mezclarla con la salida estructurada del borrador convierte un fallo de red en
+ * un JSON a medias. Así, si la investigación sale mal, se sabe aquí y el borrador
+ * ni se intenta.
+ *
+ * Lo que devuelve NO es una fuente auditada: es lo que el modelo ha encontrado.
+ * Por eso baja a `sources/` como material citable y no directamente a preguntas.
+ */
+export async function researchTopic(dimension: string, context: string | null): Promise<string> {
+  const client = new Anthropic();
+
+  const encargo =
+    `Investiga en la web el tema '${dimension}' para construir un banco de preguntas de evaluación técnica.\n\n` +
+    (context !== null ? `Contexto de para qué es:\n${context}\n\n` : "") +
+    "Devuelve un informe en castellano con:\n" +
+    "- Los subtemas que un profesional debe dominar, de fundamentos a nivel experto.\n" +
+    "- Los conceptos exactos, con su definición precisa (lo que se puede preguntar).\n" +
+    "- Los errores y malentendidos frecuentes (sirven de distractores plausibles).\n" +
+    "- Qué distingue a alguien senior de alguien junior en este tema.\n\n" +
+    "Cita las fuentes. Si algo no lo has podido verificar, dilo en vez de rellenarlo.";
+
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: encargo }];
+
+  // La búsqueda web corre en el servidor y puede agotar su presupuesto de rondas
+  // devolviendo `pause_turn`: se reenvía la conversación para que siga donde iba.
+  // El tope evita que un tema muy abierto se convierta en un bucle caro.
+  for (let intento = 0; intento < 5; intento += 1) {
+    const stream = client.messages.stream({
+      model: MODEL,
+      max_tokens: 32000,
+      tools: [{ type: "web_search_20260209", name: "web_search" }],
+      messages,
+    });
+    const message = await stream.finalMessage();
+
+    if (message.stop_reason === "refusal") {
+      throw new Error("El modelo ha rechazado investigar ese tema.");
+    }
+
+    if (message.stop_reason === "pause_turn") {
+      messages.push({ role: "assistant", content: message.content });
+      continue;
+    }
+
+    return message.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("\n");
+  }
+
+  throw new Error("La investigación no ha terminado tras varias rondas de búsqueda; se deja aquí.");
+}
+
 function buildPrompt(req: DraftRequest): string {
   const partes = [
     `Escribe hasta ${req.count} preguntas de evaluación para la dimensión '${req.dimension}'.`,

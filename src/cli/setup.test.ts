@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "../content/schema.js";
 import { DIFFICULTY_PRESETS, parseDifficulty, resolveSetup, sampleWarning } from "./setup.js";
+import { validateDimensionName } from "./new-dimension.js";
 
 const PACKS_ROOT = new URL("../../packs/", import.meta.url).pathname;
 const DEFAULT_PACK = "ai-ml-readiness";
@@ -127,5 +128,20 @@ describe("resolveSetup (no interactivo)", () => {
         DEFAULT_PACK,
       ),
     ).rejects.toThrow();
+  });
+});
+
+describe("validateDimensionName", () => {
+  it("acepta un nombre normal y lo mide ya en kebab-case", () => {
+    expect(validateDimensionName("Sistemas Distribuidos", [])).toBe(true);
+  });
+
+  it("rechaza lo que no deja nada útil tras normalizar", () => {
+    expect(validateDimensionName("", [])).toMatch(/3 caracteres/);
+    expect(validateDimensionName("!!", [])).toMatch(/3 caracteres/);
+  });
+
+  it("rechaza una dimensión que ya existe, comparando en kebab-case", () => {
+    expect(validateDimensionName("Colas de Mensajes", ["colas-de-mensajes"])).toMatch(/ya existe/);
   });
 });
