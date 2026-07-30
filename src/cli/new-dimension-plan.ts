@@ -11,7 +11,7 @@ import { toKebab } from "../core/brief.js";
  * las fuentes elegidas. Antes, esa decisión estaba trenzada con los `writeFileSync`.
  */
 
-export type MaterialSource = "carpeta" | "oferta" | "buscar";
+export type MaterialSource = "carpeta" | "oferta" | "pegar" | "buscar";
 
 export interface NewDimensionResult {
   dimension: string;
@@ -39,6 +39,45 @@ export function ofertaSourceName(rutaOferta: string): string {
 
 export function investigacionSourceName(dimension: string): string {
   return `investigacion-${dimension}.md`;
+}
+
+/**
+ * El texto pegado se guarda como un fichero más de `sources/`, con nombre que dice
+ * de qué tema es. No es un caso especial guardado en memoria: en cuanto está en
+ * `sources/` es material citable exactamente igual que una carpeta de apuntes, y
+ * el `source` de una pregunta puede apuntarlo.
+ */
+export function pegadoSourceName(dimension: string): string {
+  return `pegado-${dimension}.txt`;
+}
+
+/** Qué editor abriría un pegado, y si sale del entorno o es el de por defecto. */
+export interface EditorDePegado {
+  /** El ejecutable, sin argumentos. Cadena vacía si el entorno lo declara en blanco. */
+  readonly comando: string;
+  /** `true` si viene de $VISUAL/$EDITOR; `false` si es el que se asume por defecto. */
+  readonly configurado: boolean;
+}
+
+/**
+ * Qué editor va a abrirse al pegar texto. Replica la regla EXACTA de
+ * `@inquirer/external-editor` (`VISUAL ?? EDITOR ?? vim`), y la replica a propósito:
+ * es lo que permite decir en pantalla qué se va a abrir ANTES de abrirlo, y detectar
+ * que no hay nada que abrir en vez de dejar el prompt colgado repitiendo un error.
+ *
+ * Ojo con el `??`: un `EDITOR=""` NO cae al de por defecto, se usa tal cual y
+ * revienta. Por eso se devuelve la cadena vacía en vez de disimularla — quien llama
+ * comprueba que sea lanzable y se cae al camino de texto en una línea.
+ */
+export function editorDePegado(
+  env: NodeJS.ProcessEnv = process.env,
+  plataforma: string = process.platform,
+): EditorDePegado {
+  const declarado = env.VISUAL ?? env.EDITOR;
+  if (declarado !== undefined) {
+    return { comando: declarado.trim().split(/\s+/)[0] ?? "", configurado: true };
+  }
+  return { comando: plataforma.startsWith("win") ? "notepad" : "vim", configurado: false };
 }
 
 /**
@@ -117,6 +156,12 @@ export function sourceChoices(tieneApiKey: boolean): SourceChoice[] {
       disabled: null,
     },
     {
+      value: "pegar",
+      name: "Pegar texto aquí mismo",
+      description: "una oferta, unos apuntes — se guarda en sources/ sin crear el fichero antes",
+      disabled: null,
+    },
+    {
       value: "buscar",
       name: "Que lo busque el modelo",
       description: "investiga el tema en la web y deja el informe como material (necesita API key)",
@@ -133,7 +178,7 @@ export function sourceChoices(tieneApiKey: boolean): SourceChoice[] {
  * el brief se puede escribir igual; al revés, un fallo de red se llevaría por
  * delante lo que aún no habías traído.
  */
-export const ORDEN_FUENTES: readonly MaterialSource[] = ["carpeta", "oferta", "buscar"];
+export const ORDEN_FUENTES: readonly MaterialSource[] = ["carpeta", "oferta", "pegar", "buscar"];
 
 /** Ordena y deduplica lo marcado. Lo desconocido se descarta en vez de arrastrarse. */
 export function ordenarFuentes(seleccion: readonly MaterialSource[]): MaterialSource[] {
@@ -151,6 +196,12 @@ export type MaterialOutcome =
       readonly descartados: number;
     }
   | { readonly fuente: "oferta"; readonly copiado: string }
+  | {
+      readonly fuente: "pegar";
+      /** `null` si el texto pegado venía vacío: entonces no se escribe nada. */
+      readonly copiado: string | null;
+      readonly caracteres: number;
+    }
   | { readonly fuente: "buscar"; readonly copiado: string }
   /**
    * Una fuente que se marcó y no salió. Es una variante propia y no un `null`
@@ -164,6 +215,8 @@ export function materialUtil(m: MaterialOutcome): boolean {
   switch (m.fuente) {
     case "carpeta":
       return m.leidos > 0;
+    case "pegar":
+      return m.copiado !== null;
     case "oferta":
     case "buscar":
       return true;
@@ -177,6 +230,8 @@ export function ficherosDe(m: MaterialOutcome): readonly string[] {
   switch (m.fuente) {
     case "carpeta":
       return m.leidos > 0 ? m.copiados : [];
+    case "pegar":
+      return m.copiado === null ? [] : [m.copiado];
     case "oferta":
     case "buscar":
       return [m.copiado];
@@ -352,6 +407,11 @@ function pendientesDe(m: MaterialOutcome): string[] {
 
     case "oferta":
       return [];
+
+    case "pegar":
+      // Un pegado vacío no es un fallo del asistente, pero tampoco es material: si
+      // no se dice, la única señal sería un fichero que no está en ninguna parte.
+      return m.copiado === null ? ["el texto pegado venía vacío: no se ha escrito nada"] : [];
 
     case "buscar":
       return ["verificar el informe: lo ha escrito un modelo, no una fuente auditada"];

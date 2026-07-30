@@ -3,6 +3,7 @@ import { parse } from "yaml";
 import { QuestionSchema } from "../content/schema.js";
 import {
   admiteBorrador,
+  editorDePegado,
   ficherosDe,
   investigacionSourceName,
   materialParaBorrador,
@@ -10,6 +11,7 @@ import {
   nombreLibre,
   ofertaSourceName,
   ordenarFuentes,
+  pegadoSourceName,
   planNewDimension,
   renderSkeleton,
   sourceChoices,
@@ -69,6 +71,38 @@ describe("nombres de los ficheros de material", () => {
 
   it("el informe de investigación lleva el nombre del tema", () => {
     expect(investigacionSourceName("colas-de-mensajes")).toBe("investigacion-colas-de-mensajes.md");
+  });
+
+  it("el texto pegado se guarda con el nombre del tema: es material citable, no una nota", () => {
+    expect(pegadoSourceName("colas-de-mensajes")).toBe("pegado-colas-de-mensajes.txt");
+  });
+});
+
+describe("editorDePegado", () => {
+  it("$VISUAL manda sobre $EDITOR, igual que en external-editor", () => {
+    expect(editorDePegado({ VISUAL: "code", EDITOR: "nano" }, "linux")).toEqual({
+      comando: "code",
+      configurado: true,
+    });
+  });
+
+  it("sin $VISUAL se usa $EDITOR", () => {
+    expect(editorDePegado({ EDITOR: "nano" }, "linux").comando).toBe("nano");
+  });
+
+  it("se queda con el ejecutable, no con los argumentos", () => {
+    expect(editorDePegado({ EDITOR: "code --wait" }, "linux").comando).toBe("code");
+  });
+
+  it("sin nada declarado cae al de por defecto, y lo dice", () => {
+    expect(editorDePegado({}, "linux")).toEqual({ comando: "vim", configurado: false });
+    expect(editorDePegado({}, "win32").comando).toBe("notepad");
+  });
+
+  it("un $EDITOR en blanco NO cae al de por defecto: es lo que rompe, y se ve", () => {
+    // external-editor usa `??`, no `||`: una cadena vacía se lanza tal cual y falla.
+    // Devolverla vacía es lo que deja detectarlo antes de abrir nada.
+    expect(editorDePegado({ EDITOR: "" }, "linux")).toEqual({ comando: "", configurado: true });
   });
 });
 
@@ -142,7 +176,7 @@ describe("sourceChoices", () => {
   it("las fuentes que no salen a la red no dependen de la key", () => {
     const sinKey = sourceChoices(false);
 
-    for (const valor of ["carpeta", "oferta"] as const) {
+    for (const valor of ["carpeta", "oferta", "pegar"] as const) {
       expect(sinKey.find((c) => c.value === valor)!.disabled).toBeNull();
     }
   });
@@ -154,9 +188,10 @@ describe("sourceChoices", () => {
 
 describe("ordenarFuentes", () => {
   it("lo local va antes que la red, se marque en el orden que se marque", () => {
-    expect(ordenarFuentes(["buscar", "oferta", "carpeta"])).toEqual([
+    expect(ordenarFuentes(["buscar", "pegar", "oferta", "carpeta"])).toEqual([
       "carpeta",
       "oferta",
+      "pegar",
       "buscar",
     ]);
   });
@@ -349,6 +384,40 @@ describe("fuente: oferta y buscar", () => {
   });
 });
 
+describe("fuente: pegar texto", () => {
+  it("lo pegado queda escrito como material y alimenta el brief", () => {
+    const res = planNewDimension(
+      plan([{ fuente: "pegar", copiado: "sources/pegado-x.txt", caracteres: 420 }]),
+    );
+
+    expect(res.written).toEqual(["sources/pegado-x.txt", BRIEF, "pack.yaml"]);
+  });
+
+  it("un pegado vacío no escribe nada, y se dice en vez de callarlo", () => {
+    const vacio: MaterialOutcome = { fuente: "pegar", copiado: null, caracteres: 0 };
+    const res = planNewDimension(plan([vacio]));
+
+    expect(res.written).toEqual(["pack.yaml"]);
+    expect(res.pending).toContainEqual(expect.stringMatching(/texto pegado venía vacío/));
+  });
+
+  it("un pegado vacío no cuenta como material: no habilita el borrador", () => {
+    const vacio: MaterialOutcome = { fuente: "pegar", copiado: null, caracteres: 0 };
+
+    expect(materialUtil(vacio)).toBe(false);
+    expect(ficherosDe(vacio)).toEqual([]);
+    expect(admiteBorrador([vacio], true)).toBe(false);
+  });
+
+  it("se puede pegar Y traer una carpeta: las dos acaban en el resumen", () => {
+    const res = planNewDimension(
+      plan([CARPETA, { fuente: "pegar", copiado: "sources/pegado-x.txt", caracteres: 12 }]),
+    );
+
+    expect(res.written).toEqual(["sources/a.md", "sources/pegado-x.txt", BRIEF, "pack.yaml"]);
+  });
+});
+
 describe("sin fuentes marcadas", () => {
   it("declara la dimensión y lo único pendiente es darle material", () => {
     const res = planNewDimension(plan([]));
@@ -520,6 +589,8 @@ describe("el tema nunca queda evaluable de golpe", () => {
     [{ fuente: "carpeta", copiados: [], leidos: 0, descartados: 0 }],
     [{ fuente: "oferta", copiado: "sources/oferta-x.txt" }],
     [{ fuente: "buscar", copiado: "sources/investigacion-x.md" }],
+    [{ fuente: "pegar", copiado: "sources/pegado-x.txt", caracteres: 9 }],
+    [{ fuente: "pegar", copiado: null, caracteres: 0 }],
     [CARPETA, { fuente: "buscar", copiado: "sources/investigacion-x.md" }],
     [{ fuente: "fallo", origen: "carpeta", motivo: "no existe" }],
     [],

@@ -1,6 +1,6 @@
-import { checkbox, confirm, input } from "@inquirer/prompts";
+import { checkbox, confirm, editor, input } from "@inquirer/prompts";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { delimiter, join, resolve } from "node:path";
 import pc from "picocolors";
 import { stringify } from "yaml";
 import { copyToSources, ingestDirectory } from "../content/ingest.js";
@@ -15,12 +15,14 @@ import {
 } from "../core/brief.js";
 import {
   admiteBorrador,
+  editorDePegado,
   investigacionSourceName,
   materialParaBorrador,
   materialUtil,
   nombreLibre,
   ofertaSourceName,
   ordenarFuentes,
+  pegadoSourceName,
   planNewDimension,
   renderSkeleton,
   sourceChoices,
@@ -170,6 +172,76 @@ async function desdeFichero(packDir: string): Promise<FuenteResult> {
   };
 }
 
+/**
+ * ¿Se puede lanzar ese comando? Sin esto, un `$EDITOR` que no existe deja el prompt
+ * de `editor` repitiendo el mismo error cada vez que pulsas enter, sin más salida
+ * que Ctrl+C — el prompt captura el fallo de lanzamiento y no lo propaga.
+ */
+function esLanzable(comando: string): boolean {
+  if (comando === "") return false;
+  if (comando.includes("/")) return existsSync(comando);
+  return (process.env.PATH ?? "")
+    .split(delimiter)
+    .some((d) => d !== "" && existsSync(join(d, comando)));
+}
+
+/**
+ * Pegar el material directamente, sin crear un fichero antes.
+ *
+ * Se usa `editor` y no `input`: lo que se pega aquí es una oferta entera o una
+ * página de apuntes, y `input` es de UNA línea — al pegar un texto con saltos, cada
+ * salto cuenta como enter y el prompt se cierra con la primera línea, tirando el
+ * resto. `editor` abre $EDITOR sobre un fichero temporal, que es donde pegar algo
+ * largo funciona de verdad: se pega, se guarda y se cierra.
+ *
+ * El coste es que depende de que haya un editor que lanzar, así que se comprueba
+ * ANTES y, si no lo hay, se cae a `input` de una línea diciéndolo. Peor, pero
+ * funciona; quedarse colgado no.
+ */
+async function desdePegado(packDir: string, dimension: string): Promise<FuenteResult> {
+  const { comando, configurado } = editorDePegado();
+  const puedeAbrirEditor = esLanzable(comando);
+
+  let texto: string;
+  if (puedeAbrirEditor) {
+    texto = await editor({
+      message:
+        pc.bold("  Pega aquí el material") +
+        pc.dim(`  (se abre ${comando}${configurado ? "" : ", por defecto"}; guarda y cierra)`),
+      postfix: ".txt",
+      theme: promptTheme,
+    });
+  } else {
+    console.log(
+      `  ${pc.yellow("⚠")} No hay editor que abrir ` +
+        pc.dim(`(${comando === "" ? "$EDITOR está en blanco" : `'${comando}' no está`})`) +
+        `: se pega en una línea. ` +
+        pc.dim("Exporta EDITOR para pegar texto con saltos de línea."),
+    );
+    texto = await input({ message: pc.bold("  Pega aquí el material:"), theme: promptTheme });
+  }
+
+  const limpio = texto.trim();
+  if (limpio.length === 0) {
+    console.log(`  ${pc.yellow("⚠")} No has pegado nada; no se escribe ningún fichero.`);
+    return { outcome: { fuente: "pegar", copiado: null, caracteres: 0 }, docs: [] };
+  }
+
+  const sourcesDir = join(packDir, "sources");
+  mkdirSync(sourcesDir, { recursive: true });
+  const relativo = join(
+    "sources",
+    nombreLibre(pegadoSourceName(dimension), nombresEnSources(sourcesDir)),
+  );
+  writeFileSync(join(packDir, relativo), `${limpio}\n`, "utf8");
+
+  console.log(`  ${pc.green("✓")} ${limpio.length} caracteres guardados en ${pc.dim(relativo)}`);
+  return {
+    outcome: { fuente: "pegar", copiado: relativo, caracteres: limpio.length },
+    docs: [{ path: relativo, text: limpio }],
+  };
+}
+
 async function desdeBusqueda(
   packDir: string,
   dimension: string,
@@ -201,6 +273,25 @@ async function desdeBusqueda(
     outcome: { fuente: "buscar", copiado: relativo },
     docs: [{ path: relativo, text: informe }],
   };
+}
+
+/** Despacha una fuente a su manejador. El `switch` obliga a cubrirlas todas. */
+async function ejecutarFuente(
+  fuente: MaterialSource,
+  packDir: string,
+  dimension: string,
+  packName: string,
+): Promise<FuenteResult> {
+  switch (fuente) {
+    case "carpeta":
+      return await desdeCarpeta(packDir);
+    case "oferta":
+      return await desdeFichero(packDir);
+    case "pegar":
+      return await desdePegado(packDir, dimension);
+    case "buscar":
+      return await desdeBusqueda(packDir, dimension, packName);
+  }
 }
 
 interface SkeletonAsk {
@@ -298,12 +389,7 @@ export async function newDimensionFlow(
     for (const fuente of fuentes) {
       console.log("");
       try {
-        const res =
-          fuente === "carpeta"
-            ? await desdeCarpeta(packDir)
-            : fuente === "oferta"
-              ? await desdeFichero(packDir)
-              : await desdeBusqueda(packDir, dimension, packName);
+        const res = await ejecutarFuente(fuente, packDir, dimension, packName);
         materiales.push(res.outcome);
         corpus.push(...res.docs);
       } catch (err) {
