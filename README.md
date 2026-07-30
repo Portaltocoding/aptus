@@ -182,12 +182,31 @@ Sin `ANTHROPIC_API_KEY` el resto del CLI funciona exactamente igual.
 ```bash
 git clone https://github.com/Portaltocoding/aptus.git
 cd aptus
-npm install
-npm start          # equivale a `aptus start`
+npm install        # compila dist/ mediante `prepare`
+npm install -g .   # deja el comando `aptus` en el PATH
+aptus              # desde cualquier directorio: abre el menú
 ```
 
-Requiere Node ≥ 22. Las sesiones se guardan en `data/<pack>/`, que está fuera del
-control de versiones: tus resultados no salen de tu máquina.
+Requiere Node ≥ 22. Sin instalar nada global, `npm start` desde el repo abre ese
+mismo menú.
+
+**Dónde viven tus datos.** Instalado, el historial y los informes van a
+`$XDG_DATA_HOME/aptus` (o `~/.local/share/aptus` si no la tienes definida).
+Trabajando desde el repo clonado, siguen yendo a `data/<pack>/` del repo, como
+siempre. En los dos casos están fuera del control de versiones y fuera del
+directorio de instalación: **tus resultados no salen de tu máquina**, y un
+`npm update` no se los lleva por delante.
+
+Dos variables mandan sobre eso:
+
+| Variable | Qué hace |
+|---|---|
+| `APTUS_DATA_DIR` | Dónde se guardan historial e informes. Gana a todo lo demás. |
+| `APTUS_PACKS_DIR` | Dónde viven tus packs propios. Por defecto, junto a los datos. |
+
+Los packs que creas (`aptus new-pack`, `aptus ingest`) se escriben ahí, nunca
+dentro de la instalación — por eso `aptus packs` lista los del producto y los
+tuyos juntos, marcando cuál es cuál.
 
 ## Arquitectura
 
@@ -197,6 +216,7 @@ src/core/      motores puros: sin I/O, sin reloj, sin aleatoriedad propia
                evolution · market · jd · pack-audit
 
 src/content/   carga y validación de packs (zod), persistencia del historial
+               y resolución de rutas (dónde viven packs y datos)
 
 src/cli/       render de terminal, informe HTML, comandos
 
@@ -206,7 +226,7 @@ packs/         los datos: un directorio por tema
 La regla que sostiene el diseño: **el núcleo es puro**. Nada en `src/core/` lee el
 reloj, genera aleatoriedad ni toca disco. El `now` y la función de barajado se
 inyectan desde la capa de I/O, así que mismo input produce siempre mismo output.
-Por eso los 308 tests corren en menos de dos segundos sin un solo mock.
+Por eso los 341 tests corren en menos de dos segundos sin un solo mock.
 
 ## Anatomía de un pack
 
@@ -263,7 +283,7 @@ Basta con una tabla `jobs` que tenga `title` y `description`; si además trae
 ## Desarrollo
 
 ```bash
-npm test         # 308 tests, 28 ficheros
+npm test         # 341 tests, 29 ficheros
 npm run typecheck
 npm run lint
 ```
