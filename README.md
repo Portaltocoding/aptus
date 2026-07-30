@@ -28,9 +28,24 @@ aptus ────────────────────────�
 ❯ Empezar una sesión     Medir: eliges pack, dimensiones y dificultad.
   Repasar                Estudiar lo que peor llevas. No mide.
   Ver el historial       Sesiones guardadas y evolución entre ellas.
+  Borrar una sesión      Quitar una del historial. No se puede deshacer.
   Evaluar una oferta     Tu readiness contra una oferta concreta (o su brief).
   Ingerir material       Una carpeta → el brief de un pack nuevo.
+  Crear un pack nuevo    El esqueleto de un tema: pack.yaml y questions/.
+  Borrador con LLM       Lo único que sale a la red: necesita API key.
+  Promover un borrador   drafts/ → questions/: lo hace evaluable.
 ```
+
+El menú expone también la construcción de packs, no solo el consumirlos. El
+borrador con LLM avisa de que faltan credenciales **antes** de preguntarte nada,
+en vez de hacerte recorrer el asistente para fallar al final; y promover pregunta
+si has leído el borrador, porque la auditoría comprueba la forma y no si la
+respuesta marcada es la correcta.
+
+La interfaz se dibuja con el **ancho real del terminal** (con tope, para que una
+regla no cruce un monitor de 300 columnas). Sin TTY —pipes, CI— usa 72 columnas
+y la salida es byte a byte la de siempre: un mismo comando redirigido no puede
+producir ficheros distintos según quién lo lance.
 
 Con cualquier subcomando (o sin TTY: scripts, CI, pipes) se comporta como
 siempre — el menú llama a los mismos comandos, no los reimplementa.
@@ -104,6 +119,7 @@ Al terminar no sale un número. Sale un desglose:
 | `aptus start` | inicia una sesión sobre un pack |
 | `aptus review` | repaso espaciado de lo que peor llevas (estudio, no medición) |
 | `aptus history` | historial de sesiones y evolución entre ellas |
+| `aptus history --delete` | borra una sesión concreta (la eliges y la confirmas) |
 | `aptus report` | informe HTML local y autocontenido, sin salir a la red |
 | `aptus packs` | lista los packs disponibles |
 | `aptus new-pack <nombre>` | genera el esqueleto aislado de un pack nuevo |
@@ -115,6 +131,11 @@ Al terminar no sale un número. Sale un desglose:
 | `aptus promote <tema> <dim>` | mueve un borrador revisado a questions/ |
 
 Todos aceptan `-p, --pack <nombre>`. El pack por defecto es `ai-ml-readiness`.
+
+`aptus review` acepta `-d, --dims <lista>` para acotar el repaso a unas
+dimensiones, y `-y, --yes` para no preguntar. Acotar elige **qué estudias**, no
+qué se mide: la tanda sigue saliendo de tus fallos, así que sigue sin dar
+readiness ni gaps.
 
 `aptus start` acepta además, para saltarse el asistente (útil en scripts):
 
@@ -240,7 +261,7 @@ packs/         los datos: un directorio por tema
 La regla que sostiene el diseño: **el núcleo es puro**. Nada en `src/core/` lee el
 reloj, genera aleatoriedad ni toca disco. El `now` y la función de barajado se
 inyectan desde la capa de I/O, así que mismo input produce siempre mismo output.
-Por eso los 341 tests corren en menos de dos segundos sin un solo mock.
+Por eso los 513 tests corren en menos de dos segundos sin un solo mock.
 
 ## Anatomía de un pack
 
@@ -297,7 +318,7 @@ Basta con una tabla `jobs` que tenga `title` y `description`; si además trae
 ## Desarrollo
 
 ```bash
-npm test         # 341 tests, 29 ficheros
+npm test         # 513 tests, 33 ficheros
 npm run typecheck
 npm run lint
 ```
