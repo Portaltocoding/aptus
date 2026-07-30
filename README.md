@@ -16,6 +16,25 @@ dimensiones y sirve de caso de validación del concepto.
 
 ## Qué hace una sesión
 
+`aptus` a secas abre el menú principal, que es el sitio al que se vuelve: cada
+acción termina y te deja otra vez ahí. **ESC vuelve atrás** en cualquier pantalla
+—un paso del asistente, un prompt a medias, el menú mismo— y en mitad de una
+sesión pregunta antes de tirar lo que llevas respondido.
+
+```
+aptus ──────────────────────────────────────────────────────────
+
+›   ¿Qué hacemos?  (esc vuelve atrás · salir)
+❯ Empezar una sesión     Medir: eliges pack, dimensiones y dificultad.
+  Repasar                Estudiar lo que peor llevas. No mide.
+  Ver el historial       Sesiones guardadas y evolución entre ellas.
+  Evaluar una oferta     Tu readiness contra una oferta concreta (o su brief).
+  Ingerir material       Una carpeta → el brief de un pack nuevo.
+```
+
+Con cualquier subcomando (o sin TTY: scripts, CI, pipes) se comporta como
+siempre — el menú llama a los mismos comandos, no los reimplementa.
+
 `aptus start` abre un asistente antes de preguntar nada: sobre qué pack te
 evalúas, qué dimensiones entran, a qué nivel de dificultad y cuántas preguntas.
 Antes de empezar dice con qué se está alimentando el motor y avisa si el filtro
@@ -187,7 +206,7 @@ packs/         los datos: un directorio por tema
 La regla que sostiene el diseño: **el núcleo es puro**. Nada en `src/core/` lee el
 reloj, genera aleatoriedad ni toca disco. El `now` y la función de barajado se
 inyectan desde la capa de I/O, así que mismo input produce siempre mismo output.
-Por eso los 292 tests corren en menos de dos segundos sin un solo mock.
+Por eso los 308 tests corren en menos de dos segundos sin un solo mock.
 
 ## Anatomía de un pack
 
@@ -244,7 +263,7 @@ Basta con una tabla `jobs` que tenga `title` y `description`; si además trae
 ## Desarrollo
 
 ```bash
-npm test         # 292 tests, 26 ficheros
+npm test         # 308 tests, 28 ficheros
 npm run typecheck
 npm run lint
 ```

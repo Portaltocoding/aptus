@@ -46,7 +46,12 @@ export const DEFAULT_PACK = "ai-ml-readiness";
  * de I/O. `readiness.yaml` es opcional: un pack de cualquier tema puede traer solo
  * preguntas.
  */
-export async function startCommand(opts: SetupOptions = { interactive: true }): Promise<void> {
+/** Qué ha pasado con la sesión, para que el menú sepa si conviene pausar. */
+export type StartOutcome = "completada" | "cancelada" | "error";
+
+export async function startCommand(
+  opts: SetupOptions = { interactive: true },
+): Promise<StartOutcome> {
   let setup;
   try {
     setup = await resolveSetup(PACKS_ROOT, opts, SESSION_TARGET_QUESTIONS, DEFAULT_PACK);
@@ -55,11 +60,11 @@ export async function startCommand(opts: SetupOptions = { interactive: true }): 
       `\n✗ No se puede iniciar la sesión: ${err instanceof Error ? err.message : String(err)}`,
     );
     process.exitCode = 1;
-    return;
+    return "error";
   }
   if (setup === null) {
-    console.log("\nSesión cancelada antes de empezar. No se ha guardado nada.\n");
-    return;
+    console.log(pc.dim("\n  Sesión cancelada antes de empezar. No se ha guardado nada.\n"));
+    return "cancelada";
   }
 
   const { packName } = setup;
@@ -79,7 +84,7 @@ export async function startCommand(opts: SetupOptions = { interactive: true }): 
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`\n✗ No se puede iniciar la sesión: ${msg}`);
     process.exitCode = 1;
-    return;
+    return "error";
   }
 
   console.log("\n" + heading("Sesión") + "\n" + describeSetup(setup));
@@ -110,6 +115,12 @@ export async function startCommand(opts: SetupOptions = { interactive: true }): 
   );
 
   const answered = await runSession(selected);
+  if (answered === null) {
+    // Abandonada con ESC: no se puntúa ni se guarda nada. Decirlo importa —
+    // dejar la terminal en silencio haría dudar de si se ha guardado algo.
+    console.log(pc.dim("\n  Sesión abandonada. No se ha guardado ningún resultado.\n"));
+    return "cancelada";
+  }
   const result = score(answered, selected);
   const calib = calibration(answered, selected);
   const roles = readinessCfg ? computeReadiness(answered, selected, readinessCfg) : [];
@@ -153,4 +164,5 @@ export async function startCommand(opts: SetupOptions = { interactive: true }): 
   }
 
   console.log(renderEvolution(evolution(updatedHistory)) + "\n");
+  return "completada";
 }

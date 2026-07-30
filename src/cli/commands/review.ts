@@ -15,7 +15,12 @@ import {
   selectReview,
 } from "../../core/resurfacing.js";
 import { runSession } from "../runner.js";
-import { renderCalibration, renderResult, renderReviewPlan, renderReviewOutcome } from "../render.js";
+import {
+  renderCalibration,
+  renderResult,
+  renderReviewPlan,
+  renderReviewOutcome,
+} from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
 
 // Tanda de repaso CORTA: esto es estudio, no medición. Se busca que te sientes a
@@ -44,7 +49,9 @@ export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<vo
     pack = loadPackDir(packDir);
     history = loadHistory(historyPath);
   } catch (err) {
-    console.error(`\n✗ No se puede iniciar el repaso: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(
+      `\n✗ No se puede iniciar el repaso: ${err instanceof Error ? err.message : String(err)}`,
+    );
     process.exitCode = 1;
     return;
   }
@@ -71,7 +78,9 @@ export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<vo
     return;
   }
 
-  console.log(`\n${renderReviewPlan(due, reviewByDimension(due), before.length, REVIEW_TARGET_QUESTIONS)}\n`);
+  console.log(
+    `\n${renderReviewPlan(due, reviewByDimension(due), before.length, REVIEW_TARGET_QUESTIONS)}\n`,
+  );
 
   // Mismo barajado de opciones que en `start`: si en el repaso la correcta
   // volviera a caer siempre la primera, se estaría estudiando la posición.
@@ -80,6 +89,12 @@ export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<vo
     makeSeededShuffle(now.getTime() >>> 0),
   );
   const answered = await runSession(selected);
+  if (answered === null) {
+    // Abandonar un repaso no mueve ninguna caja: lo que no se ha respondido no
+    // puede consolidarse ni caer.
+    console.log("\n  Repaso abandonado. Las cajas se quedan como estaban.\n");
+    return;
+  }
   const result = score(answered, selected);
 
   // Se marca `review`: sin esto, la próxima `aptus history` te enseñaría una
@@ -92,5 +107,11 @@ export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<vo
 
   console.log("\n" + renderResult(result) + "\n");
   console.log(renderCalibration(calibration(answered, selected)) + "\n");
-  console.log(renderReviewOutcome(before, after, selected.map((q) => q.id)) + "\n");
+  console.log(
+    renderReviewOutcome(
+      before,
+      after,
+      selected.map((q) => q.id),
+    ) + "\n",
+  );
 }

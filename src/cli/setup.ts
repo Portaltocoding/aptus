@@ -5,6 +5,7 @@ import { listPacks, loadPackDir } from "../content/loader.js";
 import type { Pack } from "../content/schema.js";
 import { filterQuestions, type Difficulty } from "../core/session.js";
 import { DIFFICULTY_LABEL, difficultyColor, heading, promptTheme } from "./theme.js";
+import { ESCAPED, ESC_HINT, withEscape, type Escapable } from "./keys.js";
 
 /**
  * Asistente de arranque: QUÉ se evalúa antes de empezar a evaluarlo.
@@ -176,59 +177,73 @@ export const NUEVA_DIMENSION = "__nueva__";
  * de ocultarse: que un tema exista y no sea evaluable es información útil —te dice
  * qué te falta— y esconderlo lo haría parecer inexistente.
  */
-async function pickDimensions(pack: Pack): Promise<string[] | null> {
+async function pickDimensions(pack: Pack): Promise<Escapable<string[] | null>> {
   const porDim = countBy(pack.questions, (q) => q.dimension);
   const conPreguntas = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) > 0);
   const vacias = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) === 0);
 
-  const elegidas = await checkbox({
-    message:
-      pc.bold("  ¿Qué dimensiones entran?") +
-      pc.dim("  (espacio marca · a todas · enter confirma)"),
-    choices: [
-      ...conPreguntas.map((d) => ({
-        value: d,
-        name: d,
-        checked: true,
-        description: `${porDim.get(d)} preguntas en el banco`,
-      })),
-      ...vacias.map((d) => ({
-        value: d,
-        name: `${d} ${pc.dim("(declarada, sin preguntas)")}`,
-        disabled: pc.dim("no evaluable todavía"),
-        description: "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
-      })),
+  const elegidas = await withEscape((signal) =>
+    checkbox(
       {
-        value: NUEVA_DIMENSION,
-        name: pc.cyan("＋ escribir un tema nuevo…"),
-        checked: false,
-        description:
-          "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
+        message:
+          pc.bold("  ¿Qué dimensiones entran?") +
+          pc.dim(`  (espacio marca · a todas · enter confirma · ${ESC_HINT})`),
+        choices: [
+          ...conPreguntas.map((d) => ({
+            value: d,
+            name: d,
+            checked: true,
+            description: `${porDim.get(d)} preguntas en el banco`,
+          })),
+          ...vacias.map((d) => ({
+            value: d,
+            name: `${d} ${pc.dim("(declarada, sin preguntas)")}`,
+            disabled: pc.dim("no evaluable todavía"),
+            description:
+              "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
+          })),
+          {
+            value: NUEVA_DIMENSION,
+            name: pc.cyan("＋ escribir un tema nuevo…"),
+            checked: false,
+            description:
+              "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
+          },
+        ],
+        required: true,
+        theme: promptTheme,
+        pageSize: 12,
       },
-    ],
-    required: true,
-    theme: promptTheme,
-    pageSize: 12,
-  });
+      { signal },
+    ),
+  );
 
+  if (elegidas === ESCAPED) return ESCAPED;
   if (elegidas.includes(NUEVA_DIMENSION)) return [NUEVA_DIMENSION];
   return elegidas.length === conPreguntas.length ? null : elegidas;
 }
 
-async function pickDifficulty(): Promise<Difficulty[] | null> {
-  const id = await select({
-    message: pc.bold("  ¿A qué nivel de dificultad?"),
-    choices: DIFFICULTY_PRESETS.map((p) => ({
-      value: p.id,
-      name: p.id === "todas" ? p.label : difficultyColor(p.difficulties![0]!)(p.label),
-      description: p.hint,
-    })),
-    theme: promptTheme,
-  });
+async function pickDifficulty(): Promise<Escapable<Difficulty[] | null>> {
+  const id = await withEscape((signal) =>
+    select(
+      {
+        message: pc.bold("  ¿A qué nivel de dificultad?") + pc.dim(`  (${ESC_HINT})`),
+        choices: DIFFICULTY_PRESETS.map((p) => ({
+          value: p.id,
+          name: p.id === "todas" ? p.label : difficultyColor(p.difficulties![0]!)(p.label),
+          description: p.hint,
+        })),
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
+
+  if (id === ESCAPED) return ESCAPED;
   return DIFFICULTY_PRESETS.find((p) => p.id === id)!.difficulties;
 }
 
-async function pickTarget(disponibles: number, pordefecto: number): Promise<number> {
+async function pickTarget(disponibles: number, pordefecto: number): Promise<Escapable<number>> {
   const opciones = [
     {
       value: 25,
@@ -259,11 +274,16 @@ async function pickTarget(disponibles: number, pordefecto: number): Promise<numb
   // Si el filtro deja menos que la opción más corta, no hay nada que elegir.
   if (opciones.length <= 1) return disponibles;
 
-  return await select({
-    message: pc.bold("  ¿Cuántas preguntas?"),
-    choices: opciones,
-    theme: promptTheme,
-  });
+  return await withEscape((signal) =>
+    select(
+      {
+        message: pc.bold("  ¿Cuántas preguntas?") + pc.dim(`  (${ESC_HINT})`),
+        choices: opciones,
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
 }
 
 /**
@@ -277,13 +297,15 @@ async function runNewDimension(
   packDir: string,
   packName: string,
   existing: readonly string[],
-): Promise<void> {
+): Promise<boolean> {
   const { newDimensionFlow } = await import("./new-dimension.js");
   const res = await newDimensionFlow(packDir, packName, existing);
 
+  // Cancelado: se devuelve `false` para volver a la lista de dimensiones. Haber
+  // entrado aquí sin querer no debería costar el asistente entero.
   if (res === null) {
-    console.log("\nTema nuevo cancelado.\n");
-    return;
+    console.log(pc.dim("\n  Tema nuevo cancelado.\n"));
+    return false;
   }
 
   console.log("\n" + heading(`Tema '${res.dimension}'`));
@@ -300,6 +322,7 @@ async function runNewDimension(
         `  · Cuando esté listo, vuelve con \`aptus start --pack ${packName}\`.\n`,
     ),
   );
+  return true;
 }
 
 /**
@@ -332,19 +355,58 @@ export async function resolveSetup(
 
     if (interactivo) {
       console.log("\n" + heading("Qué vamos a evaluar") + "\n");
-      if (opts.dims === undefined) dimensions = await pickDimensions(pack);
 
-      // "Tema nuevo" no es un filtro de sesión: es construir el pack. Se atiende
-      // aquí y se corta la sesión — lo que salga de ahí aún no puede evaluarte.
-      if (dimensions !== null && dimensions.includes(NUEVA_DIMENSION)) {
-        await runNewDimension(join(packsRoot, packName), packName, pack.dimensions);
-        return null;
+      // Los pasos se recorren con un índice en vez de en línea recta para que ESC
+      // pueda RETROCEDER uno. Equivocarte en la dificultad no debería costarte
+      // volver a empezar desde la terminal.
+      const pasos: ("dims" | "difficulty" | "target")[] = [];
+      if (opts.dims === undefined) pasos.push("dims");
+      if (opts.difficulty === undefined) pasos.push("difficulty");
+      if (opts.questions === undefined) pasos.push("target");
+
+      let i = 0;
+      while (i < pasos.length) {
+        // ESC en el primer paso visible significa salir del asistente, no
+        // retroceder a ninguna parte.
+        if (i < 0) return null;
+        const paso = pasos[i]!;
+
+        if (paso === "dims") {
+          const elegidas = await pickDimensions(pack);
+          if (elegidas === ESCAPED) return null; // primer paso: ESC sale del asistente
+          dimensions = elegidas;
+
+          // "Tema nuevo" no es un filtro de sesión: es construir el pack. Si el
+          // flujo se cancela, se vuelve a esta misma pantalla en vez de tirar
+          // abajo el asistente entero por haber entrado sin querer.
+          if (dimensions !== null && dimensions.includes(NUEVA_DIMENSION)) {
+            const hecho = await runNewDimension(
+              join(packsRoot, packName),
+              packName,
+              pack.dimensions,
+            );
+            if (!hecho) continue;
+            return null;
+          }
+        } else if (paso === "difficulty") {
+          const elegida = await pickDifficulty();
+          if (elegida === ESCAPED) {
+            i -= 1;
+            continue;
+          }
+          difficulties = elegida;
+        } else {
+          const disponibles = filterQuestions(pack.questions, { dimensions, difficulties }).length;
+          const elegido = await pickTarget(disponibles, defaultTarget);
+          if (elegido === ESCAPED) {
+            i -= 1;
+            continue;
+          }
+          target = elegido;
+        }
+
+        i += 1;
       }
-
-      if (opts.difficulty === undefined) difficulties = await pickDifficulty();
-
-      const disponibles = filterQuestions(pack.questions, { dimensions, difficulties }).length;
-      if (opts.questions === undefined) target = await pickTarget(disponibles, defaultTarget);
     }
 
     // Se valida el filtro venga de donde venga (asistente o flags): una dimensión

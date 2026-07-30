@@ -10,6 +10,7 @@ import { reviewCommand } from "./cli/commands/review.js";
 import { jobsCommand } from "./cli/commands/jobs.js";
 import { ingestCommand } from "./cli/commands/ingest.js";
 import { draftCommand, promoteCommand } from "./cli/commands/draft.js";
+import { mainMenu } from "./cli/menu.js";
 
 const program = new Command();
 program.name("aptus").description("Motor de test de aptitud por terminal");
@@ -141,4 +142,11 @@ program
     await reportCommand(name);
   });
 
-program.parse();
+// `aptus` a secas abre el menú principal, que es el sitio al que se vuelve. Con
+// cualquier subcomando (o sin TTY: scripts, CI, pipes) se comporta exactamente
+// como siempre — el menú llama a los mismos comandos, no los reimplementa.
+if (process.argv.length <= 2 && process.stdin.isTTY === true) {
+  await mainMenu();
+} else {
+  program.parse();
+}
