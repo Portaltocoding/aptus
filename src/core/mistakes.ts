@@ -34,6 +34,12 @@ export interface ReviewedQuestion {
   dimension: string;
   subtopic?: string;
   difficulty: Question["difficulty"];
+  /**
+   * Formato del enunciado. Viaja hasta aquí porque el render NO puede reflowear
+   * un `diagrama` ni un `codigo`: reajustar sus líneas al ancho del terminal
+   * destroza el ASCII y el snippet, que es justo lo que hay que leer.
+   */
+  type: Question["type"];
   stem: string;
   /** TEXTO de lo que elegiste (no su id). `null` si no la respondiste. */
   selectedText: string | null;
@@ -187,13 +193,14 @@ function comun(
   q: Question,
 ): Pick<
   ReviewedQuestion,
-  "questionId" | "dimension" | "subtopic" | "difficulty" | "stem" | "explanation"
+  "questionId" | "dimension" | "subtopic" | "difficulty" | "type" | "stem" | "explanation"
 > {
   return {
     questionId: q.id,
     dimension: q.dimension,
     subtopic: q.subtopic,
     difficulty: q.difficulty,
+    type: q.type,
     stem: q.stem,
     explanation: q.explanation,
   };
