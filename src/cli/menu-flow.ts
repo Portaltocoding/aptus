@@ -27,6 +27,7 @@ export type MenuAction =
   | "new-pack"
   | "draft"
   | "promote"
+  | "borrar-sesion"
   | "salir";
 
 /**
@@ -82,7 +83,8 @@ export type Invocacion =
       readonly dimension: string;
       readonly cantidad: number;
     }
-  | { readonly comando: "promote"; readonly pack: string; readonly dimension: string };
+  | { readonly comando: "promote"; readonly pack: string; readonly dimension: string }
+  | { readonly comando: "borrar-sesion"; readonly pack: string };
 
 export type MenuStep =
   | { readonly tipo: "preguntar"; readonly prompt: MenuPrompt }
@@ -131,6 +133,7 @@ export function nextMenuStep(
     case "history":
     case "report":
     case "verify":
+    case "borrar-sesion":
       return r0 === undefined
         ? { tipo: "preguntar", prompt: { id: "pack", mensaje: mensajePack(action) } }
         : { tipo: "ejecutar", invocacion: { comando: action, pack: r0 } };
@@ -293,6 +296,8 @@ function mensajePack(action: MenuAction): string {
       return "¿Informe de qué pack?";
     case "verify":
       return "¿Qué pack auditar?";
+    case "borrar-sesion":
+      return "¿De qué pack borras una sesión?";
     default:
       return "¿Con qué pack evaluarlas?";
   }

@@ -31,7 +31,7 @@ describe("acciones sin sub-prompts", () => {
 });
 
 describe("acciones de un solo pack", () => {
-  const acciones: MenuAction[] = ["review", "history", "report", "verify"];
+  const acciones: MenuAction[] = ["review", "history", "report", "verify", "borrar-sesion"];
 
   it.each(acciones)("'%s' pregunta el pack y lo pasa tal cual", (accion) => {
     const paso = nextMenuStep(accion, []);
@@ -270,6 +270,21 @@ describe("promover un borrador (promote)", () => {
     respuestas[posicion] = ESCAPED;
 
     expect(runMenuAction("promote", respuestas.slice(0, posicion + 1))).toEqual({ tipo: "volver" });
+  });
+});
+
+// PERS-03: borrar es la única operación que destruye evidencia. El menú solo
+// decide el pack; la lista, la confirmación y el borrado son los del comando.
+describe("borrar una sesión", () => {
+  it("pregunta el pack y delega: no reimplementa el borrado", () => {
+    expect(runMenuAction("borrar-sesion", ["mi-pack"])).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "borrar-sesion", pack: "mi-pack" },
+    });
+  });
+
+  it("no ejecuta nada por sí solo: sin pack no hay invocación", () => {
+    expect(nextMenuStep("borrar-sesion", []).tipo).toBe("preguntar");
   });
 });
 

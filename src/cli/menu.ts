@@ -55,6 +55,11 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
     description: "Sesiones guardadas y evolución entre ellas.",
   },
   {
+    value: "borrar-sesion",
+    name: "Borrar una sesión",
+    description: "Quitar una sesión concreta del historial. No se puede deshacer.",
+  },
+  {
     value: "report",
     name: "Informe HTML",
     description: "Informe local y autocontenido, sin salir a la red.",
@@ -286,6 +291,11 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
       return null;
     case "history":
       await historyCommand(invocacion.pack);
+      return null;
+    case "borrar-sesion":
+      // Mismo comando que `aptus history --delete`: el menú no reimplementa ni la
+      // lista, ni la confirmación, ni el borrado.
+      await historyCommand(invocacion.pack, { delete: true });
       return null;
     case "report":
       await reportCommand(invocacion.pack);

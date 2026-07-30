@@ -58,8 +58,9 @@ program
   .command("history")
   .description("Muestra el historial de sesiones de un pack y la evolución entre ellas")
   .option("-p, --pack <name>", "pack cuyo historial mostrar", DEFAULT_PACK)
-  .action(async (opts: { pack: string }) => {
-    await historyCommand(opts.pack);
+  .option("--delete", "borra una sesión concreta (la eliges y la confirmas)", false)
+  .action(async (opts: { pack: string; delete: boolean }) => {
+    await historyCommand(opts.pack, { delete: opts.delete });
   });
 
 program
