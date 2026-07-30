@@ -1,17 +1,30 @@
 {
   "name": "aptus",
   "version": "0.1.0",
-  "description": "CLI de test de aptitud AI/ML por terminal",
+  "description": "Motor de evaluación de aptitud por terminal, data driven mediante packs de conocimiento intercambiables",
   "type": "module",
-  "private": true,
   "scripts": {
     "start": "tsx src/index.ts start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },
-  "keywords": [],
-  "license": "UNLICENSED",
+  "keywords": [
+    "cli",
+    "assessment",
+    "quiz",
+    "spaced-repetition",
+    "readiness",
+    "yaml"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Portaltocoding/aptus.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@inquirer/prompts": "^8.5.2",
     "cli-table3": "^0.6.5",

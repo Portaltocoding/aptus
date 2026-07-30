@@ -1,11 +1,10 @@
 import { fileURLToPath } from "node:url";
-import { homedir } from "node:os";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { loadPackDir } from "../../content/loader.js";
 import { loadReadiness } from "../../content/readiness.js";
 import { loadHistory } from "../../content/history.js";
-import { loadJobs } from "../../content/jobhunt.js";
+import { loadJobs, jobsDbPath } from "../../content/jobhunt.js";
 import { measurements } from "../../core/evolution.js";
 import { scanJobs } from "../../core/jobs-scan.js";
 import { renderJobsScan } from "../render.js";
@@ -14,9 +13,6 @@ import { DEFAULT_PACK } from "./start.js";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const PACKS_ROOT = join(ROOT, "packs");
 const DATA_DIR = join(ROOT, "data");
-
-// Misma base de datos (solo lectura) que usa la ponderación de mercado.
-const JOBHUNT_DB_PATH = join(homedir(), "workspace", "jobhunt", "data", "jobs.db");
 
 const DEFAULT_LIMIT = 20;
 
@@ -60,12 +56,16 @@ export async function jobsCommand(packName: string = DEFAULT_PACK, limit: number
     return;
   }
 
-  // Degradación elegante: sin jobhunt, aptus sigue funcionando igual (INTEG-01).
-  const jobs = loadJobs(JOBHUNT_DB_PATH);
+  // Degradación elegante: sin base de ofertas, aptus sigue funcionando igual (INTEG-01).
+  const dbPath = jobsDbPath();
+  const jobs = loadJobs(dbPath);
   if (jobs === null) {
     console.log(
-      `\nNo hay ofertas de jobhunt que evaluar: no se puede leer ${JOBHUNT_DB_PATH}.\n` +
-        `  Escanea ofertas con jobhunt y vuelve, o evalúa una suelta con \`aptus jd <fichero>\`.\n`,
+      dbPath === null
+        ? `\nNo hay ninguna base de ofertas configurada: exporta APTUS_JOBS_DB con la ruta a tu jobs.db.\n` +
+            `  Mientras tanto puedes evaluar una oferta suelta con \`aptus jd <fichero>\`.\n`
+        : `\nNo hay ofertas que evaluar: no se puede leer ${dbPath}.\n` +
+            `  Escanea ofertas y vuelve, o evalúa una suelta con \`aptus jd <fichero>\`.\n`,
     );
     return;
   }

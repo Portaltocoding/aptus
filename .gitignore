@@ -6,3 +6,6 @@ coverage/
 
 # Historial de sesiones (datos personales, Phase 5) — no se versiona.
 data/
+
+# Andamiaje de planificación (GSD): útil en local, ruido en el repo público.
+.planning/

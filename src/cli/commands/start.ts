@@ -1,11 +1,10 @@
 import { fileURLToPath } from "node:url";
-import { homedir } from "node:os";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { loadPackDir } from "../../content/loader.js";
 import { loadReadiness, type ReadinessConfig } from "../../content/readiness.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
-import { loadJobTexts } from "../../content/jobhunt.js";
+import { loadJobTexts, jobsDbPath } from "../../content/jobhunt.js";
 import { selectBalanced } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
@@ -35,10 +34,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const PACKS_ROOT = join(ROOT, "packs");
 const DATA_DIR = join(ROOT, "data");
 export const DEFAULT_PACK = "ai-ml-readiness";
-
-// Base de datos de jobhunt (solo lectura, opcional): si existe, pondera los gaps
-// por demanda de mercado; si no, Aptus funciona igual sin esa capa (INTEG-01).
-const JOBHUNT_DB_PATH = join(homedir(), "workspace", "jobhunt", "data", "jobs.db");
 
 /**
  * Compone la sesión end-to-end sobre el pack elegido: cargar pack → seleccionar
@@ -102,9 +97,9 @@ export async function startCommand(packName: string = DEFAULT_PACK): Promise<voi
   if (readinessCfg) {
     console.log(renderReadiness(roles) + "\n");
 
-    // Gaps: si jobhunt está disponible, ponderar por demanda de mercado (INTEG-01);
-    // si no, mostrar los gaps sin ponderar (degradación elegante, sin error).
-    const jobTexts = loadJobTexts(JOBHUNT_DB_PATH);
+    // Gaps: si hay base de ofertas (APTUS_JOBS_DB), ponderar por demanda de mercado
+    // (INTEG-01); si no, mostrarlos sin ponderar (degradación elegante, sin error).
+    const jobTexts = loadJobTexts(jobsDbPath());
     if (jobTexts !== null && readinessCfg.market_keywords) {
       const demand = computeDemand(jobTexts, readinessCfg.market_keywords);
       console.log(renderWeightedGaps(applyMarketWeight(gaps, demand), demand) + "\n");

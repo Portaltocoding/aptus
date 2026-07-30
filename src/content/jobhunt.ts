@@ -15,6 +15,17 @@ import { DatabaseSync } from "node:sqlite";
  * "% de encaje" que este proyecto no quiere.
  */
 
+/**
+ * Ruta de la base de ofertas, configurable con la variable de entorno
+ * `APTUS_JOBS_DB`. No hay ruta por defecto a propósito: la integración es
+ * opcional y depende de dónde tenga cada uno su base, así que sin la variable
+ * simplemente no existe y Aptus funciona igual sin la capa de mercado.
+ */
+export function jobsDbPath(): string | null {
+  const fromEnv = process.env.APTUS_JOBS_DB?.trim();
+  return fromEnv ? fromEnv : null;
+}
+
 export interface JobRow {
   id: string | null;
   title: string;
@@ -43,8 +54,8 @@ interface MinimalRow {
  * (bases de datos mínimas, fixtures de test), reintenta con title+description y
  * deja el resto en null: mejor una oferta sin empresa que ninguna oferta.
  */
-export function loadJobs(dbPath: string): JobRow[] | null {
-  if (!existsSync(dbPath)) return null;
+export function loadJobs(dbPath: string | null): JobRow[] | null {
+  if (dbPath === null || !existsSync(dbPath)) return null;
 
   try {
     const db = new DatabaseSync(dbPath, { readOnly: true });
@@ -83,7 +94,7 @@ export function loadJobs(dbPath: string): JobRow[] | null {
 }
 
 /** Los textos de las ofertas, para medir la demanda de mercado por dimensión. */
-export function loadJobTexts(dbPath: string): string[] | null {
+export function loadJobTexts(dbPath: string | null): string[] | null {
   const jobs = loadJobs(dbPath);
   return jobs === null ? null : jobs.map((j) => `${j.title} ${j.description}`);
 }
