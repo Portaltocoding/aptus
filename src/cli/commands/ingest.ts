@@ -1,14 +1,11 @@
-import { fileURLToPath } from "node:url";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { existsSync, writeFileSync } from "node:fs";
+import { basename, join, resolve } from "node:path";
 import pc from "picocolors";
 import { loadPackDir } from "../../content/loader.js";
+import { ensureDir, packDirForWrite } from "../../content/paths.js";
 import { copyToSources, ingestDirectory } from "../../content/ingest.js";
 import { briefFromCorpus, renderBrief, toKebab } from "../../core/brief.js";
 import { heading } from "../theme.js";
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
 
 export interface IngestOptions {
   /** Pack destino. Por defecto, el nombre de la carpeta ingerida. */
@@ -60,9 +57,19 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
     return;
   }
 
+  // La ingesta ESCRIBE en el pack, así que el directorio sale del resolvedor de
+  // escritura: tu directorio de packs, nunca la instalación.
+  let packDir;
+  try {
+    packDir = packDirForWrite(packName);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
+    process.exitCode = 1;
+    return;
+  }
+
   // Si el pack ya existe, sus dimensiones sirven para no proponer escribir lo que
   // ya está escrito. Si no existe, se ingiere igual: el brief es el primer paso.
-  const packDir = join(PACKS_ROOT, packName);
   let existingDimensions: string[] = [];
   const existe = existsSync(join(packDir, "pack.yaml"));
   if (existe) {
@@ -101,7 +108,7 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
       "\n";
   }
 
-  mkdirSync(packDir, { recursive: true });
+  ensureDir(packDir);
   const briefPath = join(packDir, "BRIEF.md");
   writeFileSync(briefPath, markdown, "utf8");
 
@@ -134,13 +141,13 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
   );
   if (copiados.length > 0) {
     console.log(
-      `  ${pc.green("✓")} material copiado a ${pc.dim(join("packs", packName, "sources") + "/")}`,
+      `  ${pc.green("✓")} material copiado a ${pc.dim(join(packDir, "sources") + "/")}`,
     );
   }
-  console.log(`  ${pc.green("✓")} brief escrito en ${pc.dim(join("packs", packName, "BRIEF.md"))}`);
+  console.log(`  ${pc.green("✓")} brief escrito en ${pc.dim(briefPath)}`);
   if (!existe) {
     console.log(
-      `  ${pc.green("✓")} pack nuevo creado en ${pc.dim(join("packs", packName) + "/")} ${pc.dim("(sin dimensiones aún: decláralas tú)")}`,
+      `  ${pc.green("✓")} pack nuevo creado en ${pc.dim(packDir + "/")} ${pc.dim("(sin dimensiones aún: decláralas tú)")}`,
     );
   }
 
@@ -160,7 +167,7 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
       pc.dim(
         "  · Esto es un índice mecánico: agrupa títulos y cuenta bytes, no entiende el\n" +
           "    material. Revisa y agrupa los temas en 3-6 dimensiones antes de curar nada.\n" +
-          `  · Siguiente paso: edita ${join("packs", packName, "BRIEF.md")}, luego cura las\n` +
+          `  · Siguiente paso: edita ${briefPath}, luego cura las\n` +
           `    preguntas (a mano o con \`aptus draft ${packName}\`) y cierra con \`aptus verify-pack ${packName}\`.`,
       ) +
       "\n",

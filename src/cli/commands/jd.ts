@@ -1,4 +1,3 @@
-import { fileURLToPath } from "node:url";
 import { existsSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import pc from "picocolors";
@@ -6,16 +5,13 @@ import { loadPackDir } from "../../content/loader.js";
 import { loadReadiness } from "../../content/readiness.js";
 import { loadHistory } from "../../content/history.js";
 import { loadJdText } from "../../content/jd.js";
+import { historyPath as historyPathOf, packDirForRead } from "../../content/paths.js";
 import { measurements } from "../../core/evolution.js";
 import { computeJdGaps, computeJdReadiness, extractJdProfile, jdVerdict } from "../../core/jd.js";
 import { attachMaterial, briefFromJd, renderBrief } from "../../core/brief.js";
 import { ingestDirectory } from "../../content/ingest.js";
 import { renderJdGaps, renderJdProfile, renderJdReadiness } from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
-const DATA_DIR = join(ROOT, "data");
 
 /**
  * Subcomando `jd <fichero>`: evalúa tu readiness contra una oferta CONCRETA.
@@ -41,9 +37,14 @@ export async function jdCommand(
   opts: JdOptions = { pack: DEFAULT_PACK },
 ): Promise<void> {
   const packName = opts.pack;
-  const packDir = join(PACKS_ROOT, packName);
+  const packDir = packDirForRead(packName);
+  if (packDir === null) {
+    console.error(`\n✗ No existe el pack '${packName}'.`);
+    process.exitCode = 1;
+    return;
+  }
   const readinessPath = join(packDir, "readiness.yaml");
-  const historyPath = join(DATA_DIR, packName, "history.json");
+  const historyPath = historyPathOf(packName);
 
   if (!existsSync(readinessPath)) {
     console.error(

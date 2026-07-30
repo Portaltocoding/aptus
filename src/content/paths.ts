@@ -232,11 +232,13 @@ export function ensureDir(dir: string): void {
 
 /**
  * Cómo se buscan packs, sin que quien busca tenga que saber si hay una raíz o dos.
- * `dir` devuelve `null` cuando el pack no existe en ninguna de las raíces miradas.
+ * `dir` devuelve `null` cuando el pack no existe en ninguna de las raíces miradas;
+ * `dirForWrite` lanza `PackReadOnlyError` si el pack es del producto.
  */
 export interface PackLocator {
   list(): string[];
   dir(name: string): string | null;
+  dirForWrite(name: string): string;
 }
 
 /** Localizador sobre UNA sola raíz: para tests y para contextos de raíz única. */
@@ -244,6 +246,10 @@ export function singleRootLocator(root: string): PackLocator {
   return {
     list: () => listPacks(root),
     dir: (name) => (existsSync(join(root, name, "pack.yaml")) ? join(root, name) : null),
+    dirForWrite: (name) => {
+      assertPackName(name);
+      return join(root, name);
+    },
   };
 }
 
@@ -292,6 +298,7 @@ export function defaultPackLocator(): PackLocator {
   return {
     list: () => listPackEntries().map((e) => e.name),
     dir: (name) => packDirForRead(name),
+    dirForWrite: (name) => packDirForWrite(name),
   };
 }
 

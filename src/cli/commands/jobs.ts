@@ -1,7 +1,7 @@
-import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import { loadPackDir } from "../../content/loader.js";
+import { historyPath as historyPathOf, packDirForRead } from "../../content/paths.js";
 import { loadReadiness } from "../../content/readiness.js";
 import { loadHistory } from "../../content/history.js";
 import { loadJobs, jobsDbPath } from "../../content/jobhunt.js";
@@ -9,10 +9,6 @@ import { measurements } from "../../core/evolution.js";
 import { scanJobs } from "../../core/jobs-scan.js";
 import { renderJobsScan } from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
-const DATA_DIR = join(ROOT, "data");
 
 const DEFAULT_LIMIT = 20;
 
@@ -25,9 +21,14 @@ const DEFAULT_LIMIT = 20;
  * entre sí. Solo lectura: no escribe en jobhunt ni en el historial.
  */
 export async function jobsCommand(packName: string = DEFAULT_PACK, limit: number = DEFAULT_LIMIT): Promise<void> {
-  const packDir = join(PACKS_ROOT, packName);
+  const packDir = packDirForRead(packName);
+  if (packDir === null) {
+    console.error(`\n✗ No existe el pack '${packName}'.`);
+    process.exitCode = 1;
+    return;
+  }
   const readinessPath = join(packDir, "readiness.yaml");
-  const historyPath = join(DATA_DIR, packName, "history.json");
+  const historyPath = historyPathOf(packName);
 
   if (!existsSync(readinessPath)) {
     console.error(`\n✗ El pack '${packName}' no trae readiness.yaml: sin perfiles ni niveles no hay nada que evaluar.`);

@@ -1,11 +1,9 @@
-import { fileURLToPath } from "node:url";
 import { writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import { loadHistory } from "../../content/history.js";
+import { ensureDir, historyPath as historyPathOf, packDataDir } from "../../content/paths.js";
 import { buildHtmlReport } from "../html-report.js";
 import { DEFAULT_PACK } from "./start.js";
-
-const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data");
 
 /**
  * Subcomando `report [tema]`: genera un informe HTML local y autocontenido con el
@@ -13,8 +11,8 @@ const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data
  * (data/<tema>/) y escribe data/<tema>/report.html. No sale a la red.
  */
 export async function reportCommand(packName: string = DEFAULT_PACK): Promise<void> {
-  const historyPath = join(DATA_DIR, packName, "history.json");
-  const outPath = join(DATA_DIR, packName, "report.html");
+  const historyPath = historyPathOf(packName);
+  const outPath = join(packDataDir(packName), "report.html");
 
   let history;
   try {
@@ -30,6 +28,10 @@ export async function reportCommand(packName: string = DEFAULT_PACK): Promise<vo
     return;
   }
 
+  // El directorio se crea aquí y no se da por hecho: hasta ahora existía de
+  // rebote porque lo había creado la sesión, y con los datos mudándose de sitio
+  // eso deja de estar garantizado.
+  ensureDir(packDataDir(packName));
   writeFileSync(outPath, buildHtmlReport(packName, history), "utf8");
   console.log(`\n✓ Informe generado: ${outPath}\n  Ábrelo con: xdg-open ${outPath}\n`);
 }

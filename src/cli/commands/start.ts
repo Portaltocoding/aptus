@@ -1,10 +1,10 @@
-import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import pc from "picocolors";
 import { loadReadiness, type ReadinessConfig } from "../../content/readiness.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
 import { loadJobTexts, jobsDbPath } from "../../content/jobhunt.js";
+import { defaultPackLocator, historyPath as historyPathOf } from "../../content/paths.js";
 import { selectBalanced, shuffleOptions } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
 import { score } from "../../core/scoring.js";
@@ -32,9 +32,6 @@ import { heading } from "../theme.js";
 const SESSION_TARGET_QUESTIONS = 120;
 const MIN_PER_DIMENSION = 20;
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
-const DATA_DIR = join(ROOT, "data");
 export const DEFAULT_PACK = "ai-ml-readiness";
 
 /**
@@ -54,7 +51,12 @@ export async function startCommand(
 ): Promise<StartOutcome> {
   let setup;
   try {
-    setup = await resolveSetup(PACKS_ROOT, opts, SESSION_TARGET_QUESTIONS, DEFAULT_PACK);
+    setup = await resolveSetup(
+      defaultPackLocator(),
+      opts,
+      SESSION_TARGET_QUESTIONS,
+      DEFAULT_PACK,
+    );
   } catch (err) {
     console.error(
       `\n✗ No se puede iniciar la sesión: ${err instanceof Error ? err.message : String(err)}`,
@@ -67,12 +69,13 @@ export async function startCommand(
     return "cancelada";
   }
 
-  const { packName } = setup;
+  const { packName, packDir } = setup;
 
-  // Aislamiento por tema: cada pack tiene su carpeta de contenido (packs/<pack>/)
-  // y su carpeta de resultados (data/<pack>/). Nunca se cruzan entre temas.
-  const readinessPath = join(PACKS_ROOT, packName, "readiness.yaml");
-  const historyPath = join(DATA_DIR, packName, "history.json");
+  // Aislamiento por tema: cada pack tiene su carpeta de contenido y su carpeta de
+  // resultados, y nunca se cruzan entre temas. Dónde están cada una lo decide
+  // paths.ts: instalado, el contenido viene del paquete y los datos NO.
+  const readinessPath = join(packDir, "readiness.yaml");
+  const historyPath = historyPathOf(packName);
 
   let readinessCfg: ReadinessConfig | null = null;
   let history;

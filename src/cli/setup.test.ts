@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "../content/schema.js";
 import { DIFFICULTY_PRESETS, parseDifficulty, resolveSetup, sampleWarning } from "./setup.js";
+import { singleRootLocator } from "../content/paths.js";
 import { validateDimensionName } from "./new-dimension.js";
 
-const PACKS_ROOT = new URL("../../packs/", import.meta.url).pathname;
+// Las cuatro llamadas envuelven la raíz de fixtures con el localizador de una
+// sola raíz: resolveSetup ya no recibe una ruta, porque ahora hay dos sitios
+// donde mirar. Las aserciones no cambian.
+const PACKS = singleRootLocator(new URL("../../packs/", import.meta.url).pathname);
 const DEFAULT_PACK = "ai-ml-readiness";
 
 function q(id: string, dimension: string, difficulty: Question["difficulty"] = "easy"): Question {
@@ -79,7 +83,7 @@ describe("resolveSetup (no interactivo)", () => {
   const opts = { interactive: false };
 
   it("sin flags cae al pack por defecto y al banco entero", async () => {
-    const setup = await resolveSetup(PACKS_ROOT, opts, 120, DEFAULT_PACK);
+    const setup = await resolveSetup(PACKS, opts, 120, DEFAULT_PACK);
 
     expect(setup).not.toBeNull();
     expect(setup!.packName).toBe(DEFAULT_PACK);
@@ -91,7 +95,7 @@ describe("resolveSetup (no interactivo)", () => {
 
   it("acota el banco a las dimensiones pedidas", async () => {
     const setup = await resolveSetup(
-      PACKS_ROOT,
+      PACKS,
       { ...opts, dims: "ml-clasico" },
       120,
       DEFAULT_PACK,
@@ -103,7 +107,7 @@ describe("resolveSetup (no interactivo)", () => {
 
   it("acota el banco al tramo de dificultad pedido", async () => {
     const setup = await resolveSetup(
-      PACKS_ROOT,
+      PACKS,
       { ...opts, difficulty: "experto" },
       120,
       DEFAULT_PACK,
@@ -115,14 +119,14 @@ describe("resolveSetup (no interactivo)", () => {
 
   it("una dimensión mal escrita falla con un mensaje, no con una sesión vacía", async () => {
     await expect(
-      resolveSetup(PACKS_ROOT, { ...opts, dims: "no-existe" }, 120, DEFAULT_PACK),
+      resolveSetup(PACKS, { ...opts, dims: "no-existe" }, 120, DEFAULT_PACK),
     ).rejects.toThrow(/dimensión desconocida/i);
   });
 
   it("un cruce de filtros sin material falla antes de empezar la sesión", async () => {
     await expect(
       resolveSetup(
-        PACKS_ROOT,
+        PACKS,
         { ...opts, dims: "comportamental-star", difficulty: "nada" },
         120,
         DEFAULT_PACK,

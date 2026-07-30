@@ -1,8 +1,6 @@
-import { fileURLToPath } from "node:url";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-
-const PACKS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../packs");
+import { dirname, join } from "node:path";
+import { assertPackName, packDirForWrite } from "../../content/paths.js";
 
 const PACK_YAML = (name: string) => `# Pack: ${name} (esqueleto — rellenar)
 name: "${name}"
@@ -51,9 +49,9 @@ Este pack es autocontenido y no comparte contexto con otros.
 
 /** Crea el esqueleto aislado de un pack nuevo. Lanza si el pack ya existe. */
 export function scaffoldPack(packsRoot: string, name: string): string {
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
-    throw new Error(`Nombre de pack inválido: '${name}'. Usa minúsculas, números y guiones.`);
-  }
+  // Misma exigencia de siempre, ahora compartida con paths.ts: un nombre con
+  // separadores no puede llegar a componer una ruta.
+  assertPackName(name);
   const packDir = join(packsRoot, name);
   if (existsSync(packDir)) throw new Error(`Ya existe un pack en ${packDir}`);
 
@@ -73,7 +71,10 @@ export function scaffoldPack(packsRoot: string, name: string): string {
  */
 export async function newPackCommand(name: string): Promise<void> {
   try {
-    const dir = scaffoldPack(PACKS_ROOT, name);
+    // El pack nuevo se crea en TU directorio de packs, nunca dentro de la
+    // instalación. Si el nombre choca con uno que viene con aptus, esto lanza
+    // PackReadOnlyError con la salida escrita en el mensaje.
+    const dir = scaffoldPack(dirname(packDirForWrite(name)), name);
     console.log(
       `\n✓ Pack '${name}' creado en ${dir}\n` +
         `  1. Deja el material de origen en ${name}/sources/\n` +

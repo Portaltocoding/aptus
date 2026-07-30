@@ -1,11 +1,8 @@
-import { fileURLToPath } from "node:url";
-import { dirname, join, resolve } from "node:path";
 import pc from "picocolors";
 import { loadPackDir } from "../../content/loader.js";
+import { packDirForRead } from "../../content/paths.js";
 import { auditPack } from "../../core/pack-audit.js";
 import { DEFAULT_PACK } from "./start.js";
-
-const PACKS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../packs");
 
 /**
  * Subcomando `verify-pack <tema>`: valida (schema) y AUDITA la calidad de un pack
@@ -13,9 +10,16 @@ const PACKS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../pa
  * Control "curadas, no relleno". Exit code != 0 si hay errores.
  */
 export async function verifyPackCommand(packName: string = DEFAULT_PACK): Promise<void> {
+  const packDir = packDirForRead(packName);
+  if (packDir === null) {
+    console.error(`\n✗ No existe el pack '${packName}'.`);
+    process.exitCode = 1;
+    return;
+  }
+
   let pack;
   try {
-    pack = loadPackDir(join(PACKS_ROOT, packName));
+    pack = loadPackDir(packDir);
   } catch (err) {
     console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
     process.exitCode = 1;

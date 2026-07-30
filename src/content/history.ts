@@ -1,6 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { z } from "zod";
+import { ensureDir } from "./paths.js";
 import type { SessionRecord } from "../core/evolution.js";
 
 /**
@@ -71,6 +72,8 @@ export function loadHistory(pathToJson: string): SessionRecord[] {
 
 /** Guarda el histórico (crea el directorio si hace falta). Sobrescribe el fichero. */
 export function saveHistory(pathToJson: string, records: SessionRecord[]): void {
-  mkdirSync(dirname(pathToJson), { recursive: true });
+  // Mismo modo 0700 que el resto de directorios de datos: el historial vive ahora
+  // en el home, donde el modo por defecto dejaría leerlo a otros usuarios.
+  ensureDir(dirname(pathToJson));
   writeFileSync(pathToJson, JSON.stringify(records, null, 2), "utf8");
 }

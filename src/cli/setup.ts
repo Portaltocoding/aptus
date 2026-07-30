@@ -1,7 +1,7 @@
 import { checkbox, select } from "@inquirer/prompts";
-import { join } from "node:path";
 import pc from "picocolors";
-import { listPacks, loadPackDir } from "../content/loader.js";
+import { loadPackDir } from "../content/loader.js";
+import type { PackLocator } from "../content/paths.js";
 import type { Pack } from "../content/schema.js";
 import { filterQuestions, type Difficulty } from "../core/session.js";
 import { DIFFICULTY_LABEL, difficultyColor, heading, promptTheme } from "./theme.js";
@@ -64,6 +64,8 @@ export const DIFFICULTY_PRESETS: DifficultyPreset[] = [
 
 export interface SessionSetup {
   packName: string;
+  /** Directorio del que ha salido el pack: puede ser del producto o del usuario. */
+  packDir: string;
   pack: Pack;
   dimensions: string[] | null; // null = todas las del pack
   difficulties: Difficulty[] | null; // null = todos los tramos
@@ -123,16 +125,21 @@ export function sampleWarning(bank: Pack["questions"], target: number): string |
 }
 
 async function pickPack(
-  packsRoot: string,
+  packs: PackLocator,
   preseleccionado: string | undefined,
-): Promise<{ name: string; pack: Pack }> {
-  const nombres = listPacks(packsRoot);
-  if (nombres.length === 0) throw new Error(`No hay packs en ${packsRoot}.`);
+): Promise<{ name: string; packDir: string; pack: Pack }> {
+  const nombres = packs.list();
+  if (nombres.length === 0) {
+    throw new Error("no hay ningún pack disponible (ni en la instalación ni en tu directorio).");
+  }
 
-  const cargar = (name: string): { name: string; pack: Pack } => ({
-    name,
-    pack: loadPackDir(join(packsRoot, name)),
-  });
+  // El localizador mira las DOS raíces —los packs del producto y los tuyos—, así
+  // que "no existe el pack X" ahora es cierto en los dos sitios donde se ha mirado.
+  const cargar = (name: string): { name: string; packDir: string; pack: Pack } => {
+    const packDir = packs.dir(name);
+    if (packDir === null) throw new Error(`no existe el pack '${name}'.`);
+    return { name, packDir, pack: loadPackDir(packDir) };
+  };
 
   if (preseleccionado !== undefined) return cargar(preseleccionado);
   if (nombres.length === 1) return cargar(nombres[0]!);
@@ -141,7 +148,7 @@ async function pickPack(
   // la carpeta no es elegir.
   const choices = nombres.map((name) => {
     try {
-      const pack = loadPackDir(join(packsRoot, name));
+      const { pack } = cargar(name);
       return {
         value: name,
         name: `${pack.name} ${pc.dim(`(${name})`)}`,
@@ -330,7 +337,7 @@ async function runNewDimension(
  * cancelar en el asistente no debe arrancar ninguna sesión ni escribir nada.
  */
 export async function resolveSetup(
-  packsRoot: string,
+  packs: PackLocator,
   opts: SetupOptions,
   defaultTarget: number,
   defaultPack: string,
@@ -340,7 +347,7 @@ export async function resolveSetup(
   try {
     // Sin TTY (scripts, CI, pipes) nunca se pregunta: se cae al pack por defecto.
     const preseleccionado = interactivo ? opts.pack : (opts.pack ?? defaultPack);
-    const { name: packName, pack } = await pickPack(packsRoot, preseleccionado);
+    const { name: packName, packDir, pack } = await pickPack(packs, preseleccionado);
 
     let dimensions: string[] | null =
       opts.dims !== undefined
@@ -380,8 +387,10 @@ export async function resolveSetup(
           // flujo se cancela, se vuelve a esta misma pantalla en vez de tirar
           // abajo el asistente entero por haber entrado sin querer.
           if (dimensions !== null && dimensions.includes(NUEVA_DIMENSION)) {
+            // Escribir un tema nuevo es ESCRIBIR en el pack: si el pack viene
+            // dentro de la instalación, esto lanza en vez de tocar node_modules.
             const hecho = await runNewDimension(
-              join(packsRoot, packName),
+              packs.dirForWrite(packName),
               packName,
               pack.dimensions,
             );
@@ -426,7 +435,7 @@ export async function resolveSetup(
       throw new Error("con ese filtro de dimensiones y dificultad no queda ninguna pregunta.");
     }
 
-    return { packName, pack, dimensions, difficulties, target, bank };
+    return { packName, packDir, pack, dimensions, difficulties, target, bank };
   } catch (err) {
     if (err instanceof Error && err.name === "ExitPromptError") return null;
     throw err;

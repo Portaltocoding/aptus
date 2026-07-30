@@ -1,6 +1,5 @@
-import { fileURLToPath } from "node:url";
-import { dirname, join, resolve } from "node:path";
 import { loadPackDir } from "../../content/loader.js";
+import { historyPath as historyPathOf, packDirForRead } from "../../content/paths.js";
 import { loadHistory, saveHistory } from "../../content/history.js";
 import { shuffleOptions } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
@@ -27,10 +26,6 @@ import { DEFAULT_PACK } from "./start.js";
 // repasar 15 preguntas, no que te comas otro test de 120.
 const REVIEW_TARGET_QUESTIONS = 15;
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
-const DATA_DIR = join(ROOT, "data");
-
 /**
  * Subcomando `review`: repaso espaciado de lo que peor llevas (RES-05).
  *
@@ -40,8 +35,13 @@ const DATA_DIR = join(ROOT, "data");
  * que la evolución, el informe y `aptus jd` la ignoren.
  */
 export async function reviewCommand(packName: string = DEFAULT_PACK): Promise<void> {
-  const packDir = join(PACKS_ROOT, packName);
-  const historyPath = join(DATA_DIR, packName, "history.json");
+  const packDir = packDirForRead(packName);
+  if (packDir === null) {
+    console.error(`\n✗ No se puede iniciar el repaso: no existe el pack '${packName}'.`);
+    process.exitCode = 1;
+    return;
+  }
+  const historyPath = historyPathOf(packName);
 
   let pack;
   let history;

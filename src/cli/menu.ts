@@ -1,8 +1,7 @@
 import { input, select } from "@inquirer/prompts";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import pc from "picocolors";
-import { listPacks } from "../content/loader.js";
+import { listPackEntries } from "../content/paths.js";
 import { startCommand, DEFAULT_PACK } from "./commands/start.js";
 import { reviewCommand } from "./commands/review.js";
 import { historyCommand } from "./commands/history.js";
@@ -14,8 +13,6 @@ import { jobsCommand } from "./commands/jobs.js";
 import { ingestCommand } from "./commands/ingest.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
 import { heading, promptTheme } from "./theme.js";
-
-const PACKS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../packs");
 
 /**
  * Menú principal: la pantalla a la que se vuelve.
@@ -93,7 +90,8 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
 
 /** Pregunta un pack de los que hay, con ESC para volver. */
 async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
-  const nombres = listPacks(PACKS_ROOT);
+  // Las dos raíces a la vez: los packs del producto y los tuyos.
+  const nombres = listPackEntries().map((e) => e.name);
   if (nombres.length === 0) return DEFAULT_PACK;
   if (nombres.length === 1) return nombres[0]!;
 

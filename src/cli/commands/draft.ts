@@ -1,4 +1,3 @@
-import { fileURLToPath } from "node:url";
 import {
   existsSync,
   mkdirSync,
@@ -8,16 +7,14 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import pc from "picocolors";
 import { stringify } from "yaml";
 import { loadPackDir } from "../../content/loader.js";
+import { packDirForWrite } from "../../content/paths.js";
 import { draftQuestions } from "../../content/draft.js";
 import { auditPack } from "../../core/pack-audit.js";
 import { heading } from "../theme.js";
-
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const PACKS_ROOT = join(ROOT, "packs");
 
 /** Techo de material que se manda al modelo: más que esto es coste sin señal. */
 const MAX_MATERIAL_CHARS = 120_000;
@@ -42,7 +39,17 @@ export interface DraftOptions {
  *    credenciales; todo lo demás funciona igual sin tocar esto.
  */
 export async function draftCommand(packName: string, opts: DraftOptions): Promise<void> {
-  const packDir = join(PACKS_ROOT, packName);
+  // draft ESCRIBE dentro del pack (drafts/), así que el directorio sale del
+  // resolvedor de escritura: un pack que solo viene con la instalación no se toca.
+  let packDir;
+  try {
+    packDir = packDirForWrite(packName);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
+    process.exitCode = 1;
+    return;
+  }
+
   if (!existsSync(join(packDir, "pack.yaml"))) {
     console.error(
       `\n✗ No existe el pack '${packName}'. Créalo con \`aptus new-pack ${packName}\` o \`aptus ingest\`.`,
@@ -143,7 +150,7 @@ export async function draftCommand(packName: string, opts: DraftOptions): Promis
   writeFileSync(destino, cabecera + stringify(result.valid), "utf8");
 
   console.log(
-    `  ${pc.green("✓")} ${result.valid.length} pregunta(s) escritas en ${pc.dim(join("packs", packName, "drafts", `${opts.dimension}.yaml`))}`,
+    `  ${pc.green("✓")} ${result.valid.length} pregunta(s) escritas en ${pc.dim(destino)}`,
   );
 
   // Lo descartado se dice siempre: si el modelo ha fallado 8 de 12, eso es una
@@ -179,7 +186,16 @@ export async function draftCommand(packName: string, opts: DraftOptions): Promis
  * entrada, no después de que el pack ya te esté midiendo.
  */
 export async function promoteCommand(packName: string, dimension: string): Promise<void> {
-  const packDir = join(PACKS_ROOT, packName);
+  // promote MUEVE ficheros dentro del pack: mismo resolvedor de escritura.
+  let packDir;
+  try {
+    packDir = packDirForWrite(packName);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}`);
+    process.exitCode = 1;
+    return;
+  }
+
   const origen = join(packDir, "drafts", `${dimension}.yaml`);
   const destino = join(packDir, "questions", `${dimension}.yaml`);
 
@@ -192,7 +208,7 @@ export async function promoteCommand(packName: string, dimension: string): Promi
   }
   if (existsSync(destino)) {
     console.error(
-      `\n✗ Ya existe ${join("packs", packName, "questions", `${dimension}.yaml`)}.\n` +
+      `\n✗ Ya existe ${destino}.\n` +
         "  No se sobrescribe contenido ya curado: fusiónalo tú a mano.",
     );
     process.exitCode = 1;
@@ -228,7 +244,7 @@ export async function promoteCommand(packName: string, dimension: string): Promi
   }
 
   console.log(
-    `\n  ${pc.green("✓")} '${dimension}' promovida a ${pc.dim(join("packs", packName, "questions"))} — ya es evaluable.`,
+    `\n  ${pc.green("✓")} '${dimension}' promovida a ${pc.dim(join(packDir, "questions"))} — ya es evaluable.`,
   );
   if (report.warnings.length > 0) {
     console.log(

@@ -1,19 +1,17 @@
-import { fileURLToPath } from "node:url";
-import { dirname, join, resolve } from "node:path";
 import { loadHistory } from "../../content/history.js";
+import { historyPath as historyPathOf } from "../../content/paths.js";
 import { evolution, measurements } from "../../core/evolution.js";
 import { renderEvolution } from "../render.js";
 import { DEFAULT_PACK } from "./start.js";
-
-const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data");
 
 /**
  * Subcomando `history`: consulta el historial de un pack y muestra la evolución
  * (PERS-02) sin correr una sesión nueva. El historial es por pack.
  */
 export async function historyCommand(packName: string = DEFAULT_PACK): Promise<void> {
-  // Resultados aislados por tema en data/<pack>/ (no se cruzan entre packs).
-  const historyPath = join(DATA_DIR, packName, "history.json");
+  // Resultados aislados por tema (no se cruzan entre packs), y fuera de la
+  // instalación: dónde exactamente lo decide paths.ts.
+  const historyPath = historyPathOf(packName);
 
   let history;
   try {
