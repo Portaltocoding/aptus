@@ -36,7 +36,7 @@ export async function ingestCommand(dirArg: string, opts: IngestOptions): Promis
 
   let result;
   try {
-    result = ingestDirectory(dir);
+    result = await ingestDirectory(dir);
   } catch (err) {
     console.error(
       `\n✗ No se puede leer la carpeta: ${err instanceof Error ? err.message : String(err)}`,

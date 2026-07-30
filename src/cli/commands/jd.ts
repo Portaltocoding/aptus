@@ -91,7 +91,7 @@ export async function jdCommand(
   // falta para medirlo. Por eso sale ANTES de exigir historial — construir un pack
   // desde una oferta no necesita que te hayas evaluado nunca.
   if (opts.brief === true) {
-    emitBrief(profile, packName, jdPath, opts.memoria);
+    await emitBrief(profile, packName, jdPath, opts.memoria);
     return;
   }
 
@@ -173,18 +173,18 @@ export async function jdCommand(
  * una propuesta que revisar. Y el material propio NUNCA se copia — se referencia
  * por ruta. Tus notas son tuyas y no tienen por qué acabar dentro de un repo.
  */
-function emitBrief(
+async function emitBrief(
   profile: ReturnType<typeof extractJdProfile>,
   packName: string,
   jdPath: string,
   memoria: string | undefined,
-): void {
+): Promise<void> {
   let brief = briefFromJd(profile, packName);
 
   if (memoria !== undefined) {
     const dir = resolve(memoria);
     try {
-      const { docs, skipped } = ingestDirectory(dir);
+      const { docs, skipped } = await ingestDirectory(dir);
       brief = attachMaterial(brief, docs);
       brief.sources.push(`${docs.length} documento(s) de ${dir}`);
       if (skipped.length > 0) {

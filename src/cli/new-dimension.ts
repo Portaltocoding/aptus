@@ -108,7 +108,7 @@ export async function newDimensionFlow(
       const dir = resolve(
         (await askPath("¿Dónde está el material?")).trim().replace(/^~/, process.env.HOME ?? "~"),
       );
-      const { docs, skipped } = ingestDirectory(dir);
+      const { docs, skipped } = await ingestDirectory(dir);
 
       if (docs.length === 0) {
         console.log(
