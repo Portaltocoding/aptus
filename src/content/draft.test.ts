@@ -1,5 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { parseDraft } from "./draft.js";
+import { hasApiCredentials, parseDraft } from "./draft.js";
+
+describe("hasApiCredentials", () => {
+  it("con API key hay con qué llamar", () => {
+    expect(hasApiCredentials({ ANTHROPIC_API_KEY: "sk-ant-loquesea" })).toBe(true);
+  });
+
+  it("un token de sesión vale igual: es lo que deja `ant auth login`", () => {
+    expect(hasApiCredentials({ ANTHROPIC_AUTH_TOKEN: "tok" })).toBe(true);
+  });
+
+  it("un entorno vacío no tiene credenciales", () => {
+    expect(hasApiCredentials({})).toBe(false);
+  });
+
+  it("una variable en blanco NO cuenta: existir no es servir", () => {
+    expect(hasApiCredentials({ ANTHROPIC_API_KEY: "   " })).toBe(false);
+  });
+});
 
 /** Una pregunta bien formada, tal y como debe devolverla el modelo. */
 function ok(id = "col-borrador-1"): Record<string, unknown> {

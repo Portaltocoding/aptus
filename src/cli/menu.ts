@@ -2,6 +2,7 @@ import { input, select } from "@inquirer/prompts";
 import { resolve } from "node:path";
 import pc from "picocolors";
 import { listPackEntries } from "../content/paths.js";
+import { hasApiCredentials } from "../content/draft.js";
 import { startCommand, DEFAULT_PACK } from "./commands/start.js";
 import { reviewCommand } from "./commands/review.js";
 import { historyCommand } from "./commands/history.js";
@@ -111,17 +112,6 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
   },
   { value: "salir", name: "Salir", description: "Cerrar aptus." },
 ];
-
-/**
- * ¿Hay con qué llamar a la API? Se mira ANTES de entrar en `draft` para poder
- * decirlo en el menú en vez de fallar al final del asistente. Es la misma
- * comprobación que hace el SDK al construir el cliente.
- */
-function tieneApiKey(env: NodeJS.ProcessEnv = process.env): boolean {
-  return [env.ANTHROPIC_API_KEY, env.ANTHROPIC_AUTH_TOKEN].some(
-    (v) => typeof v === "string" && v.trim().length > 0,
-  );
-}
 
 /** Pregunta un pack de los que hay, con ESC para volver. */
 async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
@@ -353,7 +343,7 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
  */
 async function dispatch(action: MenuAction): Promise<Next> {
   const respuestas: string[] = [];
-  const ctx = { tieneApiKey: tieneApiKey() };
+  const ctx = { tieneApiKey: hasApiCredentials() };
 
   for (;;) {
     const paso = nextMenuStep(action, respuestas, ctx);

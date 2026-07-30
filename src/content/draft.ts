@@ -15,6 +15,25 @@ import { QuestionSchema, type Question } from "./schema.js";
 
 const MODEL = "claude-opus-5";
 
+/**
+ * ¿Hay con qué llamar a la API? Es la MISMA condición que aplica el SDK al
+ * construir el cliente, dicha ANTES de ofrecer nada que la necesite.
+ *
+ * Vive aquí, pegada a lo único que sale a la red, porque la comprobación tenía
+ * dos clientes y solo uno la hacía: el menú miraba las credenciales antes de
+ * ofrecer `draft`, pero el asistente de tema nuevo ofrecía "que lo busque el
+ * modelo" y un borrador al final sin mirarlas — y reventaba con un error de
+ * autenticación después de haberte hecho recorrer el flujo entero.
+ *
+ * El entorno entra como PARÁMETRO, no se lee por dentro: así se prueba sin tocar
+ * `process.env`, que es global y se filtra entre tests.
+ */
+export function hasApiCredentials(env: NodeJS.ProcessEnv = process.env): boolean {
+  return [env.ANTHROPIC_API_KEY, env.ANTHROPIC_AUTH_TOKEN].some(
+    (v) => typeof v === "string" && v.trim().length > 0,
+  );
+}
+
 /** Schema de salida: el mismo contrato que exige el pack, en JSON Schema. */
 const OUTPUT_SCHEMA = {
   type: "object",
