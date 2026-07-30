@@ -422,11 +422,26 @@ export function renderReviewPlan(
   byDim: ReviewProgress[],
   tracked: number,
   target: number,
+  dimensions: readonly string[] | null = null,
 ): string {
   const tanda = Math.min(due.length, target);
+  const acotado = dimensions === null ? "" : ` en ${dimensions.join(", ")}`;
   const lines: string[] = [
-    pc.bold(`Repaso: ${tanda} pregunta(s) de las ${due.length} que tocan hoy (${tracked} en seguimiento).`),
+    pc.bold(
+      `Repaso: ${tanda} pregunta(s) de las ${due.length} que tocan hoy${acotado} (${tracked} en seguimiento).`,
+    ),
   ];
+
+  // Un filtro que se parece al de `start` invita a leer la tanda como "un test de
+  // estas dimensiones". Se desmiente donde se ve el filtro, no al final.
+  if (dimensions !== null) {
+    lines.push(
+      pc.yellow(
+        `  ⚠ Acotar a ${dimensions.join(", ")} elige QUÉ estudias, no qué se mide: ` +
+          "la tanda\n    sigue saliendo de tus fallos, así que sigue sin decir nada de tu nivel ahí.",
+      ),
+    );
+  }
 
   const table = new Table({ head: ["Dimensión", "Toca repasar", "De ellas, falladas la última vez"] });
   for (const d of byDim) {

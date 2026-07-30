@@ -87,8 +87,10 @@ program
   .command("review")
   .description("Repasa (repetición espaciada) lo que peor llevas — estudio, no medición")
   .option("-p, --pack <name>", "pack que repasar", DEFAULT_PACK)
-  .action(async (opts: { pack: string }) => {
-    await reviewCommand(opts.pack);
+  .option("-d, --dims <lista>", "dimensiones separadas por comas (por defecto, pregunta)")
+  .option("-y, --yes", "no preguntar nada: repasa todo lo que toque", false)
+  .action(async (opts: { pack: string; dims?: string; yes: boolean }) => {
+    await reviewCommand(opts.pack, { dims: opts.dims, interactive: !opts.yes });
   });
 
 program

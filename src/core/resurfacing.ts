@@ -97,6 +97,23 @@ export function dueForReview(items: ReviewItem[], now: Date): ReviewItem[] {
 }
 
 /**
+ * Acota lo que toca repasar a unas dimensiones concretas (SESS-05). `null` = todas.
+ *
+ * OJO a lo que esto NO es: filtrar aquí no convierte el repaso en una medición de
+ * esas dimensiones. La tanda sigue saliendo de tus fallos, así que sigue sin haber
+ * readiness ni gaps — elegir tema acota QUÉ estudias, no qué se mide. Se conserva
+ * el orden que traía `dueForReview` (caja baja primero): el filtro no reordena.
+ */
+export function restrictToDimensions(
+  items: ReviewItem[],
+  dimensions: readonly string[] | null,
+): ReviewItem[] {
+  if (dimensions === null) return items;
+  const quiero = new Set(dimensions);
+  return items.filter((i) => quiero.has(i.dimension));
+}
+
+/**
  * Las preguntas de la tanda de repaso, en el orden en que se han de presentar.
  * NO se equilibra por dimensión a propósito: el repaso debe cargar hacia los temas
  * peor puntuados (RES-05), justo lo contrario que `selectBalanced`, que muestrea

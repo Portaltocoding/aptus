@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "../content/schema.js";
-import { DIFFICULTY_PRESETS, parseDifficulty, resolveSetup, sampleWarning } from "./setup.js";
+import {
+  DIFFICULTY_PRESETS,
+  parseDifficulty,
+  parseDims,
+  resolveSetup,
+  sampleWarning,
+} from "./setup.js";
 import { singleRootLocator } from "../content/paths.js";
 
 // Las cuatro llamadas envuelven la raíz de fixtures con el localizador de una
@@ -51,6 +57,23 @@ describe("parseDifficulty", () => {
     for (const p of DIFFICULTY_PRESETS) {
       expect(p.difficulties === null || p.difficulties.length > 0).toBe(true);
     }
+  });
+});
+
+// Lo comparten `start` y `review` (SESS-05): una coma de más tiene que
+// comportarse igual en los dos sitios.
+describe("parseDims", () => {
+  it("parte por comas y recorta espacios", () => {
+    expect(parseDims("a, b ,c")).toEqual(["a", "b", "c"]);
+  });
+
+  it("una lista vacía es 'todas', igual que no pasar el flag", () => {
+    expect(parseDims("")).toBeNull();
+    expect(parseDims("  , ,")).toBeNull();
+  });
+
+  it("una sola dimensión también vale", () => {
+    expect(parseDims("llm-rag-evals")).toEqual(["llm-rag-evals"]);
   });
 });
 

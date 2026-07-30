@@ -8,6 +8,7 @@ import {
   buildReviewState,
   dueForReview,
   nextDueAt,
+  restrictToDimensions,
   reviewByDimension,
   selectReview,
 } from "./resurfacing.js";
@@ -168,6 +169,42 @@ describe("selectReview", () => {
     const selected = selectReview(due, BANK, 2);
 
     expect(selected.every((s) => s.dimension === "dim-a")).toBe(true);
+  });
+});
+
+describe("restrictToDimensions (SESS-05)", () => {
+  const items = buildReviewState(
+    [session(T1, [["q1", "b"], ["q2", "b"], ["q3", "b"]])],
+    BANK,
+  );
+
+  it("null es 'todas': no toca nada", () => {
+    expect(restrictToDimensions(items, null)).toBe(items);
+  });
+
+  it("se queda solo con las dimensiones pedidas", () => {
+    expect(restrictToDimensions(items, ["dim-b"]).map((i) => i.questionId)).toEqual(["q3"]);
+  });
+
+  it("varias dimensiones se acumulan", () => {
+    expect(restrictToDimensions(items, ["dim-a", "dim-b"])).toHaveLength(3);
+  });
+
+  it("una dimensión sin nada vencido devuelve vacío, no revienta", () => {
+    expect(restrictToDimensions(items, ["dim-que-no-toca"])).toEqual([]);
+  });
+
+  it("conserva el orden que traía dueForReview: el filtro no reordena", () => {
+    const due = dueForReview(items, new Date("2026-01-03T10:00:00.000Z"));
+    const filtrado = restrictToDimensions(due, ["dim-a", "dim-b"]);
+
+    expect(filtrado.map((i) => i.questionId)).toEqual(due.map((i) => i.questionId));
+  });
+
+  it("filtrar no toca las cajas: sigue siendo estudio, no una medición de ese tema", () => {
+    const filtrado = restrictToDimensions(items, ["dim-b"]);
+
+    expect(filtrado[0]).toBe(itemFor(items, "q3"));
   });
 });
 

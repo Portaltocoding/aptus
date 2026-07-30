@@ -99,6 +99,19 @@ export function parseDifficulty(raw: string): Difficulty[] | null {
   return tramos as Difficulty[];
 }
 
+/**
+ * Resuelve una lista de dimensiones escrita a mano (`--dims a,b`). Vacía = `null`
+ * = "todas", que es lo mismo que no pasar el flag. Puro: lo comparten `start` y
+ * `review`, y así una coma de más se comporta igual en los dos.
+ */
+export function parseDims(raw: string): string[] | null {
+  const dims = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  return dims.length === 0 ? null : dims;
+}
+
 function countBy<T, K>(items: T[], key: (item: T) => K): Map<K, number> {
   const map = new Map<K, number>();
   for (const item of items) map.set(key(item), (map.get(key(item)) ?? 0) + 1);
@@ -175,47 +188,69 @@ async function pickPack(
 /** Valor centinela del checkbox: no es una dimensión, es "quiero crear una". */
 export const NUEVA_DIMENSION = "__nueva__";
 
-/**
- * Qué dimensiones entran. La lista incluye SIEMPRE una entrada para crear un tema
- * nuevo: sin ella, el asistente solo deja elegir entre lo que ya existe y no hay
- * ninguna pista de que aptus sepa construir temas.
- *
- * Las dimensiones declaradas pero sin preguntas se muestran deshabilitadas en vez
- * de ocultarse: que un tema exista y no sea evaluable es información útil —te dice
- * qué te falta— y esconderlo lo haría parecer inexistente.
- */
-async function pickDimensions(pack: Pack): Promise<Escapable<string[] | null>> {
-  const porDim = countBy(pack.questions, (q) => q.dimension);
-  const conPreguntas = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) > 0);
-  const vacias = pack.dimensions.filter((d) => (porDim.get(d) ?? 0) === 0);
+/** Una dimensión elegible, con lo que hay detrás de ella. */
+export interface DimensionOption {
+  value: string;
+  /** Qué se ve bajo el cursor: cuántas preguntas, cuántas tocan repasar… */
+  detalle: string;
+}
 
+/** Una dimensión que se ve pero no se puede elegir, y por qué. */
+export interface DimensionDisabled {
+  value: string;
+  nota: string;
+  motivo: string;
+  detalle: string;
+}
+
+export interface DimensionPick {
+  mensaje: string;
+  disponibles: DimensionOption[];
+  deshabilitadas?: DimensionDisabled[];
+  /** Entrada "＋ tema nuevo…". Solo la pone quien puede atenderla. */
+  nueva?: { etiqueta: string; detalle: string };
+}
+
+/**
+ * El checkbox de dimensiones, sin saber de dónde salen. Lo comparten el asistente
+ * de `start` (dimensiones del pack) y el de `review` (dimensiones que hoy tocan
+ * repasar): es el mismo gesto y la misma tecla de escape, así que es la misma
+ * función y no dos parecidas que se separan con el tiempo.
+ *
+ * Devuelve `null` cuando se han marcado TODAS: "todas" y "estas cuatro, que dan la
+ * casualidad de ser todas" significan lo mismo aguas abajo y conviene no
+ * distinguirlas.
+ */
+export async function pickDimensionsFrom(o: DimensionPick): Promise<Escapable<string[] | null>> {
   const elegidas = await withEscape((signal) =>
     checkbox(
       {
         message:
-          pc.bold("  ¿Qué dimensiones entran?") +
+          pc.bold(`  ${o.mensaje}`) +
           pc.dim(`  (espacio marca · a todas · enter confirma · ${ESC_HINT})`),
         choices: [
-          ...conPreguntas.map((d) => ({
-            value: d,
-            name: d,
+          ...o.disponibles.map((d) => ({
+            value: d.value,
+            name: d.value,
             checked: true,
-            description: `${porDim.get(d)} preguntas en el banco`,
+            description: d.detalle,
           })),
-          ...vacias.map((d) => ({
-            value: d,
-            name: `${d} ${pc.dim("(declarada, sin preguntas)")}`,
-            disabled: pc.dim("no evaluable todavía"),
-            description:
-              "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
+          ...(o.deshabilitadas ?? []).map((d) => ({
+            value: d.value,
+            name: `${d.value} ${pc.dim(`(${d.nota})`)}`,
+            disabled: pc.dim(d.motivo),
+            description: d.detalle,
           })),
-          {
-            value: NUEVA_DIMENSION,
-            name: pc.cyan("＋ escribir un tema nuevo…"),
-            checked: false,
-            description:
-              "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
-          },
+          ...(o.nueva
+            ? [
+                {
+                  value: NUEVA_DIMENSION,
+                  name: pc.cyan(o.nueva.etiqueta),
+                  checked: false,
+                  description: o.nueva.detalle,
+                },
+              ]
+            : []),
         ],
         required: true,
         theme: promptTheme,
@@ -227,7 +262,40 @@ async function pickDimensions(pack: Pack): Promise<Escapable<string[] | null>> {
 
   if (elegidas === ESCAPED) return ESCAPED;
   if (elegidas.includes(NUEVA_DIMENSION)) return [NUEVA_DIMENSION];
-  return elegidas.length === conPreguntas.length ? null : elegidas;
+  return elegidas.length === o.disponibles.length ? null : elegidas;
+}
+
+/**
+ * Qué dimensiones entran en la sesión. La lista incluye SIEMPRE una entrada para
+ * crear un tema nuevo: sin ella, el asistente solo deja elegir entre lo que ya
+ * existe y no hay ninguna pista de que aptus sepa construir temas.
+ *
+ * Las dimensiones declaradas pero sin preguntas se muestran deshabilitadas en vez
+ * de ocultarse: que un tema exista y no sea evaluable es información útil —te dice
+ * qué te falta— y esconderlo lo haría parecer inexistente.
+ */
+async function pickDimensions(pack: Pack): Promise<Escapable<string[] | null>> {
+  const porDim = countBy(pack.questions, (q) => q.dimension);
+
+  return await pickDimensionsFrom({
+    mensaje: "¿Qué dimensiones entran?",
+    disponibles: pack.dimensions
+      .filter((d) => (porDim.get(d) ?? 0) > 0)
+      .map((d) => ({ value: d, detalle: `${porDim.get(d)} preguntas en el banco` })),
+    deshabilitadas: pack.dimensions
+      .filter((d) => (porDim.get(d) ?? 0) === 0)
+      .map((d) => ({
+        value: d,
+        nota: "declarada, sin preguntas",
+        motivo: "no evaluable todavía",
+        detalle: "Está declarada en pack.yaml pero aún no tiene banco: no puede medir nada.",
+      })),
+    nueva: {
+      etiqueta: "＋ escribir un tema nuevo…",
+      detalle:
+        "Le pones nombre y le dices de dónde sale: una carpeta, una oferta, o que lo busque el modelo.",
+    },
+  });
 }
 
 async function pickDifficulty(): Promise<Escapable<Difficulty[] | null>> {
@@ -349,13 +417,7 @@ export async function resolveSetup(
     const preseleccionado = interactivo ? opts.pack : (opts.pack ?? defaultPack);
     const { name: packName, packDir, pack } = await pickPack(packs, preseleccionado);
 
-    let dimensions: string[] | null =
-      opts.dims !== undefined
-        ? opts.dims
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s.length > 0)
-        : null;
+    let dimensions: string[] | null = opts.dims !== undefined ? parseDims(opts.dims) : null;
     let difficulties: Difficulty[] | null =
       opts.difficulty !== undefined ? parseDifficulty(opts.difficulty) : null;
     let target = opts.questions ?? defaultTarget;

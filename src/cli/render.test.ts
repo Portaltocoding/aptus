@@ -7,6 +7,7 @@ import {
   renderWeightedGaps,
   renderEvolution,
   renderSummary,
+  renderReviewPlan,
 } from "./render.js";
 import type { ScoreResult } from "../core/scoring.js";
 import type { CalibrationResult } from "../core/calibration.js";
@@ -260,5 +261,47 @@ describe("readiness sin evidencia (N=0)", () => {
     expect(out).toContain("Sin evidencia en esta sesión");
     expect(out).toContain("ML Engineer");
     expect(out).not.toContain("Ranking");
+  });
+});
+
+describe("renderReviewPlan (SESS-05: el filtro no puede parecer una medición)", () => {
+  const due = [
+    {
+      questionId: "q1",
+      dimension: "llm-rag-evals",
+      seen: 2,
+      failed: 1,
+      box: 1,
+      lastSeenAt: "2026-01-01T10:00:00.000Z",
+      lastCorrect: false,
+      dueAt: "2026-01-02T10:00:00.000Z",
+    },
+  ];
+  const byDim = [{ dimension: "llm-rag-evals", due: 1, weak: 1 }];
+
+  it("sin filtro no habla de dimensiones elegidas", () => {
+    const out = renderReviewPlan(due, byDim, 10, 15);
+
+    expect(out).toContain("1 pregunta(s) de las 1 que tocan hoy");
+    expect(out).not.toMatch(/elige QUÉ estudias/);
+  });
+
+  it("con filtro dice a qué se ha acotado", () => {
+    expect(renderReviewPlan(due, byDim, 10, 15, ["llm-rag-evals"])).toContain(
+      "que tocan hoy en llm-rag-evals",
+    );
+  });
+
+  it("con filtro desmiente la lectura de 'test de estas dimensiones'", () => {
+    const out = renderReviewPlan(due, byDim, 10, 15, ["llm-rag-evals"]);
+
+    expect(out).toMatch(/elige QUÉ estudias, no qué se mide/);
+    expect(out).toMatch(/sigue saliendo de tus fallos/);
+  });
+
+  it("filtrado o no, sigue diciendo que esto no mide", () => {
+    for (const dims of [null, ["llm-rag-evals"]]) {
+      expect(renderReviewPlan(due, byDim, 10, 15, dims)).toMatch(/no mide nada/);
+    }
   });
 });
