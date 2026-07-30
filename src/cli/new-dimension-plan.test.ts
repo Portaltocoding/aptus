@@ -3,11 +3,17 @@ import { parse } from "yaml";
 import { QuestionSchema } from "../content/schema.js";
 import {
   admiteBorrador,
+  ficherosDe,
   investigacionSourceName,
+  materialParaBorrador,
+  materialUtil,
+  nombreLibre,
   ofertaSourceName,
+  ordenarFuentes,
   planNewDimension,
   renderSkeleton,
   sourceChoices,
+  sourceDelEsqueleto,
   validateDimensionName,
   type MaterialOutcome,
   type PlanInput,
@@ -15,12 +21,20 @@ import {
 
 const BRIEF = "BRIEF-colas-de-mensajes.md";
 
-function plan(material: MaterialOutcome, extra: Partial<PlanInput> = {}): PlanInput {
+const CARPETA: MaterialOutcome = {
+  fuente: "carpeta",
+  copiados: ["sources/a.md"],
+  leidos: 1,
+  descartados: 0,
+};
+
+function plan(materiales: MaterialOutcome[], extra: Partial<PlanInput> = {}): PlanInput {
   return {
     dimension: "colas-de-mensajes",
     packName: "backend",
     briefFile: BRIEF,
-    material,
+    materiales,
+    briefEscrito: materiales.some(materialUtil),
     dimensionDeclarada: true,
     borrador: null,
     esqueleto: null,
@@ -58,25 +72,63 @@ describe("nombres de los ficheros de material", () => {
   });
 });
 
+describe("nombreLibre", () => {
+  it("si no choca con nada, es el nombre tal cual", () => {
+    expect(nombreLibre("oferta-x.txt", ["otra.txt"])).toBe("oferta-x.txt");
+  });
+
+  it("no pisa material ya guardado: numera en vez de sobrescribir", () => {
+    expect(nombreLibre("oferta-x.txt", ["oferta-x.txt"])).toBe("oferta-x-2.txt");
+  });
+
+  it("sigue numerando mientras siga chocando", () => {
+    const usados = ["a.txt", "a-2.txt", "a-3.txt"];
+
+    expect(nombreLibre("a.txt", usados)).toBe("a-4.txt");
+  });
+
+  it("un nombre sin extensión también se numera bien", () => {
+    expect(nombreLibre("notas", ["notas"])).toBe("notas-2");
+  });
+
+  it("respeta la extensión compuesta contando solo el último punto", () => {
+    expect(nombreLibre("apuntes.tar.gz", ["apuntes.tar.gz"])).toBe("apuntes.tar-2.gz");
+  });
+});
+
 describe("admiteBorrador", () => {
   it("sin material no se ofrece borrador: el modelo solo tendría el nombre del tema", () => {
-    expect(admiteBorrador("ninguno", true)).toBe(false);
+    expect(admiteBorrador([], true)).toBe(false);
   });
 
   it("con cualquier material sí", () => {
-    expect(admiteBorrador("carpeta", true)).toBe(true);
-    expect(admiteBorrador("oferta", true)).toBe(true);
-    expect(admiteBorrador("buscar", true)).toBe(true);
+    expect(admiteBorrador([CARPETA], true)).toBe(true);
+    expect(admiteBorrador([{ fuente: "oferta", copiado: "sources/o.txt" }], true)).toBe(true);
+    expect(admiteBorrador([{ fuente: "buscar", copiado: "sources/i.md" }], true)).toBe(true);
   });
 
   it("sin credenciales no se ofrece: decir que sí acabaría en un error de autenticación", () => {
-    expect(admiteBorrador("carpeta", false)).toBe(false);
-    expect(admiteBorrador("oferta", false)).toBe(false);
+    expect(admiteBorrador([CARPETA], false)).toBe(false);
+  });
+
+  it("una carpeta marcada pero vacía no es tener material", () => {
+    expect(
+      admiteBorrador([{ fuente: "carpeta", copiados: [], leidos: 0, descartados: 2 }], true),
+    ).toBe(false);
+  });
+
+  it("basta con que UNA de las combinadas haya dejado algo", () => {
+    const materiales: MaterialOutcome[] = [
+      { fuente: "fallo", origen: "buscar", motivo: "sin red" },
+      CARPETA,
+    ];
+
+    expect(admiteBorrador(materiales, true)).toBe(true);
   });
 });
 
 describe("sourceChoices", () => {
-  it("con credenciales se pueden elegir las cuatro fuentes", () => {
+  it("con credenciales se pueden elegir todas las fuentes", () => {
     expect(sourceChoices(true).filter((c) => c.disabled !== null)).toEqual([]);
   });
 
@@ -90,9 +142,88 @@ describe("sourceChoices", () => {
   it("las fuentes que no salen a la red no dependen de la key", () => {
     const sinKey = sourceChoices(false);
 
-    for (const valor of ["carpeta", "oferta", "ninguno"] as const) {
+    for (const valor of ["carpeta", "oferta"] as const) {
       expect(sinKey.find((c) => c.value === valor)!.disabled).toBeNull();
     }
+  });
+
+  it("no hay casilla 'ninguno': no marcar nada ya significa eso", () => {
+    expect(sourceChoices(true).map((c) => c.value as string)).not.toContain("ninguno");
+  });
+});
+
+describe("ordenarFuentes", () => {
+  it("lo local va antes que la red, se marque en el orden que se marque", () => {
+    expect(ordenarFuentes(["buscar", "oferta", "carpeta"])).toEqual([
+      "carpeta",
+      "oferta",
+      "buscar",
+    ]);
+  });
+
+  it("no marcar nada es una combinación válida: la lista vacía", () => {
+    expect(ordenarFuentes([])).toEqual([]);
+  });
+
+  it("una fuente repetida se recorre una sola vez", () => {
+    expect(ordenarFuentes(["carpeta", "carpeta"])).toEqual(["carpeta"]);
+  });
+});
+
+describe("materialUtil y ficherosDe", () => {
+  it("una carpeta sin nada legible no cuenta como material ni aporta ficheros", () => {
+    const vacia: MaterialOutcome = { fuente: "carpeta", copiados: [], leidos: 0, descartados: 1 };
+
+    expect(materialUtil(vacia)).toBe(false);
+    expect(ficherosDe(vacia)).toEqual([]);
+  });
+
+  it("una fuente caída no aporta nada", () => {
+    const fallo: MaterialOutcome = { fuente: "fallo", origen: "oferta", motivo: "no existe" };
+
+    expect(materialUtil(fallo)).toBe(false);
+    expect(ficherosDe(fallo)).toEqual([]);
+  });
+
+  it("el esqueleto cita el primer material escrito, no el último", () => {
+    const materiales: MaterialOutcome[] = [CARPETA, { fuente: "buscar", copiado: "sources/i.md" }];
+
+    expect(sourceDelEsqueleto(materiales)).toBe("sources/a.md");
+  });
+
+  it("sin ningún material, el esqueleto cita 'externa'", () => {
+    expect(sourceDelEsqueleto([{ fuente: "fallo", origen: "buscar", motivo: "sin red" }])).toBe(
+      "externa",
+    );
+  });
+});
+
+describe("materialParaBorrador", () => {
+  it("cada trozo lleva delante de qué fichero sale, para poder citarlo", () => {
+    const texto = materialParaBorrador([
+      { path: "sources/a.md", text: "kafka" },
+      { path: "sources/b.md", text: "rabbit" },
+    ]);
+
+    expect(texto).toContain("--- sources/a.md ---\nkafka");
+    expect(texto).toContain("--- sources/b.md ---\nrabbit");
+  });
+
+  it("sin material es cadena vacía, no un bloque de cabeceras sueltas", () => {
+    expect(materialParaBorrador([])).toBe("");
+  });
+
+  it("si hay que recortar se dice en el propio texto, no se corta a traición", () => {
+    const texto = materialParaBorrador([{ path: "a.md", text: "x".repeat(500) }], 100);
+
+    expect(texto.length).toBeLessThan(300);
+    expect(texto).toMatch(/material recortado: \d+ caracteres más/);
+  });
+
+  it("por debajo del tope no se toca nada", () => {
+    expect(materialParaBorrador([{ path: "a.md", text: "corto" }], 1000)).toBe(
+      "--- a.md ---\ncorto",
+    );
   });
 });
 
@@ -160,21 +291,25 @@ describe("renderSkeleton", () => {
 describe("fuente: carpeta", () => {
   it("con material escribe lo copiado y el brief, en ese orden", () => {
     const res = planNewDimension(
-      plan({
-        fuente: "carpeta",
-        copiados: ["sources/a.md", "sources/b.md"],
-        leidos: 2,
-        descartados: 0,
-      }),
+      plan([
+        {
+          fuente: "carpeta",
+          copiados: ["sources/a.md", "sources/b.md"],
+          leidos: 2,
+          descartados: 0,
+        },
+      ]),
     );
 
     expect(res.written).toEqual(["sources/a.md", "sources/b.md", BRIEF, "pack.yaml"]);
-    expect(res.pending).toEqual([expect.stringContaining("aptus draft backend -d colas-de-mensajes")]);
+    expect(res.pending).toEqual([
+      expect.stringContaining("aptus draft backend -d colas-de-mensajes"),
+    ]);
   });
 
   it("una carpeta sin nada legible NO escribe brief: sería fingir que hay índice", () => {
     const res = planNewDimension(
-      plan({ fuente: "carpeta", copiados: [], leidos: 0, descartados: 3 }),
+      plan([{ fuente: "carpeta", copiados: [], leidos: 0, descartados: 3 }]),
     );
 
     expect(res.written).toEqual(["pack.yaml"]);
@@ -184,55 +319,105 @@ describe("fuente: carpeta", () => {
 
   it("los ficheros que no se han sabido leer se dicen, no se callan", () => {
     const res = planNewDimension(
-      plan({ fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 2 }),
+      plan([{ fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 2 }]),
     );
 
     expect(res.pending).toContainEqual(expect.stringMatching(/2 fichero\(s\) no se han leído/));
   });
 
   it("sin descartados no aparece ese pendiente", () => {
-    const res = planNewDimension(
-      plan({ fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 0 }),
-    );
+    const res = planNewDimension(plan([CARPETA]));
 
     expect(res.pending.some((p) => /no se han leído/.test(p))).toBe(false);
   });
 });
 
 describe("fuente: oferta y buscar", () => {
-  it("la oferta queda escrita como material y no genera brief", () => {
-    const res = planNewDimension(plan({ fuente: "oferta", copiado: "sources/oferta-x.txt" }));
+  it("la oferta queda escrita como material y alimenta el brief como cualquier otra", () => {
+    const res = planNewDimension(plan([{ fuente: "oferta", copiado: "sources/oferta-x.txt" }]));
 
-    expect(res.written).toEqual(["sources/oferta-x.txt", "pack.yaml"]);
-    expect(res.written).not.toContain(BRIEF);
+    expect(res.written).toEqual(["sources/oferta-x.txt", BRIEF, "pack.yaml"]);
   });
 
   it("lo que escribe un modelo queda pendiente de verificar: no es fuente auditada", () => {
-    const res = planNewDimension(plan({ fuente: "buscar", copiado: "sources/investigacion-x.md" }));
+    const res = planNewDimension(
+      plan([{ fuente: "buscar", copiado: "sources/investigacion-x.md" }]),
+    );
 
     expect(res.written).toContain("sources/investigacion-x.md");
     expect(res.pending).toContainEqual(expect.stringMatching(/verificar el informe/));
   });
 });
 
-describe("fuente: ninguno", () => {
+describe("sin fuentes marcadas", () => {
   it("declara la dimensión y lo único pendiente es darle material", () => {
-    const res = planNewDimension(plan({ fuente: "ninguno" }));
+    const res = planNewDimension(plan([]));
 
     expect(res.written).toEqual(["pack.yaml"]);
     expect(res.pending).toEqual([expect.stringContaining("aptus ingest <carpeta> --pack backend")]);
   });
 
   it("no propone escribir preguntas de un tema sin material", () => {
-    const res = planNewDimension(plan({ fuente: "ninguno" }));
+    expect(planNewDimension(plan([])).pending.some((p) => /aptus draft/.test(p))).toBe(false);
+  });
+});
 
-    expect(res.pending.some((p) => /aptus draft/.test(p))).toBe(false);
+describe("fuentes combinadas", () => {
+  const dos: MaterialOutcome[] = [CARPETA, { fuente: "buscar", copiado: "sources/i.md" }];
+
+  it("todo lo que producen se acumula, en el orden en que se recorrieron", () => {
+    const res = planNewDimension(plan(dos));
+
+    expect(res.written).toEqual(["sources/a.md", "sources/i.md", BRIEF, "pack.yaml"]);
+  });
+
+  it("el brief es UNO solo aunque las fuentes sean varias", () => {
+    const res = planNewDimension(plan(dos));
+
+    expect(res.written.filter((f) => f === BRIEF)).toHaveLength(1);
+  });
+
+  it("una funciona y otra falla: se reportan las dos", () => {
+    const res = planNewDimension(
+      plan([CARPETA, { fuente: "fallo", origen: "buscar", motivo: "se ha cortado la red" }]),
+    );
+
+    expect(res.written).toContain("sources/a.md");
+    expect(res.pending).toContainEqual(expect.stringMatching(/'buscar' no ha dejado material/));
+    expect(res.pending).toContainEqual(expect.stringMatching(/se ha cortado la red/));
+  });
+
+  it("si TODAS caen, el tema queda como si no se hubiera marcado nada", () => {
+    const res = planNewDimension(
+      plan(
+        [
+          { fuente: "fallo", origen: "carpeta", motivo: "no existe" },
+          { fuente: "fallo", origen: "oferta", motivo: "no se puede leer" },
+        ],
+        { briefEscrito: false },
+      ),
+    );
+
+    expect(res.written).toEqual(["pack.yaml"]);
+    expect(res.pending).toContainEqual(expect.stringContaining("aptus ingest"));
+  });
+
+  it("cada fuente aporta sus propios pendientes, sin pisarse", () => {
+    const res = planNewDimension(
+      plan([
+        { fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 2 },
+        { fuente: "buscar", copiado: "sources/i.md" },
+      ]),
+    );
+
+    expect(res.pending).toContainEqual(expect.stringMatching(/no se han leído/));
+    expect(res.pending).toContainEqual(expect.stringMatching(/verificar el informe/));
   });
 });
 
 describe("declaración en pack.yaml", () => {
   it("una dimensión que ya estaba declarada no se cuenta como escrita", () => {
-    const res = planNewDimension(plan({ fuente: "ninguno" }, { dimensionDeclarada: false }));
+    const res = planNewDimension(plan([], { dimensionDeclarada: false }));
 
     expect(res.written).toEqual([]);
   });
@@ -241,10 +426,9 @@ describe("declaración en pack.yaml", () => {
 describe("borrador", () => {
   it("un borrador con preguntas queda escrito pero PENDIENTE de promover: no evalúa aún", () => {
     const res = planNewDimension(
-      plan(
-        { fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 0 },
-        { borrador: { validas: 9, descartadas: 3, fichero: "drafts/colas-de-mensajes.yaml" } },
-      ),
+      plan([CARPETA], {
+        borrador: { validas: 9, descartadas: 3, fichero: "drafts/colas-de-mensajes.yaml" },
+      }),
     );
 
     expect(res.written).toContain("drafts/colas-de-mensajes.yaml");
@@ -255,10 +439,9 @@ describe("borrador", () => {
 
   it("un borrador vacío no escribe nada y pide reintentarlo", () => {
     const res = planNewDimension(
-      plan(
-        { fuente: "oferta", copiado: "sources/oferta-x.txt" },
-        { borrador: { validas: 0, descartadas: 12, fichero: "drafts/colas-de-mensajes.yaml" } },
-      ),
+      plan([{ fuente: "oferta", copiado: "sources/oferta-x.txt" }], {
+        borrador: { validas: 0, descartadas: 12, fichero: "drafts/colas-de-mensajes.yaml" },
+      }),
     );
 
     expect(res.written).not.toContain("drafts/colas-de-mensajes.yaml");
@@ -267,10 +450,9 @@ describe("borrador", () => {
 
   it("pedir borrador sustituye al pendiente de 'escribir las preguntas'", () => {
     const res = planNewDimension(
-      plan(
-        { fuente: "buscar", copiado: "sources/investigacion-x.md" },
-        { borrador: { validas: 5, descartadas: 0, fichero: "drafts/colas-de-mensajes.yaml" } },
-      ),
+      plan([{ fuente: "buscar", copiado: "sources/investigacion-x.md" }], {
+        borrador: { validas: 5, descartadas: 0, fichero: "drafts/colas-de-mensajes.yaml" },
+      }),
     );
 
     expect(res.pending.some((p) => /aptus draft/.test(p))).toBe(false);
@@ -278,44 +460,31 @@ describe("borrador", () => {
 });
 
 describe("sin credenciales", () => {
-  const material: MaterialOutcome = {
-    fuente: "carpeta",
-    copiados: ["sources/a.md"],
-    leidos: 1,
-    descartados: 0,
-  };
-
   it("el resumen dice que falta la key en vez de callarse por qué no hay borrador", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: false }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: false }));
 
     expect(res.pending).toContainEqual(expect.stringContaining("ANTHROPIC_API_KEY"));
   });
 
   it("no propone `aptus draft`: es exactamente lo que no se puede hacer", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: false }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: false }));
 
     expect(res.pending.some((p) => /aptus draft/.test(p))).toBe(false);
     expect(res.pending).toContainEqual(expect.stringMatching(/a mano/));
   });
 
   it("con credenciales no se menciona la key: no falta nada", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: true }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: true }));
 
     expect(res.pending.some((p) => /ANTHROPIC_API_KEY/.test(p))).toBe(false);
   });
 });
 
 describe("esqueleto a mano", () => {
-  const material: MaterialOutcome = {
-    fuente: "carpeta",
-    copiados: ["sources/a.md"],
-    leidos: 1,
-    descartados: 0,
-  };
   const esqueleto = { entradas: 4, fichero: "drafts/colas-de-mensajes.yaml" };
 
   it("queda escrito y el pendiente es rellenarlo y promoverlo", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: false, esqueleto }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: false, esqueleto }));
 
     expect(res.written).toContain("drafts/colas-de-mensajes.yaml");
     expect(res.pending).toContainEqual(
@@ -324,7 +493,7 @@ describe("esqueleto a mano", () => {
   });
 
   it("dice cuántos huecos hay que rellenar y en qué fichero", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: false, esqueleto }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: false, esqueleto }));
     const paso = res.pending.find((p) => /promote/.test(p))!;
 
     expect(paso).toContain("4 pregunta(s)");
@@ -332,13 +501,13 @@ describe("esqueleto a mano", () => {
   });
 
   it("un esqueleto NO deja el tema evaluable: sigue habiendo un paso por delante", () => {
-    const res = planNewDimension(plan(material, { tieneApiKey: false, esqueleto }));
+    const res = planNewDimension(plan([CARPETA], { tieneApiKey: false, esqueleto }));
 
     expect(res.pending.length).toBeGreaterThan(0);
   });
 
   it("sobre un tema sin material, el esqueleto sustituye al pendiente genérico", () => {
-    const res = planNewDimension(plan({ fuente: "ninguno" }, { tieneApiKey: false, esqueleto }));
+    const res = planNewDimension(plan([], { tieneApiKey: false, esqueleto }));
 
     expect(res.pending.some((p) => /aptus ingest/.test(p))).toBe(false);
     expect(res.pending).toContainEqual(expect.stringContaining("aptus promote"));
@@ -346,17 +515,22 @@ describe("esqueleto a mano", () => {
 });
 
 describe("el tema nunca queda evaluable de golpe", () => {
-  const casos: MaterialOutcome[] = [
-    { fuente: "carpeta", copiados: ["sources/a.md"], leidos: 1, descartados: 0 },
-    { fuente: "carpeta", copiados: [], leidos: 0, descartados: 0 },
-    { fuente: "oferta", copiado: "sources/oferta-x.txt" },
-    { fuente: "buscar", copiado: "sources/investigacion-x.md" },
-    { fuente: "ninguno" },
+  const casos: MaterialOutcome[][] = [
+    [CARPETA],
+    [{ fuente: "carpeta", copiados: [], leidos: 0, descartados: 0 }],
+    [{ fuente: "oferta", copiado: "sources/oferta-x.txt" }],
+    [{ fuente: "buscar", copiado: "sources/investigacion-x.md" }],
+    [CARPETA, { fuente: "buscar", copiado: "sources/investigacion-x.md" }],
+    [{ fuente: "fallo", origen: "carpeta", motivo: "no existe" }],
+    [],
   ];
 
-  it.each(casos)("fuente '$fuente' siempre deja algo pendiente", (material) => {
-    // Un borrador recién generado no puede evaluarte: la regla de "lo no revisado
-    // no te evalúa" tiene que sobrevivir a cualquier camino del asistente.
-    expect(planNewDimension(plan(material)).pending.length).toBeGreaterThan(0);
-  });
+  it.each(casos.map((c, i) => [i, c] as const))(
+    "la combinación #%i siempre deja algo pendiente",
+    (_i, materiales) => {
+      // Un borrador recién generado no puede evaluarte: la regla de "lo no revisado
+      // no te evalúa" tiene que sobrevivir a cualquier camino del asistente.
+      expect(planNewDimension(plan(materiales)).pending.length).toBeGreaterThan(0);
+    },
+  );
 });
