@@ -398,7 +398,10 @@ async function runNewDimension(
   existing: readonly string[],
 ): Promise<boolean> {
   const { newDimensionFlow } = await import("./new-dimension.js");
-  const res = await newDimensionFlow(packDir, packName, existing);
+  const { hasApiCredentials } = await import("../content/draft.js");
+  // Se miran AQUÍ, una vez y antes de entrar: el flujo decide qué ofrece con este
+  // dato, no volviendo a mirar el entorno a mitad del asistente.
+  const res = await newDimensionFlow(packDir, packName, existing, hasApiCredentials());
 
   // Cancelado: se devuelve `false` para volver a la lista de dimensiones. Haber
   // entrado aquí sin querer no debería costar el asistente entero.
