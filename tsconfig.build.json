@@ -1,0 +1,19 @@
+{
+  // Config SOLO para emitir el artefacto. `tsconfig.json` sigue siendo el del
+  // typecheck (`--noEmit` sobre `src` y `test`) y el que lee el editor: tener dos
+  // ficheros es lo que permite dejar los tests fuera de `dist/` sin dejar de
+  // comprobarlos.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    // La jerarquía de `src/` se conserva tal cual en `dist/`, así que
+    // `src/cli/commands/x.ts` → `dist/cli/commands/x.js` sigue estando a tres
+    // niveles de la raíz del paquete. Todo el código de rutas depende de eso.
+    "outDir": "dist"
+  },
+  // Esto es una aplicación, no una librería: ni `declaration` ni `sourceMap`.
+  // Solo engordarían el tarball.
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}
