@@ -3,6 +3,7 @@ import { parse } from "yaml";
 import { QuestionSchema } from "../content/schema.js";
 import {
   admiteBorrador,
+  browseChoices,
   editorDePegado,
   ficherosDe,
   investigacionSourceName,
@@ -202,6 +203,66 @@ describe("ordenarFuentes", () => {
 
   it("una fuente repetida se recorre una sola vez", () => {
     expect(ordenarFuentes(["carpeta", "carpeta"])).toEqual(["carpeta"]);
+  });
+});
+
+describe("browseChoices", () => {
+  const acciones = (v: ReturnType<typeof browseChoices>): string[] =>
+    v.choices.map((c) => c.accion);
+
+  it("desde una carpeta normal se puede usarla, subir, bajar o escribir la ruta", () => {
+    const v = browseChoices("/home/carlos/apuntes", ["kafka", "redis"]);
+
+    expect(acciones(v)).toEqual(["usar", "subir", "bajar", "bajar", "escribir"]);
+    expect(v.choices.find((c) => c.accion === "usar")!.ruta).toBe("/home/carlos/apuntes");
+  });
+
+  it("bajar lleva a la subcarpeta, subir al padre", () => {
+    const v = browseChoices("/home/carlos", ["apuntes"]);
+
+    expect(v.choices.find((c) => c.accion === "subir")!.ruta).toBe("/home");
+    expect(v.choices.find((c) => c.accion === "bajar")!.ruta).toBe("/home/carlos/apuntes");
+  });
+
+  it("en la raíz no se ofrece subir: sería un paso que no se mueve", () => {
+    expect(acciones(browseChoices("/", ["tmp"]))).toEqual(["usar", "bajar", "escribir"]);
+  });
+
+  it("una carpeta sin subcarpetas sigue siendo elegible, no un callejón", () => {
+    const v = browseChoices("/home/carlos/vacia", []);
+
+    expect(acciones(v)).toEqual(["usar", "subir", "escribir"]);
+    expect(v.nota).toBeNull();
+  });
+
+  it("escribir la ruta está SIEMPRE: navegar es una ayuda, no una obligación", () => {
+    for (const caso of [browseChoices("/", []), browseChoices("/a/b", ["c"])]) {
+      expect(acciones(caso)).toContain("escribir");
+    }
+  });
+
+  it("una carpeta enorme se corta y dice cuántas faltan, en vez de fingir que no están", () => {
+    const muchas = Array.from({ length: 200 }, (_, i) => `d${i}`);
+    const v = browseChoices("/datos", muchas, false, 60);
+
+    expect(v.choices.filter((c) => c.accion === "bajar")).toHaveLength(60);
+    expect(v.ocultos).toBe(140);
+    expect(v.nota).toMatch(/140 subcarpeta\(s\) más sin listar/);
+  });
+
+  it("si el listado del disco se cortó también se avisa: no se sabe cuánto falta", () => {
+    const v = browseChoices("/datos", ["a"], true);
+
+    expect(v.ocultos).toBe(0);
+    expect(v.nota).toMatch(/demasiadas entradas/);
+  });
+
+  it("una carpeta ilegible (nada que listar) no rompe: se usa, se sube o se escribe", () => {
+    expect(acciones(browseChoices("/root/secreta", [], false))).toEqual([
+      "usar",
+      "subir",
+      "escribir",
+    ]);
   });
 });
 

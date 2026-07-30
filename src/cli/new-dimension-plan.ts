@@ -1,4 +1,4 @@
-import { basename } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { toKebab } from "../core/brief.js";
 
 /**
@@ -184,6 +184,76 @@ export const ORDEN_FUENTES: readonly MaterialSource[] = ["carpeta", "oferta", "p
 export function ordenarFuentes(seleccion: readonly MaterialSource[]): MaterialSource[] {
   const marcadas = new Set(seleccion);
   return ORDEN_FUENTES.filter((f) => marcadas.has(f));
+}
+
+/**
+ * Cuántas subcarpetas se pintan de una vez. Una carpeta con miles de entradas no
+ * se navega mejor por listarlas todas: se convierte en una lista por la que hay
+ * que bajar a ciegas. Pasado el tope se dice cuántas faltan y se recuerda que
+ * escribir la ruta sigue estando ahí.
+ */
+export const MAX_SUBDIRS_VISIBLES = 60;
+
+export type BrowseAccion = "usar" | "subir" | "bajar" | "escribir";
+
+export interface BrowseChoice {
+  readonly accion: BrowseAccion;
+  /** A dónde lleva. Cadena vacía en 'escribir', que no navega a ningún sitio. */
+  readonly ruta: string;
+  readonly name: string;
+}
+
+export interface BrowseView {
+  readonly choices: BrowseChoice[];
+  /** Subcarpetas que existen y no se pintan. 0 = se ven todas. */
+  readonly ocultos: number;
+  /** Aviso que hay que dar antes de pintar la lista, o `null` si no hay ninguno. */
+  readonly nota: string | null;
+}
+
+/**
+ * La pantalla de navegar una carpeta, como DATOS: qué opciones hay estando en
+ * `actual` con estas subcarpetas dentro.
+ *
+ * Navegar es una AYUDA, no una obligación: 'Escribir la ruta a mano' está siempre,
+ * porque quien ya sabe dónde está su material no tiene por qué bajar seis niveles
+ * a golpe de flecha para llegar.
+ *
+ * Existe aquí, en el módulo puro, porque las trampas de esto son decisiones y no
+ * dibujo: en la raíz no hay a dónde subir, una carpeta enorme hay que cortarla, y
+ * cuando se corta hay que DECIRLO — si no, parece que tu carpeta no está.
+ */
+export function browseChoices(
+  actual: string,
+  subdirs: readonly string[],
+  /** `true` si el listado del disco se cortó: hay más, y no se sabe cuánto más. */
+  listadoIncompleto = false,
+  max: number = MAX_SUBDIRS_VISIBLES,
+): BrowseView {
+  const visibles = subdirs.slice(0, Math.max(0, max));
+  const ocultos = subdirs.length - visibles.length;
+
+  const choices: BrowseChoice[] = [{ accion: "usar", ruta: actual, name: "Usar esta carpeta" }];
+
+  // En la raíz `dirname` devuelve la propia raíz: ofrecer "subir" ahí sería un paso
+  // que no se mueve, y de esos se sale a base de sospechar que la app está colgada.
+  const padre = dirname(actual);
+  if (padre !== actual) {
+    choices.push({ accion: "subir", ruta: padre, name: `..  (subir a ${padre})` });
+  }
+
+  for (const d of visibles) choices.push({ accion: "bajar", ruta: join(actual, d), name: `${d}/` });
+
+  choices.push({ accion: "escribir", ruta: "", name: "Escribir la ruta a mano" });
+
+  const nota =
+    ocultos > 0
+      ? `${ocultos} subcarpeta(s) más sin listar: escribe la ruta a mano si buscas una que no sale`
+      : listadoIncompleto
+        ? "la carpeta tiene demasiadas entradas para recorrerlas: escribe la ruta a mano si no ves la que buscas"
+        : null;
+
+  return { choices, ocultos, nota };
 }
 
 /** Qué pasó con UNA fuente, ya resuelto el I/O. */

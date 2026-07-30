@@ -1,5 +1,13 @@
-import { checkbox, confirm, editor, input } from "@inquirer/prompts";
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { checkbox, confirm, editor, input, select } from "@inquirer/prompts";
+import {
+  existsSync,
+  mkdirSync,
+  opendirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { delimiter, join, resolve } from "node:path";
 import pc from "picocolors";
 import { stringify } from "yaml";
@@ -15,6 +23,7 @@ import {
 } from "../core/brief.js";
 import {
   admiteBorrador,
+  browseChoices,
   editorDePegado,
   investigacionSourceName,
   materialParaBorrador,
@@ -30,6 +39,7 @@ import {
   validateDimensionName,
   SIN_FUENTES_HINT,
   type BorradorOutcome,
+  type BrowseChoice,
   type EsqueletoOutcome,
   type MaterialOutcome,
   type MaterialSource,
@@ -110,6 +120,88 @@ async function askPath(message: string, tipo: "fichero" | "carpeta"): Promise<st
   return expandir(bruto);
 }
 
+/**
+ * Techo de entradas que se recorren de una carpeta al navegar. No es lo mismo que
+ * cuántas se pintan: es cuántas se MIRAN. Sin él, entrar sin querer en una carpeta
+ * de medio millón de ficheros deja el asistente parado sin decir nada.
+ */
+const MAX_ENTRADAS_LEIDAS = 5000;
+
+/**
+ * Subcarpetas de `dir`, ordenadas. Nunca lanza: una carpeta sin permisos o que
+ * desaparece a mitad devuelve lo que se haya podido leer, y desde ahí siempre se
+ * puede subir, usarla o escribir la ruta.
+ *
+ * Se usa `opendirSync` y no `readdirSync` porque `readdirSync` materializa la
+ * carpeta entera antes de devolver nada: aquí se corta al llegar al techo.
+ */
+function listarSubdirs(dir: string): { dirs: string[]; incompleto: boolean } {
+  let handle;
+  try {
+    handle = opendirSync(dir);
+  } catch {
+    return { dirs: [], incompleto: false };
+  }
+
+  const dirs: string[] = [];
+  let vistas = 0;
+  let incompleto = false;
+  try {
+    for (;;) {
+      const entrada = handle.readSync();
+      if (entrada === null) break;
+      vistas += 1;
+      if (vistas > MAX_ENTRADAS_LEIDAS) {
+        incompleto = true;
+        break;
+      }
+      // Las ocultas no se listan (son ruido en cualquier home), pero se puede
+      // llegar a ellas escribiendo la ruta: no quedan prohibidas, solo fuera.
+      if (entrada.isDirectory() && !entrada.name.startsWith(".")) dirs.push(entrada.name);
+    }
+  } catch {
+    // Ilegible a mitad del recorrido: vale lo leído hasta aquí.
+    incompleto = true;
+  } finally {
+    try {
+      handle.closeSync();
+    } catch {
+      // Ya cerrado o inválido: no hay nada que salvar.
+    }
+  }
+
+  return { dirs: dirs.sort((a, b) => a.localeCompare(b)), incompleto };
+}
+
+/**
+ * Elegir una carpeta navegando, partiendo de `inicio`.
+ *
+ * Antes esto era un `input` que solo comprobaba que la ruta existiera: para
+ * acertar había que saberse la ruta de memoria y escribirla sin una errata. Ahora
+ * se baja y se sube con las flechas — y escribir la ruta sigue estando ahí para
+ * quien ya la sabe, que es más rápido que navegar.
+ */
+async function pickDirectory(message: string, inicio: string): Promise<string> {
+  let actual = inicio;
+
+  for (;;) {
+    const { dirs, incompleto } = listarSubdirs(actual);
+    const vista = browseChoices(actual, dirs, incompleto);
+    if (vista.nota !== null) console.log(`  ${pc.yellow("⚠")} ${pc.dim(vista.nota)}`);
+
+    const elegido = await select<BrowseChoice>({
+      message: pc.bold(`  ${message}`) + pc.dim(`  ${actual}`),
+      choices: vista.choices.map((c) => ({ value: c, name: c.name })),
+      pageSize: 12,
+      theme: promptTheme,
+    });
+
+    if (elegido.accion === "usar") return actual;
+    if (elegido.accion === "escribir") return await askPath(message, "carpeta");
+    actual = elegido.ruta;
+  }
+}
+
 /** Qué hay ya en `sources/`, para no pisarlo. Si no existe todavía, no hay nada. */
 function nombresEnSources(sourcesDir: string): string[] {
   try {
@@ -126,7 +218,7 @@ interface FuenteResult {
 }
 
 async function desdeCarpeta(packDir: string): Promise<FuenteResult> {
-  const dir = await askPath("¿Dónde está el material?", "carpeta");
+  const dir = await pickDirectory("¿Dónde está el material?", process.cwd());
   const { docs, skipped } = await ingestDirectory(dir);
 
   if (docs.length === 0) {
