@@ -1,0 +1,19 @@
+# Pack: Applied AI Engineer — seis dimensiones derivadas de la JD de Codeway/Wishlabs
+# (Barcelona, ago 2026), en sources/jd-codeway-wishlabs-applied-ai-engineer.md.
+#
+# La JD decide QUÉ se evalúa; la corrección de cada pregunta se ancla en documentación
+# externa e independiente de la oferta. Cada pregunta declara su procedencia en `source`
+# (jd-codeway = pedido explícitamente por la oferta, autoseleccionado; externa:<ref> =
+# hecho verificable en docs públicas), para poder auditar el sesgo de autocuración.
+#
+# No solapa con el pack ai-ml-readiness: allí se mide LLM/RAG/ML clásico y system design
+# de producto; aquí se mide el oficio agéntico — harness, loop, MCP, evals, safety.
+name: "applied-ai-engineer"
+version: "0.1.0"
+dimensions:
+  - agentes-harnesses
+  - mcp-integraciones
+  - evals-observabilidad
+  - seguridad-agentes
+  - memoria-retrieval
+  - producto-discovery-envio

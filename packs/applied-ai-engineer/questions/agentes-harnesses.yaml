@@ -1,0 +1,1375 @@
+# Dimensión: agentes-harnesses — el oficio del bucle: tool use, contexto, harness,
+# scaffolding y las superficies sobre las que se construye un agente.
+#
+# source: jd-codeway (la oferta lo pide explícitamente) | externa:<ref> (hecho verificable
+# en documentación pública e independiente de la oferta).
+# type: concepto|diagrama|codigo|escenario. Incluye tramo 'experto' (nivel staff).
+
+- id: agentes-001
+  dimension: agentes-harnesses
+  subtopic: bucle-agentico
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - Applied AI Engineer
+    - AI Engineer
+  stem: En un bucle agéntico construido a pelo sobre la API de mensajes, ¿qué condición marca
+    el final del bucle?
+  options:
+    - id: a
+      text: Que la respuesta del modelo ya no pida ejecutar herramientas (stop_reason distinto de
+        'tool_use')
+    - id: b
+      text: Que el modelo agote su presupuesto de tokens de razonamiento
+    - id: c
+      text: Que todas las herramientas declaradas hayan sido invocadas al menos una vez
+    - id: d
+      text: Que el usuario envíe un mensaje nuevo
+  correct: a
+  explanation: "El bucle es: pedir → si el modelo devuelve bloques tool_use, ejecutarlos y
+    devolver los tool_result → repetir. Termina cuando el modelo deja de pedir herramientas
+    (típicamente stop_reason 'end_turn'). Ni el presupuesto de razonamiento ni haber tocado
+    todas las herramientas son criterios: el modelo decide cuáles usa y cuántas veces."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-002
+  dimension: agentes-harnesses
+  subtopic: definiciones
+  difficulty: easy
+  type: concepto
+  roles: &a2
+    - Applied AI Engineer
+    - AI Engineer
+    - Agent Engineer
+  stem: En la jerga de agentes, ¿qué es un 'harness'?
+  options:
+    - id: c
+      text: El prompt de sistema que define la personalidad del agente
+    - id: b
+      text: "El código que rodea al modelo: el bucle, la gestión de contexto, la ejecución de
+        herramientas y los permisos"
+    - id: a
+      text: El modelo de lenguaje concreto que se usa por debajo
+    - id: d
+      text: El conjunto de evaluaciones que mide la calidad del agente
+  correct: b
+  explanation: "El harness es el arnés alrededor del modelo: quién ejecuta el bucle, cómo se
+    administra el contexto, cómo se ejecutan y se autorizan las herramientas, cómo se
+    recupera de errores. El prompt es una pieza dentro del harness, no el harness; el modelo
+    es lo que el harness conduce."
+  source: jd-codeway
+  date: 2026-08-10
+- id: agentes-003
+  dimension: agentes-harnesses
+  subtopic: tool-use-protocolo
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: Al devolver el resultado de una herramienta a la API de mensajes, ¿qué campo
+    correlaciona ese resultado con la petición que lo originó?
+  options:
+    - id: a
+      text: El nombre de la herramienta
+    - id: d
+      text: El índice del bloque dentro del contenido de la respuesta
+    - id: b
+      text: El tool_use_id del bloque tool_use correspondiente
+    - id: c
+      text: El id del mensaje del asistente
+  correct: b
+  explanation: "Cada bloque tool_use lleva un id, y el tool_result debe repetirlo en
+    tool_use_id. El nombre no basta: el modelo puede llamar dos veces a la misma herramienta
+    en el mismo turno, y hay que saber qué resultado corresponde a qué llamada."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-004
+  dimension: agentes-harnesses
+  subtopic: tool-use-protocolo
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Tu agente recibe un turno con tres bloques tool_use. Los ejecutas en paralelo y, según
+    va terminando cada uno, envías su tool_result en un mensaje 'user' distinto. Funciona,
+    pero con el tiempo observas que el modelo deja de pedir herramientas en paralelo. ¿Por
+    qué?
+  options:
+    - id: c
+      text: Porque ejecutar en paralelo consume el límite de peticiones por minuto y la API
+        degrada el comportamiento
+    - id: b
+      text: Porque el paralelismo solo está soportado con salidas estructuradas activadas
+    - id: d
+      text: Porque los tool_result deben ir en mensajes 'assistant', no 'user'
+    - id: a
+      text: Porque partir los tool_result en varios mensajes le enseña al modelo que sus llamadas
+        paralelas no se atienden como tales; hay que devolver todos los tool_result en un
+        único mensaje 'user'
+  correct: a
+  explanation: "El contrato es: un turno del asistente puede contener varios bloques tool_use,
+    y TODOS sus tool_result vuelven en un solo mensaje de rol 'user'. Repartirlos en
+    mensajes sucesivos reescribe la historia como si hubieran sido llamadas secuenciales, y
+    el modelo aprende de esa historia a no pedirlas en paralelo."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-005
+  dimension: agentes-harnesses
+  subtopic: errores-y-reintentos
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: Una herramienta de tu agente falla (la API externa devuelve 500). ¿Qué haces con ese
+    turno?
+  options:
+    - id: a
+      text: Devolver un tool_result con is_error activado y un mensaje de error informativo
+    - id: b
+      text: Omitir el tool_result de esa herramienta y devolver solo los que sí funcionaron
+    - id: c
+      text: Abortar el bucle y devolver el error al usuario final
+    - id: d
+      text: Reintentar la llamada en silencio hasta que funcione
+  correct: a
+  explanation: Un fallo de herramienta se comunica al modelo como tool_result con is_error y
+    un texto que explique qué pasó, para que pueda adaptarse (probar otros parámetros, otra
+    vía, o avisar). Omitir el bloque rompe el emparejamiento tool_use/tool_result; abortar
+    desperdicia la capacidad del modelo de recuperarse; reintentar en silencio esconde el
+    problema y puede duplicar efectos.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-006
+  dimension: agentes-harnesses
+  subtopic: stop-reasons
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Tu agente usa herramientas de servidor (búsqueda web) y recibe una respuesta con
+    stop_reason 'pause_turn'. ¿Cuál es la reacción correcta?
+  options:
+    - id: d
+      text: Tratarlo como un error transitorio y reintentar la petición original desde cero
+    - id: b
+      text: Volver a llamar a la API con el mensaje de usuario y el turno del asistente tal cual,
+        sin añadir un mensaje de 'Continúa'
+    - id: a
+      text: Añadir un mensaje de usuario que diga 'Continúa' y reenviar
+    - id: c
+      text: "Considerar la respuesta completa: 'pause_turn' significa que el modelo terminó"
+  correct: b
+  explanation: "'pause_turn' significa que el bucle de herramientas del servidor alcanzó su
+    límite de iteraciones. Se reanuda reenviando la conversación con el turno del asistente
+    añadido; el servidor detecta el bloque de uso de herramienta pendiente y continúa solo.
+    Añadir un 'Continúa' mete ruido en la conversación y no hace falta. Conviene poner un
+    tope de reanudaciones para no encadenar un bucle infinito."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-007
+  dimension: agentes-harnesses
+  subtopic: stop-reasons
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    El siguiente manejador de respuesta tiene un fallo real de robustez. ¿Cuál?
+
+        resp = client.messages.create(model=MODEL, max_tokens=4096, messages=msgs)
+        texto = resp.content[0].text
+        guardar(texto)
+  options:
+    - id: b
+      text: Falta pasar el prompt de sistema, sin el cual la llamada no es válida
+    - id: c
+      text: max_tokens debería ser siempre mayor que la longitud del prompt de entrada
+    - id: a
+      text: "Da por hecho que content[0] existe y es texto: si el turno acaba en un rechazo
+        (stop_reason 'refusal') content puede venir vacío, y si el modelo razona o pide
+        herramientas el primer bloque no es de texto"
+    - id: d
+      text: La respuesta hay que recorrerla con await porque siempre llega en streaming
+  correct: a
+  explanation: content es una lista de bloques heterogéneos (texto, razonamiento, uso de
+    herramienta) y puede llegar vacía cuando el turno acaba en rechazo. Lo correcto es mirar
+    stop_reason antes de leer el contenido y filtrar los bloques por tipo en vez de indexar
+    a ciegas.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-008
+  dimension: agentes-harnesses
+  subtopic: superficies-de-agente
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: "Dos piezas de Anthropic se confunden constantemente: el 'tool runner' del SDK de la
+    API y el Claude Agent SDK. ¿Cuál es la diferencia de fondo?"
+  options:
+    - id: c
+      text: El tool runner es la versión de pago y el Agent SDK la versión de código abierto de lo
+        mismo
+    - id: a
+      text: El tool runner ejecuta las herramientas en infraestructura de Anthropic y el Agent SDK
+        en la tuya
+    - id: d
+      text: El tool runner solo funciona con salidas estructuradas y el Agent SDK solo con
+        streaming
+    - id: b
+      text: El tool runner recorre el bucle sobre las herramientas que TÚ defines (no trae
+        herramientas propias); el Agent SDK es el harness de Claude Code empaquetado como
+        librería, con herramientas integradas de ficheros, bash y búsqueda
+  correct: b
+  explanation: "Son paquetes distintos. El tool runner es una ayuda del SDK de la API
+    (client.beta.messages.tool_runner) que automatiza pedir→ejecutar→repetir sobre tus
+    herramientas; no trae herramientas ni sandbox. El Agent SDK es Claude Code como
+    librería: bucle completo, herramientas integradas, hooks, subagentes, permisos. Los dos
+    son 'solo harness': el despliegue lo pones tú."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-009
+  dimension: agentes-harnesses
+  subtopic: superficies-de-agente
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Separando 'quién pone el harness' de 'quién pone el despliegue', ¿qué distingue a los
+    agentes gestionados (Managed Agents) del resto de formas de construir un agente sobre la
+    API?
+  options:
+    - id: d
+      text: "Que son la única opción que aporta a la vez el harness y el despliegue: Anthropic
+        ejecuta el bucle y hospeda un contenedor por sesión donde corren las herramientas"
+    - id: b
+      text: Que son la única opción que permite definir herramientas propias
+    - id: a
+      text: Que son la única opción compatible con MCP
+    - id: c
+      text: Que son la única opción que soporta razonamiento extendido
+  correct: d
+  explanation: "El bucle manual, el tool runner y el Agent SDK son harness: el despliegue
+    sigue siendo tuyo. Los agentes gestionados añaden el despliegue —el bucle corre en la
+    capa de orquestación de Anthropic y las herramientas se ejecutan en un contenedor
+    provisionado por sesión—. Herramientas propias, MCP y razonamiento existen en las otras
+    opciones también."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-010
+  dimension: agentes-harnesses
+  subtopic: diseno-tool-surface
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Tu agente ya tiene una herramienta 'bash' con la que puede hacer casi cualquier cosa.
+    ¿Cuál es la razón más sólida para promover una acción concreta (por ejemplo, enviar un
+    correo) a herramienta dedicada?
+  options:
+    - id: c
+      text: Porque el modelo escribe comandos de shell con más errores que JSON
+    - id: b
+      text: Porque una herramienta dedicada le da al harness un punto de enganche con argumentos
+        tipados que puede interceptar, pedir confirmación, renderizar o auditar; una cadena
+        de shell opaca no
+    - id: a
+      text: Porque reduce el número de tokens del esquema de herramientas
+    - id: d
+      text: Porque bash no puede ejecutar acciones irreversibles
+  correct: b
+  explanation: Bash da alcance; una herramienta dedicada da control. Con argumentos tipados el
+    harness puede poner una puerta de aprobación, comprobar invariantes, dibujar una UI
+    específica o marcar la acción como paralelizable. Con `bash -c "curl -X POST ..."` todas
+    las acciones tienen la misma forma opaca y el harness no puede distinguirlas.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-011
+  dimension: agentes-harnesses
+  subtopic: diseno-tool-surface
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué contenido pertenece a la 'description' de una herramienta y cuál no?
+  options:
+    - id: b
+      text: "Cuanto más corta mejor: una línea con el verbo y el objeto es lo ideal"
+    - id: c
+      text: Debe incluir siempre dos o tres ejemplos completos de llamada y respuesta
+    - id: a
+      text: "Sí: qué hace, cuándo llamarla y cuándo no, qué significa cada parámetro, límites y
+        qué NO devuelve. No: diálogos de ejemplo, protocolos numerados o instrucciones de
+        conversación"
+    - id: d
+      text: Debe listar qué otras herramientas NO usar cuando esta aplica
+  correct: a
+  explanation: "La descripción es la página de manual de la herramienta: contrato y
+    condiciones de disparo. Ser demasiado escueto es el fallo más común y perjudica el
+    rendimiento. Los ejemplos largos y los protocolos incrustados ocupan contexto en cada
+    petición y limitan la exploración: ese material va a skills o carga progresiva. Y las
+    referencias cruzadas del tipo 'nunca uses X' meten instrucción conversacional en un
+    contrato."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-012
+  dimension: agentes-harnesses
+  subtopic: contexto
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Compactación, edición de contexto y memoria resuelven cosas distintas. ¿Cuál es la
+    correspondencia correcta?
+  options:
+    - id: a
+      text: Compactación = elimina bloques viejos; edición de contexto = los resume; memoria =
+        amplía la ventana de contexto
+    - id: b
+      text: Las tres son nombres del mismo mecanismo en distintas versiones de la API
+    - id: d
+      text: Compactación y edición operan entre sesiones; memoria opera dentro de una sesión
+    - id: c
+      text: Compactación = resume el historial antiguo; edición de contexto = elimina resultados
+        de herramienta o bloques de razonamiento viejos; memoria = persiste estado entre
+        sesiones
+  correct: c
+  explanation: La edición de contexto PODA (borra resultados de herramienta o razonamiento
+    antiguos), la compactación RESUME cuando te acercas al límite de ventana, y la memoria
+    PERSISTE fuera de la conversación para sobrevivir al reinicio del proceso. Las dos
+    primeras operan dentro de una sesión; la memoria es la que cruza sesiones. Muchos
+    agentes largos usan las tres.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-013
+  dimension: agentes-harnesses
+  subtopic: contexto
+  difficulty: hard
+  type: codigo
+  roles: *a1
+  stem: >-
+    Un agente de conversación larga activa la compactación del servidor. Tras varios turnos,
+    el modelo pierde el hilo de lo hablado al principio. Este es el manejo del turno:
+
+        resp = client.beta.messages.create(..., context_management={"edits": [{"type": "compact_20260112"}]})
+        texto = "".join(b.text for b in resp.content if b.type == "text")
+        mensajes.append({"role": "assistant", "content": texto})
+
+    ¿Dónde está el fallo?
+  options:
+    - id: d
+      text: "Se vuelve a añadir solo el texto: los bloques de compactación que devuelve la API se
+        pierden, y con ellos el resumen que sustituye al historial compactado. Hay que
+        añadir resp.content entero"
+    - id: a
+      text: La compactación no funciona en el espacio beta del cliente
+    - id: b
+      text: Falta fijar un umbral de disparo; sin él la compactación no se activa nunca
+    - id: c
+      text: El rol debería ser 'system' y no 'assistant'
+  correct: d
+  explanation: "La compactación devuelve bloques que la API usa en la siguiente petición para
+    reemplazar el historial resumido. Extraer solo la cadena de texto y añadir eso descarta
+    el estado de compactación en silencio: no falla nada, simplemente se pierde el resumen.
+    La regla es añadir resp.content completo, no el texto extraído."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-014
+  dimension: agentes-harnesses
+  subtopic: cache-en-agentes
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: La caché de prompts funciona por coincidencia de prefijo. Sabiendo que el orden de
+    renderizado es herramientas → sistema → mensajes, ¿qué cambio invalida MÁS caché?
+  options:
+    - id: b
+      text: Añadir un mensaje nuevo al final de la conversación
+    - id: a
+      text: Añadir, quitar o reordenar una herramienta
+    - id: c
+      text: Cambiar tool_choice entre peticiones
+    - id: d
+      text: Activar o desactivar el razonamiento
+  correct: a
+  explanation: "Las herramientas se renderizan en la posición 0, así que tocarlas invalida
+    herramientas, sistema y mensajes: todo. El prompt de sistema invalida sistema y
+    mensajes. tool_choice y el razonamiento invalidan solo el tramo de mensajes. Añadir al
+    final no invalida nada. De ahí la regla práctica: no cambies el conjunto de herramientas
+    a mitad de conversación."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-015
+  dimension: agentes-harnesses
+  subtopic: cache-en-agentes
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: Tu agente necesita meterle una instrucción de operador a mitad de sesión ('modo
+    conciso activado'). Editar el prompt de sistema funcionaría, pero te destroza la caché
+    de todo el historial. ¿Cuál es la alternativa que preserva el prefijo cacheado?
+  options:
+    - id: b
+      text: Reenviar la instrucción en cada llamada como primer elemento del array de mensajes
+    - id: a
+      text: Duplicar el prompt de sistema con y sin la instrucción y alternar entre los dos
+    - id: c
+      text: Añadir un mensaje con rol 'system' al final del array de mensajes, después del
+        historial cacheado
+    - id: d
+      text: Meterla como descripción de una herramienta nueva
+  correct: c
+  explanation: "En los modelos que lo soportan se puede añadir {'role':'system', ...} dentro
+    del array de mensajes: al ir DESPUÉS del historial, el prefijo cacheado sigue intacto, y
+    además es un canal de operador no falsificable (a diferencia de meter la instrucción
+    como texto de usuario). Ponerla la primera, o editar el system de arriba, cambia el
+    prefijo y reprocesa toda la conversación."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-016
+  dimension: agentes-harnesses
+  subtopic: cache-en-agentes
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Un agente con muchas llamadas a herramientas por turno empieza a fallar la caché entre
+    peticiones, aunque el prefijo es idéntico y los puntos de corte están puestos. Los
+    turnos añaden 30-40 bloques de contenido cada uno. ¿Cuál es la causa más probable?
+  options:
+    - id: a
+      text: El límite de 4 puntos de corte por petición se ha superado y la API los ignora todos
+    - id: b
+      text: Los resultados de herramienta nunca son cacheables
+    - id: c
+      text: El TTL de 5 minutos expira entre turnos por la latencia de las herramientas
+    - id: d
+      text: Cada punto de corte solo mira hacia atrás un número acotado de bloques (unos 20)
+        buscando una entrada previa; un turno que añade más bloques que esa ventana deja el
+        corte fuera de alcance
+  correct: d
+  explanation: El punto de corte retrocede un número limitado de bloques (del orden de 20)
+    para encontrar la entrada anterior. Un turno agéntico que añade 30-40 bloques de
+    tool_use/tool_result deja la entrada previa fuera de esa ventana y el fallo es
+    silencioso. El arreglo es intercalar cortes intermedios cada ~15 bloques dentro de los
+    turnos largos. El TTL es plausible pero se descartaría mirando los tiempos; los
+    resultados de herramienta sí son cacheables.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-017
+  dimension: agentes-harnesses
+  subtopic: cache-en-agentes
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: Lanzas 20 peticiones en paralelo que comparten un prefijo grande idéntico. Ninguna lee
+    caché y pagas 20 escrituras. ¿Cuál es el patrón correcto?
+  options:
+    - id: c
+      text: Enviar una primera petición, esperar a que empiece a llegar su respuesta, y solo
+        entonces lanzar las 19 restantes
+    - id: a
+      text: "Subir el TTL a una hora: con TTL corto la caché no llega a materializarse"
+    - id: b
+      text: Poner el punto de corte al final del prompt completo en lugar de al final del prefijo
+        común
+    - id: d
+      text: "No hay solución: las peticiones concurrentes nunca comparten caché"
+  correct: c
+  explanation: "Una entrada de caché no es legible hasta que la primera respuesta empieza a
+    emitirse. Veinte peticiones simultáneas escriben todas en frío. Calentando con una y
+    esperando al primer token, las demás ya leen. Subir el TTL no cambia el problema (es de
+    carrera, no de expiración) y poner el corte al final del prompt completo empeoraría:
+    cada petición escribiría una entrada distinta."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-018
+  dimension: agentes-harnesses
+  subtopic: thinking-effort
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En los modelos actuales, ¿dónde se configura el parámetro de esfuerzo (effort) y qué
+    controla?
+  options:
+    - id: b
+      text: Como parámetro de primer nivel de la petición; controla la temperatura efectiva
+    - id: d
+      text: Dentro de output_config; controla la profundidad de razonamiento y el gasto general de
+        tokens
+    - id: a
+      text: Dentro del objeto thinking; sustituye al presupuesto de tokens de razonamiento
+    - id: c
+      text: Como cabecera HTTP; controla la prioridad de la petición en la cola
+  correct: d
+  explanation: "effort va dentro de output_config (output_config: {effort: 'high'}), no de
+    primer nivel ni dentro de thinking. Controla cuánto piensa y cuánto actúa el modelo: a
+    menor esfuerzo, menos llamadas a herramienta y respuestas más escuetas. No es una
+    temperatura ni una prioridad de cola."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-019
+  dimension: agentes-harnesses
+  subtopic: thinking-effort
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: "Un compañero propone controlar el razonamiento con thinking: {type: 'enabled',
+    budget_tokens: 8000} en un modelo de la generación actual (Opus 5 / Sonnet 5 / Fable 5).
+    ¿Qué le respondes?"
+  options:
+    - id: b
+      text: Que funciona pero solo si budget_tokens es menor que max_tokens
+    - id: c
+      text: Que funciona y es la forma recomendada de acotar el gasto en producción
+    - id: a
+      text: "Que ese parámetro se ha retirado y la petición devolverá un 400: hoy se usa
+        razonamiento adaptativo y se regula la profundidad con effort"
+    - id: d
+      text: "Que es equivalente a effort: 'medium' y da exactamente el mismo resultado"
+  correct: a
+  explanation: El presupuesto fijo de tokens de razonamiento está retirado en la generación
+    actual y la petición se rechaza con 400. El sustituto es el razonamiento adaptativo (el
+    modelo decide cuánto piensa) con effort como palanca de profundidad. La regla
+    'budget_tokens < max_tokens' era la de los modelos anteriores.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-020
+  dimension: agentes-harnesses
+  subtopic: thinking-effort
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: "Tu producto muestra el razonamiento del modelo en la interfaz. Tras migrar a la
+    generación actual, los usuarios ven una pausa larga y luego la respuesta de golpe: los
+    bloques de razonamiento llegan con el texto vacío. ¿Qué falta?"
+  options:
+    - id: c
+      text: "Activar el streaming: sin él los bloques de razonamiento no se emiten"
+    - id: a
+      text: "Subir el effort: por debajo de 'high' el razonamiento no se devuelve"
+    - id: d
+      text: "Nada: en la generación actual el razonamiento nunca se puede mostrar"
+    - id: b
+      text: "Pedir el razonamiento con display: 'summarized'; por defecto viene omitido"
+  correct: b
+  explanation: "En los modelos actuales el valor por defecto de thinking.display es 'omitted':
+    los bloques llegan, pero con el texto vacío. Para recuperar un resumen legible hay que
+    pedir explícitamente thinking: {type: 'adaptive', display: 'summarized'}. El display
+    solo controla la visibilidad: el modelo piensa y se factura igual con cualquier ajuste,
+    y la cadena de razonamiento en bruto no se devuelve nunca."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-021
+  dimension: agentes-harnesses
+  subtopic: economia-de-tokens
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: ¿En qué se diferencia un presupuesto de tarea (task budget) de max_tokens?
+  options:
+    - id: b
+      text: max_tokens es un tope duro por respuesta que el modelo no ve; el presupuesto de tarea
+        es un contador que el modelo SÍ ve, para dosificarse a lo largo de un bucle agéntico
+        y cerrar con orden
+    - id: a
+      text: "Son sinónimos: task budget es el nombre nuevo de max_tokens"
+    - id: c
+      text: max_tokens acota la entrada y el presupuesto de tarea acota la salida
+    - id: d
+      text: El presupuesto de tarea es un tope duro y max_tokens es orientativo
+  correct: b
+  explanation: "max_tokens corta la respuesta sin que el modelo lo sepa: por eso trunca a
+    media frase. El presupuesto de tarea inyecta una cuenta atrás que el modelo lee mientras
+    genera, de forma que prioriza y termina con gracia en vez de que lo corten. Es
+    orientativo, no un tope: si necesitas un techo duro sigue siendo max_tokens (o, en
+    agentes gestionados, un presupuesto de sesión en dinero)."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-022
+  dimension: agentes-harnesses
+  subtopic: economia-de-tokens
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Un agente encadena tres llamadas dependientes (leer perfil → buscar pedidos →
+    comprobar inventario) y cada resultado intermedio son miles de tokens que nadie vuelve a
+    necesitar. ¿Qué patrón ataca la raíz del coste?
+  options:
+    - id: a
+      text: Bajar el effort a 'low' para que el modelo consolide llamadas
+    - id: c
+      text: "Llamada programática a herramientas: el modelo escribe un script que invoca las
+        herramientas; los resultados vuelven al código en ejecución y solo la salida final
+        entra en el contexto"
+    - id: b
+      text: Activar la compactación para que los resultados intermedios se resuman
+    - id: d
+      text: Subir max_tokens para que quepan los tres resultados sin truncarse
+  correct: c
+  explanation: "Con uso de herramientas clásico cada llamada es una ida y vuelta y cada
+    resultado aterriza en el contexto. La llamada programática mueve la composición a un
+    script en el contenedor de ejecución: las herramientas se invocan desde el código, los
+    resultados los procesa el propio script con control de flujo normal y solo el resultado
+    final vuelve al modelo. El coste pasa a escalar con la salida final, no con los
+    intermedios. Bajar el effort o compactar mitigan; no eliminan las idas y vueltas."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-023
+  dimension: agentes-harnesses
+  subtopic: escalado-de-herramientas
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: Tienes un catálogo de 120 herramientas, pero en cada petición solo son relevantes tres
+    o cuatro. ¿Por qué la búsqueda de herramientas (tool search) es preferible a
+    intercambiar el array de herramientas según el caso?
+  options:
+    - id: d
+      text: Porque permite superar el límite de 128 herramientas por petición
+    - id: b
+      text: Porque ejecuta las herramientas en el servidor y ahorra latencia de red
+    - id: a
+      text: Porque los esquemas descubiertos se AÑADEN a la petición en vez de sustituir el
+        conjunto, y eso preserva la caché de prompt; cambiar el array de herramientas
+        invalidaría todo el prefijo
+    - id: c
+      text: Porque valida los esquemas de entrada de forma estricta
+  correct: a
+  explanation: "Las herramientas se renderizan en la posición 0 del prompt: cualquier cambio
+    en el conjunto invalida la caché entera. La búsqueda de herramientas resuelve el
+    problema de escala sin ese coste porque los esquemas se añaden en vez de intercambiarse,
+    dejando el prefijo intacto. No ejecuta nada por ti ni tiene que ver con la validación
+    estricta."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-024
+  dimension: agentes-harnesses
+  subtopic: salidas-estructuradas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Heredas un pipeline que fuerza JSON prellenando el último turno del asistente con '{'
+    y luego extrae la respuesta con una expresión regular y un bucle de reintentos. Al
+    migrar a un modelo actual, ¿qué pasa y qué se hace?
+  options:
+    - id: a
+      text: Sigue funcionando; solo hay que subir max_tokens
+    - id: c
+      text: Hay que cambiar el prellenado por una secuencia de parada equivalente
+    - id: d
+      text: Hay que envolver el prellenado en un bloque de razonamiento
+    - id: b
+      text: El prellenado del último turno del asistente devuelve 400; se sustituye por salidas
+        estructuradas (output_config.format con un esquema), y con ello sobran la regex y el
+        bucle de reintentos
+  correct: b
+  explanation: "El prellenado del turno final del asistente está retirado en los modelos
+    actuales y devuelve 400. Su sustituto es la salida estructurada: se declara el esquema
+    en output_config.format y la respuesta viene validada. Lo importante en la migración es
+    que también se borra el andamiaje que existía solo para sostener el truco: secuencias de
+    parada, extracción con regex y reintentos por fallo de parseo."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-025
+  dimension: agentes-harnesses
+  subtopic: salidas-estructuradas
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: >-
+    Quieres garantizar que los argumentos de una herramienta validen exactamente contra su
+    esquema. ¿Cuál de estas declaraciones es la correcta?
+
+        A) tool_choice = {"type": "tool", "name": "reservar", "strict": True}
+        B) tools = [{"name": "reservar", "strict": True, "input_schema": {...}}]
+  options:
+    - id: a
+      text: "B: strict es un campo de primer nivel de la DEFINICIÓN de la herramienta, junto a
+        name/description/input_schema, y el esquema necesita additionalProperties en falso y
+        su lista de required"
+    - id: b
+      text: "A: strict modifica el comportamiento de tool_choice al forzar una herramienta"
+    - id: c
+      text: Las dos son válidas y equivalentes
+    - id: d
+      text: "Ninguna: el modo estricto se activa con una cabecera beta"
+  correct: a
+  explanation: strict va en la definición de la herramienta, no en tool_choice, y exige que el
+    esquema declare additionalProperties en falso y sus campos required. Es una confusión
+    muy habitual porque ambos parámetros hablan de herramientas, pero tool_choice decide
+    CUÁL se llama y strict decide CÓMO se validan sus argumentos.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-026
+  dimension: agentes-harnesses
+  subtopic: subagentes
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Quieres usar un modelo más barato para una subtarea pesada de lectura sin destrozar la
+    caché del bucle principal. ¿Cuál es la vía correcta?
+  options:
+    - id: c
+      text: Cambiar el modelo a mitad de conversación y volver al original después
+    - id: a
+      text: Lanzar un subagente con el modelo barato y mantener el bucle principal en un solo
+        modelo
+    - id: b
+      text: Bajar el effort del bucle principal durante esos turnos
+    - id: d
+      text: Duplicar la conversación en dos hilos y fusionar los historiales al terminar
+  correct: a
+  explanation: "Las cachés están asociadas al modelo: cambiar de modelo a mitad de sesión
+    invalida el prefijo entero, y volver no lo recupera. La vía limpia es delegar la
+    subtarea a un subagente con su propio modelo y su propia ventana, y que el bucle
+    principal siga en un solo modelo. Además la subtarea de lectura devuelve solo su
+    informe, con lo que el contexto principal no se llena."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-027
+  dimension: agentes-harnesses
+  subtopic: subagentes
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: ¿Cuál de estas tareas es el MEJOR candidato para repartir entre subagentes en paralelo?
+  options:
+    - id: b
+      text: Editar tres funciones dentro de un mismo fichero que ya está leído en contexto
+    - id: a
+      text: Renombrar una variable en el proyecto con una búsqueda y reemplazo
+    - id: d
+      text: Investigar ocho fuentes independientes cuya lectura llenaría por sí sola la ventana
+        del coordinador
+    - id: c
+      text: Verificar el resultado que acaba de producir el propio agente
+  correct: d
+  explanation: "Delegar cuesta: cada subagente reestablece contexto, explora e informa, y el
+    coordinador vuelve a leer su informe. Compensa cuando el trabajo es genuinamente
+    independiente y voluminoso —ocho fuentes que se leen en paralelo y devuelven solo su
+    hallazgo—. No compensa en trabajo que el coordinador remata en unas pocas llamadas, ni
+    para verificar: la verificación pertenece al bucle principal."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-028
+  dimension: agentes-harnesses
+  subtopic: diagramas
+  difficulty: medium
+  type: diagrama
+  roles: *a1
+  stem: |-
+    Mira este flujo de un bucle agéntico:
+
+        usuario ──► [modelo] ──► stop_reason?
+                       ▲            │
+                       │            ├── end_turn ──► fin
+                       │            └── tool_use ──► ejecutar herramientas
+                       │                                  │
+                       └────────── (?) ◄──────────────────┘
+
+    ¿Qué va exactamente en (?)?
+  options:
+    - id: a
+      text: Añadir solo el texto del asistente y luego los tool_result
+    - id: b
+      text: Añadir solo los tool_result; el turno del asistente lo reconstruye la API
+    - id: d
+      text: Reiniciar la conversación con el prompt original más un resumen de lo ejecutado
+    - id: c
+      text: Añadir a los mensajes el turno del asistente COMPLETO (con sus bloques tool_use) y
+        después un mensaje de usuario con todos los tool_result
+  correct: c
+  explanation: "El historial tiene que quedar coherente: primero el turno del asistente tal
+    como llegó, con sus bloques tool_use intactos (si te quedas solo con el texto, los
+    tool_result quedan huérfanos y la petición falla), y luego un único mensaje de usuario
+    con los tool_result emparejados por tool_use_id. La API no reconstruye nada: es estado
+    que llevas tú."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-029
+  dimension: agentes-harnesses
+  subtopic: streaming
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Por qué se recomienda hacer streaming cuando max_tokens es alto (decenas de miles)?
+  options:
+    - id: a
+      text: Porque sin streaming la petición puede agotar el tiempo de espera HTTP del cliente
+    - id: b
+      text: Porque sin streaming el modelo trunca la respuesta a 4096 tokens
+    - id: c
+      text: Porque el streaming reduce el coste por token de salida
+    - id: d
+      text: Porque sin streaming no se pueden usar herramientas
+  correct: a
+  explanation: "Una generación larga sin streaming mantiene la conexión abierta sin enviar
+    nada hasta el final y choca con los tiempos de espera del cliente HTTP. El streaming
+    evita ese corte. No cambia el precio ni habilita capacidades: solo la forma de entrega."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-030
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente autónomo nocturno termina algunos turnos con un párrafo de intención ('ahora
+    voy a ejecutar las pruebas') sin la llamada a herramienta correspondiente, y el pipeline
+    lo da por completado. ¿Cuál es la corrección más directa a nivel de harness/prompt?
+  options:
+    - id: b
+      text: Subir el effort a 'max' en todas las peticiones
+    - id: a
+      text: "Instruirlo para que antes de cerrar el turno revise su último párrafo: si es un plan,
+        una pregunta o una promesa de trabajo no hecho, lo ejecute ya; y que solo termine
+        cuando la tarea esté completa o esté bloqueado por algo que solo el usuario puede
+        resolver"
+    - id: c
+      text: Reintentar automáticamente cada turno dos veces y quedarse con la respuesta más larga
+    - id: d
+      text: Desactivar el razonamiento para que no elabore planes
+  correct: a
+  explanation: "Es un fallo de cierre de turno, y se corrige con una instrucción de cierre
+    explícita: revisar el último párrafo y convertir plan o promesa en acción antes de
+    terminar. En operación autónoma conviene añadir que el usuario no está mirando y no
+    puede responder preguntas. Subir el esfuerzo no ataca el patrón, reintentar y quedarse
+    con la respuesta más larga es una heurística sin relación con la corrección, y
+    desactivar el razonamiento degrada la tarea."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-031
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Antes de construir un agente conviene comprobar cuatro cosas. ¿Cuál de estas NO es una
+    de ellas?
+  options:
+    - id: d
+      text: Que la tarea sea multi-paso y difícil de especificar por completo de antemano
+    - id: a
+      text: Que el resultado justifique el coste y la latencia extra
+    - id: b
+      text: Que exista ya un conjunto de datos etiquetado para afinar el modelo
+    - id: c
+      text: Que el modelo sea capaz en ese tipo de tarea
+  correct: b
+  explanation: "Los cuatro criterios son complejidad (multi-paso, mal especificable), valor
+    (compensa el coste y la latencia), viabilidad (el modelo sabe hacerlo) y coste del error
+    (se puede detectar y revertir). El afinado con datos etiquetados no entra: la mayoría de
+    agentes útiles se construyen sin tocar los pesos del modelo. Si falla cualquiera de los
+    cuatro, quédate en un escalón más simple: una llamada o un flujo con lógica en código."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-032
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: medium
+  type: escenario
+  roles: *a2
+  stem: "Revisas un 'agente' interno: su traza es siempre el mismo cuerpo de bucle N veces, y
+    cada llamada al modelo tiene una salida completamente determinada por su entrada
+    (normalizar un campo, decidir a qué cola va un ticket según reglas fijas, formatear un
+    informe). ¿Cuál es el diagnóstico?"
+  options:
+    - id: b
+      text: "Está bien: usar el modelo uniformemente hace el sistema más mantenible"
+    - id: a
+      text: Hay que subir el effort para reducir el número de iteraciones
+    - id: d
+      text: "Hay que sustituir todas las llamadas al modelo por código: un agente no debería
+        llamar al modelo en bucle"
+    - id: c
+      text: "Es un plan determinista ejecutado por un LLM: esos pasos vuelven a código normal y se
+        deja una única llamada al modelo donde el trabajo sea realmente de criterio"
+  correct: c
+  explanation: "Si la salida está determinada por la entrada, no hace falta un modelo:
+    enrutar, contar, normalizar, filtrar y formatear son código. La corrección es devolver
+    esos pasos al código y conservar la llamada donde hay juicio real (clasificar lo
+    ambiguo, redactar el resumen). Llevarlo al extremo de cero llamadas es pasarse cuando sí
+    existe un paso de criterio."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: agentes-033
+  dimension: agentes-harnesses
+  subtopic: triggers
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: La oferta menciona 'triggers' entre las cosas que hay que entender de los agentes en
+    producción. ¿Qué es un trigger en este contexto?
+  options:
+    - id: d
+      text: "El evento que arranca una ejecución del agente sin que haya un humano escribiendo: un
+        cron, un webhook, un cambio en un sistema interno"
+    - id: a
+      text: El token que hace que el modelo empiece a razonar
+    - id: b
+      text: La instrucción del prompt que fuerza el uso de una herramienta concreta
+    - id: c
+      text: El umbral de confianza a partir del cual el agente pide aprobación
+  correct: d
+  explanation: "Un trigger es lo que inicia el agente cuando nadie lo está pilotando: una
+    programación horaria, un webhook de otro sistema, un evento de datos. Importa porque
+    cambia el diseño entero —no hay quien conteste preguntas a mitad de ejecución, el radio
+    de acción hay que acotarlo por adelantado y los fallos se descubren por registros, no en
+    pantalla—."
+  source: jd-codeway
+  date: 2026-08-10
+- id: agentes-034
+  dimension: agentes-harnesses
+  subtopic: triggers
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente programado se dispara cada hora. Una ejecución falla porque estaba limitada
+    por cuota. ¿Cuál es la política de reintento más sensata para una tarea periódica de
+    este tipo?
+  options:
+    - id: b
+      text: Reintentar de inmediato en bucle hasta que entre
+    - id: a
+      text: Registrar el fallo y dejar que lo recoja la siguiente ocurrencia programada, sin
+        recuperar las ejecuciones perdidas
+    - id: c
+      text: Duplicar la frecuencia del cron para compensar los fallos
+    - id: d
+      text: Archivar la programación para que un humano la revise antes de volver a ejecutar
+  correct: a
+  explanation: "En una tarea periódica, la siguiente ocurrencia ya es el reintento natural:
+    registrar el fallo y seguir evita amplificar la presión sobre una cuota que ya está
+    saturada. Reintentar en bucle o doblar la frecuencia empeoran justo la condición que
+    causó el fallo. Archivar es la respuesta a fallos NO recuperables (un recurso borrado),
+    no a un límite de cuota transitorio."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-035
+  dimension: agentes-harnesses
+  subtopic: errores-y-reintentos
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En el manejo de errores de la API, ¿qué familia de códigos conviene reintentar con
+    retroceso exponencial?
+  options:
+    - id: c
+      text: 400, 401 y 404
+    - id: a
+      text: Todos los códigos distintos de 200
+    - id: b
+      text: 429, 5xx y errores de conexión
+    - id: d
+      text: Solo 429
+  correct: b
+  explanation: "Los reintentables son los transitorios: 429 (límite de tasa, con la cabecera
+    retry-after), los 5xx del servidor y los fallos de red antes de recibir respuesta. Un
+    400 (petición mal formada), un 401 (credencial) o un 404 (modelo o recurso inexistente)
+    no mejoran reintentando: son bugs. Por eso conviene capturar las excepciones tipadas del
+    SDK en cadena y no una sola clase amplia, que borra justo esta distinción."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-036
+  dimension: agentes-harnesses
+  subtopic: contexto
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Qué significa que la API de mensajes es 'sin estado' (stateless)?
+  options:
+    - id: a
+      text: Que el modelo no puede recordar nada dentro de una misma respuesta
+    - id: b
+      text: Que no se pueden usar herramientas entre turnos
+    - id: c
+      text: Que las respuestas no son reproducibles
+    - id: d
+      text: Que en cada petición envías el historial completo de la conversación
+  correct: d
+  explanation: "El servidor no guarda tu conversación: cada petición lleva el historial entero
+    de mensajes. De ahí que la gestión del contexto sea trabajo del harness (qué se
+    conserva, qué se poda, qué se resume) y que la caché de prompts sea tan importante para
+    el coste: reenviarías el mismo prefijo una y otra vez a precio completo."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-037
+  dimension: agentes-harnesses
+  subtopic: cache-en-agentes
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: >-
+    Este prompt de sistema no consigue ni un acierto de caché entre peticiones idénticas.
+    ¿Por qué?
+
+        system = f"""Eres un asistente de soporte.
+        Fecha y hora actual: {datetime.now().isoformat()}
+        {MANUAL_DE_PRODUCTO}"""
+  options:
+    - id: d
+      text: "Porque la marca de tiempo cambia en cada petición y está ANTES del contenido estable:
+        al ser una coincidencia de prefijo, invalida todo lo que va detrás"
+    - id: b
+      text: Porque el prompt de sistema no es cacheable, solo lo son los mensajes
+    - id: a
+      text: Porque falta declarar el punto de corte de caché en el último bloque de mensajes
+    - id: c
+      text: Porque las f-strings no se serializan de forma determinista
+  correct: d
+  explanation: "La caché es coincidencia de prefijo byte a byte: un valor que cambia en cada
+    petición envenena todo lo que viene después, y aquí el manual entero va detrás de la
+    marca de tiempo. La solución es dejar el prompt de sistema congelado y meter lo volátil
+    más adelante, en los mensajes. Es el invalidador silencioso más común, junto con
+    identificadores aleatorios y JSON serializado sin ordenar las claves."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-038
+  dimension: agentes-harnesses
+  subtopic: diseno-tool-surface
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente de investigación usa poco la herramienta de búsqueda y contesta de memoria.
+    Antes de tocar nada, ¿qué dos palancas atacas primero?
+  options:
+    - id: b
+      text: "Añadir 'CRÍTICO: DEBES usar siempre esta herramienta' al prompt de sistema"
+    - id: a
+      text: Subir el nivel de effort, y hacer la descripción de la herramienta prescriptiva sobre
+        CUÁNDO llamarla ('llámala cuando la respuesta dependa de información actual...')
+    - id: c
+      text: Forzar tool_choice a la herramienta de búsqueda en todas las peticiones
+    - id: d
+      text: Bajar max_tokens para que no le dé tiempo a contestar de memoria
+  correct: a
+  explanation: Un esfuerzo más alto aumenta de forma medible el uso de herramientas en tareas
+    de búsqueda, y las descripciones que declaran la condición de disparo (no solo lo que
+    hace la herramienta) dan un salto claro frente a las que solo describen la función. El
+    lenguaje a gritos es contraproducente en los modelos actuales, que siguen el prompt muy
+    de cerca y acaban sobredisparando. Forzar tool_choice mata el criterio del modelo y
+    bajar max_tokens no tiene relación con el problema.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-039
+  dimension: agentes-harnesses
+  subtopic: prompting-de-harness
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Estás migrando un prompt de sistema escrito hace dos generaciones de modelos. Está
+    lleno de 'CRÍTICO:', 'NUNCA', 'DEBES' y 'ante la duda, usa la herramienta X'. ¿Qué le
+    pasa a ese texto hoy?
+  options:
+    - id: c
+      text: "Nada: el énfasis es neutro y en el peor caso se ignora"
+    - id: a
+      text: "Deja de funcionar por completo: el énfasis en mayúsculas se filtra y se ignora"
+    - id: b
+      text: "Sobredispara: los modelos actuales siguen el prompt mucho más de cerca, así que
+        instrucciones escritas para vencer la reticencia de modelos antiguos ahora se
+        aplican de más"
+    - id: d
+      text: Aumenta la latencia porque las mayúsculas gastan más tokens
+  correct: b
+  explanation: Aquel lenguaje era una compensación por modelos poco dirigibles. Con modelos
+    que siguen el sistema al pie de la letra, el mismo texto produce sobredisparo y rigidez,
+    y cuando todo va marcado como crítico el énfasis deja de portar información. La
+    corrección es bajar el volumen y decir la condición real ('usa X cuando...'), no añadir
+    más barandillas.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-040
+  dimension: agentes-harnesses
+  subtopic: superficies-de-agente
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: En un agente gestionado, ¿dónde viven el modelo, el prompt de sistema y las herramientas?
+  options:
+    - id: a
+      text: "En la sesión: se pasan en cada arranque"
+    - id: b
+      text: En el entorno, junto a la configuración de red del contenedor
+    - id: d
+      text: En una plantilla de despliegue independiente de agente y sesión
+    - id: c
+      text: En el agente, que es un objeto persistente y versionado; la sesión solo lo referencia
+        por id
+  correct: c
+  explanation: "El agente es un objeto persistente y versionado que lleva modelo, prompt de
+    sistema, herramientas, servidores MCP y skills; la sesión referencia ese agente por id
+    (opcionalmente fijando una versión) y añade lo que sí es por ejecución: entorno,
+    recursos, credenciales. El anti-patrón clásico es crear un agente nuevo en cada
+    ejecución: acumula objetos huérfanos y anula el versionado."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-041
+  dimension: agentes-harnesses
+  subtopic: streaming
+  difficulty: hard
+  type: escenario
+  roles: *a1
+  stem: Tu cliente lee un flujo de eventos de una sesión de agente y la conexión se corta a
+    mitad. Reconectas y sigues leyendo desde ese momento. ¿Qué problema tiene ese diseño?
+  options:
+    - id: d
+      text: "El flujo no se rebobina: los eventos emitidos durante el corte se pierden. Al
+        reconectar hay que consolidar con la lista de eventos del histórico y deduplicar por
+        id"
+    - id: b
+      text: "Ninguno: al reconectar el servidor reenvía los eventos perdidos"
+    - id: a
+      text: Que hay que reconectar con un id de sesión distinto para no duplicar eventos
+    - id: c
+      text: Que reconectar reinicia la sesión y hay que reenviar el mensaje inicial
+  correct: d
+  explanation: "Un flujo de eventos entrega lo que ocurre desde que se abre; no reproduce el
+    pasado. El patrón correcto en cada (re)conexión es abrir el flujo primero, leer el
+    histórico paginado para cubrir el hueco y deduplicar por id de evento. Es especialmente
+    grave si durante el corte quedó pendiente una confirmación de herramienta: el cliente se
+    desconecta, la sesión queda esperando y nadie resuelve."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-042
+  dimension: agentes-harnesses
+  subtopic: diseno-tool-surface
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Tu harness ejecuta herramientas en paralelo cuando puede. ¿Qué propiedad determina si
+    una acción se puede marcar como paralelizable, y por qué bash no la tiene?
+  options:
+    - id: a
+      text: Que su esquema de entrada sea estricto; bash no declara esquema
+    - id: b
+      text: Que sea de solo lectura y sin efectos observables por otras llamadas del mismo turno;
+        con bash el harness recibe una cadena opaca y no puede distinguir un grep inocuo de
+        un git push, así que debe serializar
+    - id: c
+      text: Que devuelva contenido estructurado; bash devuelve texto plano
+    - id: d
+      text: Que su tiempo de ejecución esté acotado; los comandos de shell no lo están
+  correct: b
+  explanation: "Paralelizar es seguro cuando las llamadas no se pisan: lecturas sin efectos
+    secundarios. El problema de bash no es el esquema ni el formato de salida, es que TODAS
+    las acciones llegan con la misma forma —una cadena de comando— y el harness no tiene
+    forma fiable de clasificarla, así que por prudencia serializa. Promover las lecturas a
+    herramientas dedicadas (buscar, leer, listar) es justo lo que devuelve la capacidad de
+    paralelizar."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-043
+  dimension: agentes-harnesses
+  subtopic: contexto
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente de larga duración escribe notas en ficheros para recordar entre sesiones.
+    ¿Qué guía hace que esa memoria sea útil y no un vertedero?
+  options:
+    - id: c
+      text: Volcar la transcripción completa de cada sesión en un fichero por fecha
+    - id: b
+      text: Guardar solo los errores, porque los aciertos ya están implícitos en el código
+    - id: a
+      text: Una lección por fichero con un resumen en la primera línea; registrar tanto
+        correcciones como enfoques confirmados y por qué importaron; no guardar lo que el
+        repositorio ya recoge; actualizar la nota existente antes que duplicar; borrar lo
+        que resulte falso
+    - id: d
+      text: Dejar que el modelo decida el formato en cada sesión sin darle indicaciones
+  correct: a
+  explanation: "La memoria rinde cuando es recuperable y no redundante: una idea por fichero,
+    resumen arriba para poder decidir relevancia sin leerlo entero, con el porqué (una regla
+    sin motivo no se sabe cuándo deja de aplicar), sin duplicar lo que el repositorio o el
+    historial ya registran, y con borrado de lo que se demuestre falso. Volcar
+    transcripciones o dejar el formato al azar hace la memoria imposible de consultar."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: agentes-044
+  dimension: agentes-harnesses
+  subtopic: economia-de-tokens
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En la respuesta de la API, ¿qué mide exactamente el campo input_tokens cuando hay
+    caché de prompt activa?
+  options:
+    - id: a
+      text: El total de tokens del prompt, incluyendo lo servido desde caché
+    - id: b
+      text: Los tokens escritos a caché en esta petición
+    - id: c
+      text: Los tokens del prompt de sistema únicamente
+    - id: d
+      text: "Solo el resto no cacheado: el total es input_tokens más los de escritura y los de
+        lectura de caché"
+  correct: d
+  explanation: input_tokens es el remanente procesado a precio completo. El tamaño real del
+    prompt es la suma de input_tokens, cache_creation_input_tokens y
+    cache_read_input_tokens. Si no lo sabes, un agente que lleva horas corriendo parece
+    consumir 4.000 tokens de entrada y sacas conclusiones equivocadas sobre el coste. Y si
+    cache_read se queda a cero entre peticiones con el mismo prefijo, hay un invalidador
+    silencioso.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-045
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Migras un agente a un modelo nuevo que verifica su propio trabajo sin que se lo pidan.
+    Tu prompt lleva desde hace dos generaciones instrucciones de 'incluye un paso final de
+    verificación' y 'usa un subagente para verificar', y tu harness tiene además una etapa
+    de verificación aparte. ¿Qué haces?
+  options:
+    - id: d
+      text: "Borrar las instrucciones de verificación del prompt y revisar la etapa del harness:
+        mantenerlas produce sobre-verificación (más coste y latencia) sin ganancia de
+        calidad"
+    - id: c
+      text: "Dejarlo: la verificación redundante nunca hace daño"
+    - id: b
+      text: Reescribirlas con más énfasis para que la verificación sea aún más exhaustiva
+    - id: a
+      text: Sustituirlas por 'comprueba tu respuesta dos veces antes de contestar'
+  correct: d
+  explanation: "Es un borrado, no una reescritura: cuando el modelo ya verifica por su cuenta,
+    pedírselo produce sobre-verificación sin mejora medible. El andamiaje del harness
+    heredado de modelos anteriores hay que revisarlo igual. Y ojo con la opción de
+    'comprueba tu respuesta dos veces': invierte una buena práctica de prompting clásica que
+    en estos modelos dispara exactamente el mismo trabajo de más."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-046
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Para trabajo agéntico de largo recorrido (una refactorización grande, una tanda
+    nocturna), ¿qué forma de dar la tarea rinde mejor?
+  options:
+    - id: b
+      text: Ir revelándola poco a poco en varios turnos para poder corregir el rumbo pronto
+    - id: a
+      text: Especificarla entera y bien en un primer turno, con la meta y las restricciones, y
+        dejar correr al agente con un esfuerzo alto
+    - id: c
+      text: Empezar con un enunciado vago a propósito para no sesgar el enfoque del modelo
+    - id: d
+      text: Dividirla en microtareas y lanzar una sesión nueva por cada una
+  correct: a
+  explanation: "En trabajo autónomo largo, una especificación completa por adelantado con
+    esfuerzo alto es lo que mejor rinde: el modelo planifica sobre la meta real en vez de
+    reconstruirla a trozos. Los enunciados ambiguos revelados progresivamente reducen la
+    eficiencia de tokens y a menudo el resultado. Trocear en sesiones independientes tira el
+    contexto acumulado en cada corte."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-047
+  dimension: agentes-harnesses
+  subtopic: escalado-de-herramientas
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: Las 'skills' (instrucciones empaquetadas que el agente carga cuando vienen al caso) y
+    las descripciones de herramienta cumplen papeles distintos. ¿Cuál es la división
+    correcta?
+  options:
+    - id: a
+      text: "La skill sustituye a la descripción: si hay skill, la herramienta puede ir sin
+        describir"
+    - id: c
+      text: La descripción es para el humano que lee el código y la skill es para el modelo
+    - id: b
+      text: La descripción de la herramienta lleva el contrato (qué hace, parámetros, límites,
+        cuándo llamarla) y viaja en cada petición; la skill lleva el material de enseñanza
+        (procedimientos, ejemplos largos, mejores prácticas) y se carga bajo demanda
+    - id: d
+      text: Son intercambiables; la elección es cuestión de estilo del equipo
+  correct: b
+  explanation: "La descripción está en el contexto en TODAS las peticiones, así que su coste
+    es recurrente: ahí va el contrato y la condición de disparo, no diálogos de ejemplo ni
+    protocolos numerados. La skill se paga solo cuando se dispara, y es donde cabe el
+    material extenso. Confundirlos tiene dos formas típicas: incrustar ejemplos largos en la
+    descripción (impuesto en cada petición) o dejar la herramienta con una línea escueta
+    confiando en que la skill lo explique (la herramienta se usa mal o no se usa)."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-048
+  dimension: agentes-harnesses
+  subtopic: prompting-de-harness
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente de codificación con la generación actual del modelo se ha vuelto muy
+    hablador entre llamadas a herramienta y narra cada acción rutinaria. ¿Cuál es la
+    corrección que funciona sin perder calidad?
+  options:
+    - id: d
+      text: Bajar el effort hasta que las respuestas se acorten
+    - id: a
+      text: Recortar max_tokens para que no le quepa la narración
+    - id: b
+      text: Añadir 'sé conciso' repetido en varios puntos del prompt de sistema
+    - id: c
+      text: "Poner un silencio por defecto entre llamadas: escribir solo al encontrar algo,
+        cambiar de rumbo o bloquearse, y cerrar con una o dos frases de resultado"
+  correct: c
+  explanation: "La palanca es una instrucción explícita de estilo de comunicación con un
+    silencio por defecto y criterios de cuándo sí hablar. Bajar el esfuerzo cambia cuánto
+    piensa y actúa, no de forma fiable cuánto texto visible produce: pagas calidad sin
+    resolver el síntoma. Recortar max_tokens trunca respuestas legítimas. Y repetir 'sé
+    conciso' en varios sitios es duplicación que el modelo tiene que reconciliar."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-049
+  dimension: agentes-harnesses
+  subtopic: superficies-de-agente
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Un agente gestionado debe llamar a una API interna con una clave. ¿Cuál es la forma
+    correcta de que la clave llegue a la petición saliente sin quedar expuesta al código que
+    corre en el contenedor?
+  options:
+    - id: d
+      text: "Guardarla como credencial de variable de entorno en un almacén de credenciales: el
+        contenedor solo ve un marcador opaco y el secreto se sustituye en la salida a la
+        red"
+    - id: a
+      text: Incluirla en el prompt de sistema del agente para que la use al construir la llamada
+    - id: b
+      text: Pasarla como argumento de la herramienta en la primera llamada de la sesión
+    - id: c
+      text: Escribirla en un fichero del espacio de trabajo con permisos restringidos
+  correct: d
+  explanation: "La frontera de seguridad es que el secreto no entre en el sandbox: con una
+    credencial de tipo variable de entorno el contenedor ve un marcador y la sustitución
+    ocurre a la salida, así que ni el código que escriba el agente ni una inyección de
+    prompt pueden leerlo. Meterla en el prompt o en un mensaje la persiste en el historial
+    de eventos de la sesión, recuperable después; escribirla en un fichero del espacio de
+    trabajo la deja legible por cualquier cosa que se ejecute dentro."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: agentes-050
+  dimension: agentes-harnesses
+  subtopic: loop-engineering
+  difficulty: easy
+  type: concepto
+  roles: *a2
+  stem: La oferta dice que construyen 'cerca de los modelos' en vez de apoyarse en frameworks
+    todo-en-uno. ¿Qué implica eso en la práctica?
+  options:
+    - id: b
+      text: Que entrenan sus propios modelos base en lugar de usar modelos de terceros
+    - id: a
+      text: Que el bucle, las herramientas y el manejo del contexto se escriben contra las APIs de
+        los modelos, para poder razonar sobre cada pieza y depurarla, en vez de heredar las
+        abstracciones de un framework
+    - id: c
+      text: Que no usan ninguna librería, ni siquiera los SDK oficiales
+    - id: d
+      text: Que evitan por completo el uso de herramientas y trabajan con una sola llamada
+  correct: a
+  explanation: "Construir cerca del modelo es controlar el bucle, el contexto y la superficie
+    de herramientas a mano, sobre las APIs, para poder ver y ajustar cada decisión. No es
+    renunciar a los SDK oficiales ni entrenar modelos propios, y desde luego no es evitar el
+    uso de herramientas: es evitar que una capa de abstracción decida por ti cosas —qué
+    entra en contexto, cuándo se reintenta, cómo se recorta— que luego tendrás que depurar a
+    ciegas."
+  source: jd-codeway
+  date: 2026-08-10
