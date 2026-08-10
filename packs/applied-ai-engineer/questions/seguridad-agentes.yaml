@@ -1420,3 +1420,78 @@
     razonar."
   source: jd-codeway
   date: 2026-08-10
+- id: seg-051
+  dimension: seguridad-agentes
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: &a3
+    - Applied AI Engineer
+    - AI Engineer
+  stem: ¿Por qué la salida de un modelo se trata como entrada no confiable?
+  options:
+    - id: b
+      text: Porque los modelos cometen errores de sintaxis con frecuencia
+    - id: c
+      text: Porque la salida no es determinista entre ejecuciones
+    - id: a
+      text: Porque está influida por todo lo que el modelo ha leído, incluido contenido que un
+        atacante controla, así que puede llevar cualquier cosa
+    - id: d
+      text: Porque el proveedor del modelo podría alterarla
+  correct: a
+  explanation: "El motivo es la procedencia, no la calidad: el texto que sale ha sido
+    condicionado por documentos, páginas y resultados de herramienta que no controlas. Por
+    eso se aplica la misma disciplina que a cualquier dato de usuario —escapar antes de
+    renderizar, no ejecutar directamente, validar antes de usar—. Que sea no determinista es
+    otra propiedad distinta."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: seg-052
+  dimension: seguridad-agentes
+  subtopic: permisos
+  difficulty: easy
+  type: concepto
+  roles: *a3
+  stem: ¿Qué significa 'denegación por defecto' aplicado a las herramientas de un agente?
+  options:
+    - id: a
+      text: Que el agente pide permiso antes de cada llamada
+    - id: b
+      text: Que las herramientas fallan de forma segura si hay un error
+    - id: d
+      text: Que el agente no puede acceder a la red salvo autorización
+    - id: c
+      text: Que se parte de todo desactivado y se habilita explícitamente lo que hace falta, en
+        vez de habilitar todo y desactivar lo peligroso
+  correct: c
+  explanation: "Es una postura de configuración: la lista de lo permitido se declara y todo lo
+    demás queda fuera. Su virtud es cómo envejece: cuando se añade una herramienta nueva al
+    conjunto, no aparece sola en tu agente. Con el patrón inverso, cada ampliación amplía tu
+    superficie en silencio."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: seg-053
+  dimension: seguridad-agentes
+  subtopic: puertas-de-aprobacion
+  difficulty: easy
+  type: concepto
+  roles: *a3
+  stem: ¿Qué es un 'humano en el bucle' en un agente?
+  options:
+    - id: b
+      text: Que ciertas acciones se detienen y esperan la aprobación de una persona antes de
+        ejecutarse
+    - id: a
+      text: Que una persona revisa los registros del agente periódicamente
+    - id: c
+      text: Que el agente pregunta al usuario cuando no sabe qué hacer
+    - id: d
+      text: Que una persona escribe los prompts del agente
+  correct: b
+  explanation: "La clave es que el bucle se PARA antes del efecto: la acción no ocurre hasta
+    que alguien decide. Revisar registros después es supervisión, no control —el daño ya
+    está hecho—, y que el agente pregunte cuando dude es útil pero depende de que sepa que
+    duda, que es justamente lo que no se puede garantizar."
+  source: externa:anthropic-docs
+  date: 2026-08-10

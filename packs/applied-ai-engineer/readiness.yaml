@@ -1,0 +1,121 @@
+# Perfiles de rol y baselines de nivel del pack applied-ai-engineer.
+#
+# ANCLAJE A FUENTES EXTERNAS, no a la opinión del curador:
+#   - La ESTRUCTURA de niveles (junior/mid/senior/staff) se ancla al alcance, la
+#     autonomía y la profundidad de los marcos de leveling de ingeniería: junior
+#     domina lo fundamental, mid diseña features completas, senior tiene profundidad
+#     y staff además amplitud. Eso se traduce a la DIFICULTAD etiquetada de las
+#     preguntas: la barra sube por tramo al subir de nivel. Los cortes numéricos son
+#     bandas convencionales, transparentes y editables aquí.
+#   - Los ROLES (qué dimensiones pesan en cada perfil) se anclan a la JD que originó
+#     el pack y a las descripciones públicas de puestos equivalentes; cada uno cita
+#     su procedencia en `source`.
+#
+# El motor NUNCA produce un score único de "empleabilidad": da readiness POR ROL con
+# la evidencia (acierto por dificultad y su N) a la vista.
+
+version: "1.0.0"
+
+# Umbral mínimo de acierto por tramo de dificultad para considerarse "listo" a cada
+# nivel. Un tramo sin preguntas en la sesión (N=0) no se evalúa (se omite su requisito).
+#
+# Los cortes son algo más exigentes que los del pack ai-ml-readiness a propósito: este
+# pack se deriva de una oferta senior y hands-on, y sus tramos 'easy' son ya conceptos
+# de oficio (el bucle agéntico, qué es un harness), no fundamentos de entrada.
+levels:
+  - id: junior
+    label: "Junior-ready"
+    requires:
+      easy: 0.70
+      medium: 0.40
+      hard: 0.00
+  - id: mid
+    label: "Mid-ready"
+    requires:
+      easy: 0.80
+      medium: 0.60
+      hard: 0.35
+  - id: senior
+    label: "Senior-ready"
+    requires:
+      easy: 0.90
+      medium: 0.75
+      hard: 0.60
+  - id: staff
+    label: "Staff-ready"
+    # Staff = profundidad experta EN el núcleo + AMPLITUD: también hay que demostrar
+    # competencia en las dimensiones secundarias del rol.
+    requires:
+      easy: 0.90
+      medium: 0.80
+      hard: 0.70
+      experto: 0.55
+    breadth: 0.60
+
+# Perfiles de rol: dimensiones núcleo (definen el nivel) y secundarias (amplitud).
+roles:
+  - id: applied-ai-engineer
+    label: "Applied AI Engineer"
+    core: [agentes-harnesses, producto-discovery-envio]
+    secondary: [evals-observabilidad, seguridad-agentes, mcp-integraciones, memoria-retrieval]
+    source: "JD Applied AI Engineer de Codeway/Wishlabs (Barcelona, ago 2026), archivada en sources/: rol hands-on y product-focused cuyo núcleo declarado es el discovery ('you won't only be working from clearly defined tickets') más construir harnesses, tool integrations y context flows de punta a punta."
+  - id: agent-engineer
+    label: "Agent Engineer"
+    core: [agentes-harnesses, seguridad-agentes]
+    secondary: [mcp-integraciones, evals-observabilidad, memoria-retrieval]
+    source: "Misma JD, bloque 'Our stack & approach': agent harnesses (Claude Code / Agent SDK, Codex CLI, scaffolding propio) y el requisito de entender tool use, context, memory, loops, triggers y harnesses en producción, junto a la conciencia práctica de agent safety (permisos, approval gates, logging, prompt injection, blast radius)."
+  - id: ai-platform-engineer
+    label: "AI Platform / Integrations Engineer"
+    core: [mcp-integraciones, seguridad-agentes]
+    secondary: [agentes-harnesses, evals-observabilidad]
+    source: "Misma JD, bloque 'Tool integration': conectar agentes a herramientas, datos, sistemas internos y flujos de trabajo mediante MCP o patrones equivalentes, con el matiz de que la integración toca a la vez datos que salen y contexto que entra al modelo."
+  - id: ai-quality-engineer
+    label: "AI Quality / Evals Engineer"
+    core: [evals-observabilidad]
+    secondary: [agentes-harnesses, seguridad-agentes, memoria-retrieval]
+    source: "Misma JD, requisito de 'experience building or contributing to evaluation systems for AI products, including test sets, graders/evaluators, LLM-as-judge, tracing, or regression tracking', y el encargo de medir calidad, fiabilidad, coste, latencia, seguridad y regresiones a lo largo del tiempo."
+  - id: ai-product-engineer
+    label: "AI Product Engineer"
+    core: [producto-discovery-envio, agentes-harnesses]
+    secondary: [evals-observabilidad, memoria-retrieval]
+    source: "Misma JD, requisitos de 'strong product sense and the ability to identify what should be built, not just execute predefined requirements', comodidad con la ambigüedad, y construir interfaces y prototipos usables en TypeScript/Next.js."
+
+# Plan de estudio por dimensión: a dónde ir para cerrar cada gap.
+study:
+  agentes-harnesses: "Construye un harness a pelo sobre la API de mensajes —bucle, tool_use/tool_result, stop reasons, caché de prefijo— antes de tocar ningún framework; después compara con el tool runner del SDK y con el Agent SDK para ver qué te resuelve cada uno. Docs: tool use, prompt caching, context editing y compaction en platform.claude.com."
+  mcp-integraciones: "Lee la especificación vigente entera (modelcontextprotocol.io/specification/latest) sabiendo que la revisión 2026-07-28 cambió el fondo: sin estado, sin handshake 'initialize', sin sesiones ni GET en Streamable HTTP. Después escribe un servidor MCP pequeño con una herramienta real y conéctalo a un agente; la mitad de los conceptos solo se fijan implementándolos."
+  evals-observabilidad: "Coge un sistema tuyo que ya funcione y móntale la evaluación que no tiene: 30-50 casos de tráfico real, calificadores deterministas donde se pueda, un juez calibrado contra tus propias etiquetas donde no, y una puerta en integración continua. El aprendizaje está en descubrir cuánto se mueve tu métrica sin que cambies nada."
+  seguridad-agentes: "Haz de equipo rojo contra un agente tuyo: intenta que ejecute una instrucción metida en un documento que lee. Después rediseña para que colar la inyección no baste —permisos derivados del contexto, puertas en lo irreversible, límites de volumen—. Docs: MCP security best practices y la sección de vaults/permission policies de agentes gestionados."
+  memoria-retrieval: "Antes de montar una base vectorial, mide cuánto resuelve meter el corpus entero en contexto cacheado: es la línea base honesta. Si hace falta recuperación, monta híbrida con reordenación y evalúa cada etapa por separado. Para memoria, empieza por ficheros con una nota por tema y resumen en la primera línea."
+  producto-discovery-envio: "Escoge un área de negocio que no conozcas y busca trabajo que hoy NO se hace porque a mano no compensa; propón una capacidad con su punto de comprobación a dos semanas. En la parte de envío: TypeScript (unknown, uniones discriminadas), Next.js App Router (componentes de servidor y dónde vive la clave) y streaming de respuestas."
+
+# Palabras clave por dimensión para medir la demanda de mercado: se buscan
+# (case-insensitive, ES+EN) en el texto de las ofertas escaneadas por jobhunt para
+# ponderar la PRIORIDAD de los gaps. No genera ningún score de encaje; solo reordena
+# los gaps ya calculados.
+#
+# weak_keywords: subconjunto de las de abajo que son palabras de oficina —salen en
+# casi cualquier oferta y no dicen gran cosa del puesto—. Siguen contando como
+# mención, pero por sí solas NO pueden hacer NÚCLEO a una dimensión al evaluar una
+# oferta concreta. Aquí importan especialmente: "agent", "producto" y "memoria" son
+# palabras corrientes fuera del contexto de IA.
+weak_keywords:
+  producto-discovery-envio: ["product", "producto", "stakeholder", "roadmap", "prototyp", "prototip"]
+  seguridad-agentes: ["seguridad", "security", "permis", "audit"]
+  memoria-retrieval: ["memoria", "memory", "context", "contexto"]
+  evals-observabilidad: ["eval", "métrica", "metric", "quality", "calidad"]
+  agentes-harnesses: ["agent", "agente"]
+
+market_keywords:
+  agentes-harnesses:
+    ["agent", "agente", "agentic", "agéntic", "tool use", "tool calling", "function calling", "harness", "claude code", "agent sdk", "codex", "loop", "orchestrat", "orquest", "llm", "claude", "openai", "gemini", "anthropic"]
+  mcp-integraciones:
+    ["mcp", "model context protocol", "tool integration", "integración", "integration", "json-rpc", "conector", "connector", "api integration", "webhook"]
+  evals-observabilidad:
+    ["eval", "evaluation", "evaluación", "llm-as-judge", "llm as a judge", "grader", "benchmark", "regression", "regresión", "tracing", "traza", "observability", "observabilidad", "métrica", "metric", "monitoring", "monitoriz", "a/b test", "quality", "calidad"]
+  seguridad-agentes:
+    ["prompt injection", "inyección de prompt", "guardrail", "safety", "seguridad", "security", "permis", "approval", "aprobación", "sandbox", "aislamiento", "blast radius", "least privilege", "privilegio mínimo", "audit", "oauth", "secret", "credencial", "credential"]
+  memoria-retrieval:
+    ["rag", "retrieval", "recuperación", "embedding", "vector", "pinecone", "weaviate", "qdrant", "chroma", "pgvector", "mem0", "zep", "memory", "memoria", "semantic search", "búsqueda semántica", "rerank", "chunk", "knowledge base", "base de conocimiento"]
+  producto-discovery-envio:
+    ["product sense", "discovery", "ambiguity", "ambigüedad", "end-to-end", "end to end", "prototyp", "prototip", "typescript", "next.js", "nextjs", "react", "python", "fastapi", "docker", "mysql", "postgres", "stakeholder", "product", "producto", "roadmap", "ship", "shipping"]

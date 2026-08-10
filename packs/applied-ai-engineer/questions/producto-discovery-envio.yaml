@@ -1,0 +1,1537 @@
+# Dimensión: producto-discovery-envio — la parte de la oferta que dice "the core of the
+# role is discovery": detectar dónde la IA mejora un resultado, dar forma a capacidades
+# que nadie ha especificado, y enviarlo de punta a punta en Python y TypeScript/Next.
+#
+# Es la dimensión más blanda de las seis y aun así es evaluable: hay decisiones de
+# producto y de ingeniería con respuestas mejores y peores, y errores caros que se
+# repiten. Lo que NO se evalúa aquí son gustos de estilo.
+#
+# source: jd-codeway | externa:anthropic-docs | externa:practica-industria.
+
+- id: prod-001
+  dimension: producto-discovery-envio
+  subtopic: discovery
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - Applied AI Engineer
+    - AI Product Engineer
+  stem: La oferta dice que el núcleo del puesto es el 'discovery'. ¿Qué significa eso en la
+    práctica?
+  options:
+    - id: b
+      text: "Que no se trabaja solo desde tickets definidos: hay que explorar áreas de producto y
+        negocio, detectar dónde la IA cambiaría el resultado y proponer capacidades que
+        todavía no están especificadas"
+    - id: a
+      text: Que hay que investigar papers y modelos nuevos y presentarlos al equipo
+    - id: c
+      text: Que hay que hacer entrevistas de usuario antes de cada implementación
+    - id: d
+      text: Que hay que descubrir errores en producción antes de que los reporten los usuarios
+  correct: b
+  explanation: "Discovery aquí es identificar la oportunidad, no solo ejecutarla: mirar un
+    área del negocio, entender dónde está el trabajo caro o imposible hoy, y proponer qué
+    construir. La lectura de frontera es un insumo (saber qué es posible ahora), no el
+    objetivo. Y no es investigación de usuarios en sentido clásico ni observabilidad."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-002
+  dimension: producto-discovery-envio
+  subtopic: discovery
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Te dan acceso a un área de negocio nueva y te piden encontrar dónde aplicar IA. ¿Por
+    dónde empiezas?
+  options:
+    - id: c
+      text: Listando las capacidades de los modelos actuales y buscando dónde encajan
+    - id: a
+      text: "Entendiendo dónde se va el tiempo y dónde están los cuellos de botella hoy: qué
+        trabajo es repetitivo, cuál se hace mal por falta de capacidad, qué no se hace
+        porque no compensa a mano"
+    - id: b
+      text: Preguntando a los responsables qué les gustaría automatizar
+    - id: d
+      text: Analizando qué está haciendo la competencia con IA en ese área
+  correct: a
+  explanation: "Empezar por las capacidades produce soluciones buscando problema; empezar por
+    el trabajo real encuentra dónde hay valor. La tercera categoría es la más interesante y
+    la que más se pasa por alto: lo que hoy NO se hace porque a mano no compensa —revisar
+    todo en vez de una muestra, responder en minutos en vez de en días—, y que es justo
+    donde la IA cambia la ecuación en vez de acelerar un poco. Preguntar a los responsables
+    da la lista de frustraciones conocidas, que es un insumo pero no la fuente completa."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-003
+  dimension: producto-discovery-envio
+  subtopic: discovery
+  difficulty: hard
+  type: escenario
+  roles: &a2
+    - Applied AI Engineer
+    - AI Product Engineer
+    - Agent Engineer
+  stem: Detectas una oportunidad prometedora pero no está especificada y nadie la ha pedido.
+    ¿Cuál es la forma más eficaz de moverla?
+  options:
+    - id: d
+      text: Escribir un documento de propuesta detallado y llevarlo a comité
+    - id: a
+      text: Buscar primero un responsable de producto que la haga suya
+    - id: c
+      text: "Construir el prototipo más pequeño que demuestre que funciona sobre datos reales, y
+        enseñarlo: en capacidades nuevas, una demo desplaza una discusión que una
+        especificación no desbloquea"
+    - id: b
+      text: Esperar a que aparezca en la hoja de ruta para no trabajar en balde
+  correct: c
+  explanation: "El problema de una capacidad nueva es que nadie sabe si funciona ni cómo se
+    siente usarla, y un documento no resuelve ninguna de las dos cosas: la discusión se
+    queda en si el modelo 'podrá'. Un prototipo pequeño sobre datos reales convierte la
+    conversación en una sobre valor y riesgos. El documento sigue haciendo falta, pero
+    después. Y buscar un padrino antes de tener nada suele ser pedirle que apueste a
+    ciegas."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-004
+  dimension: producto-discovery-envio
+  subtopic: ambiguedad
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Recibes una petición ambigua que admite dos lecturas razonables que llevan a trabajos
+    muy distintos. ¿Qué haces?
+  options:
+    - id: b
+      text: Elegir la lectura más ambiciosa y entregarla
+    - id: c
+      text: Implementar las dos y dejar que elijan al verlas
+    - id: d
+      text: Elegir la más simple y ampliar después si hace falta
+    - id: a
+      text: "Preguntar, porque es de los pocos casos en que la ambigüedad sí bloquea: cuando las
+        dos lecturas producen entregables distintos, elegir a ciegas es tirar la mitad del
+        trabajo"
+  correct: a
+  explanation: "La regla útil es que la mayoría de la ambigüedad se resuelve con criterio
+    propio y una nota de la suposición hecha, pero hay una excepción: cuando las lecturas
+    divergen en el entregable, no en el detalle. Ahí preguntar cuesta un mensaje y no
+    preguntar cuesta un ciclo. Hacer las dos duplica el trabajo, y elegir por ambición o por
+    simpleza son heurísticas que no miran el coste de equivocarse."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-005
+  dimension: producto-discovery-envio
+  subtopic: ambiguedad
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un interlocutor te pide 'un agente que gestione los tickets de soporte'. ¿Qué
+    preguntas concretas convierten eso en algo construible?
+  options:
+    - id: d
+      text: Qué acciones concretas puede tomar y cuáles no, qué pasa cuando no está seguro, cómo
+        sabremos que va bien, y qué error sería inaceptable
+    - id: b
+      text: Qué modelo prefiere, qué presupuesto hay y para cuándo lo necesita
+    - id: a
+      text: Cuántos tickets al día y de qué categorías
+    - id: c
+      text: Si prefiere una interfaz de chat o una integración en la herramienta actual
+  correct: d
+  explanation: "Esas cuatro preguntas fijan lo que de verdad determina el diseño: el alcance
+    de acciones (que es el radio de daño), el comportamiento ante la incertidumbre
+    (¿escala?, ¿pregunta?, ¿no hace nada?), el criterio de éxito (que es la evaluación) y el
+    fallo inaceptable (que decide dónde van las puertas de aprobación). El volumen, el
+    modelo y la interfaz son decisiones posteriores que dependen de las respuestas a estas."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-006
+  dimension: producto-discovery-envio
+  subtopic: alcance
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué señal indica que una tarea NO debería resolverse con un agente?
+  options:
+    - id: b
+      text: Que el volumen sea bajo
+    - id: c
+      text: "Que los pasos estén completamente especificados de antemano y la salida esté
+        determinada por la entrada: eso es un flujo con lógica en código, y el modelo solo
+        hace falta donde hay criterio"
+    - id: a
+      text: Que los usuarios prefieran hacerlo a mano
+    - id: d
+      text: Que no exista todavía un conjunto de evaluación
+  correct: c
+  explanation: Un agente aporta cuando la tarea es de varios pasos y difícil de especificar
+    por completo; si los pasos son fijos y deterministas, un flujo normal es más barato, más
+    rápido, más fiable y más fácil de depurar. El volumen bajo no descarta un agente (a
+    veces justifica automatizar lo que a mano no compensaba), y la ausencia de evaluación es
+    algo que hay que construir, no un motivo para descartar.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-007
+  dimension: producto-discovery-envio
+  subtopic: alcance
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Antes de comprometerte a construir un agente, ¿qué cuatro cosas conviene comprobar?
+  options:
+    - id: a
+      text: Datos disponibles, presupuesto, plazo y patrocinador
+    - id: c
+      text: Modelo, herramientas, evaluación e infraestructura
+    - id: b
+      text: Complejidad (tarea multi-paso mal especificable), valor (compensa coste y latencia),
+        viabilidad (el modelo es capaz) y coste del error (se puede detectar y revertir)
+    - id: d
+      text: Volumen, frecuencia, criticidad y número de usuarios
+  correct: b
+  explanation: "Es una lista de descarte, no de planificación: si falla cualquiera de las
+    cuatro, la respuesta correcta es quedarse en un escalón más simple —una llamada única o
+    un flujo con lógica en código—. La cuarta es la que más se salta: si un error no se
+    detecta ni se revierte, el sistema no puede ser autónomo por muy bueno que sea el
+    modelo. Presupuesto, plazo y stack son decisiones que vienen después de pasar el
+    filtro."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-008
+  dimension: producto-discovery-envio
+  subtopic: prototipos
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué debe demostrar un prototipo de una capacidad con IA para que sirva de algo?
+  options:
+    - id: c
+      text: Que la interfaz es agradable y el flujo se entiende
+    - id: b
+      text: Que el coste por operación está dentro de lo aceptable
+    - id: d
+      text: Que la arquitectura escala al volumen previsto
+    - id: a
+      text: "Que el modelo resuelve la parte difícil sobre datos reales y feos, no sobre ejemplos
+        escogidos: si la duda era la viabilidad, un prototipo que solo enseña la interfaz no
+        ha reducido ninguna incertidumbre"
+  correct: a
+  explanation: "Un prototipo se juzga por cuánta incertidumbre elimina, y en capacidades con
+    IA la incertidumbre grande casi siempre está en si el modelo hace la parte difícil con
+    material real —desordenado, incompleto, con casos raros—. Enseñar la interfaz sobre tres
+    ejemplos escogidos es teatro. Coste y escala son incertidumbres reales, pero
+    secundarias: se resuelven después y con ingeniería conocida."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-009
+  dimension: producto-discovery-envio
+  subtopic: prototipos
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu prototipo funciona el 70% de las veces. ¿Qué determina si eso es suficiente para
+    enviarlo?
+  options:
+    - id: d
+      text: "Qué pasa en el 30% restante: si el fallo es visible y barato de corregir para el
+        usuario, el 70% puede sobrar; si es silencioso o caro, ni el 95% basta"
+    - id: b
+      text: Si el 70% supera el umbral estándar del sector para ese tipo de tarea
+    - id: a
+      text: Si el 70% mejora lo que hace hoy el proceso manual
+    - id: c
+      text: Si se puede llegar al 90% con más trabajo de prompt
+  correct: d
+  explanation: "El número solo no decide: decide la forma del fallo. Un borrador que el
+    usuario revisa y corrige puede ser utilísimo al 70%, porque el error se ve y cuesta
+    poco; una acción automática sobre un sistema real puede ser inaceptable al 95%, porque
+    el error pasa desapercibido y es caro. De ahí que muchas veces la palanca no sea subir
+    la precisión sino cambiar el diseño para que el fallo sea visible y reversible."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-010
+  dimension: producto-discovery-envio
+  subtopic: diseno-de-producto
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu función acierta el 80% y el 20% de fallos es inaceptable en producción. Sin poder
+    mejorar el modelo, ¿qué rediseños lo hacen viable?
+  options:
+    - id: b
+      text: Añadir un aviso legal indicando que el resultado puede contener errores
+    - id: a
+      text: Pasar de acción automática a propuesta que el usuario acepta; acotar el alcance a los
+        casos donde acierta casi siempre y derivar el resto; o pedir que el sistema se
+        abstenga cuando no está seguro en vez de responder igual
+    - id: c
+      text: Mostrar la confianza del modelo junto a cada resultado
+    - id: d
+      text: Registrar los fallos para corregirlos manualmente después
+  correct: a
+  explanation: Las tres palancas de producto ante una precisión insuficiente son cambiar quién
+    decide (propuesta en vez de acción), estrechar el dominio (automatizar lo fácil, derivar
+    lo difícil) y permitir la abstención (no responder cuando no se sabe, que suele ser
+    mejor producto que responder mal). El aviso legal traslada el riesgo sin reducirlo,
+    mostrar confianza solo ayuda si está calibrada, y corregir después no evita el daño.
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-011
+  dimension: producto-discovery-envio
+  subtopic: diseno-de-producto
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Por qué la abstención ('no lo sé') suele ser mejor producto que una respuesta poco
+    fiable?
+  options:
+    - id: c
+      text: Porque reduce el consumo de tokens en los casos difíciles
+    - id: a
+      text: Porque los usuarios prefieren sistemas prudentes
+    - id: b
+      text: "Porque preserva la confianza: un sistema que a veces se inventa cosas obliga a
+        verificarlo todo, y entonces deja de ahorrar trabajo aunque acierte la mayoría de
+        las veces"
+    - id: d
+      text: Porque evita responsabilidad legal sobre las respuestas
+  correct: b
+  explanation: "El argumento es económico, no de estilo: el valor de un asistente es que
+    puedas fiarte sin comprobar. Si de vez en cuando inventa y no se distingue, hay que
+    verificar todo, y verificar todo cuesta casi lo mismo que hacerlo a mano. Un sistema que
+    se calla cuando no sabe conserva el ahorro en los casos en que sí responde. Por eso los
+    casos negativos deben estar en el conjunto de evaluación."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-012
+  dimension: producto-discovery-envio
+  subtopic: stakeholders
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Un responsable de negocio pide una capacidad que sabes que el modelo hará mal. ¿Cómo
+    lo manejas?
+  options:
+    - id: d
+      text: "Construirla igual: es su decisión y hay que respetarla"
+    - id: a
+      text: Explicar que no es viable con la tecnología actual y cerrar la conversación
+    - id: b
+      text: Construir una versión reducida sin decir que se ha recortado el alcance
+    - id: c
+      text: Explicar en qué falla concretamente, enseñarlo con ejemplos reales si se puede, y
+        proponer la variante más cercana que sí funciona bien
+  correct: c
+  explanation: "Un 'no es viable' sin más deja al interlocutor sin salida y sin entender por
+    qué; construirlo a sabiendas quema el crédito del equipo cuando falla; y recortar en
+    silencio es lo peor de todo, porque el problema aparece en producción y con la confianza
+    rota. Lo que funciona es concretar el fallo, hacerlo visible y traer una alternativa:
+    casi siempre hay una variante cercana —más acotada, con humano en el bucle, con otro
+    reparto entre modelo y código— que sí resuelve el problema de fondo."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-013
+  dimension: producto-discovery-envio
+  subtopic: priorizacion
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tienes cinco oportunidades de IA identificadas y tiempo para una. ¿Qué criterio ordena
+    mejor?
+  options:
+    - id: b
+      text: Valor si funciona por probabilidad de que funcione, dividido entre el esfuerzo, y a
+        igualdad de eso, primero la que enseñe más rápido si la apuesta era buena
+    - id: a
+      text: La que pida el interlocutor de más peso
+    - id: c
+      text: La técnicamente más interesante, porque atraerá talento y aprendizaje
+    - id: d
+      text: La más barata de construir, para acumular victorias rápidas
+  correct: b
+  explanation: "Es valor esperado sobre esfuerzo, con un desempate importante: en territorio
+    incierto, la velocidad a la que aprendes vale casi tanto como el resultado, porque una
+    apuesta que se descarta en dos semanas libera tiempo para las otras cuatro. Ordenar por
+    peso político produce una hoja de ruta que no maximiza nada, por interés técnico es
+    optimizar para el equipo, y por barato acumula victorias pequeñas que a veces no suman."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-014
+  dimension: producto-discovery-envio
+  subtopic: herramientas-internas
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué hace atractivas a las herramientas internas como primer terreno para capacidades
+    con IA?
+  options:
+    - id: a
+      text: Que no necesitan evaluación porque los usuarios son compañeros
+    - id: d
+      text: Que el bucle de realimentación es corto y directo, el coste de un fallo es mucho menor
+        que de cara al cliente, y se puede iterar rápido con usuarios que saben explicar qué
+        falló
+    - id: b
+      text: Que no requieren cumplir requisitos de seguridad ni privacidad
+    - id: c
+      text: Que se pueden construir sin diseño de interfaz
+  correct: d
+  explanation: "El valor está en el ciclo: usuarios accesibles que dan realimentación
+    específica, fallos que no queman la marca, y libertad para cambiar deprisa. Eso las
+    convierte en el sitio natural para aprender qué funciona antes de llevarlo a producto.
+    Lo que no cambia es que siguen tocando datos internos —a menudo los más sensibles de la
+    casa— y que sin medida no sabes si mejoran nada."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-015
+  dimension: producto-discovery-envio
+  subtopic: typescript
+  difficulty: medium
+  type: codigo
+  roles: &a3
+    - Applied AI Engineer
+    - Full Stack Engineer
+  stem: >-
+    En TypeScript, ¿qué diferencia práctica hay entre `any` y `unknown` al recibir la
+    respuesta JSON de una API?
+
+        const a: any = await res.json();
+        const b: unknown = await res.json();
+  options:
+    - id: a
+      text: Ninguna en tiempo de compilación; unknown solo documenta la intención
+    - id: b
+      text: unknown lanza una excepción si el tipo no coincide en tiempo de ejecución
+    - id: c
+      text: Con any el compilador deja de comprobar y a.lo.que.sea pasa sin quejarse; con unknown
+        hay que estrechar el tipo (comprobándolo o validándolo con un esquema) antes de
+        poder usarlo, así que el error sale en compilación y no en producción
+    - id: d
+      text: any es más rápido porque evita comprobaciones en tiempo de ejecución
+  correct: c
+  explanation: "any desactiva el sistema de tipos y propaga esa desactivación a todo lo que
+    toca; unknown es el tipo desconocido honesto: acepta cualquier valor y no deja hacer
+    nada con él hasta estrecharlo. En la frontera de una API es justo lo que quieres,
+    normalmente combinado con un validador de esquema en tiempo de ejecución, porque el tipo
+    estático no comprueba lo que llega por el cable. Ninguno de los dos afecta al
+    rendimiento."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-016
+  dimension: producto-discovery-envio
+  subtopic: nextjs
+  difficulty: medium
+  type: concepto
+  roles: *a3
+  stem: En Next.js con App Router, ¿qué distingue a un componente de servidor de uno de cliente?
+  options:
+    - id: b
+      text: El de servidor se renderiza en construcción y el de cliente en cada petición
+    - id: c
+      text: El de servidor no puede ser asíncrono y el de cliente sí
+    - id: d
+      text: Es una distinción de organización de ficheros sin efecto en tiempo de ejecución
+    - id: a
+      text: El de servidor se ejecuta en el servidor y su código no se envía al navegador, así que
+        puede leer secretos y datos directamente; el de cliente (marcado con 'use client')
+        se hidrata en el navegador y es el que puede usar estado y eventos
+  correct: a
+  explanation: "La consecuencia que importa para una aplicación con IA es dónde vive el
+    secreto: en un componente de servidor puedes llamar a la API del modelo con tu clave sin
+    que llegue al navegador. Los componentes de servidor sí pueden ser asíncronos —de hecho
+    es lo habitual—, y lo que no pueden es usar estado ni manejadores de eventos, que es
+    exactamente lo contrario de una de las opciones."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-017
+  dimension: producto-discovery-envio
+  subtopic: nextjs
+  difficulty: hard
+  type: escenario
+  roles: *a3
+  stem: Un prototipo en Next.js llama a la API del modelo desde el navegador con la clave en
+    una variable de entorno pública. ¿Qué está mal y cuál es el arreglo?
+  options:
+    - id: d
+      text: "La clave viaja al navegador y es extraíble por cualquiera que abra las herramientas
+        de desarrollo: la llamada tiene que hacerse desde el servidor (manejador de ruta,
+        acción de servidor o componente de servidor) y el navegador hablar solo con tu
+        backend"
+    - id: b
+      text: Nada si es un prototipo interno; basta con rotar la clave al pasar a producción
+    - id: a
+      text: Hay que ofuscar la clave antes de exponerla en el cliente
+    - id: c
+      text: Hay que restringir la clave por dominio de origen
+  correct: d
+  explanation: "Todo lo que llega al navegador es público: una variable de entorno marcada
+    como pública se incrusta en el paquete que se descarga. Ofuscar solo añade un paso al
+    que la extraiga, y las restricciones por origen las pone el cliente en una cabecera y se
+    falsifican trivialmente fuera del navegador. La única solución es que la clave no salga
+    del servidor. Y en un prototipo interno tampoco vale: es exactamente cómo se filtran las
+    claves."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-018
+  dimension: producto-discovery-envio
+  subtopic: interfaces
+  difficulty: medium
+  type: concepto
+  roles: *a3
+  stem: ¿Por qué se hace streaming de la respuesta en una interfaz conversacional?
+  options:
+    - id: c
+      text: Porque reduce el coste total de la petición
+    - id: b
+      text: "Porque el tiempo hasta el primer token es lo que percibe el usuario como velocidad:
+        sin streaming, una respuesta de treinta segundos es una pantalla en blanco de
+        treinta segundos"
+    - id: a
+      text: Porque el modelo genera mejores respuestas cuando se emiten por partes
+    - id: d
+      text: Porque permite cancelar la generación a mitad
+  correct: b
+  explanation: "La latencia percibida no es la latencia total: con streaming el usuario ve
+    avance inmediato y lee mientras se genera, así que la misma duración se siente
+    radicalmente distinta. La cancelación a mitad es un beneficio secundario real. Lo que no
+    cambia es el coste ni la calidad de la generación."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-019
+  dimension: producto-discovery-envio
+  subtopic: interfaces
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu agente tarda entre 30 segundos y varios minutos por tarea. ¿Qué patrón de interfaz
+    encaja?
+  options:
+    - id: b
+      text: Una petición síncrona con un indicador de carga y un tiempo de espera generoso
+    - id: c
+      text: Trocear la tarea en subtareas de menos de diez segundos y encadenarlas en el cliente
+    - id: a
+      text: "Trabajo asíncrono: se lanza, se devuelve un identificador y el usuario consulta el
+        avance o recibe aviso al terminar, con progreso visible durante la ejecución"
+    - id: d
+      text: Aumentar el nivel de esfuerzo para que termine antes
+  correct: a
+  explanation: "Con duraciones de minutos, una petición síncrona choca con los tiempos de
+    espera de la infraestructura y ata al usuario a una pestaña abierta. El patrón es
+    asíncrono con avance visible: identificador de trabajo, actualizaciones de progreso y
+    aviso al terminar. Trocear en el cliente traslada la orquestación al sitio menos fiable,
+    y subir el esfuerzo hace lo contrario de lo que se busca: piensa más y tarda más."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-020
+  dimension: producto-discovery-envio
+  subtopic: interfaces
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: En una interfaz de agente, ¿qué información hace que la espera sea tolerable?
+  options:
+    - id: d
+      text: Una barra de progreso con porcentaje estimado
+    - id: a
+      text: El número de tokens consumidos hasta el momento
+    - id: b
+      text: El nombre técnico de la herramienta que se está ejecutando
+    - id: c
+      text: "Qué está haciendo ahora mismo en términos que el usuario entienda ('buscando en los
+        pedidos de marzo'), y qué ha averiguado ya: el avance concreto informa y además
+        permite abortar pronto si va por mal camino"
+  correct: c
+  explanation: "El avance concreto hace dos cosas: confirma que el sistema no está colgado y
+    deja ver si el agente entendió mal la tarea, lo que permite interrumpir antes de gastar
+    más. Un porcentaje sobre un proceso de duración desconocida es una estimación inventada.
+    Los tokens y los nombres internos de herramienta son vocabulario del sistema, no del
+    usuario, y hay que traducirlos."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-021
+  dimension: producto-discovery-envio
+  subtopic: python
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    Este cliente hace 200 llamadas independientes al modelo. ¿Cuál es la mejora estructural?
+
+        resultados = []
+        for caso in casos:                       # 200 casos
+            r = client.messages.create(...)
+            resultados.append(r)
+  options:
+    - id: a
+      text: "Son independientes y dominadas por espera de red: paralelizarlas con concurrencia
+        acotada (o, si no son sensibles a la latencia, mandarlas por lotes) reduce el tiempo
+        total en un orden de magnitud"
+    - id: b
+      text: Reutilizar el mismo objeto cliente entre iteraciones
+    - id: c
+      text: Mover el bucle a un proceso aparte para no bloquear el principal
+    - id: d
+      text: Reducir max_tokens para que cada llamada termine antes
+  correct: a
+  explanation: 200 llamadas secuenciales suman 200 latencias completas, y el proceso está
+    esperando red casi todo el tiempo. Con concurrencia acotada —acotada para respetar
+    límites de tasa— el tiempo total pasa a ser aproximadamente el de la tanda más lenta. Y
+    si el trabajo no es sensible a la latencia, procesarlo por lotes sale además a mitad de
+    precio. Reutilizar el cliente es buena práctica pero no cambia el orden de magnitud.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-022
+  dimension: producto-discovery-envio
+  subtopic: python
+  difficulty: hard
+  type: concepto
+  roles: *a1
+  stem: ¿Cuándo compensa la API de lotes frente a llamadas normales?
+  options:
+    - id: a
+      text: Siempre que haya más de diez peticiones, porque agrupa la conexión
+    - id: b
+      text: "Cuando el trabajo no es sensible a la latencia (evaluaciones, procesados masivos,
+        backfills): sale a la mitad de precio a cambio de que el resultado tarde, con un
+        máximo de horas"
+    - id: c
+      text: Cuando las peticiones dependen unas de otras y hay que ordenarlas
+    - id: d
+      text: Cuando se necesita una latencia menor que con llamadas individuales
+  correct: b
+  explanation: "El trato es descuento por paciencia, así que encaja en todo lo que no mira
+    nadie en tiempo real. Dos detalles que muerden al integrarlo: los resultados NO vuelven
+    necesariamente en el mismo orden, hay que indexarlos por el identificador que asignaste
+    a cada petición; y las peticiones de un lote son independientes por definición, así que
+    un flujo con dependencias no es un caso de uso."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-023
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué separa un prototipo de una función enviada de punta a punta?
+  options:
+    - id: a
+      text: Que el código esté cubierto por pruebas unitarias
+    - id: b
+      text: Que use un modelo más capaz que el del prototipo
+    - id: c
+      text: Que funcione con datos reales y sus casos raros, que tenga manejo de errores y
+        límites, que se pueda observar y medir en producción, y que alguien pueda operarla y
+        pararla
+    - id: d
+      text: Que tenga una interfaz pulida
+  correct: c
+  explanation: "El prototipo demuestra que se puede; el envío hace que aguante: entradas feas,
+    fallos de las dependencias, límites de tasa, coste bajo control, visibilidad de lo que
+    pasa y una forma de intervenir. Las pruebas y la interfaz son partes de eso, no el
+    conjunto. Y subir de modelo rara vez es lo que separa una cosa de la otra."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-024
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Vas a llevar a producción una función con IA. ¿Qué modos de fallo específicos de la
+    dependencia del modelo hay que manejar?
+  options:
+    - id: b
+      text: Solo los errores de red, como con cualquier otra dependencia HTTP
+    - id: a
+      text: Solo el agotamiento del presupuesto de tokens
+    - id: c
+      text: "Ninguno especial: el SDK reintenta automáticamente todo lo que hace falta"
+    - id: d
+      text: Límite de tasa y sobrecarga (reintento con retroceso), tiempos de espera en
+        generaciones largas (streaming), respuestas que no cumplen el formato esperado, y
+        rechazos o negativas del modelo que hay que tratar como resultado y no como
+        excepción
+  correct: d
+  explanation: "Además de los fallos HTTP habituales hay dos que son propios y se olvidan.
+    Uno: una respuesta puede llegar con un código de éxito y aun así no ser utilizable
+    —formato inesperado, salida truncada por el tope de tokens, un rechazo—, así que hay que
+    mirar el motivo de parada antes de leer el contenido. Y dos: los SDK reintentan los
+    transitorios (límites de tasa, errores de servidor), pero no arreglan una respuesta que
+    llegó bien y no sirve."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-025
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué hay que instrumentar desde el primer día en una función con IA en producción?
+  options:
+    - id: a
+      text: Tokens y coste por operación, latencia con sus percentiles altos, tasa de error por
+        tipo, y una muestra de entradas y salidas para poder evaluar después
+    - id: b
+      text: Solo los errores, para no inflar el volumen de registros
+    - id: c
+      text: El número de peticiones por usuario, para facturación
+    - id: d
+      text: Solo el uso agregado mensual, que es lo que mira el negocio
+  correct: a
+  explanation: Sin coste por operación no sabes si es sostenible; sin percentiles altos crees
+    que va rápido; sin tipos de error no sabes qué arreglar; y sin una muestra de entradas y
+    salidas no puedes construir el conjunto de evaluación ni diagnosticar quejas. Esa
+    muestra es la pieza que más se olvida y la que más caro sale añadir después, porque el
+    tráfico pasado ya no se recupera.
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-026
+  dimension: producto-discovery-envio
+  subtopic: coste
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu función funciona pero cuesta 40 céntimos por operación y el negocio necesita bajar
+    de 5. ¿Por dónde atacas?
+  options:
+    - id: a
+      text: Cambiando al modelo más barato disponible para todo
+    - id: c
+      text: "Por lo que domina el gasto: cachear el prefijo estable, recortar el contexto que no
+        aporta, bajar el nivel de esfuerzo donde no se note, usar un modelo menor en las
+        subtareas fáciles y sacar del bucle lo que es código determinista"
+    - id: b
+      text: Limitando el número de operaciones por usuario
+    - id: d
+      text: Negociando un descuento por volumen
+  correct: c
+  explanation: "Un factor de ocho no sale de una sola palanca: se mide primero de dónde viene
+    el gasto y se atacan las que apliquen. La caché suele ser la de mayor efecto en agentes
+    (el prefijo se reenvía en cada llamada y leerlo cuesta una fracción), y devolver a
+    código lo que es determinista quita llamadas enteras. Bajar de modelo para todo es la
+    palanca más burda y suele pagarse en calidad; limitar el uso no reduce el coste
+    unitario, que es lo que pide el requisito."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-027
+  dimension: producto-discovery-envio
+  subtopic: seleccion-de-modelo
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Cómo se decide qué modelo usar para una tarea concreta?
+  options:
+    - id: b
+      text: Por las comparativas públicas del tipo de tarea
+    - id: a
+      text: Siempre el más capaz disponible, y se optimiza el coste después
+    - id: d
+      text: "Midiendo en tu propia evaluación: se empieza por uno capaz para saber si la tarea es
+        viable y luego se prueba a bajar mientras la calidad aguante"
+    - id: c
+      text: Siempre el más barato que produzca una salida con formato válido
+  correct: d
+  explanation: "Las comparativas públicas miden otras tareas y otra distribución. Lo que
+    decide es tu conjunto sobre tu caso, y el orden importa: empezar por un modelo capaz
+    separa 'la tarea no es viable' de 'este modelo no llega', que son diagnósticos muy
+    distintos. Con eso resuelto se baja mientras la calidad aguante. Elegir por formato
+    válido confunde que parsee con que acierte."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-028
+  dimension: producto-discovery-envio
+  subtopic: seleccion-de-modelo
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: La oferta menciona trabajar con Claude, OpenAI y Gemini 'según la tarea'. ¿Qué implica
+    eso para el diseño del código?
+  options:
+    - id: a
+      text: Usar una capa de abstracción que unifique los tres proveedores desde el principio
+    - id: c
+      text: Elegir un proveedor y ceñirse a él para no fragmentar el conocimiento del equipo
+    - id: d
+      text: Implementar cada función por duplicado, una vez por proveedor
+    - id: b
+      text: "Aislar la llamada al modelo detrás de una frontera fina propia del caso de uso, sin
+        intentar una abstracción universal: las capacidades que diferencian a cada proveedor
+        (razonamiento, uso de herramientas, salidas estructuradas, caché) son justo las que
+        una abstracción de mínimo común denominador borra"
+  correct: b
+  explanation: "Es el mismo criterio que 'construir cerca del modelo': una abstracción que
+    iguale a los tres proveedores acaba exponiendo la intersección de sus capacidades, y con
+    ella pierdes justo aquello por lo que elegirías uno u otro. Lo que sí compensa es una
+    frontera fina y a la medida de tu caso, para poder cambiar de proveedor en un sitio.
+    Duplicar funciones enteras multiplica el mantenimiento por tres."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-029
+  dimension: producto-discovery-envio
+  subtopic: iteracion
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Al mejorar la calidad de una función con IA, ¿qué orden de intervenciones suele dar
+    más por menos?
+  options:
+    - id: a
+      text: Primero el contexto y las herramientas (¿tiene la información y la capacidad que
+        necesita?), después el prompt, después el modelo o el esfuerzo, y solo al final
+        afinar el modelo
+    - id: b
+      text: Primero cambiar de modelo, que es el cambio de una línea
+    - id: c
+      text: Primero afinar con ejemplos del dominio, que es lo que más especializa
+    - id: d
+      text: Primero añadir más ejemplos al prompt hasta que el comportamiento se estabilice
+  correct: a
+  explanation: "La mayoría de los fallos no son de capacidad del modelo, son de que le falta
+    información o le falta la herramienta: el orden empieza donde está el problema real más
+    a menudo. Después vienen las palancas baratas (prompt, modelo, esfuerzo) y al final la
+    más cara y menos flexible, el afinado, que además no arregla conocimiento que cambia.
+    Amontonar ejemplos en el prompt congela el comportamiento del modelo con el que se
+    escribieron."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-030
+  dimension: producto-discovery-envio
+  subtopic: colaboracion
+  difficulty: medium
+  type: escenario
+  roles: *a1
+  stem: Producto te pide una estimación para una capacidad con IA que nadie ha construido
+    antes. ¿Cómo respondes?
+  options:
+    - id: c
+      text: Con una estimación conservadora multiplicada por tres para cubrir la incertidumbre
+    - id: b
+      text: "Separando lo incierto de lo conocido: acotar un tiempo para averiguar si el modelo
+        hace la parte difícil, y estimar el resto de la integración solo después de esa
+        respuesta"
+    - id: a
+      text: Negándote a estimar hasta tener un prototipo funcionando
+    - id: d
+      text: Estimando solo la parte de integración, que es la predecible
+  correct: b
+  explanation: "En trabajo con IA la incertidumbre no está repartida: la integración se estima
+    como cualquier otra cosa y la viabilidad no se estima, se averigua. Lo honesto y lo útil
+    es acotar el tiempo de averiguación ('en una semana sé si esto se sostiene') y
+    comprometerse con el resto después. Multiplicar por tres es esconder la incertidumbre en
+    un número, y negarse a estimar deja a producto sin poder planificar nada."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-031
+  dimension: producto-discovery-envio
+  subtopic: colaboracion
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Al presentar una capacidad con IA a interlocutores no técnicos, ¿qué es lo más
+    importante que hay que transmitir?
+  options:
+    - id: b
+      text: Qué modelo usa y por qué se eligió
+    - id: a
+      text: El porcentaje de acierto en la evaluación
+    - id: d
+      text: Qué hace bien, qué hace mal, y qué pasa cuando se equivoca
+    - id: c
+      text: Cómo se compara con lo que hace la competencia
+  correct: d
+  explanation: "Lo que necesita quien decide es saber si puede confiar y en qué condiciones, y
+    eso lo dan las tres cosas juntas: dónde acierta, dónde no y cuál es el coste del fallo.
+    Un porcentaje suelto invita a leerlo como una garantía y no dice nada del 20% restante.
+    El modelo elegido es un detalle de implementación y la comparación competitiva es otra
+    conversación."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-032
+  dimension: producto-discovery-envio
+  subtopic: typescript
+  difficulty: hard
+  type: codigo
+  roles: *a3
+  stem: |-
+    Este manejo de la respuesta del modelo no compila en TypeScript. ¿Por qué?
+
+        const resp = await client.messages.create({...});
+        console.log(resp.content[0].text);
+  options:
+    - id: a
+      text: Porque create devuelve una promesa que hay que resolver con .then
+    - id: b
+      text: Porque content puede ser nulo y falta el operador de acceso opcional
+    - id: d
+      text: Porque hay que importar el tipo de respuesta explícitamente
+    - id: c
+      text: Porque content es un array de una unión discriminada de bloques (texto, razonamiento,
+        uso de herramienta) y hay que estrechar por el campo de tipo antes de acceder a
+        .text
+  correct: c
+  explanation: "El compilador te está avisando de un fallo real: no todos los bloques tienen
+    .text, así que indexar el primero y leer .text solo funciona por casualidad. Lo correcto
+    es filtrar por bloque de tipo texto, que además es lo que necesitas cuando el modelo
+    razona o pide herramientas. Es un buen ejemplo de sistema de tipos evitando un error de
+    tiempo de ejecución."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-033
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Un agente interno lleva un mes en producción y el equipo no sabe si aporta. ¿Qué faltó
+    desde el principio?
+  options:
+    - id: a
+      text: "Definir de antemano qué resultado del negocio tenía que mover y cómo se mediría: sin
+        eso, lo que se mide es actividad (peticiones, tokens) y no efecto"
+    - id: b
+      text: Un panel con métricas técnicas de latencia y coste
+    - id: c
+      text: Una encuesta de satisfacción a los usuarios internos
+    - id: d
+      text: Un conjunto de evaluación de calidad de las respuestas
+  correct: a
+  explanation: "Sin una métrica de resultado acordada antes, la conversación de después es
+    irresoluble: cada uno mira lo que quiere y no hay línea base con la que comparar. La
+    calidad de las respuestas y las métricas técnicas dicen si el sistema funciona, no si
+    sirve; y una encuesta a posteriori mide simpatía, no efecto. La pregunta que había que
+    responder al empezar es qué número tenía que moverse y cuánto valía moverlo."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-034
+  dimension: producto-discovery-envio
+  subtopic: adopcion
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Construyes una herramienta interna con IA que funciona bien y nadie la usa. ¿Cuál es
+    la primera hipótesis a investigar?
+  options:
+    - id: b
+      text: Que falta formación y hay que hacer una sesión de presentación
+    - id: d
+      text: Que resuelve un problema que sus usuarios no tienen, o lo resuelve fuera de donde ya
+        trabajan y el coste de cambiar de contexto se come el ahorro
+    - id: a
+      text: Que la calidad no es tan buena como parece en las evaluaciones
+    - id: c
+      text: Que hace falta apoyo de dirección para impulsar el uso
+  correct: d
+  explanation: "Las dos causas más frecuentes de una herramienta buena sin usuarios son de
+    encaje: o el problema no era el que duele, o la solución vive en otro sitio y obliga a
+    salir del flujo de trabajo. Es la comprobación barata y la que más veces acierta.
+    Formación y respaldo de dirección empujan la adopción de algo que ya encaja; si no
+    encaja, solo consiguen un pico y una caída. Que la calidad real sea peor que la medida
+    es una hipótesis válida, pero se comprueba después de la de encaje."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-035
+  dimension: producto-discovery-envio
+  subtopic: diagramas
+  difficulty: medium
+  type: diagrama
+  roles: *a2
+  stem: |-
+    Dos formas de meter IA en un flujo de trabajo existente:
+
+        A)  entrada ──► [IA] ──► acción automática ──► sistema
+
+        B)  entrada ──► [IA] ──► propuesta ──► [humano] ──► acción ──► sistema
+                                                  │
+                                                  └──► señal de aceptación/corrección
+
+    ¿Qué ventaja tiene B más allá de la seguridad?
+  options:
+    - id: a
+      text: Que es más barata porque el humano filtra los casos difíciles antes de llamar al
+        modelo
+    - id: b
+      text: Que permite usar un modelo más pequeño
+    - id: c
+      text: "Genera etiquetas gratis: cada aceptación o corrección del humano es una señal de
+        calidad sobre tráfico real, que alimenta la evaluación y marca el camino hacia la
+        automatización"
+    - id: d
+      text: Que evita la necesidad de instrumentar el sistema
+  correct: c
+  explanation: "El diseño con humano en el bucle no es solo una barandilla: es un generador de
+    datos. Cada decisión del revisor etiqueta un caso real, y con eso construyes el conjunto
+    de evaluación que jamás habrías podido etiquetar a mano y mides cuándo estás listo para
+    pasar al esquema A —en general o para un subconjunto de casos—. En B el modelo se llama
+    igual, así que no es más barato."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-036
+  dimension: producto-discovery-envio
+  subtopic: frontera
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: La oferta pide 'interés activo por la frontera de la IA'. ¿Qué lo convierte en algo
+    útil para el puesto y no en consumo de novedades?
+  options:
+    - id: a
+      text: Probar cada modelo nuevo el día que sale y comparar puntuaciones
+    - id: c
+      text: Mantenerse al día de la literatura de investigación
+    - id: d
+      text: Participar en las comunidades donde se discuten los lanzamientos
+    - id: b
+      text: "Traducir lo nuevo en decisiones: qué se puede construir ahora que hace tres meses no,
+        qué andamiaje de tu sistema ha quedado obsoleto, qué supuesto de coste o latencia
+        hay que rehacer"
+  correct: b
+  explanation: La utilidad está en el cambio de decisión. Un modelo nuevo puede hacer viable
+    una capacidad descartada hace un trimestre, y también puede convertir en lastre
+    andamiaje que existía para compensar limitaciones que ya no están —instrucciones de
+    verificación, trucos para forzar formato, pasos manuales de planificación—. Enterarse
+    rápido sin traducirlo a eso es consumo; probar y comparar puntuaciones es un insumo de
+    esa traducción, no el resultado.
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-037
+  dimension: producto-discovery-envio
+  subtopic: frontera
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Sale un modelo nuevo notablemente mejor. ¿Qué haces con tus prompts existentes?
+  options:
+    - id: d
+      text: "Revisarlos: el andamiaje escrito para compensar limitaciones del modelo anterior a
+        menudo degrada al nuevo. Se prueba quitándolo y se vuelve a medir, en vez de
+        arrastrarlo por inercia"
+    - id: a
+      text: "Nada: si funcionaban antes, funcionarán mejor ahora"
+    - id: b
+      text: Reescribirlos desde cero para aprovechar las capacidades nuevas
+    - id: c
+      text: Añadir instrucciones que aprovechen explícitamente lo que el modelo nuevo hace mejor
+  correct: d
+  explanation: "Los prompts son artefactos atados a un modelo: instrucciones de verificación,
+    coreografía paso a paso, énfasis a gritos para vencer una reticencia que ya no existe, o
+    pautas de formato de la época del prellenado. Con un modelo que sigue mejor las
+    instrucciones, ese texto se aplica más literalmente y produce sobre-verificación,
+    rigidez o sobredisparo. La disciplina es probar quitándolo y medir el efecto, no
+    reescribir a ciegas ni arrastrar por si acaso."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-038
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: medium
+  type: concepto
+  roles: *a3
+  stem: ¿Qué papel juegan Docker y una base de datos relacional en el envío de una herramienta
+    interna con IA?
+  options:
+    - id: a
+      text: "Son opcionales: una herramienta con IA vive en la ventana de contexto del modelo"
+    - id: c
+      text: "El contenedor da un entorno reproducible y desplegable (y es también el mecanismo de
+        aislamiento si el agente ejecuta código); la base relacional guarda lo que la
+        conversación no puede guardar: estado, trabajos, auditoría y resultados"
+    - id: b
+      text: El contenedor solo sirve para el desarrollo local
+    - id: d
+      text: La base relacional se sustituye por la base vectorial en sistemas con IA
+  correct: c
+  explanation: "Un sistema con IA sigue siendo un sistema: hay estado que persistir (trabajos,
+    sesiones, aprobaciones), auditoría que conservar y despliegues que reproducir. La base
+    vectorial resuelve búsqueda por similitud y no sustituye a la relacional, que es la que
+    sirve para consultas exactas, transacciones e integridad. Y el contenedor no es solo
+    comodidad de desarrollo: es la unidad de despliegue y, cuando el agente ejecuta código,
+    también la de aislamiento."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-039
+  dimension: producto-discovery-envio
+  subtopic: alcance
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Un flujo de negocio tiene ocho pasos. Cinco son deterministas y tres requieren
+    criterio. ¿Cómo lo diseñas?
+  options:
+    - id: a
+      text: Un agente con las ocho acciones como herramientas y que decida él la secuencia
+    - id: c
+      text: Ocho llamadas al modelo, una por paso, encadenadas
+    - id: b
+      text: Los cinco deterministas en código y los tres de criterio como llamadas al modelo
+        dentro de ese flujo; solo si el propio ORDEN de los pasos depende de lo que se vaya
+        encontrando conviene un agente que decida la secuencia
+    - id: d
+      text: Un agente para los tres pasos de criterio y ejecución manual de los cinco restantes
+  correct: b
+  explanation: El criterio es dónde hay incertidumbre. Un flujo con lógica en código y
+    llamadas al modelo en los puntos de criterio es más barato, más rápido, más fiable y
+    muchísimo más fácil de depurar que un agente que redescubre la secuencia en cada
+    ejecución. El agente se gana el sitio cuando la propia secuencia depende de los
+    hallazgos. Poner el modelo en los ocho pasos es el anti-patrón de usar un LLM para
+    ejecutar un plan determinista.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-040
+  dimension: producto-discovery-envio
+  subtopic: colaboracion
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Descubres a mitad de construcción que la capacidad no va a funcionar como se planteó.
+    ¿Qué haces?
+  options:
+    - id: b
+      text: Terminar lo comprometido y señalar las limitaciones en la entrega
+    - id: a
+      text: "Seguir hasta el final: quizá se resuelve con más iteración de prompt"
+    - id: d
+      text: Cambiar el enfoque por tu cuenta y presentar el resultado que sí funciona
+    - id: c
+      text: "Decirlo pronto, con la evidencia concreta de qué falla, y traer las opciones: acotar
+        el alcance, cambiar el reparto entre modelo y humano, o parar"
+  correct: c
+  explanation: "El valor de la mala noticia decae rápido: dicha pronto libera tiempo y permite
+    decidir; dicha en la entrega solo deja constancia. Y decirla con evidencia y opciones es
+    lo que la convierte en una decisión y no en un problema que le devuelves a otro. Cambiar
+    el enfoque por tu cuenta puede ser lo correcto técnicamente y aun así estar mal, porque
+    la elección de alcance no es tuya."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-041
+  dimension: producto-discovery-envio
+  subtopic: interfaces
+  difficulty: medium
+  type: concepto
+  roles: *a3
+  stem: ¿Por qué el chat no siempre es la interfaz adecuada para una capacidad con IA?
+  options:
+    - id: a
+      text: "Porque traslada al usuario la carga de saber qué pedir y cómo: cuando la tarea es
+        conocida y repetitiva, un botón, un formulario o una sugerencia en contexto entregan
+        el valor sin obligar a formular nada"
+    - id: b
+      text: Porque el chat es más caro de implementar que una interfaz tradicional
+    - id: c
+      text: Porque los usuarios prefieren interfaces gráficas
+    - id: d
+      text: Porque el chat no permite mostrar resultados estructurados
+  correct: a
+  explanation: "El chat es un lienzo en blanco: potentísimo cuando el espacio de peticiones es
+    abierto, y una carga cuando la tarea siempre es la misma, porque obliga a redescubrir
+    cada vez cómo pedirla. Muchas de las mejores integraciones no tienen chat: aparecen
+    donde el usuario ya está, con la acción ya formulada. La pregunta de diseño es si el
+    usuario sabe qué pedir, no si el chat está de moda."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-042
+  dimension: producto-discovery-envio
+  subtopic: iteracion
+  difficulty: medium
+  type: escenario
+  roles: *a2
+  stem: Tras desplegar, llegan quejas puntuales de calidad. ¿Cómo se procesa esa
+    realimentación sin perseguir cada caso?
+  options:
+    - id: b
+      text: Corregir cada caso reportado con una regla específica en el prompt
+    - id: d
+      text: Convertir cada queja en un caso de evaluación, buscar el patrón común entre ellas y
+        atacar el patrón, no el caso
+    - id: a
+      text: Esperar a tener volumen suficiente para un análisis estadístico
+    - id: c
+      text: Derivar las quejas al equipo de soporte y centrarse en la hoja de ruta
+  correct: d
+  explanation: Parchear caso a caso produce un prompt lleno de condiciones especiales, cada
+    una trazable a un incidente, y un sistema que falla de forma impredecible entre ellas.
+    Convertir la queja en caso de evaluación conserva la señal y evita la regresión; buscar
+    el patrón ataca la causa. Esperar a tener volumen desaprovecha justo la realimentación
+    más rica, que es la de los primeros días.
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-043
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: ¿Qué implica que una función con IA sea 'medible' desde el diseño, y no como añadido
+    posterior?
+  options:
+    - id: a
+      text: Que se elige un modelo que exponga métricas de confianza
+    - id: c
+      text: Que se documentan las métricas en la especificación técnica
+    - id: b
+      text: Que se decide antes qué señal indicará que funciona y se instrumenta para capturarla
+        desde el primer día, incluyendo guardar entradas y salidas para poder evaluar
+        después
+    - id: d
+      text: Que se añade un panel de métricas antes del lanzamiento
+  correct: b
+  explanation: "Medible desde el diseño significa dos decisiones tomadas antes de construir:
+    qué señal cuenta como éxito, y qué hay que capturar en ejecución para poder calcularla.
+    La segunda es la que no admite retroactividad: el tráfico que no guardaste no se
+    recupera, y sin esa muestra el conjunto de evaluación hay que inventárselo. Un panel es
+    la consecuencia visible, no la decisión."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-044
+  dimension: producto-discovery-envio
+  subtopic: discovery
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Buscas oportunidades de IA en una empresa de producto con muchos usuarios. ¿Qué tipo
+    de oportunidad se pasa por alto con más frecuencia?
+  options:
+    - id: c
+      text: Automatizar tareas que ya hace un equipo interno
+    - id: a
+      text: Añadir un asistente conversacional al producto
+    - id: b
+      text: Mejorar la calidad de una función existente basada en reglas
+    - id: d
+      text: "Trabajo que hoy NO se hace porque a mano no compensa: revisar todo en vez de una
+        muestra, personalizar para cada usuario en vez de por segmento, responder en minutos
+        en vez de en días. Ahí el cambio es de escalón, no de eficiencia"
+  correct: d
+  explanation: "Automatizar lo que ya se hace da ahorros lineales y acotados por el coste
+    actual. Lo que cambia de escalón es lo que era económicamente imposible: revisar el 100%
+    en vez de muestrear, tratar a cada usuario como un caso, dar en minutos lo que tardaba
+    días. Esas oportunidades no aparecen preguntando qué duele, porque nadie echa de menos
+    lo que nunca ha existido: hay que buscarlas mirando dónde el coste marginal del trabajo
+    humano obligó a conformarse."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-045
+  dimension: producto-discovery-envio
+  subtopic: riesgo
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Producto quiere lanzar una función con IA de cara al usuario final. ¿Qué preguntas de
+    riesgo hay que resolver antes?
+  options:
+    - id: a
+      text: Qué pasa si se equivoca delante de un cliente, si el fallo es visible o silencioso, si
+        el usuario puede corregirlo, si hay implicaciones legales o de sesgo, y qué se hace
+        si alguien intenta usarla mal a propósito
+    - id: b
+      text: Qué coste tendrá al volumen previsto y si el proveedor aguanta el pico
+    - id: c
+      text: Si la latencia será aceptable en hora punta
+    - id: d
+      text: Si el equipo podrá mantenerla con la plantilla actual
+  correct: a
+  explanation: "De cara al cliente, el riesgo cambia de naturaleza: un fallo interno se
+    corrige con una conversación y uno externo puede acabar en soporte, en prensa o en un
+    expediente. Las preguntas que hay que responder antes son sobre visibilidad y
+    reversibilidad del error, sobre trato desigual entre usuarios y sobre el uso adversario
+    deliberado, que en interno rara vez ocurre. Coste, latencia y mantenimiento son riesgos
+    reales de otra categoría, y se gestionan con ingeniería conocida."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-046
+  dimension: producto-discovery-envio
+  subtopic: python
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué papel juega la validación de esquemas (tipo Pydantic en Python o Zod en
+    TypeScript) en un sistema con IA?
+  options:
+    - id: b
+      text: Sustituir a las pruebas unitarias del sistema
+    - id: d
+      text: Validar en la frontera lo que entra y lo que sale del modelo, y de paso generar el
+        esquema JSON que se le declara al modelo desde la misma definición
+    - id: a
+      text: Acelerar el parseo de las respuestas del modelo
+    - id: c
+      text: Garantizar que el modelo produzca siempre una salida válida
+  correct: d
+  explanation: "El doble papel es lo que hace que compense: una sola definición sirve para
+    declarar el esquema al modelo (salidas estructuradas o parámetros de herramienta) y para
+    validar lo que llega, evitando que las dos se desincronicen. Lo que NO hace es
+    garantizar la salida —eso lo impone la generación con esquema en el servidor, y aun así
+    puede llegar truncada— ni sustituir a las pruebas."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: prod-047
+  dimension: producto-discovery-envio
+  subtopic: adopcion
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué hace que un usuario confíe en una herramienta con IA lo bastante como para
+    incorporarla a su trabajo?
+  options:
+    - id: a
+      text: Que tenga la mayor tasa de acierto posible
+    - id: b
+      text: Que explique su razonamiento en cada respuesta
+    - id: c
+      text: "Que sea predecible: que falle de formas que se entienden y se detectan, que muestre
+        en qué se basa, y que no sorprenda con un error grave donde antes acertaba diez
+        veces"
+    - id: d
+      text: Que se integre visualmente con el resto del producto
+  correct: c
+  explanation: La confianza no es una función de la tasa de acierto, es una función de la
+    varianza y de la visibilidad del fallo. Un sistema que acierta el 85% de forma
+    predecible —falla donde uno espera y se nota— se incorpora al trabajo; uno que acierta
+    el 95% con fallos aleatorios e invisibles obliga a comprobarlo todo y no ahorra nada.
+    Enseñar en qué se basa (citas, fuentes, pasos) es lo que permite detectar; explicar el
+    razonamiento en cada respuesta es ruido.
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-048
+  dimension: producto-discovery-envio
+  subtopic: colaboracion
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: En un puesto donde el núcleo es el discovery, ¿qué distingue una propuesta que se
+    aprueba de una que se queda en el cajón?
+  options:
+    - id: b
+      text: El detalle técnico del diseño propuesto
+    - id: c
+      text: El respaldo de un interlocutor con influencia
+    - id: d
+      text: La novedad de la capacidad propuesta
+    - id: a
+      text: "Que esté atada a un resultado que a alguien le importa y con una vía de comprobación
+        barata: qué problema real resuelve, cuánto vale resolverlo y cómo sabremos en dos
+        semanas si va bien"
+  correct: a
+  explanation: "Quien decide compara tu propuesta con otras cosas que podrían hacerse con el
+    mismo tiempo, así que necesita valor y riesgo, no arquitectura. Y la parte que más peso
+    tiene en territorio incierto es el 'cómo lo sabremos pronto': una apuesta con punto de
+    comprobación barato es fácil de aprobar porque es fácil de cancelar. El detalle técnico
+    convence a ingeniería y la novedad no es un argumento."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-049
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: easy
+  type: concepto
+  roles: *a2
+  stem: La oferta pide construir 'de punta a punta'. ¿Qué abarca eso?
+  options:
+    - id: d
+      text: "Desde detectar la oportunidad hasta que funciona en producción con usuarios reales:
+        exploración, prototipo, integración, interfaz, evaluación, despliegue y operación"
+    - id: b
+      text: Desde el prompt hasta la respuesta del modelo
+    - id: a
+      text: Desde el backend hasta el frontend de la función
+    - id: c
+      text: Desde la especificación hasta la entrega a control de calidad
+  correct: d
+  explanation: De punta a punta aquí incluye el extremo de delante —encontrar y dar forma a la
+    oportunidad, que es la parte de discovery— y el de atrás —que quede funcionando, medido
+    y operable—. Es más ancho que 'backend y frontend' y bastante más que la parte de
+    prompt. Por eso el puesto pide a la vez criterio de producto y capacidad de enviar.
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-050
+  dimension: producto-discovery-envio
+  subtopic: criterio
+  difficulty: medium
+  type: escenario
+  roles: *a2
+  stem: Tienes libertad para elegir en qué trabajar durante un trimestre en un equipo de IA
+    aplicada. ¿Qué reparto es más sensato?
+  options:
+    - id: b
+      text: "Todo a exploración: en un puesto de discovery, entregar es labor de otros equipos"
+    - id: a
+      text: "Un núcleo de apuestas con dueño y resultado acordado, más una parte reservada a
+        exploración con punto de comprobación barato: sin exploración no hay descubrimiento,
+        y sin entrega el descubrimiento no llega a nadie"
+    - id: c
+      text: "Todo a entregar lo comprometido: la exploración se hace cuando sobra tiempo"
+    - id: d
+      text: Alternar trimestres completos de exploración y de entrega
+  correct: a
+  explanation: "Los dos extremos fallan de forma simétrica: solo explorar produce demos que
+    nadie adopta, y solo entregar consume el trimestre en lo que ya estaba decidido, que es
+    justo lo contrario de lo que pide un puesto de discovery —y en la práctica la
+    exploración nunca encuentra ese hueco de tiempo sobrante—. Alternar trimestres completos
+    deja medio año sin entregar y medio sin explorar. La reserva explícita, con puntos de
+    comprobación baratos, es lo que hace que ambas cosas ocurran."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-051
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: easy
+  type: concepto
+  roles: &a4
+    - Applied AI Engineer
+    - AI Product Engineer
+  stem: ¿Por qué una demo que funciona no equivale a una función lista para usuarios?
+  options:
+    - id: a
+      text: Porque en producción hay que usar un modelo distinto
+    - id: c
+      text: Porque la demo no tiene interfaz definitiva
+    - id: b
+      text: Porque la demo se enseña con casos elegidos y bajo control; en producción llegan
+        entradas imprevistas, fallan las dependencias y nadie está delante para reconducir
+    - id: d
+      text: Porque falta documentación
+  correct: b
+  explanation: "La distancia no está en el pulido, está en las condiciones: la demo se ejecuta
+    sobre lo que tú elegiste y con alguien capaz de explicar el resultado; producción es lo
+    contrario en las tres cosas. De ahí que el trabajo de envío sea sobre todo manejo de
+    casos raros, de errores y de observabilidad."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-052
+  dimension: producto-discovery-envio
+  subtopic: discovery
+  difficulty: easy
+  type: concepto
+  roles: *a4
+  stem: ¿Qué significa 'product sense' en un puesto de ingeniería aplicada de IA?
+  options:
+    - id: a
+      text: Tener criterio de diseño visual y de interfaz
+    - id: b
+      text: Conocer las métricas de producto y saber leer paneles
+    - id: c
+      text: Saber escribir especificaciones detalladas
+    - id: d
+      text: Saber juzgar qué merece la pena construir y para quién, no solo cómo construirlo
+  correct: d
+  explanation: "La oferta lo dice casi con esas palabras: identificar qué debería construirse,
+    no solo ejecutar requisitos predefinidos. Es criterio sobre el valor y el usuario.
+    Diseño de interfaz, lectura de métricas y redacción de especificaciones son habilidades
+    adyacentes y útiles, pero ninguna es lo mismo que decidir qué merece la pena."
+  source: jd-codeway
+  date: 2026-08-10
+- id: prod-053
+  dimension: producto-discovery-envio
+  subtopic: envio
+  difficulty: easy
+  type: concepto
+  roles: *a4
+  stem: ¿Por qué conviene empezar por el caso de uso más estrecho posible al construir una
+    capacidad con IA?
+  options:
+    - id: c
+      text: Porque acota la evaluación y el radio de daño, y da una señal real de si funciona
+        antes de invertir en generalizar
+    - id: a
+      text: Porque los modelos funcionan mejor con prompts cortos
+    - id: b
+      text: Porque reduce el coste de inferencia
+    - id: d
+      text: Porque los usuarios prefieren herramientas especializadas
+  correct: c
+  explanation: "Un alcance estrecho hace evaluable la cosa: sabes qué entra, qué debería salir
+    y qué cuenta como fallo. Y limita lo que puede romperse mientras aprendes. Generalizar
+    después es fácil; averiguar por qué falla un sistema que hace de todo, no. No tiene que
+    ver con la longitud del prompt ni con el coste unitario."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-054
+  dimension: producto-discovery-envio
+  subtopic: colaboracion
+  difficulty: experto
+  type: escenario
+  roles: *a4
+  stem: "Llevas dos semanas explorando una oportunidad y los resultados son ambiguos: no falla
+    claramente, pero tampoco convence. ¿Qué haces?"
+  options:
+    - id: a
+      text: "Seguir dos semanas más: las capacidades nuevas tardan en madurar"
+    - id: c
+      text: "Volver a la pregunta que la exploración tenía que responder y comprobar si sigue sin
+        respuesta: si el criterio de decisión no estaba definido, definirlo ahora y darle un
+        plazo corto; si lo estaba y no se ha cumplido, parar"
+    - id: b
+      text: Enseñarlo al equipo y dejar que decidan si continuar
+    - id: d
+      text: Cambiar de enfoque técnico y volver a empezar
+  correct: c
+  explanation: "La ambigüedad a las dos semanas suele delatar que la exploración arrancó sin
+    criterio de parada, y sin él siempre habrá razones para seguir un poco más. La
+    disciplina es recuperar la pregunta original: si no existía, definirla ahora con plazo;
+    si existía y no se ha cumplido, parar es el resultado correcto y liberar el tiempo vale
+    más que el trabajo hundido. Llevarlo al equipo sin criterio traslada la misma
+    indecisión, y cambiar de enfoque sin haber entendido por qué no convence es empezar otra
+    apuesta con el mismo defecto."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-055
+  dimension: producto-discovery-envio
+  subtopic: riesgo
+  difficulty: experto
+  type: escenario
+  roles: *a4
+  stem: Una función con IA funciona muy bien en la mayoría de casos y falla sistemáticamente
+    en un subgrupo concreto de usuarios. La media es excelente. ¿Cómo se decide?
+  options:
+    - id: a
+      text: "Lanzar: la media supera el umbral acordado y el subgrupo es minoritario"
+    - id: c
+      text: No lanzar hasta que el rendimiento sea uniforme en todos los segmentos
+    - id: b
+      text: "La media es la métrica equivocada aquí: un fallo sistemático concentrado en un grupo
+        es trato desigual, no ruido, y hay que medir por segmento antes de lanzar. Las
+        salidas son corregirlo, excluir explícitamente ese caso, o lanzar asumiéndolo de
+        forma consciente y declarada"
+    - id: d
+      text: Lanzar y añadir un aviso de que el resultado puede variar según el caso
+  correct: b
+  explanation: "Lo importante es que un fallo concentrado y sistemático se comporta distinto
+    de un fallo aleatorio: para el grupo afectado la tasa de acierto no es la media, es la
+    suya, y la media la esconde. Reconocerlo obliga a medir por segmento. A partir de ahí,
+    las tres salidas son legítimas —arreglar, excluir el caso, o asumirlo con conocimiento y
+    responsabilidad—; lo que no es defendible es no haberlo mirado o taparlo con un aviso
+    genérico. Exigir uniformidad perfecta tampoco es realista."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: prod-056
+  dimension: producto-discovery-envio
+  subtopic: alcance
+  difficulty: experto
+  type: escenario
+  roles: *a4
+  stem: "Un equipo lleva seis meses con un agente que 'casi funciona': cada mes se arregla un
+    modo de fallo y aparece otro. ¿Qué diagnóstico de fondo hay que considerar?"
+  options:
+    - id: d
+      text: Que falta un modelo más capaz y hay que esperar a la siguiente generación
+    - id: b
+      text: Que el equipo no dedica suficiente tiempo a la ingeniería de prompt
+    - id: c
+      text: Que hace falta más contexto en cada llamada
+    - id: a
+      text: "Que puede que la tarea no sea viable con este reparto entre modelo y sistema: si la
+        cola de casos raros no se agota, la salida no es un parche más sino estrechar el
+        dominio, meter al humano en el bucle o mover parte del trabajo a código
+        determinista"
+  correct: a
+  explanation: "El patrón revelador es que la cola no se agota: cada arreglo descubre otro
+    caso, lo que indica que la distribución real es más ancha de lo que el diseño asume.
+    Insistir en la misma forma produce un sistema cada vez más enrevesado y no más fiable.
+    El movimiento correcto es cambiar el reparto —menos dominio, humano revisando, o partes
+    del trabajo devueltas a código—, que es una decisión de producto y arquitectura, no de
+    prompt. Esperar a un modelo mejor puede ayudar algún día, pero no es un plan."
+  source: externa:practica-industria
+  date: 2026-08-10

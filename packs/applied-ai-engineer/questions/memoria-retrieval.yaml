@@ -1356,3 +1356,177 @@
     aislamiento, que son las caras de arreglar después."
   source: jd-codeway
   date: 2026-08-10
+- id: mem-051
+  dimension: memoria-retrieval
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: &a4
+    - Applied AI Engineer
+    - AI Engineer
+  stem: ¿Qué hace un sistema de recuperación aumentada (RAG) que no hace el modelo por sí solo?
+  options:
+    - id: b
+      text: Modifica los pesos del modelo para que aprenda tus documentos
+    - id: c
+      text: Amplía la ventana de contexto del modelo
+    - id: a
+      text: Le da al modelo, en el momento de responder, fragmentos concretos de tus datos que no
+        estaban en su entrenamiento
+    - id: d
+      text: Comprueba que la respuesta del modelo es correcta
+  correct: a
+  explanation: "La idea es sustituir 'lo que el modelo recuerda' por 'lo que le pones
+    delante': se busca lo relevante y se le entrega en el prompt. No toca los pesos (eso es
+    afinado), no cambia el tamaño de la ventana y no verifica nada por sí mismo, aunque al
+    aportar la fuente permite que la respuesta se pueda comprobar."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: mem-052
+  dimension: memoria-retrieval
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: *a4
+  stem: ¿Por qué hay que trocear los documentos antes de indexarlos?
+  options:
+    - id: a
+      text: Porque los modelos de embeddings solo aceptan textos de menos de 100 palabras
+    - id: c
+      text: Porque así se reduce el coste de almacenamiento del índice
+    - id: d
+      text: Porque el orden de los párrafos afecta al resultado de la búsqueda
+    - id: b
+      text: Porque un documento entero produce un único vector que promedia todos sus temas y deja
+        de apuntar a ninguno en concreto, además de no caber bien en el contexto
+  correct: b
+  explanation: "Un vector por documento largo es una media de todo lo que trata: se parece un
+    poco a muchas consultas y mucho a ninguna. Trocear devuelve especificidad a cada vector
+    y además permite meter en el contexto solo la parte que hace falta. Los modelos de
+    embeddings aceptan textos bastante largos, y trocear aumenta el tamaño del índice en vez
+    de reducirlo."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: mem-053
+  dimension: memoria-retrieval
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: *a4
+  stem: En un sistema con recuperación, ¿qué significa que el modelo 'alucine' pese a tener
+    los documentos delante?
+  options:
+    - id: c
+      text: Que afirma cosas que los documentos recuperados no dicen, ya sea porque no estaban ahí
+        o porque el modelo rellenó los huecos con lo que le sonaba
+    - id: a
+      text: Que el sistema recuperó documentos que no venían a cuento
+    - id: b
+      text: Que la respuesta contradice el prompt de sistema
+    - id: d
+      text: Que el modelo cita documentos con formato incorrecto
+  correct: c
+  explanation: "Conviene separar los dos fallos porque se arreglan de forma distinta:
+    recuperar mal es un problema de la etapa de búsqueda, y afirmar lo que la fuente no dice
+    es un problema de fidelidad de la generación. Un sistema puede recuperar perfectamente y
+    aun así inventarse el detalle que faltaba, y por eso se miden por separado."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: mem-054
+  dimension: memoria-retrieval
+  subtopic: indices
+  difficulty: experto
+  type: escenario
+  roles:
+    - Applied AI Engineer
+    - AI Engineer
+    - ML Engineer
+  stem: Tu índice funciona bien en pruebas y en producción la exhaustividad cae, con la misma
+    configuración y el mismo modelo de embeddings. El corpus ha crecido de 50.000 a 5
+    millones de fragmentos. ¿Qué explica la caída?
+  options:
+    - id: a
+      text: Los embeddings pierden capacidad discriminativa al crecer el corpus y hay que subir la
+        dimensión
+    - id: d
+      text: "Los parámetros de la búsqueda aproximada que bastaban con 50.000 vectores exploran
+        una fracción mucho menor del espacio con 5 millones: el compromiso
+        exhaustividad-latencia se desplaza con el tamaño y hay que recalibrarlo, no
+        heredarlo"
+    - id: b
+      text: El índice se ha fragmentado y hay que reconstruirlo desde cero
+    - id: c
+      text: Con más documentos hay más duplicados y ocupan los primeros puestos
+  correct: d
+  explanation: "Los parámetros de un índice aproximado no son absolutos: definen cuánto se
+    explora, y lo que era una porción generosa del espacio con 50.000 vectores es una
+    rendija con 5 millones. Por eso la exhaustividad medida en un corpus pequeño no se
+    transfiere, y hay que volver a medirla y recalibrar (asumiendo más latencia o más
+    recursos). Los embeddings no cambian de calidad por el tamaño del corpus, y los
+    duplicados son un problema real pero independiente y visible al inspeccionar
+    resultados."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: mem-055
+  dimension: memoria-retrieval
+  subtopic: ingenieria-de-contexto
+  difficulty: experto
+  type: escenario
+  roles: &a5
+    - Applied AI Engineer
+    - AI Engineer
+    - Agent Engineer
+  stem: Un agente con recuperación cachea el prefijo del prompt para abaratar. Alguien propone
+    meter los documentos recuperados justo detrás del prompt de sistema, antes del
+    historial. ¿Qué consecuencia tiene?
+  options:
+    - id: a
+      text: "Ninguna: el prefijo cacheado es el prompt de sistema y sigue intacto"
+    - id: c
+      text: Mejora la caché, porque los documentos recuperados se repiten entre consultas
+        parecidas
+    - id: b
+      text: "Destruye la caché en cada turno: los documentos cambian con cada consulta, así que
+        todo lo que va detrás —el historial entero— deja de coincidir y se reprocesa a
+        precio completo"
+    - id: d
+      text: Solo afecta a la latencia del primer token, no al coste
+  correct: b
+  explanation: La caché es coincidencia de prefijo, así que lo que decide no es si el prompt
+    de sistema cambia sino qué hay ANTES de cada punto de corte. Insertar contenido volátil
+    entre lo estable y el historial invalida el historial completo en cada turno, que en un
+    agente largo es justo el tramo grande. Lo correcto es colocar lo variable después de lo
+    estable, aunque intuitivamente parezca que 'el contexto va arriba'.
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mem-056
+  dimension: memoria-retrieval
+  subtopic: capas-de-memoria
+  difficulty: experto
+  type: escenario
+  roles: *a5
+  stem: Una memoria extraída de conversaciones guarda 'el usuario prefiere Python'. Meses
+    después el usuario dice que ahora trabaja en Go. ¿Qué política de actualización es la
+    más defendible?
+  options:
+    - id: c
+      text: Sustituir el hecho antiguo por el nuevo, porque la información reciente siempre manda
+    - id: b
+      text: Guardar los dos y dejar que la búsqueda semántica decida cuál recupera
+    - id: d
+      text: No guardar preferencias que puedan cambiar
+    - id: a
+      text: "Registrar el hecho nuevo con su momento y marcar el anterior como superado,
+        conservando la traza: sustituir a ciegas pierde información útil (a veces la
+        preferencia vieja sigue aplicando en otro contexto) y guardar los dos sin vigencia
+        deja al modelo eligiendo al azar"
+  correct: a
+  explanation: "La resolución de contradicciones es el problema de fondo de toda memoria a
+    largo plazo, y las dos salidas simples fallan: guardar ambos sin vigencia hace que el
+    modelo recupere una u otra según la consulta —memoria que se contradice a sí misma—, y
+    sustituir sin traza borra contexto que a veces importa (puede seguir prefiriendo Python
+    para scripts). Modelar la validez temporal es lo que permite responder 'ahora Go, antes
+    Python' en vez de una de las dos a ciegas. Por eso algunas implementaciones representan
+    la memoria como un grafo con vigencias."
+  source: externa:practica-industria
+  date: 2026-08-10

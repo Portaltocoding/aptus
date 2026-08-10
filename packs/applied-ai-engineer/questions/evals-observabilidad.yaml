@@ -1365,3 +1365,117 @@
     el conjunto empieza pequeño y crece con lo que aprendes."
   source: jd-codeway
   date: 2026-08-10
+- id: evals-051
+  dimension: evals-observabilidad
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: &a4
+    - Applied AI Engineer
+    - AI Engineer
+  stem: ¿Por qué un porcentaje de acierto sin su N no sirve para decidir?
+  options:
+    - id: a
+      text: Porque los porcentajes son difíciles de comparar entre equipos
+    - id: c
+      text: Porque hace falta también la desviación típica
+    - id: b
+      text: Porque sin saber sobre cuántos casos se calculó no se puede distinguir una mejora real
+        del ruido de muestreo
+    - id: d
+      text: Porque los porcentajes ocultan la distribución por dificultad
+  correct: b
+  explanation: "El mismo 84% sobre 25 casos y sobre 2.500 son afirmaciones de fuerza muy
+    distinta: en el primero, unos pocos aciertos de más o de menos mueven varios puntos. Sin
+    el N no se puede juzgar si una diferencia significa algo, y por eso ningún porcentaje
+    debería viajar solo."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: evals-052
+  dimension: evals-observabilidad
+  subtopic: trazas
+  difficulty: easy
+  type: concepto
+  roles: *a4
+  stem: ¿Para qué sirve un identificador de correlación en la traza de una ejecución de agente?
+  options:
+    - id: a
+      text: Para deduplicar registros repetidos
+    - id: b
+      text: Para ordenar los registros cronológicamente
+    - id: c
+      text: Para identificar al usuario que lanzó la ejecución
+    - id: d
+      text: Para poder juntar todos los pasos de una misma ejecución cuando hay muchas corriendo a
+        la vez y sus registros se entremezclan
+  correct: d
+  explanation: En un sistema concurrente los registros de decenas de ejecuciones se
+    intercalan, y sin un identificador común no se puede reconstruir la secuencia de una
+    sola. La marca de tiempo ordena pero no agrupa, y el identificador de usuario es otra
+    dimensión útil que no resuelve esto.
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: evals-053
+  dimension: evals-observabilidad
+  subtopic: harness-de-eval
+  difficulty: experto
+  type: escenario
+  roles: &a5
+    - Applied AI Engineer
+    - AI Engineer
+    - Agent Engineer
+  stem: Comparas dos configuraciones con un juez con LLM. La variante B gana por 8 puntos.
+    Antes de darlo por bueno, ¿qué comprobación específica del instrumento haces?
+  options:
+    - id: c
+      text: "Si el juez tiene una preferencia sistemática que la variante B explota sin ser mejor:
+        se comprueba invirtiendo el orden en las comparaciones por pares, mirando si B
+        produce respuestas sistemáticamente más largas o mejor formateadas, y contrastando
+        una muestra con etiquetas humanas"
+    - id: a
+      text: Repetir la comparación tres veces y quedarse con la mediana
+    - id: b
+      text: Aumentar el tamaño del conjunto hasta que la diferencia sea significativa
+    - id: d
+      text: Cambiar el modelo juez por uno más capaz y repetir
+  correct: c
+  explanation: "Con un juez de por medio hay dos hipótesis para una ventaja: B es mejor, o B
+    le gusta más al juez. Repetir y ampliar la muestra reducen la varianza pero no
+    distinguen entre las dos, porque un sesgo sistemático no se promedia. Lo que discrimina
+    es atacar los sesgos conocidos —posición invirtiendo el orden, longitud y formato
+    mirando las salidas— y anclar en una muestra etiquetada por humanos. Cambiar de juez es
+    útil como comprobación cruzada, pero sin la calibración no sabes cuál de los dos tiene
+    razón."
+  source: externa:practica-industria
+  date: 2026-08-10
+- id: evals-054
+  dimension: evals-observabilidad
+  subtopic: produccion
+  difficulty: experto
+  type: escenario
+  roles: *a5
+  stem: Tu evaluación fuera de línea dice que la variante nueva es mejor y en producción los
+    usuarios se quejan más. Ambas mediciones parecen correctas. ¿Qué explica la
+    contradicción?
+  options:
+    - id: a
+      text: Que la muestra fuera de línea era demasiado pequeña
+    - id: b
+      text: "Que el conjunto y el tráfico real no son la misma distribución, y que lo que mide el
+        calificador no es lo que le duele al usuario: hay que comparar la distribución de
+        entradas y comprobar si los casos que generan queja están representados y bien
+        puntuados por la rúbrica"
+    - id: d
+      text: Que los usuarios tardan en acostumbrarse a los cambios
+    - id: c
+      text: Que la variante nueva es más lenta y eso genera insatisfacción
+  correct: b
+  explanation: "Cuando las dos mediciones son técnicamente correctas y discrepan, el desajuste
+    está en qué se mide y sobre qué. Las dos causas típicas: el conjunto no representa el
+    tráfico real (casos frecuentes infrarrepresentados, o al revés), y la rúbrica premia
+    algo que no es lo que molesta —una respuesta más completa que se lee peor, por ejemplo—.
+    Se diagnostica comparando distribuciones y puntuando con la rúbrica los casos concretos
+    que generaron queja. La latencia es una hipótesis razonable que se descarta en un minuto
+    mirando los percentiles."
+  source: externa:practica-industria
+  date: 2026-08-10

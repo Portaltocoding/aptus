@@ -1392,3 +1392,32 @@
     reutilización, no de tamaño de respuesta."
   source: jd-codeway
   date: 2026-08-10
+- id: mcp-051
+  dimension: mcp-integraciones
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles:
+    - Applied AI Engineer
+    - AI Engineer
+  stem: ¿Qué diferencia hay entre el transporte stdio y Streamable HTTP a la hora de decidir
+    cuál usar?
+  options:
+    - id: a
+      text: stdio es más rápido y Streamable HTTP más seguro
+    - id: b
+      text: stdio solo admite herramientas y Streamable HTTP también recursos y prompts
+    - id: d
+      text: stdio es para servidores locales que lanza el propio cliente como subproceso;
+        Streamable HTTP es para servidores remotos accesibles por red y capaces de atender a
+        varios clientes
+    - id: c
+      text: stdio es el transporte antiguo y Streamable HTTP lo sustituye
+  correct: d
+  explanation: "La elección es de topología: proceso local lanzado por el cliente frente a
+    servicio remoto compartido. La semántica del protocolo es idéntica en los dos, así que
+    las primitivas disponibles no cambian. Y stdio no está obsoleto: sigue siendo un
+    transporte estándar y es la opción recomendada para servidores locales, precisamente
+    porque solo habla con quien lo lanzó."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
