@@ -311,3 +311,12 @@ export function packDataDir(name: string): string {
 export function historyPath(name: string): string {
   return join(packDataDir(name), "history.json");
 }
+
+/**
+ * Fichero de la sesión en pausa de un pack. UNA por pack a propósito: retomar
+ * tiene que ser "sigue donde lo dejaste", no elegir entre siete sesiones a medias
+ * de las que ya no te acuerdas.
+ */
+export function pausedPath(name: string): string {
+  return join(packDataDir(name), "paused.json");
+}

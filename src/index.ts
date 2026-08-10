@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { Command } from "commander";
 import { startCommand, DEFAULT_PACK } from "./cli/commands/start.js";
+import { resumeCommand } from "./cli/commands/resume.js";
 import { historyCommand } from "./cli/commands/history.js";
 import { packsCommand } from "./cli/commands/packs.js";
 import { newPackCommand } from "./cli/commands/new-pack.js";
@@ -53,6 +54,16 @@ program
       });
     },
   );
+
+// Retomar lo que dejaste a medias. Sin `--pack`, si solo hay una sesión en pausa
+// se retoma esa: preguntar cuál cuando no hay elección es un trámite.
+program
+  .command("resume")
+  .description("Retoma la sesión que dejaste en pausa, donde la dejaste")
+  .option("-p, --pack <name>", "pack cuya sesión en pausa retomar")
+  .action(async (opts: { pack?: string }) => {
+    await resumeCommand(opts.pack);
+  });
 
 program
   .command("history")

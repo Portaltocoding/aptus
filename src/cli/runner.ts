@@ -1,8 +1,16 @@
-import { confirm, select } from "@inquirer/prompts";
+import { select } from "@inquirer/prompts";
 import pc from "picocolors";
 import type { Question } from "../content/schema.js";
-import type { AnsweredQuestion, Confidence } from "../core/scoring.js";
-import { promptTheme, questionHeader, questionTheme } from "./theme.js";
+import type { Confidence } from "../core/scoring.js";
+import type { SessionSnapshot } from "../core/session.js";
+import {
+  optionNote,
+  promptTheme,
+  questionHeader,
+  questionStem,
+  questionTheme,
+  termWidth,
+} from "./theme.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
 import {
   BACK,
@@ -11,12 +19,14 @@ import {
   backAvailable,
   confidenceDefault,
   currentQuestion,
+  exitChoices,
   exitWarning,
-  flowResult,
+  flowOutcome,
   initialFlow,
   isFinished,
   stepFlow,
   type FlowInput,
+  type FlowOutcome,
   type FlowState,
 } from "./session-flow.js";
 
@@ -29,9 +39,23 @@ const CONFIDENCE_CHOICES: { value: Confidence; name: string; description: string
 /** Pregunta actual con sus opciones y, si hay adónde volver, la choice `◀ Volver`. */
 async function preguntar(state: FlowState): Promise<FlowInput> {
   const q = currentQuestion(state)!;
+  const ancho = termWidth();
   const choices = [
-    ...q.options.map((o) => ({ value: o.id, name: o.text })),
-    ...(backAvailable(state) ? [{ value: BACK, name: pc.dim("◀ Volver a la pregunta anterior") }] : []),
+    ...q.options.map((o) => ({
+      value: o.id,
+      name: o.text,
+      // El apunte de la opción: sale al poner el cursor encima, y solo si el pack
+      // lo trae. Sin `rationale` no se enseña nada — antes que inventar un margen
+      // vacío, ninguno. Un `rationale: ""` en el YAML cuenta como no traerlo: si
+      // no, dibujaría una barra sobre la nada.
+      description:
+        o.rationale !== undefined && o.rationale.trim().length > 0
+          ? optionNote(o.rationale, ancho)
+          : undefined,
+    })),
+    ...(backAvailable(state)
+      ? [{ value: BACK, name: pc.dim("◀ Volver a la pregunta anterior"), description: undefined }]
+      : []),
   ];
 
   const cabecera = questionHeader(
@@ -45,9 +69,13 @@ async function preguntar(state: FlowState): Promise<FlowInput> {
   const answer = await withEscape((signal) =>
     select(
       {
-        // Cabecera tenue, enunciado en negrita, opciones en color normal: los
-        // tres niveles se distinguen de un vistazo sin leer nada.
-        message: `${cabecera}\n\n  ${pc.bold(q.stem)}\n`,
+        // Tres niveles y tres colores: cabecera tenue, enunciado en cian y
+        // negrita, opciones en el color por defecto (y en amarillo la que estás
+        // mirando). El aire —línea en blanco antes de la cabecera y dos entre el
+        // enunciado y las opciones— es parte del mensaje: sin él, pregunta y
+        // respuestas se leen como un único bloque de texto, y una pregunta y la
+        // siguiente se pegan la una a la otra en el scroll.
+        message: `\n${cabecera}\n\n${questionStem(q.stem, q.type, ancho)}\n\n`,
         choices,
         default: answerDefault(state), // reposiciona el cursor si ya se respondió
         theme: questionTheme,
@@ -63,6 +91,9 @@ async function preguntar(state: FlowState): Promise<FlowInput> {
 }
 
 async function preguntarConfianza(state: FlowState): Promise<FlowInput> {
+  // El aire va FUERA del mensaje: estos prompts llevan el prefijo `›` en la misma
+  // línea, y un salto dentro del mensaje deja el prefijo solo, colgando arriba.
+  console.log("");
   const valor = await withEscape((signal) =>
     select(
       {
@@ -80,33 +111,62 @@ async function preguntarConfianza(state: FlowState): Promise<FlowInput> {
   return valor === ESCAPED ? { tipo: "escape" } : { tipo: "confianza", valor };
 }
 
-async function confirmarSalida(state: FlowState): Promise<FlowInput> {
-  const salir = await confirm({
-    message: pc.yellow(`  ${exitWarning(answeredCount(state))}`),
-    default: false,
-    theme: promptTheme,
-  });
+/**
+ * El menú de salida: qué hacer con una sesión a medias. Antes era un sí/no que
+ * solo sabía tirarla; ahora puedes cortarla en la pregunta que sea y evaluar lo
+ * que llevas, o guardarla para otro día. ESC aquí es "seguir": salir del menú de
+ * salida no puede ser una forma de perderlo todo.
+ */
+async function preguntarSalida(state: FlowState, pausable: boolean): Promise<FlowInput> {
+  console.log("");
+  const eleccion = await withEscape((signal) =>
+    select(
+      {
+        message:
+          pc.bold(pc.yellow(`  ${exitWarning(answeredCount(state))}`)) +
+          pc.dim(`  (${ESC_HINT} y sigues)`),
+        choices: exitChoices(answeredCount(state), pausable),
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
 
-  return { tipo: "confirmacion", salir };
+  return { tipo: "salida", eleccion: eleccion === ESCAPED ? "seguir" : eleccion };
+}
+
+export interface RunSessionOptions {
+  /**
+   * ¿Se puede dejar en pausa? Solo lo es si quien compone sabe guardar la foto y
+   * retomarla (hoy: las sesiones de medida, no los repasos).
+   */
+  pausable?: boolean;
+  /** Foto de una sesión pausada que se está retomando. */
+  resume?: SessionSnapshot | null;
 }
 
 /**
  * Runner interactivo `select` navegable. Capa fina de I/O: NO decide nada.
  * Traduce prompts de `@inquirer/prompts` a entradas de `./session-flow.ts`, que es
- * quien tiene la lógica de navegación (avanzar, volver, ESC, abandono) en funciones
- * puras testeables sin terminal, y que a su vez envuelve las transiciones del motor
- * puro `src/core/session.ts`.
+ * quien tiene la lógica de navegación (avanzar, volver, ESC, pausa, abandono) en
+ * funciones puras testeables sin terminal, y que a su vez envuelve las
+ * transiciones del motor puro `src/core/session.ts`.
  *
- * La presentación (cabecera, colores, cursor) vive en `./theme.ts`: aquí solo se
- * compone. Las opciones llegan ya barajadas desde la composición (`shuffleOptions`),
- * no se reordenan aquí, para que "volver atrás" enseñe siempre el mismo orden que
- * la primera vez.
+ * La presentación (cabecera, enunciado, colores, apuntes) vive en `./theme.ts`:
+ * aquí solo se compone. Las opciones llegan ya barajadas desde la composición
+ * (`shuffleOptions`), no se reordenan aquí, para que "volver atrás" enseñe siempre
+ * el mismo orden que la primera vez.
  *
- * Devuelve `null` si se abandona la sesión con ESC: quien compone decide qué hacer
- * con eso (volver al menú), pero NADA se puntúa ni se guarda.
+ * Devuelve CÓMO acabó (completada, cortada a medias, pausada o abandonada) en vez
+ * de solo las respuestas: quien compone tiene que poder distinguir "esto se mide"
+ * de "esto se guarda para luego" de "esto no ha pasado".
  */
-export async function runSession(questions: Question[]): Promise<AnsweredQuestion[] | null> {
-  let state = initialFlow(questions);
+export async function runSession(
+  questions: Question[],
+  opts: RunSessionOptions = {},
+): Promise<FlowOutcome> {
+  const pausable = opts.pausable === true;
+  let state = initialFlow(questions, opts.resume ?? null);
 
   try {
     while (!isFinished(state)) {
@@ -119,7 +179,7 @@ export async function runSession(questions: Question[]): Promise<AnsweredQuestio
           input = await preguntarConfianza(state);
           break;
         default:
-          input = await confirmarSalida(state);
+          input = await preguntarSalida(state, pausable);
       }
       state = stepFlow(state, input);
     }
@@ -132,5 +192,5 @@ export async function runSession(questions: Question[]): Promise<AnsweredQuestio
     throw err;
   }
 
-  return flowResult(state);
+  return flowOutcome(state);
 }

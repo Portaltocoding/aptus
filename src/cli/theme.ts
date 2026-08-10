@@ -1,4 +1,5 @@
 import pc from "picocolors";
+import type { Question } from "../content/schema.js";
 import type { Difficulty } from "../core/session.js";
 
 /**
@@ -55,6 +56,40 @@ export function termWidth(columns: number | undefined = process.stdout.columns):
     return DEFAULT_WIDTH;
   }
   return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, Math.floor(columns)));
+}
+
+/**
+ * Reparte un párrafo en líneas que caben en `width`, respetando los saltos que ya
+ * trae el texto. Palabra más larga que el hueco: se deja salir en vez de cortarla
+ * a mitad — partir un identificador o una URL hace más daño que desbordar.
+ *
+ * Vive aquí (y no en `render-mistakes.ts`, de donde viene) porque ajustar texto al
+ * ancho es vocabulario visual de TODO el CLI: lo usan el repaso de fallos y ahora
+ * también el enunciado y el apunte de una opción en la sesión en vivo.
+ */
+export function wrap(text: string, width: number, indent = ""): string[] {
+  const hueco = Math.max(8, width - indent.length);
+  const salida: string[] = [];
+
+  for (const parrafo of text.split("\n")) {
+    const palabras = parrafo.split(/\s+/).filter((p) => p.length > 0);
+    if (palabras.length === 0) {
+      salida.push(indent.trimEnd());
+      continue;
+    }
+    let linea = "";
+    for (const palabra of palabras) {
+      if (linea.length === 0) linea = palabra;
+      else if (linea.length + 1 + palabra.length <= hueco) linea += " " + palabra;
+      else {
+        salida.push(indent + linea);
+        linea = palabra;
+      }
+    }
+    if (linea.length > 0) salida.push(indent + linea);
+  }
+
+  return salida;
 }
 
 /**
@@ -116,8 +151,12 @@ export function tableWidths(columnas: number, total = termWidth()): number[] | u
 }
 
 /**
- * Cabecera de una pregunta: dónde estás, de qué va y cuánto pesa. Va en tenue y
- * en cian para que el enunciado (negrita, color por defecto) destaque encima.
+ * Cabecera de una pregunta: dónde estás, de qué va y cuánto pesa.
+ *
+ * Va ENTERA en tenue salvo la dificultad (que sí informa de un vistazo). El cian
+ * dejó de vivir aquí a propósito: ahora viste el enunciado, y tener la dimensión
+ * del mismo color que la pregunta repartía el acento entre dos sitios en vez de
+ * marcar la jerarquía cabecera → enunciado → respuestas.
  */
 export function questionHeader(
   index: number,
@@ -129,7 +168,7 @@ export function questionHeader(
   const posicion = pc.dim(`Pregunta ${index}/${total}`);
   const barra = progressBar(index - 1, total);
   const partes = [
-    pc.cyan(dimension),
+    pc.dim(dimension),
     subtopic ? pc.dim(subtopic) : null,
     difficultyColor(difficulty)(DIFFICULTY_LABEL[difficulty]),
   ]
@@ -137,6 +176,51 @@ export function questionHeader(
     .join(pc.dim(" · "));
 
   return `${posicion}  ${barra}\n  ${partes}`;
+}
+
+/** Sangría del enunciado y de todo lo que cuelga de él en la sesión en vivo. */
+const SANGRIA_PREGUNTA = "  ";
+
+/**
+ * El enunciado, vestido y ajustado al ancho real.
+ *
+ * Dos cosas que antes no hacía. Una: se pinta en CIAN y en negrita, no solo en
+ * negrita — la negrita sola apenas se distingue del color por defecto de las
+ * opciones, y era justo el contraste que faltaba para separar de un vistazo la
+ * pregunta de las respuestas. Dos: se ajusta al ancho, salvo `diagrama` y
+ * `codigo`, que se indentan VERBATIM: reflowear un ASCII lo convierte en ruido y
+ * un snippet en algo que no compila (mismo criterio que el repaso de fallos).
+ */
+export function questionStem(stem: string, type: Question["type"], width = termWidth()): string {
+  const lineas =
+    type === "diagrama" || type === "codigo"
+      ? stem.split("\n").map((l) => SANGRIA_PREGUNTA + l)
+      : wrap(stem, width, SANGRIA_PREGUNTA);
+  return lineas.map((l) => pc.bold(pc.cyan(l))).join("\n");
+}
+
+/**
+ * El apunte de la opción bajo el cursor: lo que sale "al pasar por encima".
+ *
+ * Va en tenue y colgando de una barra para que se lea como un margen y no como
+ * una quinta opción. Con saltos de línea se respeta VERBATIM (es un diagrama o un
+ * snippet); de una tirada se ajusta al ancho.
+ */
+export function optionNote(rationale: string, width = termWidth()): string {
+  const sangria = "   │ ";
+  const lineas = rationale.includes("\n")
+    ? // Con saltos de línea se va línea a línea: la que CABE se respeta tal cual
+      // (es la que dibuja el diagrama, y `wrap` colapsaría sus espacios), y solo
+      // la que no cabe se ajusta. Antes se respetaban todas, y un párrafo largo
+      // metido junto a un diagrama se salía del ancho y lo partía el terminal por
+      // donde le tocaba, sin barra y sin sangría.
+      rationale
+        .split("\n")
+        .flatMap((l) =>
+          sangria.length + l.length <= width ? [sangria + l] : wrap(l, width, sangria),
+        )
+    : wrap(rationale, width, sangria);
+  return lineas.map((l) => pc.dim(l)).join("\n");
 }
 
 /**
@@ -156,7 +240,22 @@ export const promptTheme = {
 };
 
 /**
- * Igual, pero sin prefijo: la pregunta ya trae su propia cabecera y un `›`
- * delante solo desalinea el bloque.
+ * Igual, pero para la pregunta: sin prefijo (ya trae su propia cabecera, y un `›`
+ * delante solo desalinea el bloque) y con la opción bajo el cursor en AMARILLO en
+ * vez de cian. Tres colores, tres niveles: cabecera tenue, enunciado cian, la
+ * respuesta que estás mirando amarilla. Con el cursor también en cian, mirar una
+ * opción la pintaba del mismo color que el enunciado.
  */
-export const questionTheme = { ...promptTheme, prefix: "" };
+export const questionTheme = {
+  ...promptTheme,
+  prefix: "",
+  style: {
+    ...promptTheme.style,
+    highlight: (text: string): string => pc.bold(pc.yellow(text)),
+    // El apunte llega ya vestido de `optionNote` (tenue, con su barra y su
+    // sangría). Recolorearlo entero aquí —lo que hace inquirer por defecto— se
+    // cargaría el verbatim de un diagrama y lo pintaría como si fuera una opción
+    // más. En el resto de menús la descripción sigue siendo la de siempre.
+    description: (text: string): string => text,
+  },
+};

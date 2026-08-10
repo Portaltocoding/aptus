@@ -54,8 +54,15 @@ const OUTPUT_SCHEMA = {
             type: "array",
             items: {
               type: "object",
-              properties: { id: { type: "string" }, text: { type: "string" } },
-              required: ["id", "text"],
+              properties: {
+                id: { type: "string" },
+                text: { type: "string" },
+                // El apunte que sale al poner el cursor encima durante la sesión.
+                // Se pide para TODAS las opciones (también los distractores): si
+                // solo lo tuviera la correcta, el apunte delataría la respuesta.
+                rationale: { type: "string" },
+              },
+              required: ["id", "text", "rationale"],
               additionalProperties: false,
             },
           },
@@ -101,6 +108,13 @@ Reglas de calidad:
 - Varía el 'type': concepto, escenario (caso práctico), codigo (snippet con un fallo
   real), diagrama (ASCII en el enunciado).
 - 'explanation' explica POR QUÉ la correcta lo es, y por qué las otras no.
+- 'rationale' de cada opción: una o dos frases que ARGUMENTAN A FAVOR de ESA
+  opción, como las diría quien la eligiera ("bajar de modelo abarata: sus tokens
+  cuestan menos por millón"). Se enseña ANTES de responder, al poner el cursor
+  encima, así que va en todas —correcta y distractores— y NUNCA dice cuál es la
+  buena, ni la delata por ser más larga, más segura o más cuidada que las otras.
+  Si la opción se entiende mejor con un diagrama o un snippet corto, ponlo ahí con
+  saltos de línea: se enseña tal cual.
 - 'source' cita de dónde sale: el fichero del material, o 'externa' si es
   conocimiento canónico del campo que no está en el material.
 - No dupliques conceptos entre preguntas.`;

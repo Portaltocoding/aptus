@@ -1,31 +1,20 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import pc from "picocolors";
-import { loadReadiness, type ReadinessConfig } from "../../content/readiness.js";
-import { loadHistory, saveHistory } from "../../content/history.js";
-import { loadJobTexts, jobsDbPath } from "../../content/jobhunt.js";
-import { defaultPackLocator, historyPath as historyPathOf } from "../../content/paths.js";
+import { select } from "@inquirer/prompts";
+import { loadHistory } from "../../content/history.js";
+import {
+  defaultPackLocator,
+  historyPath as historyPathOf,
+  pausedPath,
+} from "../../content/paths.js";
+import { loadPaused, savePaused } from "../../content/paused.js";
 import { selectBalanced, shuffleOptions } from "../../core/session.js";
 import { makeSeededShuffle } from "../../core/random.js";
-import { score } from "../../core/scoring.js";
-import { calibration } from "../../core/calibration.js";
-import { computeReadiness, computeGaps } from "../../core/readiness.js";
-import { buildSessionRecord, evolution } from "../../core/evolution.js";
-import { computeDemand, applyMarketWeight } from "../../core/market.js";
-import { deriveMistakes } from "../../core/mistakes.js";
-import { mistakesHeading, offerMistakes } from "../mistakes-flow.js";
+import { ESCAPED, ESC_HINT, withEscape } from "../keys.js";
 import { runSession } from "../runner.js";
-import {
-  renderResult,
-  renderCalibration,
-  renderReadiness,
-  renderGaps,
-  renderWeightedGaps,
-  renderEvolution,
-  renderSummary,
-} from "../render.js";
+import { avisoPausa, reanudarSesion } from "./resume.js";
+import { finishMeasureSession } from "../session-finish.js";
 import { describeSetup, resolveSetup, sampleWarning, type SetupOptions } from "../setup.js";
-import { heading } from "../theme.js";
+import { heading, promptTheme } from "../theme.js";
 
 // Test LARGO por defecto: para evaluar en serio a través de los rangos de
 // seniority (junior→staff) hace falta bastante muestra por dimensión y dificultad.
@@ -46,7 +35,7 @@ export const DEFAULT_PACK = "ai-ml-readiness";
  * preguntas.
  */
 /** Qué ha pasado con la sesión, para que el menú sepa si conviene pausar. */
-export type StartOutcome = "completada" | "cancelada" | "error";
+export type StartOutcome = "completada" | "pausada" | "cancelada" | "error";
 
 export async function startCommand(
   opts: SetupOptions = { interactive: true },
@@ -71,20 +60,34 @@ export async function startCommand(
   // Aislamiento por tema: cada pack tiene su carpeta de contenido y su carpeta de
   // resultados, y nunca se cruzan entre temas. Dónde están cada una lo decide
   // paths.ts: instalado, el contenido viene del paquete y los datos NO.
-  const readinessPath = join(packDir, "readiness.yaml");
   const historyPath = historyPathOf(packName);
+  const rutaPausa = pausedPath(packName);
 
-  let readinessCfg: ReadinessConfig | null = null;
-  let history;
+  let pausada;
   try {
-    if (existsSync(readinessPath)) readinessCfg = loadReadiness(readinessPath);
-    // Se carga ANTES de la sesión para fallar rápido si el historial está corrupto.
-    history = loadHistory(historyPath);
+    // Las dos se leen ANTES de la sesión para fallar rápido si algo está corrupto:
+    // enterarse después de responder 120 preguntas sería enterarse tarde.
+    loadHistory(historyPath);
+    pausada = loadPaused(rutaPausa);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(`\n✗ No se puede iniciar la sesión: ${msg}`);
     process.exitCode = 1;
     return "error";
+  }
+
+  // Hay una sesión de este pack a medias. Empezar otra encima sin decir nada la
+  // dejaría ahí para siempre, olvidada; y descartarla sin preguntar tiraría un
+  // trabajo que se guardó a propósito.
+  if (pausada !== null) {
+    const quiere = await preguntarSiRetoma(packName, pausada.timestamp, opts);
+    if (quiere === "cancelar") {
+      console.log(pc.dim("\n  Sesión cancelada. La pausa sigue donde estaba.\n"));
+      return "cancelada";
+    }
+    if (quiere === "retomar") return await reanudarSesion(packName, packDir);
+    // "nueva": la pausa se queda en disco hasta que se retome o se pause otra
+    // encima. Nada de borrarla por haber empezado otro test.
   }
 
   console.log("\n" + heading("Sesión") + "\n" + describeSetup(setup));
@@ -114,66 +117,79 @@ export async function startCommand(
     shuffle,
   );
 
-  const answered = await runSession(selected);
-  if (answered === null) {
-    // Abandonada con ESC: no se puntúa ni se guarda nada. Decirlo importa —
-    // dejar la terminal en silencio haría dudar de si se ha guardado algo.
-    console.log(pc.dim("\n  Sesión abandonada. No se ha guardado ningún resultado.\n"));
-    return "cancelada";
+  const outcome = await runSession(selected, { pausable: true });
+
+  switch (outcome.tipo) {
+    case "abandonada":
+      // Descartada a propósito: no se puntúa ni se guarda nada. Decirlo importa —
+      // dejar la terminal en silencio haría dudar de si se ha guardado algo.
+      console.log(pc.dim("\n  Sesión descartada. No se ha guardado ningún resultado.\n"));
+      return "cancelada";
+
+    case "pausada":
+      savePaused(rutaPausa, {
+        pack: packName,
+        kind: "measure",
+        timestamp: new Date().toISOString(),
+        snapshot: outcome.snapshot,
+      });
+      // `pausada` es la que había ANTES de empezar esta: si existía, quiere decir
+      // que se eligió "empezar una sesión nueva" y esta acaba de ocupar su sitio.
+      console.log(
+        avisoPausa(packName, outcome.snapshot.answers.length, pausada?.timestamp ?? null),
+      );
+      return "pausada";
+
+    default:
+      // Completada o cortada en la pregunta que sea: las dos se puntúan y se
+      // guardan igual. Lo único que cambia es que la parcial lo dice.
+      await finishMeasureSession(packName, packDir, outcome.questions, outcome.answered, {
+        parcial: outcome.tipo === "parcial",
+        seleccionadas: selected.length,
+      });
+      return "completada";
   }
-  const result = score(answered, selected);
-  const calib = calibration(answered, selected);
-  const roles = readinessCfg ? computeReadiness(answered, selected, readinessCfg) : [];
+}
 
-  // Persistir la sesión (PERS-01) y mostrar la evolución (PERS-02). Se guardan
-  // también las respuestas crudas para poder reevaluar esta sesión contra una
-  // oferta concreta (`aptus jd`) sin tener que repetir el test.
-  const record = buildSessionRecord(new Date().toISOString(), result, roles, answered);
-  const updatedHistory = [...history, record];
-  saveHistory(historyPath, updatedHistory);
+/**
+ * Qué hacer con una sesión de este pack que quedó en pausa. Sin terminal (scripts,
+ * CI, `--yes`) no se pregunta y se empieza una nueva: un prompt bloqueando un
+ * script sería peor que la duda, y la pausa no se toca.
+ */
+async function preguntarSiRetoma(
+  packName: string,
+  cuando: string,
+  opts: SetupOptions,
+): Promise<"retomar" | "nueva" | "cancelar"> {
+  const interactivo = opts.interactive !== false && process.stdin.isTTY === true;
+  if (!interactivo) return "nueva";
 
-  const gaps = readinessCfg ? computeGaps(answered, selected, readinessCfg) : [];
+  const fecha = new Date(cuando).toLocaleString("es-ES");
+  console.log("");
+  const eleccion = await withEscape((signal) =>
+    select(
+      {
+        message:
+          pc.bold(`  Tienes una sesión de '${packName}' en pausa (${fecha}).`) +
+          pc.dim(`  (${ESC_HINT})`),
+        choices: [
+          {
+            value: "retomar",
+            name: "Retomarla donde la dejaste",
+            description: "mismas preguntas, mismo orden, con tus respuestas puestas",
+          },
+          {
+            value: "nueva",
+            name: "Empezar una sesión nueva",
+            description: "la pausa se queda guardada; podrás retomarla después",
+          },
+        ],
+        theme: promptTheme,
+      },
+      { signal },
+    ),
+  );
 
-  // TL;DR narrativo primero: ranking, peores puntos y por dónde estudiar.
-  if (readinessCfg) {
-    console.log(
-      "\n" +
-        renderSummary(
-          roles,
-          gaps,
-          readinessCfg.levels.map((l) => l.id),
-        ) +
-        "\n",
-    );
-  }
-  console.log(renderResult(result) + "\n");
-  console.log(renderCalibration(calib) + "\n");
-
-  if (readinessCfg) {
-    console.log(renderReadiness(roles) + "\n");
-
-    // Gaps: si hay base de ofertas (APTUS_JOBS_DB), ponderar por demanda de mercado
-    // (INTEG-01); si no, mostrarlos sin ponderar (degradación elegante, sin error).
-    const jobTexts = loadJobTexts(jobsDbPath());
-    if (jobTexts !== null && readinessCfg.market_keywords) {
-      const demand = computeDemand(jobTexts, readinessCfg.market_keywords);
-      console.log(renderWeightedGaps(applyMarketWeight(gaps, demand), demand) + "\n");
-    } else {
-      console.log(renderGaps(gaps) + "\n");
-    }
-  }
-
-  console.log(renderEvolution(evolution(updatedHistory)) + "\n");
-
-  // Lo último, y OFRECIDO: hasta ahora se veían porcentajes y nunca qué fallaste
-  // ni por qué, con las explicaciones curadas del pack ahí sin usarse. Va después
-  // de los resultados porque primero interesa dónde estás; y se pregunta porque
-  // sesenta fallos de golpe es un muro que nadie lee.
-  const fallos = deriveMistakes(answered, selected);
-  if (fallos.reviewable > 0) {
-    console.log(mistakesHeading());
-    await offerMistakes(fallos);
-  }
-
-  return "completada";
+  if (eleccion === ESCAPED) return "cancelar";
+  return eleccion === "retomar" ? "retomar" : "nueva";
 }

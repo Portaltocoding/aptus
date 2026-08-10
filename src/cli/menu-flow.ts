@@ -16,6 +16,7 @@ import { ESCAPED, type Escapable } from "./keys.js";
 
 export type MenuAction =
   | "start"
+  | "resume"
   | "review"
   | "history"
   | "report"
@@ -39,6 +40,11 @@ export type MenuAction =
  */
 export interface MenuContext {
   tieneApiKey: boolean;
+  /**
+   * Packs con una sesión a medias. Entra como dato por lo mismo: con uno solo no
+   * hay nada que preguntar (se retoma ESE), y con ninguno la acción ni se ofrece.
+   */
+  packsPausados?: readonly string[];
 }
 
 /** Por defecto se asume que sí: quien decide de verdad (menu.ts) lo pasa siempre. */
@@ -53,6 +59,9 @@ export type Next = "salir" | "volver" | "pausar";
 /** Un sub-prompt que el menú necesita antes de poder ejecutar la acción. */
 export type MenuPrompt =
   | { readonly id: "pack"; readonly mensaje: string }
+  // Lleva la lista dentro: los packs que se pueden retomar son los que tienen algo
+  // pausado, no todos los del sistema, y elegir uno sin pausa no llevaría a nada.
+  | { readonly id: "packPausado"; readonly mensaje: string; readonly opciones: readonly string[] }
   | { readonly id: "rutaOferta"; readonly mensaje: string }
   | { readonly id: "modoJd" }
   | { readonly id: "cruzarMaterial" }
@@ -67,6 +76,7 @@ export type MenuPrompt =
 export type Invocacion =
   | { readonly comando: "start" }
   | { readonly comando: "packs" }
+  | { readonly comando: "resume"; readonly pack: string }
   | { readonly comando: "review" | "history" | "report" | "verify"; readonly pack: string }
   | { readonly comando: "jobs"; readonly pack: string; readonly limite: number }
   | {
@@ -129,6 +139,32 @@ export function nextMenuStep(
 
     case "packs":
       return { tipo: "ejecutar", invocacion: { comando: "packs" } };
+
+    case "resume": {
+      const pausados = ctx.packsPausados ?? [];
+      // El menú solo ofrece esta acción si hay algo pausado, pero llegar aquí sin
+      // nada (la pausa se retomó desde otra terminal, o se terminó) tiene que
+      // decirlo en vez de abrir un selector vacío.
+      if (pausados.length === 0) {
+        return {
+          tipo: "aviso",
+          titulo: "No hay ninguna sesión en pausa",
+          cuerpo:
+            "Se crea una saliendo de una sesión con ESC → «Pausar y seguir en otro momento».\n" +
+            "  Se guarda dónde vas y se retoma con las mismas preguntas y tus respuestas puestas.",
+        };
+      }
+      // Con una sola no hay nada que elegir: preguntar sería un paso ceremonial.
+      if (pausados.length === 1) {
+        return { tipo: "ejecutar", invocacion: { comando: "resume", pack: pausados[0]! } };
+      }
+      return r0 === undefined
+        ? {
+            tipo: "preguntar",
+            prompt: { id: "packPausado", mensaje: mensajePack(action), opciones: pausados },
+          }
+        : { tipo: "ejecutar", invocacion: { comando: "resume", pack: r0 } };
+    }
 
     case "review":
     case "history":
@@ -294,6 +330,8 @@ export function nextMenuStep(
 
 function mensajePack(action: MenuAction): string {
   switch (action) {
+    case "resume":
+      return "¿Qué sesión en pausa retomas?";
     case "review":
       return "¿Qué pack repasar?";
     case "history":
@@ -351,7 +389,8 @@ export function runMenuAction(
  * no ha dejado nada en pantalla que leer, así que pausar sería ruido.
  */
 export function nextTrasEjecutar(invocacion: Invocacion, resultado: string | null): Next {
-  if (invocacion.comando === "start" && resultado === "cancelada") return "volver";
+  const esSesion = invocacion.comando === "start" || invocacion.comando === "resume";
+  if (esSesion && resultado === "cancelada") return "volver";
   return "pausar";
 }
 

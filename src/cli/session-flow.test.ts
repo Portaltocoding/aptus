@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Question } from "../content/schema.js";
+import type { AnsweredQuestion } from "../core/scoring.js";
 import {
   BACK,
   answerDefault,
@@ -7,8 +8,9 @@ import {
   backAvailable,
   confidenceDefault,
   currentQuestion,
+  exitChoices,
   exitWarning,
-  flowResult,
+  flowOutcome,
   initialFlow,
   isFinished,
   questionChoiceValues,
@@ -50,7 +52,16 @@ const responde = (optionId: string): FlowInput => ({ tipo: "respuesta", optionId
 const volver: FlowInput = { tipo: "volver" };
 const escape: FlowInput = { tipo: "escape" };
 const confia = (valor: "alta" | "media" | "baja"): FlowInput => ({ tipo: "confianza", valor });
-const confirma = (salir: boolean): FlowInput => ({ tipo: "confirmacion", salir });
+const sale = (eleccion: "seguir" | "terminar" | "pausar" | "descartar"): FlowInput => ({
+  tipo: "salida",
+  eleccion,
+});
+
+/** Las respuestas de una sesión, como las devolvía el viejo `flowResult`. */
+function respuestas(state: FlowState): AnsweredQuestion[] | null {
+  const outcome = flowOutcome(state);
+  return outcome.tipo === "abandonada" || outcome.tipo === "pausada" ? null : outcome.answered;
+}
 
 describe("initialFlow", () => {
   it("arranca en la primera pregunta, sin nada respondido", () => {
@@ -69,7 +80,7 @@ describe("initialFlow", () => {
     expect(state.step).toBe("terminada");
     expect(isFinished(state)).toBe(true);
     expect(currentQuestion(state)).toBeNull();
-    expect(flowResult(state)).toEqual([]);
+    expect(respuestas(state)).toEqual([]);
   });
 });
 
@@ -134,7 +145,7 @@ describe("◀ Volver", () => {
     );
 
     expect(answeredCount(state)).toBe(1);
-    expect(flowResult(state)![0]).toEqual({
+    expect(respuestas(state)![0]).toEqual({
       questionId: "q1",
       selectedOptionId: "c",
       confidence: "baja",
@@ -159,7 +170,7 @@ describe("confianza", () => {
     expect(state.pendiente).toBeNull();
     expect(answeredCount(state)).toBe(0);
     expect(answerDefault(state)).toBeUndefined();
-    expect(flowResult(state)![0]!.selectedOptionId).toBeNull();
+    expect(respuestas(state)![0]!.selectedOptionId).toBeNull();
   });
 
   it("declarar la confianza registra respuesta + confianza y avanza", () => {
@@ -168,7 +179,7 @@ describe("confianza", () => {
     expect(state.step).toBe("pregunta");
     expect(state.session.index).toBe(1);
     expect(state.pendiente).toBeNull();
-    expect(flowResult(state)![0]).toEqual({
+    expect(respuestas(state)![0]).toEqual({
       questionId: "q1",
       selectedOptionId: "c",
       confidence: "alta",
@@ -183,22 +194,22 @@ describe("confianza", () => {
   });
 });
 
-describe("ESC en la pregunta y abandono", () => {
-  it("ESC pide confirmación, no abandona de golpe", () => {
+describe("ESC en la pregunta: el menú de salida", () => {
+  it("ESC abre el menú, no abandona de golpe", () => {
     const state = play(initialFlow(makeBank(3)), responde("a"), confia("alta"), escape);
 
-    expect(state.step).toBe("confirmar-salida");
+    expect(state.step).toBe("salida");
     expect(isFinished(state)).toBe(false);
     expect(answeredCount(state)).toBe(1); // nada perdido todavía
   });
 
-  it("decir que NO devuelve a la misma pregunta con todo intacto", () => {
+  it("seguir devuelve a la misma pregunta con todo intacto", () => {
     const state = play(
       initialFlow(makeBank(3)),
       responde("a"),
       confia("alta"),
       escape,
-      confirma(false),
+      sale("seguir"),
     );
 
     expect(state.step).toBe("pregunta");
@@ -206,46 +217,209 @@ describe("ESC en la pregunta y abandono", () => {
     expect(answeredCount(state)).toBe(1);
   });
 
-  it("decir que SÍ abandona y el resultado es null: no se guarda nada", () => {
+  it("descartar abandona y el resultado es null: no se guarda nada", () => {
     const state = play(
       initialFlow(makeBank(3)),
       responde("a"),
       confia("alta"),
       escape,
-      confirma(true),
+      sale("descartar"),
     );
 
     expect(state.step).toBe("abandonada");
     expect(isFinished(state)).toBe(true);
-    expect(flowResult(state)).toBeNull();
+    expect(flowOutcome(state)).toEqual({ tipo: "abandonada" });
   });
 
   it("una sesión terminada no se puede abandonar a posteriori", () => {
     const terminada = play(initialFlow(makeBank(1)), responde("a"), confia("alta"));
-    const despues = play(terminada, escape, confirma(true));
+    const despues = play(terminada, escape, sale("descartar"));
 
     expect(despues.step).toBe("terminada");
-    expect(flowResult(despues)).not.toBeNull();
+    expect(respuestas(despues)).not.toBeNull();
   });
 
   it("una sesión abandonada ignora cualquier entrada posterior", () => {
-    const abandonada = play(initialFlow(makeBank(2)), escape, confirma(true));
+    const abandonada = play(initialFlow(makeBank(2)), escape, sale("descartar"));
 
     expect(play(abandonada, responde("a"), confia("alta")).step).toBe("abandonada");
   });
 });
 
+describe("terminar en la pregunta que sea", () => {
+  it("evalúa SOLO lo respondido: las que no se vieron no cuentan como presentadas", () => {
+    const state = play(
+      initialFlow(makeBank(30)),
+      responde("a"),
+      confia("alta"),
+      responde("b"),
+      confia("media"),
+      escape,
+      sale("terminar"),
+    );
+
+    expect(state.step).toBe("parcial");
+    expect(isFinished(state)).toBe(true);
+
+    const outcome = flowOutcome(state);
+    expect(outcome.tipo).toBe("parcial");
+    if (outcome.tipo !== "parcial") throw new Error("debería ser parcial");
+    expect(outcome.questions.map((q) => q.id)).toEqual(["q1", "q2"]);
+    expect(outcome.answered).toEqual([
+      { questionId: "q1", selectedOptionId: "a", confidence: "alta" },
+      { questionId: "q2", selectedOptionId: "b", confidence: "media" },
+    ]);
+  });
+
+  it("da igual en qué pregunta se corte: la 10 o la 30 se tratan igual", () => {
+    const hasta = (n: number): FlowInput[] =>
+      Array.from({ length: n }, (_, i) => [responde("a"), confia("alta")][i % 2]!).flat();
+
+    for (const corte of [10, 30]) {
+      const state = play(initialFlow(makeBank(40)), ...hasta(corte * 2), escape, sale("terminar"));
+      const outcome = flowOutcome(state);
+
+      expect(outcome.tipo).toBe("parcial");
+      if (outcome.tipo !== "parcial") throw new Error("debería ser parcial");
+      expect(outcome.questions).toHaveLength(corte);
+      expect(outcome.answered).toHaveLength(corte);
+    }
+  });
+
+  it("terminar SIN nada respondido no inventa una sesión vacía: es un abandono", () => {
+    const state = play(initialFlow(makeBank(5)), escape, sale("terminar"));
+
+    expect(state.step).toBe("abandonada");
+    expect(flowOutcome(state)).toEqual({ tipo: "abandonada" });
+  });
+});
+
+describe("pausar y reanudar", () => {
+  it("pausar deja una foto con dónde vas y qué llevas respondido", () => {
+    const state = play(
+      initialFlow(makeBank(5)),
+      responde("a"),
+      confia("alta"),
+      responde("c"),
+      confia("baja"),
+      escape,
+      sale("pausar"),
+    );
+
+    expect(state.step).toBe("pausada");
+    const outcome = flowOutcome(state);
+    if (outcome.tipo !== "pausada") throw new Error("debería ser pausada");
+
+    expect(outcome.snapshot.index).toBe(2);
+    expect(outcome.snapshot.answers).toEqual([
+      ["q1", "a"],
+      ["q2", "c"],
+    ]);
+    expect(outcome.snapshot.confidences).toEqual([
+      ["q1", "alta"],
+      ["q2", "baja"],
+    ]);
+    // El orden en que se enseñaron las opciones viaja con la foto: sin él, al
+    // reanudar la respuesta ya dada aparecería en otra posición.
+    expect(outcome.snapshot.questions[0]).toEqual({ id: "q1", options: ["a", "b", "c"] });
+  });
+
+  it("reanudar sigue donde se dejó, con las respuestas puestas", () => {
+    const pausada = play(
+      initialFlow(makeBank(5)),
+      responde("a"),
+      confia("alta"),
+      responde("c"),
+      confia("baja"),
+      escape,
+      sale("pausar"),
+    );
+    const outcome = flowOutcome(pausada);
+    if (outcome.tipo !== "pausada") throw new Error("debería ser pausada");
+
+    const retomada = initialFlow(makeBank(5), outcome.snapshot);
+
+    expect(retomada.step).toBe("pregunta");
+    expect(retomada.session.index).toBe(2);
+    expect(answeredCount(retomada)).toBe(2);
+    expect(currentQuestion(retomada)!.id).toBe("q3");
+    expect(backAvailable(retomada)).toBe(true);
+  });
+
+  it("reanudar y terminar la sesión entera da el mismo resultado que no haber parado", () => {
+    const deUnTiron = play(
+      initialFlow(makeBank(2)),
+      responde("a"),
+      confia("alta"),
+      responde("b"),
+      confia("media"),
+    );
+
+    const pausada = play(initialFlow(makeBank(2)), responde("a"), confia("alta"), escape, sale("pausar"));
+    const foto = flowOutcome(pausada);
+    if (foto.tipo !== "pausada") throw new Error("debería ser pausada");
+    const retomada = play(initialFlow(makeBank(2), foto.snapshot), responde("b"), confia("media"));
+
+    expect(retomada.step).toBe("terminada");
+    expect(respuestas(retomada)).toEqual(respuestas(deUnTiron));
+  });
+
+  it("una pausa en la última pregunta se reanuda ya terminada, no fuera de rango", () => {
+    const casiEntera = play(initialFlow(makeBank(1)), responde("a"), confia("alta"));
+    const foto = flowOutcome(casiEntera);
+    if (foto.tipo !== "completada") throw new Error("debería estar completada");
+
+    const retomada = initialFlow(makeBank(1), {
+      index: 1,
+      questions: [{ id: "q1", options: ["a", "b", "c"] }],
+      answers: [["q1", "a"]],
+      confidences: [["q1", "alta"]],
+    });
+
+    expect(retomada.step).toBe("terminada");
+    expect(isFinished(retomada)).toBe(true);
+  });
+});
+
+describe("exitChoices", () => {
+  it("sin nada respondido solo se puede seguir o salir: no hay nada que evaluar ni que guardar", () => {
+    expect(exitChoices(0, true).map((c) => c.value)).toEqual(["seguir", "descartar"]);
+  });
+
+  it("con respuestas se ofrece terminar y evaluar, y pausar", () => {
+    expect(exitChoices(12, true).map((c) => c.value)).toEqual([
+      "seguir",
+      "terminar",
+      "pausar",
+      "descartar",
+    ]);
+  });
+
+  it("lo que no se puede pausar no lo ofrece (un repaso no se retoma)", () => {
+    expect(exitChoices(12, false).map((c) => c.value)).toEqual(["seguir", "terminar", "descartar"]);
+  });
+
+  it("terminar dice cuántas se van a puntuar: decidir a ciegas no es decidir", () => {
+    expect(exitChoices(1, true).find((c) => c.value === "terminar")!.description).toMatch(
+      /la respuesta que llevas/,
+    );
+    expect(exitChoices(30, true).find((c) => c.value === "terminar")!.description).toMatch(
+      /las 30 que llevas/,
+    );
+  });
+});
+
 describe("exitWarning", () => {
-  it("sin respuestas no habla de pérdidas: no hay ninguna", () => {
-    expect(exitWarning(0)).toBe("¿Salir de la sesión?");
+  it("sin respuestas no habla de lo que llevas: no llevas nada", () => {
+    expect(exitWarning(0)).toMatch(/Todavía no has respondido nada/);
   });
 
   it("con una respuesta habla en singular", () => {
-    expect(exitWarning(1)).toMatch(/Se pierde la respuesta/);
+    expect(exitWarning(1)).toMatch(/Llevas 1 respuesta\./);
   });
 
-  it("con varias dice cuántas se pierden", () => {
-    expect(exitWarning(7)).toMatch(/Se pierden las 7 respuestas/);
+  it("con varias dice cuántas llevas: es lo que está en juego", () => {
+    expect(exitWarning(7)).toMatch(/Llevas 7 respuestas/);
   });
 });
 
@@ -282,7 +456,7 @@ describe("resultado completo", () => {
       confia("baja"),
     );
 
-    expect(flowResult(state)).toEqual([
+    expect(respuestas(state)).toEqual([
       { questionId: "q1", selectedOptionId: "a", confidence: "alta" },
       { questionId: "q2", selectedOptionId: "b", confidence: "media" },
       { questionId: "q3", selectedOptionId: "c", confidence: "baja" },

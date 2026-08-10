@@ -8,9 +8,12 @@ import {
   heading,
   progressBar,
   progressWidth,
+  optionNote,
   questionHeader,
+  questionStem,
   tableWidths,
   termWidth,
+  wrap,
 } from "./theme.js";
 
 /** Sin TTY picocolors no colorea, así que aquí se comprueba estructura, no ANSI. */
@@ -38,6 +41,60 @@ describe("theme", () => {
     const out = questionHeader(1, 10, "dim", undefined, "easy");
     expect(out).toContain("dim");
     expect(out).not.toContain("· ·");
+  });
+
+  it("el enunciado se ajusta al ancho del terminal, con sangría", () => {
+    const largo = "palabra ".repeat(30).trim();
+    const lineas = questionStem(largo, "concepto", 40).split("\n");
+
+    expect(lineas.length).toBeGreaterThan(1);
+    for (const l of lineas) {
+      expect(l.startsWith("  ")).toBe(true);
+      expect(l.length).toBeLessThanOrEqual(40);
+    }
+  });
+
+  it("un diagrama o un snippet se indentan VERBATIM: reflowearlos los rompe", () => {
+    const diagrama = "┌───┐\n│ A │──▶│ B │\n└───┘";
+
+    for (const tipo of ["diagrama", "codigo"] as const) {
+      const lineas = questionStem(diagrama, tipo, 20).split("\n");
+      expect(lineas).toHaveLength(3);
+      expect(lineas.map((l) => l.trimStart())).toEqual(diagrama.split("\n"));
+    }
+  });
+
+  it("el apunte de una opción cuelga de una barra y cabe en el ancho", () => {
+    const lineas = optionNote("razón ".repeat(20).trim(), 40).split("\n");
+
+    expect(lineas.length).toBeGreaterThan(1);
+    for (const l of lineas) {
+      expect(l).toContain("│");
+      expect(l.length).toBeLessThanOrEqual(40);
+    }
+  });
+
+  it("un apunte con saltos de línea (diagrama) se respeta tal cual", () => {
+    const lineas = optionNote("a  →  b\nb  →  c", 20).split("\n");
+
+    expect(lineas).toHaveLength(2);
+    // Los espacios de dentro NO se colapsan: son lo que alinea el dibujo.
+    expect(lineas[0]).toContain("a  →  b");
+    expect(lineas[1]).toContain("b  →  c");
+  });
+
+  it("dentro de un apunte con diagrama, solo se ajusta la línea que no cabe", () => {
+    const largo = "prosa ".repeat(20).trim();
+    const lineas = optionNote(`${largo}\n  A──▶B`, 40).split("\n");
+
+    // El diagrama sobrevive entero; el párrafo se reparte en varias líneas, todas
+    // colgando de la barra en vez de desbordarse por donde quiera el terminal.
+    expect(lineas.at(-1)).toContain("  A──▶B");
+    expect(lineas.length).toBeGreaterThan(2);
+    for (const l of lineas) {
+      expect(l).toContain("│");
+      expect(l.length).toBeLessThanOrEqual(40);
+    }
   });
 
   it("heading rellena la regla hasta el ancho pedido", () => {
@@ -152,5 +209,19 @@ describe("tableWidths", () => {
 
   it("una tabla sin columnas no pide anchos", () => {
     expect(tableWidths(0, 40)).toBeUndefined();
+  });
+});
+
+// `wrap` se mudó aquí desde render-mistakes (lo usan también el enunciado y el
+// apunte de opción). Su contrato no cambia: ajusta al ancho respetando los saltos
+// que ya trae el texto, y no parte una palabra más larga que el hueco.
+describe("wrap", () => {
+  it("respeta los saltos de línea del texto original", () => {
+    expect(wrap("uno\ndos", 40)).toEqual(["uno", "dos"]);
+  });
+
+  it("no corta una palabra más larga que el hueco: la deja salir", () => {
+    const largo = "x".repeat(30);
+    expect(wrap(largo, 10)).toEqual([largo]);
   });
 });

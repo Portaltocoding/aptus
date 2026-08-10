@@ -13,6 +13,10 @@ dimensions:
 const SAMPLE_QUESTIONS = `# Preguntas de la dimensión 'dimension-ejemplo'. Sustituye por las reales.
 # Campos: id, dimension, subtopic?, difficulty(easy|medium|hard|experto),
 # type(concepto|diagrama|codigo|escenario), roles[], stem, options[], correct, explanation, source, date.
+# Cada opción admite además un 'rationale' OPCIONAL: el apunte que sale al poner el
+# cursor encima durante la sesión. Argumenta a favor de ESA opción (también en los
+# distractores) y nunca delata cuál es la correcta; con saltos de línea se enseña
+# verbatim, así que ahí caben un diagrama o un snippet.
 - id: ejemplo-001
   dimension: dimension-ejemplo
   difficulty: easy
@@ -22,8 +26,10 @@ const SAMPLE_QUESTIONS = `# Preguntas de la dimensión 'dimension-ejemplo'. Sust
   options:
     - id: a
       text: "Opción correcta"
+      rationale: "Por qué alguien elegiría esta, sin decir que es la buena."
     - id: b
       text: "Opción incorrecta"
+      rationale: "El argumento que hace plausible este error."
   correct: a
   explanation: "Explicación de ejemplo, suficientemente larga para el validador."
   source: externa

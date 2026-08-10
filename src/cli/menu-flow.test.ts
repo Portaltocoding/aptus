@@ -288,6 +288,47 @@ describe("borrar una sesión", () => {
   });
 });
 
+describe("retomar la sesión en pausa", () => {
+  it("con una sola sesión en pausa no pregunta nada: retoma ESA", () => {
+    const paso = nextMenuStep("resume", [], { tieneApiKey: true, packsPausados: ["mi-pack"] });
+
+    expect(paso).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "resume", pack: "mi-pack" },
+    });
+  });
+
+  it("con varias pregunta cuál, y solo ofrece las que están en pausa", () => {
+    const ctx = { tieneApiKey: true, packsPausados: ["uno", "dos"] };
+    const paso = nextMenuStep("resume", [], ctx);
+
+    expect(paso.tipo).toBe("preguntar");
+    if (paso.tipo !== "preguntar") throw new Error("debería preguntar");
+    expect(paso.prompt.id).toBe("packPausado");
+    if (paso.prompt.id !== "packPausado") throw new Error("debería ser packPausado");
+    expect(paso.prompt.opciones).toEqual(["uno", "dos"]);
+
+    expect(nextMenuStep("resume", ["dos"], ctx)).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "resume", pack: "dos" },
+    });
+  });
+
+  it("sin nada en pausa lo dice, en vez de abrir un selector vacío", () => {
+    const paso = nextMenuStep("resume", [], { tieneApiKey: true, packsPausados: [] });
+
+    expect(paso.tipo).toBe("aviso");
+    if (paso.tipo !== "aviso") throw new Error("debería avisar");
+    expect(paso.titulo).toMatch(/No hay ninguna sesión en pausa/);
+  });
+
+  it("ESC al elegir qué pack retomar cancela la acción entera", () => {
+    expect(
+      runMenuAction("resume", [ESCAPED], { tieneApiKey: true, packsPausados: ["uno", "dos"] }),
+    ).toEqual({ tipo: "volver" });
+  });
+});
+
 describe("qué pasa después de ejecutar", () => {
   it("una sesión cancelada vuelve al menú sin pausa: no hay nada que leer", () => {
     expect(nextTrasEjecutar({ comando: "start" }, "cancelada")).toBe("volver");
@@ -295,6 +336,11 @@ describe("qué pasa después de ejecutar", () => {
 
   it("una sesión completada pausa para poder leer el resultado", () => {
     expect(nextTrasEjecutar({ comando: "start" }, "completada")).toBe("pausar");
+  });
+
+  it("retomar se comporta como una sesión: cancelada vuelve, con resultado pausa", () => {
+    expect(nextTrasEjecutar({ comando: "resume", pack: "p" }, "cancelada")).toBe("volver");
+    expect(nextTrasEjecutar({ comando: "resume", pack: "p" }, "completada")).toBe("pausar");
   });
 
   it("el resto de comandos siempre pausan: han escrito algo en pantalla", () => {

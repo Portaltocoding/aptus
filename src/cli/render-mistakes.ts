@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import { DIFFICULTY_LABEL, difficultyColor, heading, termWidth } from "./theme.js";
+import { DIFFICULTY_LABEL, difficultyColor, heading, termWidth, wrap } from "./theme.js";
 import type { MistakeReview, ReviewedQuestion } from "../core/mistakes.js";
 
 /**
@@ -17,35 +17,10 @@ import type { MistakeReview, ReviewedQuestion } from "../core/mistakes.js";
 /** Sangría de todo lo que cuelga de un enunciado. */
 const SANGRIA = "     ";
 
-/**
- * Reparte un párrafo en líneas que caben en `width`, respetando los saltos que ya
- * trae el texto. Palabra más larga que el hueco: se deja salir en vez de cortarla
- * a mitad — partir un identificador o una URL hace más daño que desbordar.
- */
-export function wrap(text: string, width: number, indent = ""): string[] {
-  const hueco = Math.max(8, width - indent.length);
-  const salida: string[] = [];
-
-  for (const parrafo of text.split("\n")) {
-    const palabras = parrafo.split(/\s+/).filter((p) => p.length > 0);
-    if (palabras.length === 0) {
-      salida.push(indent.trimEnd());
-      continue;
-    }
-    let linea = "";
-    for (const palabra of palabras) {
-      if (linea.length === 0) linea = palabra;
-      else if (linea.length + 1 + palabra.length <= hueco) linea += " " + palabra;
-      else {
-        salida.push(indent + linea);
-        linea = palabra;
-      }
-    }
-    if (linea.length > 0) salida.push(indent + linea);
-  }
-
-  return salida;
-}
+// `wrap` vive ahora en `./theme.js` (lo usan también el enunciado y el apunte de
+// opción de la sesión en vivo). Se reexporta desde aquí porque este era su sitio
+// original y quien lo importaba no tiene por qué enterarse de la mudanza.
+export { wrap };
 
 /** Un trozo de línea con su color. Ver `wrapSegments`. */
 interface Segmento {

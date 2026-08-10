@@ -53,12 +53,51 @@ export function shuffleOptions(questions: Question[], shuffle: ShuffleFn): Quest
   return questions.map((q) => ({ ...q, options: shuffle(q.options) }));
 }
 
+const TIER_ORDER: Difficulty[] = ["easy", "medium", "hard", "experto"];
+
+/**
+ * Ordena un pool alternando dificultades (una fácil, una media, una difícil, una
+ * experto, y vuelta a empezar) para que al cortarlo por `take` salgan los cuatro
+ * tramos, no la mezcla que traiga el banco.
+ *
+ * Existe porque el nivel de readiness se decide POR TRAMO de dificultad, y en un
+ * banco donde solo el 11% de las preguntas son fáciles, una sesión de 20 traía
+ * unas dos: el veredicto entero pasaba a depender de dos preguntas, y con menos
+ * evidencia el motor —con razón— se negaba a conceder nada. El desequilibrio no
+ * estaba en el juicio sino en la muestra que le llegaba.
+ *
+ * No fuerza cuotas: si un tramo se agota, sigue con los demás. Reparte lo que hay.
+ *
+ * `offset` rota por dónde empieza la ronda. Es imprescindible: sin rotar, una
+ * sesión corta que solo coge 1 pregunta por dimensión cogía la fácil SIEMPRE, y
+ * el reparto quedaba peor que antes. Rotando por dimensión, lo que en una empieza
+ * por fácil en la siguiente empieza por media, y el total sale repartido.
+ */
+function interleaveByDifficulty(pool: Question[], offset: number): Question[] {
+  const orden = TIER_ORDER.map((_, i) => TIER_ORDER[(i + offset) % TIER_ORDER.length]!);
+  const buckets = orden.map((d) => pool.filter((q) => q.difficulty === d));
+  const resto = pool.filter((q) => !TIER_ORDER.includes(q.difficulty));
+  const salida: Question[] = [];
+
+  for (let i = 0; salida.length < pool.length - resto.length; i++) {
+    for (const bucket of buckets) {
+      const q = bucket[i];
+      if (q !== undefined) salida.push(q);
+    }
+  }
+  return [...salida, ...resto];
+}
+
 /**
  * Reparte preguntas por dimensión con un mínimo garantizado cuando el
  * pool lo permite. Si `pool.length < minPerDimension` para alguna
  * dimensión, NO lanza: toma todo lo disponible (responsabilidad del
  * loader/composición avisar de una muestra insuficiente, no de esta
  * función — se mantiene pura y simple).
+ *
+ * Dentro de cada dimensión el recorte reparte además por DIFICULTAD
+ * (`interleaveByDifficulty`): la sesión mide las dos cosas que el informe usa
+ * después, dimensión y tramo.
  */
 export function selectBalanced(
   bank: Question[],
@@ -71,11 +110,13 @@ export function selectBalanced(
   const perDim = Math.max(minPerDimension, Math.floor(targetTotal / dimensions.length));
 
   const selected: Question[] = [];
-  for (const dim of dimensions) {
-    const pool = shuffle(byDim.get(dim)!);
+  dimensions.forEach((dim, i) => {
+    // Se baraja ANTES de intercalar: dentro de cada tramo la elección sigue
+    // siendo aleatoria, lo que se fija es cuántas de cada tramo entran.
+    const pool = interleaveByDifficulty(shuffle(byDim.get(dim)!), i);
     const take = Math.min(perDim, pool.length); // nunca más de lo disponible
     selected.push(...pool.slice(0, take));
-  }
+  });
   return shuffle(selected); // orden final también determinista si se inyecta el mismo shuffle
 }
 
@@ -148,4 +189,78 @@ export function toAnswered(state: SessionState): AnsweredQuestion[] {
     selectedOptionId: state.answers.get(q.id) ?? null,
     confidence: state.confidences.get(q.id) ?? null,
   }));
+}
+
+/**
+ * La sesión que de verdad ha ocurrido cuando se corta a mitad: SOLO las preguntas
+ * respondidas, en el orden presentado, con sus respuestas.
+ *
+ * Devuelve también las preguntas —y no solo las respuestas— porque el scoring
+ * cuenta "presentadas" contra el banco que se le pasa. Puntuar 12 respuestas
+ * contra las 120 que se habían seleccionado diría "12/120" en cada dimensión: un
+ * 90% de preguntas sin responder que nunca llegaron a enseñarse, y un readiness
+ * hundido por preguntas que no viste. Lo honesto al terminar antes es medir lo
+ * respondido, con su N pequeño a la vista.
+ */
+export function answeredSoFar(state: SessionState): {
+  questions: Question[];
+  answered: AnsweredQuestion[];
+} {
+  const questions = state.questions.filter((q) => state.answers.has(q.id));
+  const answered = questions.map((q) => ({
+    questionId: q.id,
+    selectedOptionId: state.answers.get(q.id) ?? null,
+    confidence: state.confidences.get(q.id) ?? null,
+  }));
+  return { questions, answered };
+}
+
+/**
+ * Foto serializable de una sesión a medias, para poder retomarla otro día.
+ *
+ * Guarda IDS, no preguntas: el contenido vive en el pack y volverá a leerse de
+ * ahí al reanudar (si una pregunta se editó, se reanuda con la versión de hoy, y
+ * si desapareció, se cae de la sesión). Y guarda el ORDEN DE LAS OPCIONES tal y
+ * como se enseñaron: sin eso, al reanudar las opciones saldrían rebarajadas y la
+ * respuesta que ya diste aparecería en otro sitio.
+ */
+export interface SessionSnapshot {
+  readonly index: number;
+  readonly questions: readonly { readonly id: string; readonly options: readonly string[] }[];
+  readonly answers: readonly (readonly [string, string])[];
+  readonly confidences: readonly (readonly [string, Confidence])[];
+}
+
+export function snapshotSession(state: SessionState): SessionSnapshot {
+  return {
+    index: state.index,
+    questions: state.questions.map((q) => ({ id: q.id, options: q.options.map((o) => o.id) })),
+    answers: [...state.answers],
+    confidences: [...state.confidences],
+  };
+}
+
+/**
+ * Reconstruye el estado a partir de las preguntas ya reordenadas y la foto.
+ *
+ * El índice NO se copia tal cual: se DESPLAZA por las preguntas que el pack ha
+ * perdido por delante del cursor. Con el índice de ayer sobre una lista más corta,
+ * la posición 5 dejaría de ser la misma pregunta y te saltarías una que no habías
+ * respondido — que es justo lo contrario de "sigue donde lo dejaste". Después se
+ * acota al total recuperado, para no apuntar fuera del banco.
+ *
+ * Las respuestas de preguntas que ya no están se descartan por la misma razón: son
+ * respuestas a algo que este pack ya no pregunta.
+ */
+export function restoreSession(questions: Question[], snap: SessionSnapshot): SessionState {
+  const vigentes = new Set(questions.map((q) => q.id));
+  const answers = new Map(snap.answers.filter(([id]) => vigentes.has(id)));
+  const confidences = new Map(snap.confidences.filter(([id]) => vigentes.has(id)));
+
+  const caidasPorDelante = snap.questions
+    .slice(0, snap.index)
+    .filter((q) => !vigentes.has(q.id)).length;
+  const index = Math.max(0, Math.min(snap.index - caidasPorDelante, questions.length));
+
+  return { questions, index, answers, confidences };
 }

@@ -156,14 +156,31 @@ export async function reviewCommand(
     selectReview(tanda, pack.questions, REVIEW_TARGET_QUESTIONS),
     makeSeededShuffle(now.getTime() >>> 0),
   );
-  const answered = await runSession(selected);
-  if (answered === null) {
+  // El repaso NO se pausa: es una tanda corta de estudio, y sus cajas se mueven al
+  // terminarla. Una tanda a medias en disco no tendría a dónde volver. Cortarla y
+  // evaluar lo respondido sí se ofrece: eso consolida lo que sí has repasado.
+  const outcome = await runSession(selected, { pausable: false });
+  if (outcome.tipo === "abandonada" || outcome.tipo === "pausada") {
     // Abandonar un repaso no mueve ninguna caja: lo que no se ha respondido no
     // puede consolidarse ni caer.
     console.log("\n  Repaso abandonado. Las cajas se quedan como estaban.\n");
     return;
   }
-  const result = score(answered, selected);
+
+  // Al cortar antes de tiempo se repasa —y se mueve caja de— lo que sí se ha
+  // respondido. Contar como falladas las que ni llegaste a ver haría caer cajas
+  // por preguntas que no se enseñaron.
+  const { questions: presentadas, answered } = outcome;
+  if (outcome.tipo === "parcial") {
+    const cuantas =
+      presentadas.length === 1
+        ? "solo se mueve la caja de la que respondiste"
+        : `solo se mueven las cajas de las ${presentadas.length} que respondiste`;
+    console.log(
+      `\n  Repaso cortado antes de tiempo: ${cuantas}, de las ${selected.length} de la tanda.`,
+    );
+  }
+  const result = score(answered, presentadas);
 
   // Se marca `review`: sin esto, la próxima `aptus history` te enseñaría una
   // regresión inventada por haber estudiado.
@@ -174,12 +191,12 @@ export async function reviewCommand(
   const after = buildReviewState(updatedHistory, pack.questions);
 
   console.log("\n" + renderResult(result) + "\n");
-  console.log(renderCalibration(calibration(answered, selected)) + "\n");
+  console.log(renderCalibration(calibration(answered, presentadas)) + "\n");
   console.log(
     renderReviewOutcome(
       before,
       after,
-      selected.map((q) => q.id),
+      presentadas.map((q) => q.id),
     ) + "\n",
   );
 }

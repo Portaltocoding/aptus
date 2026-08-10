@@ -2,12 +2,16 @@ import type { Question } from "../content/schema.js";
 import type { AnsweredQuestion, Confidence } from "../core/scoring.js";
 import {
   answerCurrent,
+  answeredSoFar,
   buildSession,
   goBack,
   goForward,
   isComplete,
+  restoreSession,
   setConfidenceCurrent,
+  snapshotSession,
   toAnswered,
+  type SessionSnapshot,
   type SessionState,
 } from "../core/session.js";
 
@@ -34,9 +38,18 @@ export const BACK = "__back__";
 export type FlowStep =
   | "pregunta" // eligiendo respuesta
   | "confianza" // respuesta elegida, declarando cómo de seguro
-  | "confirmar-salida" // ESC en la pregunta: confirmando antes de tirarlo todo
+  | "salida" // ESC en la pregunta: decidiendo qué hacer con la sesión
   | "terminada" // todas las preguntas recorridas
+  | "parcial" // cortada a propósito: se evalúa lo respondido hasta aquí
+  | "pausada" // cortada a propósito: se guarda dónde vas para retomarla
   | "abandonada"; // salida confirmada: no se puntúa ni se guarda nada
+
+/** Qué se ha decidido en el menú de salida. */
+export type ExitChoice =
+  | "seguir" // volver a la misma pregunta, con todo intacto
+  | "terminar" // evaluar aquí mismo lo respondido
+  | "pausar" // guardar dónde vas y seguir otro día
+  | "descartar"; // salir sin puntuar ni guardar nada
 
 export interface FlowState {
   readonly session: SessionState;
@@ -55,17 +68,28 @@ export type FlowInput =
   | { readonly tipo: "volver" }
   | { readonly tipo: "escape" }
   | { readonly tipo: "confianza"; readonly valor: Confidence }
-  | { readonly tipo: "confirmacion"; readonly salir: boolean };
+  | { readonly tipo: "salida"; readonly eleccion: ExitChoice };
 
-export function initialFlow(questions: Question[]): FlowState {
-  const session = buildSession(questions);
-  // Un banco vacío no debe abrir un prompt sobre la nada.
+/**
+ * Arranca la sesión. Con `previo` se REANUDA una sesión pausada: mismas preguntas
+ * (ya reordenadas por quien las recuperó del disco), mismas respuestas y el cursor
+ * donde se dejó.
+ */
+export function initialFlow(questions: Question[], previo?: SessionSnapshot | null): FlowState {
+  const session = previo != null ? restoreSession(questions, previo) : buildSession(questions);
+  // Un banco vacío no debe abrir un prompt sobre la nada. Y una sesión pausada
+  // justo en la última pregunta se reanuda ya terminada, no fuera de rango.
   return { session, step: isComplete(session) ? "terminada" : "pregunta", pendiente: null };
 }
 
-/** La sesión ya no espera nada del usuario: o se completó o se abandonó. */
+/** La sesión ya no espera nada del usuario. */
 export function isFinished(state: FlowState): boolean {
-  return state.step === "terminada" || state.step === "abandonada";
+  return (
+    state.step === "terminada" ||
+    state.step === "parcial" ||
+    state.step === "pausada" ||
+    state.step === "abandonada"
+  );
 }
 
 export function currentQuestion(state: FlowState): Question | null {
@@ -105,14 +129,68 @@ export function confidenceDefault(state: FlowState): Confidence | undefined {
 }
 
 /**
- * Aviso de la confirmación de salida. El número importa: decirle "se pierden las
- * respuestas" a quien no ha contestado ninguna es ruido, y no decir cuántas se
- * pierden convierte la confirmación en un trámite que se acepta sin leer.
+ * Encabezado del menú de salida. El número importa: sin él, decidir qué hacer con
+ * la sesión es decidir a ciegas, y con 0 respondidas hablar de lo que se pierde
+ * sería ruido.
  */
 export function exitWarning(respondidas: number): string {
-  if (respondidas === 0) return "¿Salir de la sesión?";
-  if (respondidas === 1) return "¿Salir de la sesión? Se pierde la respuesta que llevas.";
-  return `¿Salir de la sesión? Se pierden las ${respondidas} respuestas que llevas.`;
+  if (respondidas === 0) return "¿Salir de la sesión? Todavía no has respondido nada.";
+  if (respondidas === 1) return "¿Qué hago con la sesión? Llevas 1 respuesta.";
+  return `¿Qué hago con la sesión? Llevas ${respondidas} respuestas.`;
+}
+
+/** Una opción del menú de salida, tal cual la pinta el runner. */
+export interface ExitOption {
+  readonly value: ExitChoice;
+  readonly name: string;
+  readonly description: string;
+}
+
+/**
+ * Las salidas que se ofrecen, en orden. PURA y aquí (y no en el runner) porque
+ * QUÉ se puede hacer con una sesión a medias es una decisión, no un formato.
+ *
+ * Dos reglas:
+ * - Sin ninguna respuesta no se ofrece ni terminar ni pausar: no hay nada que
+ *   puntuar ni nada que retomar, y ofrecerlo sería prometer un resultado vacío.
+ * - `pausable` lo decide quien compone: una sesión de medida se retoma con
+ *   `aptus resume`, pero un repaso no (sus cajas se mueven al terminar la tanda,
+ *   así que dejarlo a medias en disco no tendría a dónde volver).
+ */
+export function exitChoices(respondidas: number, pausable: boolean): ExitOption[] {
+  const opciones: ExitOption[] = [
+    {
+      value: "seguir",
+      name: "Seguir respondiendo",
+      description: "vuelves a la misma pregunta, con todo lo respondido intacto",
+    },
+  ];
+
+  if (respondidas > 0) {
+    opciones.push({
+      value: "terminar",
+      name: "Terminar aquí y evaluar",
+      description:
+        respondidas === 1
+          ? "puntúa la respuesta que llevas y guarda la sesión; lo que no has visto no cuenta"
+          : `puntúa las ${respondidas} que llevas y guarda la sesión; lo que no has visto no cuenta`,
+    });
+    if (pausable) {
+      opciones.push({
+        value: "pausar",
+        name: "Pausar y seguir en otro momento",
+        description: "se guarda dónde vas; se retoma con `aptus resume` o desde el menú",
+      });
+    }
+  }
+
+  opciones.push({
+    value: "descartar",
+    name: "Salir y descartar",
+    description: "no se puntúa ni se guarda nada de esta sesión",
+  });
+
+  return opciones;
 }
 
 /** Cuántas respuestas se perderían al abandonar ahora mismo. */
@@ -132,10 +210,10 @@ export function stepFlow(state: FlowState, input: FlowInput): FlowState {
       return desdePregunta(state, input);
     case "confianza":
       return desdeConfianza(state, input);
-    case "confirmar-salida":
-      return desdeConfirmacion(state, input);
+    case "salida":
+      return desdeSalida(state, input);
     default:
-      return state; // terminada / abandonada: no hay vuelta atrás
+      return state; // terminada / parcial / pausada / abandonada: no hay vuelta atrás
   }
 }
 
@@ -147,9 +225,10 @@ function desdePregunta(state: FlowState, input: FlowInput): FlowState {
     case "volver":
       return { ...state, session: goBack(state.session), pendiente: null };
     case "escape":
-      // ESC en la pregunta = "quiero irme", pero se pregunta antes: sin confirmación
+      // ESC en la pregunta = "quiero irme", pero se pregunta antes: sin ese menú
       // un ESC de más borraría todo lo respondido y no hay forma de recuperarlo.
-      return { ...state, step: "confirmar-salida", pendiente: null };
+      // Y de paso es donde se decide SI irse es tirarlo, evaluarlo o guardarlo.
+      return { ...state, step: "salida", pendiente: null };
     default:
       return state;
   }
@@ -176,17 +255,63 @@ function desdeConfianza(state: FlowState, input: FlowInput): FlowState {
   }
 }
 
-function desdeConfirmacion(state: FlowState, input: FlowInput): FlowState {
-  if (input.tipo !== "confirmacion") return state;
-  // Decir que no devuelve a la MISMA pregunta, con todo lo respondido intacto.
-  return { ...state, step: input.salir ? "abandonada" : "pregunta" };
+function desdeSalida(state: FlowState, input: FlowInput): FlowState {
+  if (input.tipo !== "salida") return state;
+
+  switch (input.eleccion) {
+    case "seguir":
+      // Vuelve a la MISMA pregunta, con todo lo respondido intacto.
+      return { ...state, step: "pregunta" };
+    case "descartar":
+      return { ...state, step: "abandonada" };
+    case "pausar":
+      return { ...state, step: "pausada" };
+    case "terminar":
+      // Terminar sin haber respondido nada no es una sesión de 0 preguntas: es
+      // haberse ido. Se trata como abandono para no guardar un registro vacío que
+      // luego apareciera en el historial y en la evolución.
+      return { ...state, step: state.session.answers.size > 0 ? "parcial" : "abandonada" };
+  }
 }
 
 /**
- * Resultado de la sesión: `null` si se abandonó — quien compone decide qué hacer con
- * eso (volver al menú), pero NADA se puntúa ni se guarda.
+ * Cómo ha acabado la sesión y con qué se queda quien compone.
+ *
+ * `completada` y `parcial` se distinguen porque no significan lo mismo: la segunda
+ * mide una muestra más pequeña de la que se seleccionó, y eso hay que decirlo en
+ * pantalla en vez de dejar que un N pequeño lo insinúe.
  */
-export function flowResult(state: FlowState): AnsweredQuestion[] | null {
-  if (state.step === "abandonada") return null;
-  return toAnswered(state.session);
+export type FlowOutcome =
+  | {
+      readonly tipo: "completada";
+      readonly questions: Question[];
+      readonly answered: AnsweredQuestion[];
+    }
+  | {
+      readonly tipo: "parcial";
+      readonly questions: Question[];
+      readonly answered: AnsweredQuestion[];
+    }
+  | { readonly tipo: "pausada"; readonly snapshot: SessionSnapshot }
+  | { readonly tipo: "abandonada" };
+
+export function flowOutcome(state: FlowState): FlowOutcome {
+  switch (state.step) {
+    case "abandonada":
+      return { tipo: "abandonada" };
+    case "pausada":
+      return { tipo: "pausada", snapshot: snapshotSession(state.session) };
+    case "parcial": {
+      // Solo lo respondido: puntuar 12 respuestas contra las 120 seleccionadas
+      // hundiría cada dimensión con preguntas que nunca se llegaron a enseñar.
+      const { questions, answered } = answeredSoFar(state.session);
+      return { tipo: "parcial", questions, answered };
+    }
+    default:
+      return {
+        tipo: "completada",
+        questions: state.session.questions,
+        answered: toAnswered(state.session),
+      };
+  }
 }

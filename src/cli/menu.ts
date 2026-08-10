@@ -2,8 +2,10 @@ import { input, select } from "@inquirer/prompts";
 import { resolve } from "node:path";
 import pc from "picocolors";
 import { listPackEntries } from "../content/paths.js";
+import { pausedPacks } from "../content/paused.js";
 import { hasApiCredentials } from "../content/draft.js";
 import { startCommand, DEFAULT_PACK } from "./commands/start.js";
+import { resumeCommand } from "./commands/resume.js";
 import { reviewCommand } from "./commands/review.js";
 import { historyCommand } from "./commands/history.js";
 import { reportCommand } from "./commands/report.js";
@@ -113,6 +115,25 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
   { value: "salir", name: "Salir", description: "Cerrar aptus." },
 ];
 
+/** La acción de retomar, que solo existe si hay algo que retomar. */
+const RETOMAR: { value: MenuAction; name: string; description: string } = {
+  value: "resume",
+  name: "Retomar la sesión en pausa",
+  description: "Sigue donde la dejaste: mismas preguntas y tus respuestas puestas.",
+};
+
+/**
+ * Las opciones del menú para el estado de HOY. "Retomar" va la primera y solo
+ * aparece cuando hay una sesión a medias: una entrada permanente que casi siempre
+ * dice "no hay nada" es ruido, y tener un test a medias es justo lo que quieres
+ * ver en cuanto abres el programa.
+ */
+export function menuChoices(
+  pausados: readonly string[],
+): { value: MenuAction; name: string; description: string }[] {
+  return pausados.length > 0 ? [RETOMAR, ...CHOICES] : [...CHOICES];
+}
+
 /** Pregunta un pack de los que hay, con ESC para volver. */
 async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
   // Las dos raíces a la vez: los packs del producto y los tuyos.
@@ -158,6 +179,18 @@ async function preguntar(prompt: MenuPrompt): Promise<string | typeof ESCAPED> {
   switch (prompt.id) {
     case "pack":
       return await askPack(prompt.mensaje);
+
+    case "packPausado":
+      return await withEscape((signal) =>
+        select(
+          {
+            message: pc.bold(`  ${prompt.mensaje}`) + pc.dim(`  (${ESC_HINT})`),
+            choices: prompt.opciones.map((n) => ({ value: n, name: n })),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
 
     case "rutaOferta":
     case "rutaMaterial":
@@ -281,6 +314,8 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
     case "start":
       // El asistente de la sesión pregunta el pack por su cuenta.
       return await startCommand({ interactive: true });
+    case "resume":
+      return await resumeCommand(invocacion.pack);
     case "review":
       await reviewCommand(invocacion.pack);
       return null;
@@ -343,7 +378,9 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
  */
 async function dispatch(action: MenuAction): Promise<Next> {
   const respuestas: string[] = [];
-  const ctx = { tieneApiKey: hasApiCredentials() };
+  // Se relee en cada acción y no una vez al arrancar: acabas de terminar la sesión
+  // que estaba pausada, y el menú tiene que enterarse.
+  const ctx = { tieneApiKey: hasApiCredentials(), packsPausados: pausedPacks() };
 
   for (;;) {
     const paso = nextMenuStep(action, respuestas, ctx);
@@ -387,7 +424,7 @@ export async function mainMenu(): Promise<void> {
         select<MenuAction>(
           {
             message: pc.bold("  ¿Qué hacemos?") + pc.dim(`  (${ESC_HINT} · salir)`),
-            choices: CHOICES,
+            choices: menuChoices(pausedPacks()),
             theme: promptTheme,
             pageSize: 12,
           },

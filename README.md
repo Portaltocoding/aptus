@@ -19,7 +19,8 @@ dimensiones y sirve de caso de validación del concepto.
 `aptus` a secas abre el menú principal, que es el sitio al que se vuelve: cada
 acción termina y te deja otra vez ahí. **ESC vuelve atrás** en cualquier pantalla
 —un paso del asistente, un prompt a medias, el menú mismo— y en mitad de una
-sesión pregunta antes de tirar lo que llevas respondido.
+sesión abre el menú de salida (seguir, terminar y evaluar, pausar, o descartar)
+antes de tirar lo que llevas respondido.
 
 ```
 aptus ──────────────────────────────────────────────────────────
@@ -81,18 +82,61 @@ Pregunta 3/60  ▓░░░░░░░░░░░░░░░░░
   llm-rag-evals · chunking · media
 
   En un pipeline RAG, ¿cuál es el motivo principal de usar 'chunk overlap'
-  al trocear los documentos?
+  al trocear los documentos?               ← enunciado en cian y negrita
+
 
   Reducir el tamaño total del índice vectorial
-❯ Evitar que información relevante quede cortada en el límite entre fragmentos
+❯ Evitar que información relevante quede cortada en el límite entre       ← en amarillo
   Acelerar la generación de embeddings
   Eliminar la necesidad de un modelo de reranking
+
+   │ El solape paga tokens repetidos a cambio de que una frase partida
+   │ por la mitad siga entera en algún fragmento.      ← apunte de ESA opción
 
   ¿Cómo de seguro estás de tu respuesta?
 ❯ Alta    Estoy muy seguro — sé por qué es esa
   Media   Creo que sí, pero no la firmaría
   Baja    Voy a medias / estoy adivinando
 ```
+
+**Tres niveles, tres colores.** La cabecera va tenue, el enunciado en cian y
+negrita y las respuestas en el color normal, con la que tienes bajo el cursor en
+amarillo. Antes enunciado y opciones se distinguían solo por la negrita y se leían
+como un bloque de texto seguido. El enunciado se ajusta al ancho real del terminal
+—salvo los de tipo `diagrama` y `codigo`, que se indentan verbatim— y hay aire
+entre la pregunta y sus respuestas, y entre un bloque y el siguiente.
+
+**Poner el cursor sobre una respuesta enseña su apunte.** Es el `rationale`
+opcional de cada opción del pack: una o dos frases que *argumentan a favor de esa
+opción* ("bajar de modelo abarata: sus tokens cuestan menos por millón"), o un
+diagrama corto, que se respeta tal cual. Va en **todas** las opciones, también en
+los distractores, y nunca dice cuál es la correcta: eso es la `explanation`, y esa
+solo se ve al repasar los fallos, después de responder. Una opción sin `rationale`
+no enseña nada — antes que un margen vacío, ninguno.
+
+**Se puede parar en la pregunta que sea.** ESC en mitad de una sesión abre un
+menú, no un sí/no:
+
+```
+  ¿Qué hago con la sesión? Llevas 30 respuestas.  (esc vuelve atrás y sigues)
+❯ Seguir respondiendo               vuelves a la misma pregunta, todo intacto
+  Terminar aquí y evaluar           puntúa las 30 que llevas y guarda la sesión
+  Pausar y seguir en otro momento   se guarda dónde vas; vuelves con `aptus resume`
+  Salir y descartar                 no se puntúa ni se guarda nada
+```
+
+*Terminar* evalúa **solo lo respondido**: da igual que sea la pregunta 10 o la 30.
+Las que no llegaste a ver no cuentan como presentadas —puntuarlas como falladas
+sería medirte por preguntas que nadie te enseñó—, y el aviso lo dice arriba en vez
+de dejar que lo deduzcas de un N pequeño. La sesión se guarda en el historial como
+cualquier otra.
+
+*Pausar* guarda la sesión a medias (una por pack) y no puntúa nada. Al retomarla
+vuelven las mismas preguntas, en el mismo orden, con las opciones en el mismo sitio
+y tus respuestas puestas: se guardan ids, así que si editaste una pregunta te sale
+la versión de hoy, y si la retiraste del pack, se cae de la sesión y se te dice.
+Con una sesión en pausa, el menú principal la ofrece la primera y `aptus start` te
+pregunta si retomarla antes de empezar otra.
 
 **Las opciones se barajan al presentarlas.** Escribiendo preguntas a mano la
 correcta acaba casi siempre la primera —en este pack, 223 de 255— y un test que se
@@ -117,6 +161,7 @@ Al terminar no sale un número. Sale un desglose:
 | comando | qué hace |
 |---|---|
 | `aptus start` | inicia una sesión sobre un pack |
+| `aptus resume` | retoma la sesión que dejaste en pausa, donde la dejaste |
 | `aptus review` | repaso espaciado de lo que peor llevas (estudio, no medición) |
 | `aptus history` | historial de sesiones y evolución entre ellas |
 | `aptus history --delete` | borra una sesión concreta (la eliges y la confirmas) |
@@ -276,6 +321,26 @@ packs/ai-ml-readiness/
 Cada pregunta declara dimensión, subtema, dificultad, roles a los que aplica,
 opciones, respuesta, explicación y **`source`**, que permite auditar el sesgo de
 autocuración: cuánto del pack viene de una fuente propia y cuánto de fuera.
+
+Cada opción admite además un **`rationale`** opcional: el apunte que sale al poner
+el cursor encima durante la sesión. Los packs escritos antes de que existiera el
+campo siguen cargando igual (y no enseñan apunte).
+
+```yaml
+options:
+  - id: a
+    text: "Cambiar a un modelo más pequeño para todo el tráfico"
+    rationale: "Abarata directo: los tokens de un modelo pequeño cuestan
+      varias veces menos por millón, y la factura es lineal en tokens."
+  - id: b
+    text: "Cachear las respuestas de los prompts repetidos"
+    rationale: "Lo que se sirve de caché no paga inferencia ni espera al modelo."
+```
+
+Se escribe para **todas** las opciones, argumentando a favor de cada una como lo
+haría quien la eligiera. Si solo lo tuviera la correcta —o si fuera visiblemente
+más larga o más segura que las demás—, el apunte delataría la respuesta y el test
+dejaría de medir. `aptus draft` los pide ya al modelo con esa misma regla.
 
 ```bash
 aptus new-pack idiomas-b2     # esqueleto listo para rellenar
