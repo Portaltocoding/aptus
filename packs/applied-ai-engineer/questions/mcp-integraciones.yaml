@@ -1,0 +1,1394 @@
+# Dimensión: mcp-integraciones — conectar agentes a herramientas, datos y sistemas
+# internos: el protocolo MCP (revisión 2026-07-28) y los patrones de integración.
+#
+# OJO CON EL PRIOR: la revisión 2026-07-28 cambió cosas de fondo respecto a 2025-11-25
+# (protocolo sin estado, sin handshake 'initialize', sin sesiones ni GET en Streamable
+# HTTP, negociación de capacidades por petición). Las preguntas están ancladas a la
+# especificación vigente, no a la anterior.
+#
+# source: jd-codeway | externa:mcp-spec-2026-07-28 | externa:anthropic-docs.
+
+- id: mcp-001
+  dimension: mcp-integraciones
+  subtopic: fundamentos
+  difficulty: easy
+  type: concepto
+  roles: &a1
+    - Applied AI Engineer
+    - AI Engineer
+  stem: ¿Qué problema resuelve MCP?
+  options:
+    - id: a
+      text: Estandarizar cómo una aplicación de LLM se conecta a herramientas, datos y sistemas
+        externos, para no escribir una integración a medida por cada par cliente-servicio
+    - id: b
+      text: Estandarizar el formato de los prompts entre proveedores de modelos
+    - id: c
+      text: Servir modelos de lenguaje con una API común independiente del proveedor
+    - id: d
+      text: Orquestar varios agentes entre sí dentro de una misma sesión
+  correct: a
+  explanation: "MCP normaliza el lado de la integración: qué expone un servidor (herramientas,
+    recursos, prompts) y cómo lo consume un cliente. No unifica APIs de modelos ni formatos
+    de prompt, y no es un protocolo de orquestación entre agentes. La analogía que usa la
+    propia especificación es el Language Server Protocol: un protocolo por integración en
+    vez de N×M."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-002
+  dimension: mcp-integraciones
+  subtopic: arquitectura
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: En la terminología de MCP, ¿qué papel juega cada pieza?
+  options:
+    - id: a
+      text: Host = el servidor de modelos; cliente = el usuario final; servidor = la base de datos
+    - id: b
+      text: Host = la aplicación de LLM que inicia conexiones; cliente = el conector dentro del
+        host; servidor = el servicio que aporta contexto y capacidades
+    - id: c
+      text: Host = el proveedor del modelo; cliente = el servidor MCP; servidor = el modelo
+    - id: d
+      text: Host y cliente son sinónimos; servidor es el modelo de lenguaje
+  correct: b
+  explanation: "El host es la aplicación (un IDE, un chat, tu agente); dentro de él viven uno
+    o varios clientes, cada uno conectado a un servidor. El servidor es quien expone
+    herramientas, recursos y prompts. El modelo de lenguaje no es ninguna de las tres cosas:
+    vive en el host y es quien decide invocar lo que el servidor ofrece."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-003
+  dimension: mcp-integraciones
+  subtopic: primitivas
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: Un servidor MCP puede ofrecer tres tipos de primitiva. ¿Cuáles y para quién?
+  options:
+    - id: c
+      text: Tools, agents y workflows
+    - id: d
+      text: Tools, embeddings y prompts
+    - id: a
+      text: Resources (contexto y datos), Prompts (mensajes y flujos plantillados para el usuario)
+        y Tools (funciones que ejecuta el modelo)
+    - id: b
+      text: Resources, memories y tools
+  correct: a
+  explanation: "Las tres primitivas de servidor son recursos, prompts y herramientas, y se
+    distinguen por quién las controla: los recursos los aporta la aplicación o el usuario
+    como contexto, los prompts los elige el usuario, y las herramientas las invoca el
+    modelo. Ni embeddings, ni memorias, ni agentes son primitivas del protocolo."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-004
+  dimension: mcp-integraciones
+  subtopic: primitivas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿Qué primitivas puede ofrecer el CLIENTE al servidor?
+  options:
+    - id: b
+      text: "Ninguna: en MCP el flujo va siempre del cliente al servidor"
+    - id: a
+      text: Solo sampling
+    - id: c
+      text: Tools y resources, igual que el servidor
+    - id: d
+      text: Elicitation (pedir información al usuario), sampling (pedir una generación al modelo)
+        y roots (la lista de directorios raíz)
+  correct: d
+  explanation: "El cliente puede ofrecer elicitation (el servidor necesita un dato del
+    usuario), sampling (el servidor necesita una generación del modelo, sin tener que traer
+    su propia clave) y roots (qué directorios están en el alcance). Son capacidades del
+    cliente, no del servidor, y por eso el servidor no puede darlas por hechas: tiene que
+    comprobar que el cliente las declara."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-005
+  dimension: mcp-integraciones
+  subtopic: protocolo-base
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Sobre qué formato de mensajes está construido MCP?
+  options:
+    - id: a
+      text: JSON-RPC 2.0
+    - id: c
+      text: gRPC con Protocol Buffers
+    - id: b
+      text: REST sobre JSON:API
+    - id: d
+      text: GraphQL
+  correct: a
+  explanation: "Todos los mensajes son JSON-RPC 2.0 codificados en UTF-8: peticiones (con id
+    de cadena o número, nunca nulo), respuestas y notificaciones (sin id, sin respuesta). El
+    transporte solo decide cómo se enmarcan y entregan esos mensajes; la semántica es
+    idéntica en cualquier transporte."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-006
+  dimension: mcp-integraciones
+  subtopic: sin-estado
+  difficulty: hard
+  type: concepto
+  roles: &a2
+    - Applied AI Engineer
+    - AI Engineer
+    - Agent Engineer
+  stem: En la revisión 2026-07-28, ¿cómo se negocian la versión de protocolo y las capacidades?
+  options:
+    - id: b
+      text: Con un handshake 'initialize' al abrir la conexión, cuyo resultado vale para toda la
+        sesión
+    - id: a
+      text: "En cada petición: la versión y las capacidades del cliente viajan en el `_meta` de
+        los params, y el servidor no puede inferir nada de peticiones anteriores"
+    - id: c
+      text: Mediante una cabecera fijada una vez por conexión TCP
+    - id: d
+      text: "No se negocian: cliente y servidor deben acordarlas fuera de banda"
+  correct: a
+  explanation: "Este es el cambio de fondo respecto a revisiones anteriores: MCP es un
+    protocolo SIN ESTADO. Cada petición se autocontiene y lleva en `_meta` la versión de
+    protocolo y las capacidades del cliente; el servidor debe procesarla de forma
+    independiente. El handshake 'initialize' pertenece a las revisiones anteriores, y hoy
+    solo aparece como camino de compatibilidad hacia atrás."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-007
+  dimension: mcp-integraciones
+  subtopic: sin-estado
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: "Consecuencia práctica del modelo sin estado: un servidor recibe dos peticiones por la
+    misma conexión stdio. ¿Qué puede asumir sobre ellas?"
+  options:
+    - id: c
+      text: Que pertenecen a la misma conversación, porque comparten proceso
+    - id: a
+      text: Que comparten la versión de protocolo negociada al arrancar el proceso
+    - id: d
+      text: "Nada: una conexión abierta no es una conversación ni una sesión, y el cliente puede
+        intercalar peticiones sin relación entre sí sobre el mismo transporte"
+    - id: b
+      text: Que la segunda continúa el trabajo de la primera salvo que indique lo contrario
+  correct: d
+  explanation: "La especificación es explícita: una conexión (incluido un proceso stdio) no es
+    una sesión. El cliente puede intercalar peticiones de tareas, hilos o conversaciones
+    distintas, y el servidor no debe usar la identidad del proceso como sustituto de la
+    continuidad. El estado que deba cruzar peticiones se referencia con un identificador
+    explícito que el cliente reenvía en cada llamada."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-008
+  dimension: mcp-integraciones
+  subtopic: sin-estado
+  difficulty: medium
+  type: escenario
+  roles: *a2
+  stem: "Tu servidor MCP expone un carrito de la compra: crear carrito, añadir artículo,
+    pagar. Sin sesiones de protocolo, ¿cómo se relacionan las llamadas entre sí?"
+  options:
+    - id: a
+      text: El servidor guarda el carrito asociado a la conexión que lo creó
+    - id: b
+      text: El cliente reenvía el historial completo de llamadas en cada petición
+    - id: d
+      text: Se usa una cabecera de sesión que el servidor emite en la primera respuesta
+    - id: c
+      text: La herramienta de creación devuelve un identificador explícito y las siguientes lo
+        reciben como un argumento más
+  correct: c
+  explanation: "El patrón es el de un asa (handle) explícita: se crea, se devuelve en el
+    resultado y el modelo la arrastra como argumento en cada llamada posterior. Desde el
+    punto de vista del protocolo no es nada especial: una cadena en un resultado y un
+    argumento en la siguiente llamada. Atarlo a la conexión rompe en cuanto el cliente
+    reconecta o intercala trabajo; la cabecera de sesión es el mecanismo de revisiones
+    anteriores y ya no forma parte de esta."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-009
+  dimension: mcp-integraciones
+  subtopic: sin-estado
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: "Siguiendo con las asas explícitas: ¿qué error de diseño convierte ese patrón en una
+    vulnerabilidad?"
+  options:
+    - id: d
+      text: "Tratar la posesión de la asa como autenticación: si el servidor no comprueba que la
+        asa pertenece a quien llama, cualquiera que la adivine u obtenga opera sobre el
+        estado de otro usuario"
+    - id: b
+      text: Que la asa se genere con un contador secuencial en vez de un UUID
+    - id: a
+      text: Devolver la asa dentro de structuredContent en vez de en texto plano
+    - id: c
+      text: Que la asa no caduque nunca
+  correct: d
+  explanation: "Es el secuestro de asa de estado. La regla es que un servidor con autorización
+    debe verificar TODAS las peticiones entrantes y no puede tratar la posesión de la asa
+    como prueba de identidad: lo correcto es ligarla en el servidor al usuario autenticado
+    (por ejemplo indexando el estado por usuario y asa, con el usuario derivado del token
+    verificado) y rechazarla si la presenta otro. Los identificadores secuenciales y la
+    ausencia de caducidad agravan el problema —conviene usar aleatoriedad segura y vida
+    acotada—, pero por sí solos no son la vulnerabilidad: el fallo es de autorización."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-010
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: easy
+  type: concepto
+  roles: *a1
+  stem: ¿Cuáles son los dos transportes estándar de MCP?
+  options:
+    - id: a
+      text: stdio y HTTP+SSE
+    - id: d
+      text: stdio y Streamable HTTP
+    - id: b
+      text: WebSocket y gRPC
+    - id: c
+      text: stdio y WebSocket
+  correct: d
+  explanation: Los dos vinculantes estándar son stdio (JSON-RPC delimitado por saltos de línea
+    sobre los flujos estándar de un subproceso que lanza el cliente) y Streamable HTTP (cada
+    mensaje es un POST a un único endpoint). El antiguo HTTP+SSE de la revisión 2024-11-05
+    está obsoleto desde 2025-03-26 y es candidato a desaparecer.
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-011
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En Streamable HTTP (revisión 2026-07-28), ¿qué métodos HTTP acepta el endpoint MCP?
+  options:
+    - id: b
+      text: POST para mensajes y GET para abrir el flujo de eventos del servidor
+    - id: c
+      text: POST para mensajes, GET para el flujo y DELETE para terminar la sesión
+    - id: a
+      text: "Solo POST: se retiraron tanto el endpoint GET como las sesiones de protocolo"
+    - id: d
+      text: POST y PUT, según el mensaje sea petición o notificación
+  correct: a
+  explanation: "Esta revisión eliminó el flujo GET independiente y las sesiones de protocolo:
+    el endpoint solo acepta POST. Un servidor que solo implemente esta revisión debe
+    responder 405 a un GET o un DELETE, ignorar cualquier cabecera de id de sesión sin
+    emitir ni devolver una, e ignorar Last-Event-ID porque los flujos ya no son reanudables.
+    GET+DELETE es la forma de las revisiones 2025-03-26 a 2025-11-25."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-012
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al enviar una petición JSON-RPC por Streamable HTTP, ¿qué debe declarar el cliente en
+    la cabecera Accept y por qué?
+  options:
+    - id: a
+      text: Solo application/json; el SSE se negocia con una cabecera aparte
+    - id: b
+      text: Solo text/event-stream, porque toda respuesta de MCP es un flujo
+    - id: c
+      text: "Da igual: la cabecera Accept es informativa en este transporte"
+    - id: d
+      text: "Ambos, application/json y text/event-stream: el servidor decide por petición si
+        contesta con un único objeto JSON o con un flujo SSE, y el cliente tiene que
+        soportar las dos"
+  correct: d
+  explanation: "El cliente DEBE listar los dos tipos y soportar los dos, porque la elección es
+    del servidor y es por petición: una llamada rápida se contesta con un objeto JSON, y una
+    larga con un flujo SSE que lleva notificaciones de progreso y termina con la respuesta
+    final. Anunciar solo uno rompe con servidores perfectamente conformes."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-013
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: En Streamable HTTP, ¿cómo cancela un cliente una petición en vuelo?
+  options:
+    - id: b
+      text: "Cerrando el flujo de respuesta SSE de esa petición: como cada petición tiene su
+        propio flujo, la desconexión es inequívoca"
+    - id: c
+      text: Enviando una notificación notifications/cancelled con el id de la petición
+    - id: a
+      text: Enviando un DELETE al endpoint MCP con el id de la petición
+    - id: d
+      text: "No se puede cancelar: hay que esperar a que el servidor termine"
+  correct: b
+  explanation: Cada vinculante define su propia señal de cancelación. En Streamable HTTP el
+    cierre del flujo de respuesta ES la cancelación, y el servidor debe parar cuanto pueda y
+    no enviar nada más de esa petición. notifications/cancelled es la señal del transporte
+    stdio, donde no hay un flujo por petición que cerrar.
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-014
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Sin flujo GET ni sesiones, ¿cómo recibe hoy un cliente las notificaciones de cambio de
+    larga duración (por ejemplo, que cambió la lista de herramientas)?
+  options:
+    - id: a
+      text: Sondeando tools/list cada cierto tiempo; ya no hay notificaciones
+    - id: c
+      text: "Enviando una petición subscriptions/listen: su respuesta es un flujo SSE que queda
+        abierto y entrega solo los tipos de notificación a los que se suscribió"
+    - id: b
+      text: Reabriendo el flujo SSE de la última petición con Last-Event-ID
+    - id: d
+      text: Registrando un webhook en el servidor
+  correct: c
+  explanation: "El flujo de larga duración se obtiene con subscriptions/listen: sigue siendo
+    petición-respuesta, solo que la respuesta es un flujo que permanece abierto. Las
+    notificaciones ligadas a una petición concreta (progreso, log) NO viajan por ahí: van
+    por el flujo de respuesta de la petición a la que se refieren. Cada notificación del
+    flujo de escucha lleva su subscriptionId en `_meta` para poder correlacionarla."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-015
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: |-
+    Un servidor MCP local se arranca así:
+
+        app.listen(3000, "0.0.0.0")   // endpoint MCP en /mcp
+        // el handler procesa el POST sin mirar cabeceras de origen
+
+    Señala los DOS problemas de seguridad de transporte.
+  options:
+    - id: a
+      text: Usa un puerto no privilegiado y no fija un tiempo de espera en el socket
+    - id: c
+      text: No emite un id de sesión y no soporta reanudación de flujos
+    - id: b
+      text: "No valida la cabecera Origin (debe responder 403 si viene y es inválida) y escucha en
+        todas las interfaces en lugar de solo en localhost: entre las dos cosas, una web
+        remota puede atacarlo por reenlace de DNS"
+    - id: d
+      text: No comprime las respuestas y no fija cabeceras de caché
+  correct: b
+  explanation: "El ataque concreto es el reenlace de DNS: una página web hace que un dominio
+    suyo resuelva a 127.0.0.1 y el navegador de la víctima habla con el servidor MCP local.
+    Las dos defensas que exige la especificación son validar Origin (403 si viene e
+    inválido) y, en local, escuchar solo en 127.0.0.1 en vez de en 0.0.0.0; además se
+    recomienda autenticar. Los ids de sesión y la reanudación ya no existen en esta
+    revisión."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-016
+  dimension: mcp-integraciones
+  subtopic: cabeceras
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Streamable HTTP replica algunos campos del cuerpo JSON-RPC en cabeceras HTTP
+    (MCP-Protocol-Version, Mcp-Method, Mcp-Name). ¿Para qué, y qué obligación crea eso en el
+    servidor?
+  options:
+    - id: a
+      text: Para ahorrar ancho de banda; el cuerpo puede omitir esos campos
+    - id: b
+      text: Para permitir peticiones sin cuerpo; las cabeceras bastan para las llamadas simples
+    - id: c
+      text: Para depurar; el servidor puede ignorarlas sin más
+    - id: d
+      text: Para que los intermediarios (balanceadores, pasarelas, observabilidad) puedan enrutar
+        e inspeccionar sin parsear el cuerpo; el cuerpo sigue siendo la fuente de verdad y
+        el servidor debe rechazar con 400 y código -32020 si cabecera y cuerpo no coinciden
+  correct: d
+  explanation: "El motivo es operativo (enrutar y observar sin abrir el cuerpo) y el riesgo es
+    de seguridad: si el balanceador decide por la cabecera y el servidor ejecuta según el
+    cuerpo, hay dos fuentes de verdad y una de ellas se puede falsear. Por eso la validación
+    cabecera-cuerpo es obligatoria y el desajuste devuelve 400 con HeaderMismatch (-32020).
+    El cuerpo nunca puede omitir los campos."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-017
+  dimension: mcp-integraciones
+  subtopic: cabeceras
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: ¿En qué peticiones es obligatoria la cabecera Mcp-Name?
+  options:
+    - id: a
+      text: En tools/call, resources/read y prompts/get
+    - id: c
+      text: En todas las peticiones
+    - id: b
+      text: Solo en tools/call
+    - id: d
+      text: "En ninguna: es opcional y solo sirve para trazas"
+  correct: a
+  explanation: "Mcp-Method va en todas las peticiones; Mcp-Name refleja params.name o
+    params.uri y solo aplica donde existe ese campo: tools/call, resources/read y
+    prompts/get. Las dos son obligatorias para ser conforme, y si el valor no se puede
+    representar como ASCII plano hay que codificarlo con el centinela =?base64?...?=."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-018
+  dimension: mcp-integraciones
+  subtopic: cabeceras
+  difficulty: experto
+  type: codigo
+  roles: *a2
+  stem: >-
+    Un servidor quiere que la región de esta herramienta llegue como cabecera HTTP para que
+    el balanceador enrute sin abrir el cuerpo:
+
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "region":   { "type": "string",  "x-mcp-header": "Region" },
+            "umbral":   { "type": "number",  "x-mcp-header": "Umbral" },
+            "api_key":  { "type": "string",  "x-mcp-header": "ApiKey" }
+          }
+        }
+
+    ¿Qué está mal?
+  options:
+    - id: a
+      text: x-mcp-header debe declararse a nivel de la herramienta, no dentro de cada propiedad
+    - id: b
+      text: "'umbral' es de tipo number, que no está permitido (solo integer, string y boolean); y
+        anotar 'api_key' es un error de criterio: los valores de cabecera son visibles para
+        los intermediarios, así que no se deben marcar parámetros sensibles"
+    - id: c
+      text: Los nombres de cabecera deben ir en minúsculas
+    - id: d
+      text: "No está mal: las tres anotaciones son válidas"
+  correct: b
+  explanation: "x-mcp-header se coloca dentro del esquema de la propiedad y genera la cabecera
+    Mcp-Param-{nombre}. Solo admite tipos primitivos —integer, string y boolean— y `number`
+    queda explícitamente excluido, así que 'umbral' invalida la definición (y un cliente
+    conforme excluye la herramienta entera de tools/list). Lo de la clave de API no lo
+    detecta ningún validador: es la advertencia de que no se marquen contraseñas, claves,
+    tokens ni datos personales, porque acaban a la vista de cualquier intermediario de red."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-019
+  dimension: mcp-integraciones
+  subtopic: resultados
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: En la revisión 2026-07-28 los resultados llevan un campo resultType. ¿Qué valores
+    define el protocolo base y qué hace un cliente si falta?
+  options:
+    - id: a
+      text: "'ok' y 'error'; si falta, el cliente debe rechazar la respuesta"
+    - id: b
+      text: "'complete', 'partial' y 'streaming'; si falta se asume 'partial'"
+    - id: c
+      text: "'complete' e 'input_required'; si falta (servidor de una revisión anterior) el
+        cliente debe tratarlo como 'complete'"
+    - id: d
+      text: Solo 'complete'; cualquier otro valor es inválido
+  correct: c
+  explanation: "El protocolo base define 'complete' (terminó, el resultado es el definitivo) e
+    'input_required' (falta información: el resultado es un InputRequiredResult). Las
+    extensiones pueden añadir valores, pero solo cuentan los de extensiones anunciadas por
+    capacidades, y un resultType desconocido es inválido. Para compatibilidad con servidores
+    anteriores, la ausencia del campo se interpreta como 'complete'."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-020
+  dimension: mcp-integraciones
+  subtopic: mrtr
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Un servidor necesita un dato del usuario a mitad de un tools/call. En esta revisión,
+    ¿cómo lo pide?
+  options:
+    - id: b
+      text: Envía una petición JSON-RPC elicitation/create al cliente por el flujo SSE abierto
+    - id: c
+      text: Devuelve un error -32602 y espera a que el cliente vuelva con los argumentos completos
+    - id: d
+      text: Abre una conexión inversa hacia el cliente y le manda la petición por ahí
+    - id: a
+      text: Devuelve un resultado con resultType 'input_required' que contiene inputRequests; el
+        cliente recoge lo pedido y REINTENTA la petición original con inputResponses (y el
+        requestState si lo dieron), usando un id JSON-RPC distinto
+  correct: a
+  explanation: "Es el patrón MRTR (peticiones de varias idas y vueltas). Los servidores ya no
+    inician peticiones JSON-RPC: la necesidad de entrada se devuelve como resultado y el
+    cliente reintenta la llamada original añadiendo inputResponses. Dos detalles que se
+    escapan: el id JSON-RPC del reintento DEBE ser distinto del original, y si el servidor
+    devolvió requestState hay que reenviarlo (es cómo un servidor sin estado recupera el
+    contexto de la llamada a medias)."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-021
+  dimension: mcp-integraciones
+  subtopic: mrtr
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: ¿Por qué el modelo MRTR (devolver 'hace falta entrada' como resultado) encaja mejor
+    con un protocolo sin estado que el modelo anterior (el servidor emite una petición
+    JSON-RPC al cliente)?
+  options:
+    - id: b
+      text: Porque una petición del servidor al cliente exige un canal bidireccional vivo y
+        correlación con la llamada en curso, es decir, estado de conexión; con MRTR cada ida
+        y vuelta es una petición autocontenida y el servidor puede recuperar el contexto del
+        requestState que el cliente le devuelve
+    - id: d
+      text: Porque reduce el número de mensajes intercambiados
+    - id: a
+      text: Porque permite cifrar la petición de entrada extremo a extremo
+    - id: c
+      text: Porque evita que el usuario tenga que aprobar la operación
+  correct: b
+  explanation: "Que el servidor inicie peticiones obliga a mantener un canal abierto y a
+    recordar qué llamada quedó suspendida esperando respuesta: eso es exactamente el estado
+    de conexión que la revisión elimina. Con MRTR el servidor termina la petición
+    devolviendo lo que necesita, y el cliente vuelve con una petición nueva y completa que
+    trae el requestState. No son menos mensajes —suelen ser los mismos— ni tiene que ver con
+    el cifrado, y el usuario sigue aprobando igual."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-022
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: En el resultado de una herramienta MCP, ¿qué diferencia hay entre `content` y
+    `structuredContent`?
+  options:
+    - id: a
+      text: "`structuredContent` es la salida del modelo con esquema forzado; `content` es la
+        salida libre"
+    - id: c
+      text: "`content` es la salida no estructurada (texto, imagen, audio, enlaces o recursos
+        incrustados); `structuredContent` es un valor JSON que debe conformar el
+        outputSchema de la herramienta si lo declara"
+    - id: b
+      text: "`content` es para el usuario y `structuredContent` para los registros de auditoría"
+    - id: d
+      text: "Son alternativas excluyentes: usar las dos en el mismo resultado es un error"
+  correct: c
+  explanation: "Las dos son datos que produce el SERVIDOR, no generación del modelo:
+    structuredContent no tiene nada que ver con las 'salidas estructuradas' de un LLM. Y no
+    son excluyentes: por compatibilidad hacia atrás, una herramienta que devuelve contenido
+    estructurado debería incluir además el JSON serializado en un bloque de texto, para los
+    clientes que no lo lean."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-023
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Una herramienta MCP recibe una fecha de salida en el pasado. ¿Cómo se informa del
+    fallo y por qué?
+  options:
+    - id: b
+      text: Con un error JSON-RPC -32602, porque es un error de validación de parámetros
+    - id: c
+      text: Devolviendo un resultado vacío para que el modelo deduzca que algo falló
+    - id: a
+      text: Con un resultado normal e isError activado y un texto que explique el problema, porque
+        es un error de ejecución del que el modelo puede recuperarse solo reintentando con
+        otros argumentos
+    - id: d
+      text: Con un error JSON-RPC -32603, reservado para errores de lógica de negocio
+  correct: a
+  explanation: MCP separa dos vías. Los errores de PROTOCOLO (herramienta desconocida,
+    petición mal formada, fallo del servidor) van como error JSON-RPC y el modelo poco puede
+    hacer con ellos. Los errores de EJECUCIÓN —fallos de API, validación de entrada, reglas
+    de negocio— van en el resultado con isError, precisamente para que el modelo los lea y
+    se autocorrija. Un cliente debería pasarle al modelo los segundos; los primeros rara vez
+    llevan a una recuperación exitosa.
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-024
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: ¿Qué dice la especificación sobre las anotaciones (annotations) de una herramienta y
+    su fiabilidad?
+  options:
+    - id: d
+      text: Que el cliente puede confiar en ellas porque el servidor las firma criptográficamente
+    - id: a
+      text: Que son obligatorias y el cliente debe rechazar herramientas que no las declaren
+    - id: c
+      text: Que el cliente debe validarlas contra el outputSchema
+    - id: b
+      text: "Que el cliente DEBE considerarlas no fiables salvo que vengan de un servidor de
+        confianza: describen el comportamiento declarado, no verificado"
+  correct: b
+  explanation: "Las anotaciones son opcionales y AUTODECLARADAS por el servidor: describen el
+    comportamiento que el servidor dice tener. Un servidor malicioso puede anunciar que una
+    herramienta es inocua. Por eso la especificación las marca como no fiables salvo
+    confianza previa en el servidor, y la misma cautela vale para las descripciones. Nada de
+    esto se firma ni se valida contra el esquema de salida."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-025
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Una herramienta MCP no recibe ningún parámetro. ¿Cuál es el inputSchema correcto?
+  options:
+    - id: b
+      text: '{ "type": "object", "additionalProperties": false }'
+    - id: c
+      text: "null"
+    - id: a
+      text: Omitir el campo inputSchema
+    - id: d
+      text: '{ "type": "null" }'
+  correct: b
+  explanation: "inputSchema debe ser siempre un objeto JSON Schema válido, nunca nulo ni
+    ausente. Para una herramienta sin parámetros lo recomendado es {type: 'object',
+    additionalProperties: false}, que acepta solo el objeto vacío; {type: 'object'} a secas
+    también vale, pero acepta cualquier objeto. Si no hay campo $schema, el dialecto por
+    defecto es JSON Schema 2020-12."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-026
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu servidor devuelve las herramientas de tools/list en un orden distinto cada vez
+    (viene de un diccionario sin ordenar). Técnicamente el conjunto es el mismo. ¿Por qué
+    importa?
+  options:
+    - id: a
+      text: Porque el modelo elige siempre la primera herramienta de la lista
+    - id: d
+      text: Porque un orden no determinista rompe la caché del cliente y, al ir las herramientas
+        al principio del prompt del modelo, baja la tasa de acierto de la caché de prompts
+    - id: b
+      text: Porque el protocolo exige orden alfabético estricto
+    - id: c
+      text: Porque la paginación con cursor devuelve resultados duplicados si el orden cambia
+  correct: d
+  explanation: "La especificación recomienda orden determinista (el mismo mientras el conjunto
+    no cambie) por dos motivos que se refuerzan: el cliente puede cachear la lista con
+    fiabilidad, y como las herramientas se incorporan al contexto del modelo, un orden
+    estable mejora los aciertos de caché de prompt. No se exige orden alfabético, y el
+    modelo no elige por posición."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-027
+  dimension: mcp-integraciones
+  subtopic: herramientas
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: La especificación dice que el conjunto devuelto por tools/list no debe variar por
+    conexión ni como efecto secundario de otras peticiones. ¿Admite alguna variación?
+  options:
+    - id: b
+      text: "No: el conjunto es fijo para todo el ciclo de vida del servidor"
+    - id: a
+      text: "Sí: puede variar libremente siempre que se emita la notificación de lista cambiada"
+    - id: d
+      text: "Sí: puede variar según la autorización presentada en la petición (devolver solo lo
+        que permiten los permisos concedidos), porque las credenciales son entrada por
+        petición y no estado de conexión"
+    - id: c
+      text: "Sí: puede variar según la dirección IP del cliente"
+  correct: d
+  explanation: "La prohibición apunta al estado de conexión: el servidor no puede devolver
+    cosas distintas por el hecho de que sea otra conexión, ni acordarse de peticiones
+    anteriores. Variar según la autorización SÍ es legítimo, y encaja perfectamente con el
+    modelo sin estado, porque la credencial es entrada de esa petición. El conjunto también
+    puede cambiar con el tiempo (para eso está la notificación de lista cambiada), pero eso
+    no es lo mismo que variar por conexión."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-028
+  dimension: mcp-integraciones
+  subtopic: errores
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Sobre los códigos de error de MCP en el rango reservado de JSON-RPC (-32000 a -32099),
+    ¿qué es correcto?
+  options:
+    - id: a
+      text: Todo el rango está libre para que cada implementación defina los suyos
+    - id: b
+      text: El rango está reservado a la especificación entero; nadie más puede usarlo
+    - id: d
+      text: "MCP no usa ese rango: solo emplea los códigos estándar de JSON-RPC"
+    - id: c
+      text: De -32000 a -32019 es un tramo heredado donde no se deben asignar códigos nuevos, y de
+        -32020 a -32099 es un tramo reservado a la propia especificación en el que una
+        implementación no puede inventarse códigos
+  correct: c
+  explanation: "JSON-RPC reserva -32000..-32099 para errores de servidor, y MCP lo particiona:
+    el tramo bajo quedó ocupado por códigos que las implementaciones asignaron antes de que
+    existiera la política (no se asignan más y no hay que asumirles significado), y el tramo
+    alto lo define en exclusiva la especificación —ahí viven HeaderMismatch (-32020),
+    MissingRequiredClientCapability (-32021) y UnsupportedProtocolVersion (-32022)—. Los
+    códigos propios de una aplicación van fuera del rango reservado."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-029
+  dimension: mcp-integraciones
+  subtopic: errores
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu servidor necesita la capacidad de elicitation para completar un tools/call, pero el
+    cliente no la declaró en el `_meta` de la petición. ¿Qué debe hacer el servidor?
+  options:
+    - id: a
+      text: Devolver MissingRequiredClientCapability (-32021) con la lista de capacidades que
+        faltan en data.requiredCapabilities, y en HTTP con estado 400
+    - id: b
+      text: "Intentar la elicitation de todos modos: si el cliente no la soporta, la ignorará"
+    - id: c
+      text: Devolver un resultado con isError y explicar el problema en texto
+    - id: d
+      text: Cerrar la conexión para forzar al cliente a renegociar capacidades
+  correct: a
+  explanation: "La regla es que un servidor NO puede apoyarse en capacidades que el cliente no
+    declaró en esa petición. El error específico existe justo para esto: -32021, con la
+    lista de lo que falta, y 400 en HTTP. Intentarlo igual viola la regla; isError es para
+    errores de ejecución que el modelo puede corregir, no para una incompatibilidad de
+    capacidades; y cerrar la conexión no tiene sentido en un protocolo sin estado, donde no
+    hay nada que renegociar."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-030
+  dimension: mcp-integraciones
+  subtopic: versionado
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Un cliente moderno envía un POST a un endpoint MCP y recibe un 400. ¿Qué debe hacer
+    antes de concluir que el servidor es de una revisión antigua?
+  options:
+    - id: d
+      text: Reintentar directamente con el handshake 'initialize' de las revisiones anteriores
+    - id: b
+      text: "Mirar el cuerpo: los servidores modernos también responden 400 para versión no
+        soportada, capacidad faltante o fallo de validación de cabeceras. Si el cuerpo trae
+        un error JSON-RPC moderno reconocible, hay que corregir la petición o usar una
+        versión de las anunciadas, no retroceder"
+    - id: a
+      text: "Probar un GET al mismo endpoint: si responde, es antiguo"
+    - id: c
+      text: Asumir que el servidor está caído y aplicar retroceso exponencial
+  correct: b
+  explanation: "El 400 está sobrecargado a propósito, y por eso la detección de época se hace
+    por el cuerpo: si contiene un error JSON-RPC moderno reconocible (por ejemplo
+    UnsupportedProtocolVersion, que además lista las versiones soportadas), el servidor es
+    moderno y la respuesta correcta es reintentar bien. Solo si el cuerpo está vacío o no es
+    un error moderno reconocible tiene sentido caer al 'initialize' antiguo."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-031
+  dimension: mcp-integraciones
+  subtopic: extensiones
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: MCP define extensiones opcionales sobre el protocolo base (Tasks, Skills over MCP, MCP
+    Apps). ¿Cómo se activan?
+  options:
+    - id: a
+      text: Automáticamente si el servidor las implementa
+    - id: b
+      text: Con una cabecera HTTP específica por extensión, obligatoria en cada petición
+    - id: c
+      text: Son siempre voluntarias y requieren soporte explícito de cliente y servidor, negociado
+        mediante capacidades
+    - id: d
+      text: Publicando el servidor en un registro oficial de extensiones
+  correct: c
+  explanation: "Las extensiones son modulares y opt-in por diseño: hacen falta las dos partes
+    y se negocian por capacidades, igual que el resto. De ahí la regla sobre resultType: una
+    extensión puede añadir valores nuevos, pero solo cuentan los de extensiones
+    efectivamente anunciadas. La de Tasks cubre ejecución asíncrona de operaciones largas
+    con sondeo y asas duraderas."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-032
+  dimension: mcp-integraciones
+  subtopic: esquemas
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: JSON Schema 2020-12 permite que un $ref apunte a una URI absoluta. ¿Qué exige MCP al
+    respecto?
+  options:
+    - id: b
+      text: Que se resuelva siempre, cacheando el resultado
+    - id: c
+      text: Que se resuelva solo si el host coincide con el del servidor MCP
+    - id: d
+      text: "Nada: la resolución de $ref queda fuera del alcance de la especificación"
+    - id: a
+      text: Que las implementaciones NO desreferencien automáticamente $ref que resuelvan a una
+        URI de red; si se ofrece un modo que lo haga, debe venir desactivado por defecto y
+        con lista de hosts permitidos, tiempos de espera y límites de tamaño
+  correct: a
+  explanation: "Es una defensa contra falsificación de peticiones del lado servidor: un
+    esquema con $ref a http://169.254.169.254/... convertiría al validador en el ariete. La
+    regla es no desreferenciar en automático, y si se ofrece, opt-in con lista de permitidos
+    —o como mínimo rechazando direcciones de bucle local, enlace local y redes privadas—,
+    con tiempos de espera, límites de tamaño y registro de lo que se descarga. Un esquema
+    que no valide por un $ref externo sin resolver debe rechazarse, no tratarse como
+    permisivo."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-033
+  dimension: mcp-integraciones
+  subtopic: esquemas
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: ¿Por qué recomienda MCP acotar la profundidad y el número de subesquemas cuando se
+    validan esquemas con anyOf/oneOf/allOf/if-then-else y $defs?
+  options:
+    - id: c
+      text: Porque un esquema malicioso con composición muy anidada puede hacer que la validación
+        explote en coste y sirva de vector de denegación de servicio contra el validador
+    - id: d
+      text: Porque los validadores no soportan más de tres niveles de anidamiento
+    - id: a
+      text: Porque esas palabras clave no están soportadas en el dialecto 2020-12
+    - id: b
+      text: Porque el modelo no entiende esquemas compuestos
+  correct: c
+  explanation: "Las palabras de composición son expresivas pero pueden ser carísimas de
+    validar: un esquema construido a propósito puede tumbar el validador. Por eso se
+    recomienda poner límites razonables —profundidad máxima, tope de subesquemas, o un
+    presupuesto de tiempo por validación—. Están perfectamente soportadas en 2020-12; el
+    problema es de coste, no de compatibilidad."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-034
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: El 'paso de token' (token passthrough) está explícitamente prohibido en MCP. ¿En qué
+    consiste y cuál es la regla?
+  options:
+    - id: a
+      text: Consiste en enviar el token en la URL en vez de en la cabecera; la regla es usar
+        siempre cabecera
+    - id: b
+      text: Consiste en que el servidor acepte tokens que no fueron emitidos para él y los reenvíe
+        tal cual a la API de destino; la regla es que un servidor MCP NO debe aceptar ningún
+        token que no haya sido emitido explícitamente para él
+    - id: c
+      text: Consiste en guardar el token en el contexto del modelo; la regla es no persistirlo
+    - id: d
+      text: Consiste en usar el mismo token para varias sesiones; la regla es rotarlo por sesión
+  correct: b
+  explanation: "Tiene dos caras: fallar la validación de audiencia (aceptar tokens emitidos
+    para otro servicio) y, encima, reenviarlos sin modificar aguas abajo. El daño es que se
+    saltan controles que dependen de la audiencia (limitación de tasa, validación,
+    monitorización), se rompe el rastro de auditoría —los registros de destino ven una
+    identidad que no es la que llama— y un token robado convierte al servidor en un proxy de
+    exfiltración. La regla es tajante: no aceptar tokens que no se emitieran para este
+    servidor."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-035
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: experto
+  type: escenario
+  roles: *a2
+  stem: Un servidor MCP hace de proxy hacia una API de terceros con un client_id estático, y
+    deja que los clientes MCP se registren dinámicamente. ¿Cuál es el ataque y cuál la
+    mitigación clave?
+  options:
+    - id: a
+      text: "Repetición de token: se mitiga acortando la vida de los tokens"
+    - id: b
+      text: "Reenlace de DNS: se mitiga validando la cabecera Origin"
+    - id: d
+      text: "Diputado confundido: la cookie de consentimiento que el servidor de autorización dejó
+        en el navegador tras el primer flujo hace que se salte la pantalla de consentimiento
+        con un client_id recién registrado por el atacante y un redirect_uri suyo. La
+        mitigación es consentimiento POR CLIENTE en el propio proxy, comprobado ANTES de
+        reenviar al tercero"
+    - id: c
+      text: "Envenenamiento de esquema: se mitiga validando el inputSchema"
+  correct: d
+  explanation: "El fallo aparece cuando se juntan client_id estático hacia el tercero,
+    registro dinámico de clientes MCP y una cookie de consentimiento en el navegador: el
+    tercero ve su cookie, se salta el consentimiento, y el código de autorización acaba en
+    el redirect_uri del atacante. La defensa central es que el proxy mantenga su propio
+    registro de consentimiento por client_id y lo compruebe ANTES de redirigir al tercero,
+    junto con validación exacta de redirect_uri y un parámetro state de un solo uso guardado
+    solo DESPUÉS de aprobar el consentimiento."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-036
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tu cliente MCP descubre metadatos de OAuth siguiendo URLs que le da el servidor (la
+    del WWW-Authenticate, la de los servidores de autorización, los endpoints de token).
+    ¿Qué riesgo introduce y cómo se acota?
+  options:
+    - id: a
+      text: Fijación de sesión; se acota rotando el id de sesión tras autenticar
+    - id: b
+      text: Ataque de repetición; se acota firmando cada petición
+    - id: d
+      text: Inyección de prompt; se acota sanitizando el texto de las descripciones
+    - id: c
+      text: "Falsificación de peticiones del lado servidor: un servidor malicioso apunta a redes
+        internas o al endpoint de metadatos de la nube. Se acota exigiendo HTTPS, bloqueando
+        rangos privados y de enlace local, validando también los destinos de redirección y
+        usando un proxy de salida"
+  correct: c
+  explanation: "El cliente actúa como ariete contra la red interna: URLs como
+    http://169.254.169.254/ pueden sacar credenciales de instancia, y localhost llega a
+    servicios que no están expuestos. Las mitigaciones son exigir HTTPS (salvo bucle local
+    en desarrollo), bloquear rangos privados y de enlace local, aplicar la misma validación
+    a cada salto de redirección y, en despliegues de servidor, enrutar por un proxy de
+    salida. Ojo con validar IPs a mano: los trucos de codificación (octal, hexadecimal, IPv6
+    mapeada) se cuelan, y hay una ventana entre comprobación y uso por resolución DNS."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-037
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Un cliente MCP ofrece configurar servidores locales con un clic. ¿Qué exige la
+    especificación antes de ejecutar el comando?
+  options:
+    - id: a
+      text: Un consentimiento explícito que muestre el comando EXACTO sin truncar, lo identifique
+        como operación potencialmente peligrosa y permita cancelar
+    - id: b
+      text: Verificar la firma del paquete en un registro oficial de servidores
+    - id: c
+      text: Ejecutar el comando en modo simulación primero y mostrar lo que haría
+    - id: d
+      text: "Nada especial: es el mismo caso que instalar cualquier dependencia"
+  correct: a
+  explanation: Un servidor local es un binario que se ejecuta con los privilegios del cliente,
+    y el comando de arranque puede llevar cualquier cosa oculta. La exigencia mínima es
+    enseñar el comando completo sin truncar, marcarlo como peligroso, pedir aprobación
+    explícita y permitir cancelar. Por encima de eso se recomienda resaltar patrones
+    peligrosos, avisar de accesos a rutas sensibles y ejecutar en un entorno aislado con
+    privilegios mínimos.
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-038
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Sobre el diseño de ámbitos (scopes) en un servidor MCP, ¿cuál es la práctica recomendada?
+  options:
+    - id: b
+      text: Publicar un único ámbito amplio para simplificar el consentimiento del usuario
+    - id: d
+      text: "Un modelo progresivo de privilegio mínimo: empezar con un conjunto pequeño de
+        operaciones de bajo riesgo y elevar de forma dirigida con desafíos WWW-Authenticate
+        cuando se intente por primera vez una operación privilegiada"
+    - id: a
+      text: Solicitar todos los ámbitos por adelantado para evitar interrupciones a mitad de tarea
+    - id: c
+      text: Usar ámbitos comodín para no tener que versionarlos
+  correct: d
+  explanation: Un token con ámbitos amplios agranda el radio de explosión si se filtra, hace
+    la revocación traumática (revocarlo rompe todos los flujos) y ensucia la auditoría,
+    porque un ámbito omnibús oculta la intención por operación. Lo recomendado es empezar
+    mínimo y elevar de forma incremental con desafíos precisos, aceptando además tokens con
+    ámbitos reducidos. Los comodines y los ámbitos únicos y enormes son justo los errores
+    que la especificación enumera.
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-039
+  dimension: mcp-integraciones
+  subtopic: seguridad-protocolo
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: ¿Qué esquemas de URL debe aceptar un cliente MCP como URL de autorización, y cómo debe
+    abrirlas?
+  options:
+    - id: a
+      text: Cualquier esquema, delegando la decisión en el navegador del sistema
+    - id: b
+      text: Solo https://, y abrirlas con el comando del sistema operativo para abrir URLs
+    - id: c
+      text: "Solo http:// (y únicamente para bucle local en desarrollo) y https://, rechazando
+        javascript:, data:, file: y similares; y abrirlas sin pasar por una shell"
+    - id: d
+      text: Los que declare el servidor en sus metadatos, ya que es quien conoce su flujo
+  correct: c
+  explanation: "Son dos reglas distintas y las dos hacen falta. La validación de esquema con
+    lista de permitidos evita que una URL javascript: acabe en window.open y ejecute código
+    en el contexto del cliente. Y abrir la URL sin shell evita que los caracteres especiales
+    de la URL los interprete el intérprete de comandos como comandos adicionales. Https solo
+    es correcto en producción, pero el bucle local en http se admite en desarrollo."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-040
+  dimension: mcp-integraciones
+  subtopic: integracion-modelos
+  difficulty: medium
+  type: codigo
+  roles: *a1
+  stem: >-
+    Este intento de conectar un servidor MCP desde la API de mensajes de Anthropic se
+    rechaza por validación. ¿Qué falta?
+
+        client.beta.messages.create(
+            model=MODEL, max_tokens=1024,
+            betas=["mcp-client-2025-11-20"],
+            mcp_servers=[{"type": "url", "url": "https://ejemplo/mcp", "name": "ejemplo"}],
+            messages=[...],
+        )
+  options:
+    - id: b
+      text: Falta el authorization_token en la definición del servidor
+    - id: a
+      text: 'Falta declarar el transporte: hay que añadir "transport": "streamable_http"'
+    - id: c
+      text: El nombre del servidor debe coincidir con el host de la URL
+    - id: d
+      text: 'Falta la entrada correspondiente en tools: cada servidor de mcp_servers debe estar
+        referenciado por un tools=[{"type": "mcp_toolset", "mcp_server_name": "ejemplo"}]'
+  correct: d
+  explanation: "El conector de MCP tiene dos mitades obligatorias: mcp_servers declara la
+    conexión y tools declara el conjunto de herramientas que la referencia por nombre.
+    Declarar un servidor sin su mcp_toolset es un error de validación, y el mcp_server_name
+    debe coincidir con el name del servidor. El token de autorización es opcional y no tiene
+    por qué relacionarse con el host."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mcp-041
+  dimension: mcp-integraciones
+  subtopic: integracion-modelos
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: En agentes gestionados, la definición del agente declara los servidores MCP con {type,
+    name, url} y ningún campo de autenticación. ¿Dónde viven las credenciales y por qué ahí?
+  options:
+    - id: a
+      text: En un almacén de credenciales (vault) que se adjunta a la sesión; así los secretos no
+        quedan dentro de una definición de agente reutilizable y versionada, y se inyectan
+        en la petición saliente sin entrar nunca en el contenedor
+    - id: b
+      text: En variables de entorno del contenedor, leídas por el agente al arrancar
+    - id: c
+      text: En el prompt de sistema del agente, que es el único sitio que persiste entre sesiones
+    - id: d
+      text: En el propio servidor MCP, que autentica por dirección IP de origen
+  correct: a
+  explanation: "La separación es deliberada: el agente es una configuración reutilizable y
+    versionada, así que meterle secretos dentro sería propagarlos a cada sesión y cada
+    versión. Las credenciales van en un vault que se adjunta por sesión, y la inyección la
+    hace un proxy del lado de Anthropic DESPUÉS de que la petición salga del contenedor: el
+    código que corre dentro —incluido el que escriba el propio agente— no puede leerlas ni
+    exfiltrarlas."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mcp-042
+  dimension: mcp-integraciones
+  subtopic: integracion-modelos
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Guardas el token de integración nativo de un SaaS (por ejemplo, un token de su API
+    REST) como credencial para su servidor MCP alojado, y la autenticación falla. ¿Por qué?
+  options:
+    - id: c
+      text: Porque el token hay que codificarlo en base64 antes de guardarlo
+    - id: b
+      text: Porque los servidores MCP alojados suelen esperar tokens OAuth de portador, que son un
+        sistema de autenticación distinto del de la API REST nativa del servicio
+    - id: a
+      text: Porque las credenciales solo se pueden adjuntar al crear la sesión, no después
+    - id: d
+      text: Porque el emparejamiento credencial-servidor se hace por nombre y no por URL
+  correct: b
+  explanation: "Es una confusión muy común: el token de integración que autentica contra la
+    API REST de un producto no vale como credencial de su servidor MCP alojado, que
+    normalmente exige OAuth. Son sistemas de autenticación distintos aunque sea el mismo
+    proveedor. El emparejamiento credencial-servidor sí se hace por URL (normalizada:
+    minúsculas en esquema y host, sin puerto por defecto ni barra final), y una credencial
+    inválida no impide crear la sesión: aparece como error de autenticación durante la
+    ejecución."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mcp-043
+  dimension: mcp-integraciones
+  subtopic: operacion
+  difficulty: medium
+  type: escenario
+  roles: *a2
+  stem: Un agente en un entorno con red restringida tiene servidores MCP configurados, pero
+    sus herramientas fallan en silencio. ¿Cuál es la causa más probable?
+  options:
+    - id: b
+      text: El agente no declaró la capacidad de sampling
+    - id: d
+      text: La versión de protocolo del servidor es distinta de la del cliente
+    - id: a
+      text: La política de red del entorno es de denegación por defecto y no se permitió el acceso
+        a los servidores MCP ni se listaron sus dominios entre los hosts permitidos
+    - id: c
+      text: Los esquemas de entrada de las herramientas no declaran additionalProperties
+  correct: a
+  explanation: "Con red limitada hay que abrir el paso explícitamente: o activando el permiso
+    para servidores MCP, o listando cada dominio entre los hosts permitidos. Si no, el
+    contenedor no los alcanza y el fallo es silencioso, que es lo que lo hace difícil de
+    diagnosticar. Ojo además a que son dos capas independientes: que una credencial tenga
+    permitido un host no significa que el entorno permita llegar a él."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mcp-044
+  dimension: mcp-integraciones
+  subtopic: operacion
+  difficulty: medium
+  type: concepto
+  roles: *a2
+  stem: Un cliente agrega herramientas de varios servidores MCP y dos de ellos exponen una
+    herramienta llamada 'search'. ¿Qué recomienda la especificación?
+  options:
+    - id: d
+      text: "Rechazar la conexión del segundo servidor: los nombres deben ser únicos globalmente"
+    - id: a
+      text: Usar el nombre que declara el servidor en serverInfo como prefijo, que sí es único
+    - id: c
+      text: Presentar las dos al modelo y dejar que elija por el orden de la lista
+    - id: b
+      text: Implementar una estrategia de desambiguación, por ejemplo prefijando con un
+        identificador de servidor; y no usar el nombre declarado por el servidor para ello,
+        porque no está garantizado que sea único
+  correct: b
+  explanation: "La unicidad de nombres de herramienta está acotada a un solo servidor, así que
+    las colisiones al agregar son esperables y hay que desambiguar. El matiz que se escapa
+    es que el nombre de serverInfo lo autodeclara el servidor, no está garantizado como
+    único y no debe usarse para esto: el identificador tiene que ponerlo el cliente. Dejar
+    dos herramientas homónimas ante el modelo es una receta para llamadas a la equivocada."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-045
+  dimension: mcp-integraciones
+  subtopic: meta
+  difficulty: hard
+  type: concepto
+  roles: *a2
+  stem: Sobre los campos clientInfo y serverInfo que viajan en `_meta`, ¿qué precaución señala
+    la especificación?
+  options:
+    - id: c
+      text: "Que son autodeclarados y el protocolo no los verifica: sirven para mostrar, registrar
+        y depurar, y no se deben usar para cambiar el comportamiento ni para decisiones de
+        seguridad"
+    - id: a
+      text: Que son obligatorios y su ausencia invalida la petición
+    - id: b
+      text: Que deben coincidir con el nombre del paquete publicado del SDK
+    - id: d
+      text: Que solo se envían en la primera petición de cada conexión
+  correct: c
+  explanation: "Los declara quien los envía y nadie los comprueba: son etiquetas para
+    interfaz, trazas y depuración. Basar en ellos una decisión de seguridad —o incluso una
+    bifurcación de comportamiento— es confiar en una cadena que el otro extremo elige a
+    voluntad. Nótese además la asimetría de obligatoriedad: protocolVersion y
+    clientCapabilities SÍ son obligatorios en cada petición; clientInfo es opcional (aunque
+    se recomienda enviarlo)."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-046
+  dimension: mcp-integraciones
+  subtopic: meta
+  difficulty: experto
+  type: concepto
+  roles: *a2
+  stem: Las claves de `_meta` llevan un prefijo opcional en notación DNS inversa, y MCP
+    reserva algunos. ¿Cuál de estos prefijos NO está reservado?
+  options:
+    - id: b
+      text: dev.mcp/
+    - id: a
+      text: com.example.mcp/
+    - id: d
+      text: io.modelcontextprotocol/
+    - id: c
+      text: com.mcp.tools/
+  correct: a
+  explanation: "La regla es que se reserva cualquier prefijo cuya SEGUNDA etiqueta sea
+    'modelcontextprotocol' o 'mcp'. En io.modelcontextprotocol/, dev.mcp/ y com.mcp.tools/
+    la segunda etiqueta encaja, así que están reservados. En com.example.mcp/ la segunda
+    etiqueta es 'example', así que es un prefijo de tercero perfectamente válido. Hay una
+    excepción aparte a la propia regla de prefijos: traceparent, tracestate y baggage,
+    reservadas para propagación de contexto de trazas de OpenTelemetry."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-047
+  dimension: mcp-integraciones
+  subtopic: operacion
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Una herramienta MCP devuelve un volcado de 300.000 caracteres. En un agente
+    gestionado, ¿qué ocurre y qué implica para el diseño?
+  options:
+    - id: a
+      text: La llamada falla con un error de tamaño y hay que paginar la herramienta
+    - id: b
+      text: El contenido se resume automáticamente con un modelo más pequeño
+    - id: d
+      text: La salida se descarga a un fichero del sandbox por encima del umbral (unos 100.000
+        caracteres); el agente recibe una vista previa truncada y la ruta, y puede leer el
+        resto si lo necesita
+    - id: c
+      text: Se inserta entero en el contexto y dispara la compactación
+  correct: d
+  explanation: "Por encima del umbral la salida se vuelca a un fichero y el agente recibe una
+    vista previa más la ruta, sin configuración por medio. Lo importante para el diseño es
+    que el mecanismo es una red de seguridad, no una estrategia: seguir devolviendo volcados
+    enormes convierte cada consulta en un paseo por el sistema de ficheros. Mejor que la
+    herramienta filtre, pagine o devuelva contenido estructurado."
+  source: externa:anthropic-docs
+  date: 2026-08-10
+- id: mcp-048
+  dimension: mcp-integraciones
+  subtopic: diagramas
+  difficulty: medium
+  type: diagrama
+  roles: *a2
+  stem: >-
+    Este es el flujo de una llamada que necesita un dato del usuario en la revisión
+    2026-07-28:
+
+        Cliente                                  Servidor
+          │  POST tools/call (id: 1)                │
+          ├────────────────────────────────────────►│
+          │                                         │ necesita entrada
+          │  resultType: input_required             │
+          │◄────────────────────────────────────────┤
+          │  (recoge el dato del usuario)           │
+          │  POST tools/call (id: ?) + inputResponses
+          ├────────────────────────────────────────►│
+          │  resultado final                        │
+          │◄────────────────────────────────────────┤
+
+    ¿Qué debe valer el id de la segunda petición?
+  options:
+    - id: c
+      text: "1, el mismo: es la continuación de la misma petición lógica"
+    - id: a
+      text: "Debe omitirse: al llevar inputResponses se trata como notificación"
+    - id: d
+      text: El valor que el servidor haya devuelto en requestState
+    - id: b
+      text: "Un id distinto del original (por ejemplo 2): son dos peticiones JSON-RPC distintas"
+  correct: b
+  explanation: "El reintento es una petición JSON-RPC nueva y su id DEBE ser distinto del de
+    la original: reutilizar el id viola la regla de que un id no puede repetirse mientras
+    haya una petición sin respuesta, y aquí la primera ya se respondió. Lo que sí se reenvía
+    tal cual es el requestState que dio el servidor, que es otra cosa: el contexto opaco con
+    el que un servidor sin estado retoma la llamada. Y no puede ser una notificación, porque
+    se espera respuesta."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-049
+  dimension: mcp-integraciones
+  subtopic: transportes
+  difficulty: medium
+  type: concepto
+  roles: *a1
+  stem: Al abrir un flujo SSE, la especificación recomienda enviar la cabecera
+    X-Accel-Buffering con valor 'no'. ¿Para qué?
+  options:
+    - id: c
+      text: "Para indicar a los proxys inversos que no acumulen la respuesta: sin ella pueden
+        retener los eventos en un búfer y romper la naturaleza en tiempo real del flujo"
+    - id: a
+      text: Para desactivar el búfer de escritura del propio servidor
+    - id: b
+      text: Para que el cliente no cachee los eventos ya recibidos
+    - id: d
+      text: Para permitir la reanudación del flujo tras una desconexión
+  correct: c
+  explanation: "Es una instrucción para los intermediarios: un proxy inverso puede acumular la
+    respuesta antes de reenviarla, con lo que los eventos llegan a ráfagas o no llegan.
+    Junto a esto, en flujos de larga duración se recomienda emitir periódicamente una línea
+    de comentario SSE (una línea que empieza por dos puntos) como latido, para que la
+    conexión no la cierre un intermediario o el tiempo de inactividad del cliente. La
+    reanudación no existe en esta revisión."
+  source: externa:mcp-spec-2026-07-28
+  date: 2026-08-10
+- id: mcp-050
+  dimension: mcp-integraciones
+  subtopic: criterio
+  difficulty: hard
+  type: escenario
+  roles: *a2
+  stem: Tienes que conectar un agente interno a un sistema propio. ¿Cuándo compensa exponerlo
+    como servidor MCP en vez de como herramientas nativas del harness?
+  options:
+    - id: b
+      text: "Siempre: MCP es la forma canónica de dar herramientas a un agente"
+    - id: a
+      text: "Cuando la integración se va a reutilizar desde varios clientes o harnesses, o la
+        mantiene otro equipo: MCP paga su coste con la interoperabilidad. Para una capacidad
+        de un único agente, una herramienta nativa es más simple de construir, autorizar y
+        depurar"
+    - id: c
+      text: "Nunca en sistemas internos: MCP está pensado para integraciones con terceros"
+    - id: d
+      text: Cuando el sistema necesite devolver más de 100.000 caracteres por llamada
+  correct: a
+  explanation: "MCP resuelve el problema N×M: N clientes contra M sistemas sin escribir N×M
+    integraciones. Ese beneficio aparece cuando hay varios consumidores o una frontera de
+    equipo, y ahí compensa el coste (un servicio más que desplegar, autenticar, versionar y
+    monitorizar). Para una capacidad que solo usa un agente y mantiene el mismo equipo, una
+    herramienta nativa es menos piezas móviles. La decisión es de límites organizativos y de
+    reutilización, no de tamaño de respuesta."
+  source: jd-codeway
+  date: 2026-08-10
