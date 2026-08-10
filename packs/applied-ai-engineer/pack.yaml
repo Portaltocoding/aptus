@@ -8,8 +8,8 @@
 #
 # No solapa con el pack ai-ml-readiness: allí se mide LLM/RAG/ML clásico y system design
 # de producto; aquí se mide el oficio agéntico — harness, loop, MCP, evals, safety.
-name: "applied-ai-engineer"
-version: "0.1.0"
+name: "Applied AI Engineer (Codeway/Wishlabs)"
+version: "1.0.0"
 dimensions:
   - agentes-harnesses
   - mcp-integraciones
