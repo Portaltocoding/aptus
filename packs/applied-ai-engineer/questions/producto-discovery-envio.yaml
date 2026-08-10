@@ -23,12 +23,16 @@
       text: "Que no se trabaja solo desde tickets definidos: hay que explorar áreas de producto y
         negocio, detectar dónde la IA cambiaría el resultado y proponer capacidades que
         todavía no están especificadas"
+      rationale: "Cambia de dónde sale el trabajo: no llega escrito por nadie, hay que ir a buscarlo y defenderlo."
     - id: a
       text: Que hay que investigar papers y modelos nuevos y presentarlos al equipo
+      rationale: "Seguir la literatura y los modelos nuevos, y traer al equipo lo que vaya saliendo."
     - id: c
       text: Que hay que hacer entrevistas de usuario antes de cada implementación
+      rationale: "Hablar con usuarios antes de construir, para no implementar lo que nadie ha pedido."
     - id: d
       text: Que hay que descubrir errores en producción antes de que los reporten los usuarios
+      rationale: "Encontrar los fallos en producción antes de que lleguen las quejas de los usuarios."
   correct: b
   explanation: "Discovery aquí es identificar la oportunidad, no solo ejecutarla: mirar un
     área del negocio, entender dónde está el trabajo caro o imposible hoy, y proponer qué
@@ -47,14 +51,18 @@
   options:
     - id: c
       text: Listando las capacidades de los modelos actuales y buscando dónde encajan
+      rationale: "Partiendo de lo que los modelos saben hacer hoy y buscando dónde encaja en el área."
     - id: a
       text: "Entendiendo dónde se va el tiempo y dónde están los cuellos de botella hoy: qué
         trabajo es repetitivo, cuál se hace mal por falta de capacidad, qué no se hace
         porque no compensa a mano"
+      rationale: "Empieza por el problema y no por la tecnología: lo demás lleva a soluciones buscando un sitio donde encajar."
     - id: b
       text: Preguntando a los responsables qué les gustaría automatizar
+      rationale: "Preguntando a los responsables qué automatizarían: nadie conoce mejor su propio trabajo."
     - id: d
       text: Analizando qué está haciendo la competencia con IA en ese área
+      rationale: "Mirando qué ha lanzado la competencia, que marca lo que el mercado ya espera."
   correct: a
   explanation: "Empezar por las capacidades produce soluciones buscando problema; empezar por
     el trabajo real encuentra dónde hay valor. La tercera categoría es la más interesante y
@@ -78,14 +86,18 @@
   options:
     - id: d
       text: Escribir un documento de propuesta detallado y llevarlo a comité
+      rationale: "Un documento bien argumentado llevado al comité es como se aprueban las cosas."
     - id: a
       text: Buscar primero un responsable de producto que la haga suya
+      rationale: "Con un responsable de producto detrás, la idea entra en la hoja de ruta y avanza sola."
     - id: c
       text: "Construir el prototipo más pequeño que demuestre que funciona sobre datos reales, y
         enseñarlo: en capacidades nuevas, una demo desplaza una discusión que una
         especificación no desbloquea"
+      rationale: "En capacidades nuevas nadie sabe si funciona hasta verlo: una demo cierra la discusión que un documento abre."
     - id: b
       text: Esperar a que aparezca en la hoja de ruta para no trabajar en balde
+      rationale: "Esperar a que entre en la hoja de ruta evita trabajar en algo que quizá nadie quiera."
   correct: c
   explanation: "El problema de una capacidad nueva es que nadie sabe si funciona ni cómo se
     siente usarla, y un documento no resuelve ninguna de las dos cosas: la discusión se
@@ -106,14 +118,18 @@
   options:
     - id: b
       text: Elegir la lectura más ambiciosa y entregarla
+      rationale: "Tirar por la lectura más ambiciosa cubre también la pequeña si al final era esa."
     - id: c
       text: Implementar las dos y dejar que elijan al verlas
+      rationale: "Construyendo las dos, la decisión se toma viendo el resultado y no imaginándolo."
     - id: d
       text: Elegir la más simple y ampliar después si hace falta
+      rationale: "Empezar por lo simple y ampliar después es lo que menos trabajo tira si te equivocas."
     - id: a
       text: "Preguntar, porque es de los pocos casos en que la ambigüedad sí bloquea: cuando las
         dos lecturas producen entregables distintos, elegir a ciegas es tirar la mitad del
         trabajo"
+      rationale: "El criterio es cuánto cuesta equivocarse: si las dos lecturas convergen, se elige; si divergen, se pregunta."
   correct: a
   explanation: "La regla útil es que la mayoría de la ambigüedad se resuelve con criterio
     propio y una nota de la suposición hecha, pero hay una excepción: cuando las lecturas
@@ -134,12 +150,16 @@
     - id: d
       text: Qué acciones concretas puede tomar y cuáles no, qué pasa cuando no está seguro, cómo
         sabremos que va bien, y qué error sería inaceptable
+      rationale: "Las cuatro apuntan a lo mismo: qué puede tocar, qué hace si duda, cómo se mide y qué no puede pasar."
     - id: b
       text: Qué modelo prefiere, qué presupuesto hay y para cuándo lo necesita
+      rationale: "Son decisiones que vienen después y que dependen justo de lo que aún no se ha definido."
     - id: a
       text: Cuántos tickets al día y de qué categorías
+      rationale: "Dimensiona el sistema, pero no dice qué tiene que hacer ni cuándo estaría bien hecho."
     - id: c
       text: Si prefiere una interfaz de chat o una integración en la herramienta actual
+      rationale: "Si lo quiere como chat o integrado en la herramienta que ya usan."
   correct: d
   explanation: "Esas cuatro preguntas fijan lo que de verdad determina el diseño: el alcance
     de acciones (que es el radio de daño), el comportamiento ante la incertidumbre
@@ -158,14 +178,18 @@
   options:
     - id: b
       text: Que el volumen sea bajo
+      rationale: "Con poco volumen, el trabajo de construirlo no se amortiza nunca."
     - id: c
       text: "Que los pasos estén completamente especificados de antemano y la salida esté
         determinada por la entrada: eso es un flujo con lógica en código, y el modelo solo
         hace falta donde hay criterio"
+      rationale: "La pregunta que lo revela: dada la entrada, ¿hay más de una salida defendible? Si no la hay, sobra el modelo."
     - id: a
       text: Que los usuarios prefieran hacerlo a mano
+      rationale: "Si los usuarios prefieren hacerlo a mano, automatizarlo va a chocar con quien lo usa."
     - id: d
       text: Que no exista todavía un conjunto de evaluación
+      rationale: "Sin conjunto de evaluación no hay forma de saber si el agente lo está haciendo bien."
   correct: c
   explanation: Un agente aporta cuando la tarea es de varios pasos y difícil de especificar
     por completo; si los pasos son fijos y deterministas, un flujo normal es más barato, más
@@ -184,13 +208,17 @@
   options:
     - id: a
       text: Datos disponibles, presupuesto, plazo y patrocinador
+      rationale: "Datos disponibles, presupuesto, plazo y quién lo patrocina: sin eso no arranca nada."
     - id: c
       text: Modelo, herramientas, evaluación e infraestructura
+      rationale: "Modelo, herramientas, evaluación e infraestructura: las cuatro piezas que hay que tener."
     - id: b
       text: Complejidad (tarea multi-paso mal especificable), valor (compensa coste y latencia),
         viabilidad (el modelo es capaz) y coste del error (se puede detectar y revertir)
+      rationale: "Las cuatro se pueden responder antes de escribir una línea, y cualquiera de ellas en rojo cancela el resto."
     - id: d
       text: Volumen, frecuencia, criticidad y número de usuarios
+      rationale: "Sirve para dimensionar la infraestructura, no para decidir si el enfoque tiene sentido."
   correct: b
   explanation: "Es una lista de descarte, no de planificación: si falla cualquiera de las
     cuatro, la respuesta correcta es quedarse en un escalón más simple —una llamada única o
@@ -210,14 +238,18 @@
   options:
     - id: c
       text: Que la interfaz es agradable y el flujo se entiende
+      rationale: "Que la interfaz se entiende y el flujo encaja: es lo que decide si se va a usar."
     - id: b
       text: Que el coste por operación está dentro de lo aceptable
+      rationale: "Que el coste por operación cabe en el presupuesto, que es lo que suele tumbar la idea."
     - id: d
       text: Que la arquitectura escala al volumen previsto
+      rationale: "Que la arquitectura aguanta el volumen previsto sin rehacerse entera."
     - id: a
       text: "Que el modelo resuelve la parte difícil sobre datos reales y feos, no sobre ejemplos
         escogidos: si la duda era la viabilidad, un prototipo que solo enseña la interfaz no
         ha reducido ninguna incertidumbre"
+      rationale: "Un prototipo existe para eliminar la duda más cara: si esa duda era si el modelo puede, lo demás no reduce nada."
   correct: a
   explanation: "Un prototipo se juzga por cuánta incertidumbre elimina, y en capacidades con
     IA la incertidumbre grande casi siempre está en si el modelo hace la parte difícil con
@@ -238,12 +270,16 @@
     - id: d
       text: "Qué pasa en el 30% restante: si el fallo es visible y barato de corregir para el
         usuario, el 70% puede sobrar; si es silencioso o caro, ni el 95% basta"
+      rationale: "El número solo no dice nada: lo que decide es la forma del fallo, no su frecuencia."
     - id: b
       text: Si el 70% supera el umbral estándar del sector para ese tipo de tarea
+      rationale: "No hay tal referencia: el mismo porcentaje sobra en un sitio y es inaceptable en otro."
     - id: a
       text: Si el 70% mejora lo que hace hoy el proceso manual
+      rationale: "Si mejora lo que hoy se consigue a mano, que es la referencia con la que se compara."
     - id: c
       text: Si se puede llegar al 90% con más trabajo de prompt
+      rationale: "Si con más trabajo de prompt se llega al 90%, que es donde deja de molestar."
   correct: d
   explanation: "El número solo no decide: decide la forma del fallo. Un borrador que el
     usuario revisa y corrige puede ser utilísimo al 70%, porque el error se ve y cuesta
@@ -263,14 +299,18 @@
   options:
     - id: b
       text: Añadir un aviso legal indicando que el resultado puede contener errores
+      rationale: "Un aviso de que puede contener errores traslada al usuario la responsabilidad de revisar."
     - id: a
       text: Pasar de acción automática a propuesta que el usuario acepta; acotar el alcance a los
         casos donde acierta casi siempre y derivar el resto; o pedir que el sistema se
         abstenga cuando no está seguro en vez de responder igual
+      rationale: "Las tres cambian el reparto de trabajo entre modelo y persona, en vez de esperar a que el modelo mejore."
     - id: c
       text: Mostrar la confianza del modelo junto a cada resultado
+      rationale: "Enseñando la confianza junto al resultado, el usuario sabe de cuáles fiarse."
     - id: d
       text: Registrar los fallos para corregirlos manualmente después
+      rationale: "Registrando los fallos se pueden corregir después y el sistema mejora con el uso."
   correct: a
   explanation: Las tres palancas de producto ante una precisión insuficiente son cambiar quién
     decide (propuesta en vez de acción), estrechar el dominio (automatizar lo fácil, derivar
@@ -290,14 +330,18 @@
   options:
     - id: c
       text: Porque reduce el consumo de tokens en los casos difíciles
+      rationale: "Callarse en los casos difíciles ahorra los tokens de una respuesta que no vale."
     - id: a
       text: Porque los usuarios prefieren sistemas prudentes
+      rationale: "Un sistema prudente genera mejor impresión que uno que se moja siempre."
     - id: b
       text: "Porque preserva la confianza: un sistema que a veces se inventa cosas obliga a
         verificarlo todo, y entonces deja de ahorrar trabajo aunque acierte la mayoría de
         las veces"
+      rationale: "El cálculo es el del ahorro: si hay que revisarlo todo, da igual cuántas veces acierte."
     - id: d
       text: Porque evita responsabilidad legal sobre las respuestas
+      rationale: "No afirmar nada dudoso reduce la exposición legal por lo que el sistema responde."
   correct: b
   explanation: "El argumento es económico, no de estilo: el valor de un asistente es que
     puedas fiarte sin comprobar. Si de vez en cuando inventa y no se distingue, hay que
@@ -317,13 +361,17 @@
   options:
     - id: d
       text: "Construirla igual: es su decisión y hay que respetarla"
+      rationale: "Construirlo igual: la decisión es suya y quien pide asume el resultado."
     - id: a
       text: Explicar que no es viable con la tecnología actual y cerrar la conversación
+      rationale: "Decir que no es viable con la tecnología de hoy y no gastar tiempo en ello."
     - id: b
       text: Construir una versión reducida sin decir que se ha recortado el alcance
+      rationale: "Entregar una versión reducida que sí funcione, sin entrar en discusiones de alcance."
     - id: c
       text: Explicar en qué falla concretamente, enseñarlo con ejemplos reales si se puede, y
         proponer la variante más cercana que sí funciona bien
+      rationale: "Enseñar el fallo con sus datos evita la discusión de opiniones y deja algo sobre la mesa que sí se puede hacer."
   correct: c
   explanation: "Un 'no es viable' sin más deja al interlocutor sin salida y sin entender por
     qué; construirlo a sabiendas quema el crédito del equipo cuando falla; y recortar en
@@ -345,12 +393,16 @@
     - id: b
       text: Valor si funciona por probabilidad de que funcione, dividido entre el esfuerzo, y a
         igualdad de eso, primero la que enseñe más rápido si la apuesta era buena
+      rationale: "Ordena por lo que se aprende y no por lo que apetece: primero lo que resuelve antes la duda más cara."
     - id: a
       text: La que pida el interlocutor de más peso
+      rationale: "La que pida quien más peso tiene: es lo que garantiza apoyo para lo que venga después."
     - id: c
       text: La técnicamente más interesante, porque atraerá talento y aprendizaje
+      rationale: "Optimiza el aprendizaje del equipo, que no es lo que hay que priorizar con tiempo para una."
     - id: d
       text: La más barata de construir, para acumular victorias rápidas
+      rationale: "La más barata, para acumular victorias rápidas y ganar margen de confianza."
   correct: b
   explanation: "Es valor esperado sobre esfuerzo, con un desempate importante: en territorio
     incierto, la velocidad a la que aprendes vale casi tanto como el resultado, porque una
@@ -370,14 +422,18 @@
   options:
     - id: a
       text: Que no necesitan evaluación porque los usuarios son compañeros
+      rationale: "Al ser compañeros los que las usan, no hace falta montar evaluación formal."
     - id: d
       text: Que el bucle de realimentación es corto y directo, el coste de un fallo es mucho menor
         que de cara al cliente, y se puede iterar rápido con usuarios que saben explicar qué
         falló
+      rationale: "Es el sitio donde equivocarse es barato y donde quien lo sufre te lo puede explicar en persona."
     - id: b
       text: Que no requieren cumplir requisitos de seguridad ni privacidad
+      rationale: "Al quedarse dentro, no hay que pasar por los requisitos de seguridad y privacidad."
     - id: c
       text: Que se pueden construir sin diseño de interfaz
+      rationale: "Aunque fuera cierto, no es lo que decide: lo que las hace buen primer terreno es el riesgo, no el diseño."
   correct: d
   explanation: "El valor está en el ciclo: usuarios accesibles que dan realimentación
     específica, fallos que no queman la marca, y libertad para cambiar deprisa. Eso las
@@ -403,14 +459,18 @@
   options:
     - id: a
       text: Ninguna en tiempo de compilación; unknown solo documenta la intención
+      rationale: "En compilación las dos dejan pasar lo mismo: la segunda solo documenta la intención."
     - id: b
       text: unknown lanza una excepción si el tipo no coincide en tiempo de ejecución
+      rationale: "La segunda comprueba el tipo al ejecutar y lanza si no coincide con lo esperado."
     - id: c
       text: Con any el compilador deja de comprobar y a.lo.que.sea pasa sin quejarse; con unknown
         hay que estrechar el tipo (comprobándolo o validándolo con un esquema) antes de
         poder usarlo, así que el error sale en compilación y no en producción
+      rationale: "La diferencia se paga en producción: uno mueve el error al momento de compilar, el otro al momento de fallar."
     - id: d
       text: any es más rápido porque evita comprobaciones en tiempo de ejecución
+      rationale: "Ninguno de los dos existe al ejecutar: los tipos desaparecen en la compilación."
   correct: c
   explanation: "any desactiva el sistema de tipos y propaga esa desactivación a todo lo que
     toca; unknown es el tipo desconocido honesto: acepta cualquier valor y no deja hacer
@@ -430,14 +490,18 @@
   options:
     - id: b
       text: El de servidor se renderiza en construcción y el de cliente en cada petición
+      rationale: "Uno se resuelve al construir y el otro en cada petición que llega."
     - id: c
       text: El de servidor no puede ser asíncrono y el de cliente sí
+      rationale: "Uno no admite código asíncrono y el otro sí, y de ahí la separación."
     - id: d
       text: Es una distinción de organización de ficheros sin efecto en tiempo de ejecución
+      rationale: "Si fuera cosa de organización, no habría diferencia entre poder leer una base de datos y no poder."
     - id: a
       text: El de servidor se ejecuta en el servidor y su código no se envía al navegador, así que
         puede leer secretos y datos directamente; el de cliente (marcado con 'use client')
         se hidrata en el navegador y es el que puede usar estado y eventos
+      rationale: "Lo decisivo es dónde acaba ejecutándose: arriba se pueden leer secretos, abajo todo queda a la vista."
   correct: a
   explanation: "La consecuencia que importa para una aplicación con IA es dónde vive el
     secreto: en un componente de servidor puedes llamar a la API del modelo con tu clave sin
@@ -460,12 +524,16 @@
         de desarrollo: la llamada tiene que hacerse desde el servidor (manejador de ruta,
         acción de servidor o componente de servidor) y el navegador hablar solo con tu
         backend"
+      rationale: "Cualquier variable que llegue al navegador es pública: la protección no está en ocultarla sino en que no salga."
     - id: b
       text: Nada si es un prototipo interno; basta con rotar la clave al pasar a producción
+      rationale: "En un prototipo interno el riesgo es bajo; basta con rotarla antes de salir a producción."
     - id: a
       text: Hay que ofuscar la clave antes de exponerla en el cliente
+      rationale: "Ofuscándola en el cliente deja de estar a la vista de quien inspeccione el código."
     - id: c
       text: Hay que restringir la clave por dominio de origen
+      rationale: "Restringiendo la clave por dominio, solo tu web puede usarla aunque la vean."
   correct: d
   explanation: "Todo lo que llega al navegador es público: una variable de entorno marcada
     como pública se incrusta en el paquete que se descarga. Ofuscar solo añade un paso al
@@ -485,14 +553,18 @@
   options:
     - id: c
       text: Porque reduce el coste total de la petición
+      rationale: "Entregar por partes evita generar de más y recorta el coste de la petición."
     - id: b
       text: "Porque el tiempo hasta el primer token es lo que percibe el usuario como velocidad:
         sin streaming, una respuesta de treinta segundos es una pantalla en blanco de
         treinta segundos"
+      rationale: "Lo que se mide no es el total sino la espera hasta la primera señal: con la misma duración, la percepción cambia."
     - id: a
       text: Porque el modelo genera mejores respuestas cuando se emiten por partes
+      rationale: "Emitir mientras genera hace que el modelo se corrija sobre la marcha y responda mejor."
     - id: d
       text: Porque permite cancelar la generación a mitad
+      rationale: "Solo con la respuesta llegando se puede cortar a mitad cuando ya no interesa."
   correct: b
   explanation: "La latencia percibida no es la latencia total: con streaming el usuario ve
     avance inmediato y lee mientras se genera, así que la misma duración se siente
@@ -511,13 +583,17 @@
   options:
     - id: b
       text: Una petición síncrona con un indicador de carga y un tiempo de espera generoso
+      rationale: "Ata el resultado a una conexión abierta, que es justo lo que no se sostiene durante minutos."
     - id: c
       text: Trocear la tarea en subtareas de menos de diez segundos y encadenarlas en el cliente
+      rationale: "Troceando en subtareas cortas, cada una responde rápido y el cliente las encadena."
     - id: a
       text: "Trabajo asíncrono: se lanza, se devuelve un identificador y el usuario consulta el
         avance o recibe aviso al terminar, con progreso visible durante la ejecución"
+      rationale: "Encaja con lo que dura: nada que aguante minutos debe depender de que una conexión siga viva."
     - id: d
       text: Aumentar el nivel de esfuerzo para que termine antes
+      rationale: "Subiendo el esfuerzo el modelo resuelve antes y la espera se acorta."
   correct: a
   explanation: "Con duraciones de minutos, una petición síncrona choca con los tiempos de
     espera de la infraestructura y ata al usuario a una pestaña abierta. El patrón es
@@ -536,14 +612,18 @@
   options:
     - id: d
       text: Una barra de progreso con porcentaje estimado
+      rationale: "Una barra con su porcentaje es lo que la gente sabe leer sin explicación."
     - id: a
       text: El número de tokens consumidos hasta el momento
+      rationale: "Los tokens consumidos dan una medida objetiva de cuánto trabajo lleva hecho."
     - id: b
       text: El nombre técnico de la herramienta que se está ejecutando
+      rationale: "El nombre de la herramienta en ejecución dice exactamente en qué punto está."
     - id: c
       text: "Qué está haciendo ahora mismo en términos que el usuario entienda ('buscando en los
         pedidos de marzo'), y qué ha averiguado ya: el avance concreto informa y además
         permite abortar pronto si va por mal camino"
+      rationale: "La espera se hace corta cuando se puede seguir: no es una barra, es saber si va por buen camino."
   correct: c
   explanation: "El avance concreto hace dos cosas: confirma que el sistema no está colgado y
     deja ver si el agente entendió mal la tarea, lo que permite interrumpir antes de gastar
@@ -570,12 +650,16 @@
       text: "Son independientes y dominadas por espera de red: paralelizarlas con concurrencia
         acotada (o, si no son sensibles a la latencia, mandarlas por lotes) reduce el tiempo
         total en un orden de magnitud"
+      rationale: "El reloj lo manda la red, no el cálculo: doscientas esperas en fila son doscientas veces la misma espera."
     - id: b
       text: Reutilizar el mismo objeto cliente entre iteraciones
+      rationale: "Reutilizar el cliente evita rehacer la conexión en cada vuelta del bucle."
     - id: c
       text: Mover el bucle a un proceso aparte para no bloquear el principal
+      rationale: "Sacando el bucle a otro proceso, el principal deja de quedarse bloqueado."
     - id: d
       text: Reducir max_tokens para que cada llamada termine antes
+      rationale: "Con menos tope de salida cada llamada termina antes y el bucle entero se acorta."
   correct: a
   explanation: 200 llamadas secuenciales suman 200 latencias completas, y el proceso está
     esperando red casi todo el tiempo. Con concurrencia acotada —acotada para respetar
@@ -594,14 +678,18 @@
   options:
     - id: a
       text: Siempre que haya más de diez peticiones, porque agrupa la conexión
+      rationale: "A partir de unas cuantas peticiones ya compensa agrupar y reutilizar la conexión."
     - id: b
       text: "Cuando el trabajo no es sensible a la latencia (evaluaciones, procesados masivos,
         backfills): sale a la mitad de precio a cambio de que el resultado tarde, con un
         máximo de horas"
+      rationale: "Se cambia tiempo por dinero: sirve cuando a nadie le importa si el resultado llega en diez minutos o en seis horas."
     - id: c
       text: Cuando las peticiones dependen unas de otras y hay que ordenarlas
+      rationale: "Cuando unas peticiones dependen de otras y hay que garantizar el orden entre ellas."
     - id: d
       text: Cuando se necesita una latencia menor que con llamadas individuales
+      rationale: "Cuando hace falta responder más rápido que llamando una a una."
   correct: b
   explanation: "El trato es descuento por paciencia, así que encaja en todo lo que no mira
     nadie en tiempo real. Dos detalles que muerden al integrarlo: los resultados NO vuelven
@@ -620,14 +708,18 @@
   options:
     - id: a
       text: Que el código esté cubierto por pruebas unitarias
+      rationale: "Que haya pruebas cubriendo el código es lo que separa un experimento de algo mantenible."
     - id: b
       text: Que use un modelo más capaz que el del prototipo
+      rationale: "Que use un modelo más capaz que el del prototipo, ya sin la limitación del coste de pruebas."
     - id: c
       text: Que funcione con datos reales y sus casos raros, que tenga manejo de errores y
         límites, que se pueda observar y medir en producción, y que alguien pueda operarla y
         pararla
+      rationale: "La diferencia no es de código sino de responsabilidad: alguien tiene que poder verlo, arreglarlo y apagarlo."
     - id: d
       text: Que tenga una interfaz pulida
+      rationale: "Que la interfaz esté acabada, que es lo que ve el usuario y por lo que juzga."
   correct: c
   explanation: "El prototipo demuestra que se puede; el envío hace que aguante: entradas feas,
     fallos de las dependencias, límites de tasa, coste bajo control, visibilidad de lo que
@@ -646,15 +738,19 @@
   options:
     - id: b
       text: Solo los errores de red, como con cualquier otra dependencia HTTP
+      rationale: "Los mismos que cualquier dependencia HTTP: cortes, tiempos de espera y errores de red."
     - id: a
       text: Solo el agotamiento del presupuesto de tokens
+      rationale: "El principal es quedarse sin presupuesto de tokens a mitad de una generación."
     - id: c
       text: "Ninguno especial: el SDK reintenta automáticamente todo lo que hace falta"
+      rationale: "Ninguno especial: el SDK ya reintenta por debajo lo que se puede reintentar."
     - id: d
       text: Límite de tasa y sobrecarga (reintento con retroceso), tiempos de espera en
         generaciones largas (streaming), respuestas que no cumplen el formato esperado, y
         rechazos o negativas del modelo que hay que tratar como resultado y no como
         excepción
+      rationale: "Son fallos que no existen llamando a una base de datos: llegan como respuestas válidas que no sirven."
   correct: d
   explanation: "Además de los fallos HTTP habituales hay dos que son propios y se olvidan.
     Uno: una respuesta puede llegar con un código de éxito y aun así no ser utilizable
@@ -675,12 +771,16 @@
     - id: a
       text: Tokens y coste por operación, latencia con sus percentiles altos, tasa de error por
         tipo, y una muestra de entradas y salidas para poder evaluar después
+      rationale: "Lo que no se guarda desde el día uno no se puede reconstruir después: sin muestras no hay evaluación posible."
     - id: b
       text: Solo los errores, para no inflar el volumen de registros
+      rationale: "Solo los errores: es lo único que hay que mirar y no infla el volumen de registros."
     - id: c
       text: El número de peticiones por usuario, para facturación
+      rationale: "Las peticiones por usuario, que es lo que hace falta para repartir el coste."
     - id: d
       text: Solo el uso agregado mensual, que es lo que mira el negocio
+      rationale: "El uso agregado del mes, que es la cifra que acaba mirando el negocio."
   correct: a
   explanation: Sin coste por operación no sabes si es sostenible; sin percentiles altos crees
     que va rápido; sin tipos de error no sabes qué arreglar; y sin una muestra de entradas y
@@ -700,14 +800,18 @@
   options:
     - id: a
       text: Cambiando al modelo más barato disponible para todo
+      rationale: "Bajando de modelo en todo el flujo, el precio por llamada cae de golpe."
     - id: c
       text: "Por lo que domina el gasto: cachear el prefijo estable, recortar el contexto que no
         aporta, bajar el nivel de esfuerzo donde no se note, usar un modelo menor en las
         subtareas fáciles y sacar del bucle lo que es código determinista"
+      rationale: "Ochenta veces más barato no sale de una idea: sale de mirar dónde se van los tokens y atacar ahí."
     - id: b
       text: Limitando el número de operaciones por usuario
+      rationale: "Limitando las operaciones por usuario, el gasto total queda acotado por diseño."
     - id: d
       text: Negociando un descuento por volumen
+      rationale: "Con volumen suficiente, un descuento negociado arregla la cuenta sin tocar el sistema."
   correct: c
   explanation: "Un factor de ocho no sale de una sola palanca: se mide primero de dónde viene
     el gasto y se atacan las que apliquen. La caché suele ser la de mayor efecto en agentes
@@ -727,13 +831,17 @@
   options:
     - id: b
       text: Por las comparativas públicas del tipo de tarea
+      rationale: "Por las comparativas públicas del tipo de tarea, que ya han hecho el trabajo de medir."
     - id: a
       text: Siempre el más capaz disponible, y se optimiza el coste después
+      rationale: "El más capaz disponible, y una vez funciona se busca abaratarlo."
     - id: d
       text: "Midiendo en tu propia evaluación: se empieza por uno capaz para saber si la tarea es
         viable y luego se prueba a bajar mientras la calidad aguante"
+      rationale: "El orden importa: primero se despeja si la tarea es posible, y solo después se busca lo barato."
     - id: c
       text: Siempre el más barato que produzca una salida con formato válido
+      rationale: "El más barato que devuelva algo con formato válido: si cumple, sobra pagar más."
   correct: d
   explanation: "Las comparativas públicas miden otras tareas y otra distribución. Lo que
     decide es tu conjunto sobre tu caso, y el orden importa: empezar por un modelo capaz
@@ -753,15 +861,19 @@
   options:
     - id: a
       text: Usar una capa de abstracción que unifique los tres proveedores desde el principio
+      rationale: "Una capa que unifique los tres desde el principio permite cambiar de proveedor sin tocar nada."
     - id: c
       text: Elegir un proveedor y ceñirse a él para no fragmentar el conocimiento del equipo
+      rationale: "Elegir uno y quedarse ahí concentra el conocimiento del equipo en una sola API."
     - id: d
       text: Implementar cada función por duplicado, una vez por proveedor
+      rationale: "Implementar cada función una vez por proveedor deja cada camino optimizado a su API."
     - id: b
       text: "Aislar la llamada al modelo detrás de una frontera fina propia del caso de uso, sin
         intentar una abstracción universal: las capacidades que diferencian a cada proveedor
         (razonamiento, uso de herramientas, salidas estructuradas, caché) son justo las que
         una abstracción de mínimo común denominador borra"
+      rationale: "El coste de la abstracción no es escribirla: es que borra justo lo que hace mejor a cada proveedor."
   correct: b
   explanation: "Es el mismo criterio que 'construir cerca del modelo': una abstracción que
     iguale a los tres proveedores acaba exponiendo la intersección de sus capacidades, y con
@@ -783,12 +895,16 @@
       text: Primero el contexto y las herramientas (¿tiene la información y la capacidad que
         necesita?), después el prompt, después el modelo o el esfuerzo, y solo al final
         afinar el modelo
+      rationale: "Ordena por coste y reversibilidad: lo primero se prueba en minutos, lo último cuesta semanas y ata al modelo."
     - id: b
       text: Primero cambiar de modelo, que es el cambio de una línea
+      rationale: "Primero cambiar de modelo: es una línea y a veces resuelve el problema entero."
     - id: c
       text: Primero afinar con ejemplos del dominio, que es lo que más especializa
+      rationale: "Es lo más caro y lo más difícil de deshacer: por eso va al final, no al principio."
     - id: d
       text: Primero añadir más ejemplos al prompt hasta que el comportamiento se estabilice
+      rationale: "Alarga el prompt en cada llamada y tapa el problema si lo que falta es información, no formato."
   correct: a
   explanation: "La mayoría de los fallos no son de capacidad del modelo, son de que le falta
     información o le falta la herramienta: el orden empieza donde está el problema real más
@@ -809,14 +925,18 @@
   options:
     - id: c
       text: Con una estimación conservadora multiplicada por tres para cubrir la incertidumbre
+      rationale: "Una estimación conservadora multiplicada por tres cubre lo que no se sabe todavía."
     - id: b
       text: "Separando lo incierto de lo conocido: acotar un tiempo para averiguar si el modelo
         hace la parte difícil, y estimar el resto de la integración solo después de esa
         respuesta"
+      rationale: "Estimar lo desconocido es inventar: lo que se acota es cuánto se va a tardar en saberlo."
     - id: a
       text: Negándote a estimar hasta tener un prototipo funcionando
+      rationale: "Sin un prototipo delante, cualquier número que se dé es inventado."
     - id: d
       text: Estimando solo la parte de integración, que es la predecible
+      rationale: "Deja fuera justo la parte que puede triplicar el plazo o hacer inviable el proyecto."
   correct: b
   explanation: "En trabajo con IA la incertidumbre no está repartida: la integración se estima
     como cualquier otra cosa y la viabilidad no se estima, se averigua. Lo honesto y lo útil
@@ -836,12 +956,16 @@
   options:
     - id: b
       text: Qué modelo usa y por qué se eligió
+      rationale: "Qué modelo hay debajo y por qué se eligió ese, que es la decisión técnica de fondo."
     - id: a
       text: El porcentaje de acierto en la evaluación
+      rationale: "El porcentaje de acierto de la evaluación, que resume la calidad en un número."
     - id: d
       text: Qué hace bien, qué hace mal, y qué pasa cuando se equivoca
+      rationale: "Es lo que necesitan para decidir: no cuánto acierta, sino con qué pueden contar y con qué no."
     - id: c
       text: Cómo se compara con lo que hace la competencia
+      rationale: "Cómo queda frente a lo que ofrece la competencia, que es la referencia del mercado."
   correct: d
   explanation: "Lo que necesita quien decide es saber si puede confiar y en qué condiciones, y
     eso lo dan las tres cosas juntas: dónde acierta, dónde no y cuál es el coste del fallo.
@@ -864,14 +988,18 @@
   options:
     - id: a
       text: Porque create devuelve una promesa que hay que resolver con .then
+      rationale: "La llamada devuelve una promesa y hay que resolverla antes de tocar el resultado."
     - id: b
       text: Porque content puede ser nulo y falta el operador de acceso opcional
+      rationale: "El contenido puede llegar nulo, y sin acceso opcional el compilador se queja."
     - id: d
       text: Porque hay que importar el tipo de respuesta explícitamente
+      rationale: "El tipo llega inferido de la llamada; lo que falta es distinguir qué clase de bloque es cada uno."
     - id: c
       text: Porque content es un array de una unión discriminada de bloques (texto, razonamiento,
         uso de herramienta) y hay que estrechar por el campo de tipo antes de acceder a
         .text
+      rationale: "El compilador está protegiendo de algo real: no todos los turnos empiezan con texto."
   correct: c
   explanation: "El compilador te está avisando de un fallo real: no todos los bloques tienen
     .text, así que indexar el primero y leer .text solo funciona por casualidad. Lo correcto
@@ -892,12 +1020,16 @@
     - id: a
       text: "Definir de antemano qué resultado del negocio tenía que mover y cómo se mediría: sin
         eso, lo que se mide es actividad (peticiones, tokens) y no efecto"
+      rationale: "Sin esa definición previa, al mes solo hay cifras de uso y ninguna forma de saber si sirvieron para algo."
     - id: b
       text: Un panel con métricas técnicas de latencia y coste
+      rationale: "Un panel con latencia y coste, que es lo que dice si el sistema va bien."
     - id: c
       text: Una encuesta de satisfacción a los usuarios internos
+      rationale: "Una encuesta a los usuarios internos, que son quienes saben si les sirve."
     - id: d
       text: Un conjunto de evaluación de calidad de las respuestas
+      rationale: "Un conjunto de evaluación de calidad, para saber si responde bien o mal."
   correct: a
   explanation: "Sin una métrica de resultado acordada antes, la conversación de después es
     irresoluble: cada uno mira lo que quiere y no hay línea base con la que comparar. La
@@ -917,13 +1049,17 @@
   options:
     - id: b
       text: Que falta formación y hay que hacer una sesión de presentación
+      rationale: "Falta formación: la gente no usa lo que no sabe manejar todavía."
     - id: d
       text: Que resuelve un problema que sus usuarios no tienen, o lo resuelve fuera de donde ya
         trabajan y el coste de cambiar de contexto se come el ahorro
+      rationale: "El fallo no está en la herramienta sino en el encaje: obliga a salir de donde la gente ya trabaja."
     - id: a
       text: Que la calidad no es tan buena como parece en las evaluaciones
+      rationale: "Que la calidad real no es la que sugieren las evaluaciones internas."
     - id: c
       text: Que hace falta apoyo de dirección para impulsar el uso
+      rationale: "Falta un empujón de dirección para que el uso se generalice."
   correct: d
   explanation: "Las dos causas más frecuentes de una herramienta buena sin usuarios son de
     encaje: o el problema no era el que duele, o la solución vive en otro sitio y obliga a
@@ -953,14 +1089,18 @@
     - id: a
       text: Que es más barata porque el humano filtra los casos difíciles antes de llamar al
         modelo
+      rationale: "Es al revés en coste: la llamada se hace igual, y encima se añade el tiempo de una persona."
     - id: b
       text: Que permite usar un modelo más pequeño
+      rationale: "Con revisión detrás se puede usar un modelo más pequeño sin que se note."
     - id: c
       text: "Genera etiquetas gratis: cada aceptación o corrección del humano es una señal de
         calidad sobre tráfico real, que alimenta la evaluación y marca el camino hacia la
         automatización"
+      rationale: "Cada decisión de la persona es una etiqueta gratis sobre tráfico real, que es lo más caro de conseguir."
     - id: d
       text: Que evita la necesidad de instrumentar el sistema
+      rationale: "Con el humano en medio no hace falta instrumentar: él ve lo que pasa."
   correct: c
   explanation: "El diseño con humano en el bucle no es solo una barandilla: es un generador de
     datos. Cada decisión del revisor etiqueta un caso real, y con eso construyes el conjunto
@@ -980,14 +1120,18 @@
   options:
     - id: a
       text: Probar cada modelo nuevo el día que sale y comparar puntuaciones
+      rationale: "Probar cada modelo el día que sale y comparar resultados es lo que mantiene el criterio afilado."
     - id: c
       text: Mantenerse al día de la literatura de investigación
+      rationale: "Seguir la literatura de investigación, que es de donde sale todo lo demás."
     - id: d
       text: Participar en las comunidades donde se discuten los lanzamientos
+      rationale: "Estar en las comunidades donde se discuten los lanzamientos y se separa el ruido."
     - id: b
       text: "Traducir lo nuevo en decisiones: qué se puede construir ahora que hace tres meses no,
         qué andamiaje de tu sistema ha quedado obsoleto, qué supuesto de coste o latencia
         hay que rehacer"
+      rationale: "La diferencia entre seguir lanzamientos y usarlos: qué construyes hoy que hace tres meses no podías."
   correct: b
   explanation: La utilidad está en el cambio de decisión. Un modelo nuevo puede hacer viable
     una capacidad descartada hace un trimestre, y también puede convertir en lastre
@@ -1009,12 +1153,16 @@
       text: "Revisarlos: el andamiaje escrito para compensar limitaciones del modelo anterior a
         menudo degrada al nuevo. Se prueba quitándolo y se vuelve a medir, en vez de
         arrastrarlo por inercia"
+      rationale: "Lo que ayudaba antes puede estorbar ahora: el prompt lleva parches para límites que ya no existen."
     - id: a
       text: "Nada: si funcionaban antes, funcionarán mejor ahora"
+      rationale: "Nada: lo que funcionaba con el anterior funcionará al menos igual de bien."
     - id: b
       text: Reescribirlos desde cero para aprovechar las capacidades nuevas
+      rationale: "Reescribirlos desde cero para aprovechar de verdad lo que el modelo nuevo trae."
     - id: c
       text: Añadir instrucciones que aprovechen explícitamente lo que el modelo nuevo hace mejor
+      rationale: "Añade sin quitar: el problema no es lo que falta, es lo que sobra de la generación anterior."
   correct: d
   explanation: "Los prompts son artefactos atados a un modelo: instrucciones de verificación,
     coreografía paso a paso, énfasis a gritos para vencer una reticencia que ya no existe, o
@@ -1035,14 +1183,18 @@
   options:
     - id: a
       text: "Son opcionales: una herramienta con IA vive en la ventana de contexto del modelo"
+      rationale: "Todo lo que haga falta recordar, auditar o reejecutar se queda fuera de esa ventana."
     - id: c
       text: "El contenedor da un entorno reproducible y desplegable (y es también el mecanismo de
         aislamiento si el agente ejecuta código); la base relacional guarda lo que la
         conversación no puede guardar: estado, trabajos, auditoría y resultados"
+      rationale: "Las dos piezas cubren lo que la conversación no puede: reproducir el entorno y recordar más allá del turno."
     - id: b
       text: El contenedor solo sirve para el desarrollo local
+      rationale: "El contenedor es cosa del desarrollo local, para que a todos les funcione igual."
     - id: d
       text: La base relacional se sustituye por la base vectorial en sistemas con IA
+      rationale: "Resuelven cosas distintas: una busca por parecido, la otra garantiza transacciones y consultas exactas."
   correct: c
   explanation: "Un sistema con IA sigue siendo un sistema: hay estado que persistir (trabajos,
     sesiones, aprobaciones), auditoría que conservar y despliegues que reproducir. La base
@@ -1063,14 +1215,18 @@
   options:
     - id: a
       text: Un agente con las ocho acciones como herramientas y que decida él la secuencia
+      rationale: "Paga una decisión del modelo por cada paso, incluidos los cinco que no admiten discusión."
     - id: c
       text: Ocho llamadas al modelo, una por paso, encadenadas
+      rationale: "Convierte en probabilístico un flujo que ya estaba resuelto, y multiplica por ocho el coste."
     - id: b
       text: Los cinco deterministas en código y los tres de criterio como llamadas al modelo
         dentro de ese flujo; solo si el propio ORDEN de los pasos depende de lo que se vaya
         encontrando conviene un agente que decida la secuencia
+      rationale: "El criterio es dónde hace falta juicio: lo demás es más barato, más rápido y más fácil de probar en código."
     - id: d
       text: Un agente para los tres pasos de criterio y ejecución manual de los cinco restantes
+      rationale: "Un agente para los tres de criterio y los otros cinco a mano, como hasta ahora."
   correct: b
   explanation: El criterio es dónde hay incertidumbre. Un flujo con lógica en código y
     llamadas al modelo en los puntos de criterio es más barato, más rápido, más fiable y
@@ -1091,13 +1247,17 @@
   options:
     - id: b
       text: Terminar lo comprometido y señalar las limitaciones en la entrega
+      rationale: "Entrega algo que ya se sabe que no sirve, y la conversación difícil llega igual pero más tarde."
     - id: a
       text: "Seguir hasta el final: quizá se resuelve con más iteración de prompt"
+      rationale: "Seguir: con más iteración de prompt estas cosas suelen acabar saliendo."
     - id: d
       text: Cambiar el enfoque por tu cuenta y presentar el resultado que sí funciona
+      rationale: "Puede que sea la salida correcta, pero decidida por una sola persona y sin que nadie más lo sepa."
     - id: c
       text: "Decirlo pronto, con la evidencia concreta de qué falla, y traer las opciones: acotar
         el alcance, cambiar el reparto entre modelo y humano, o parar"
+      rationale: "Lo que se está gestionando es el tiempo de los demás: cuanto antes se sepa, más opciones quedan abiertas."
   correct: c
   explanation: "El valor de la mala noticia decae rápido: dicha pronto libera tiempo y permite
     decidir; dicha en la entrega solo deja constancia. Y decirla con evidencia y opciones es
@@ -1118,12 +1278,16 @@
       text: "Porque traslada al usuario la carga de saber qué pedir y cómo: cuando la tarea es
         conocida y repetitiva, un botón, un formulario o una sugerencia en contexto entregan
         el valor sin obligar a formular nada"
+      rationale: "Una caja de texto vacía es la interfaz más flexible y la más difícil de usar: hay que saber qué pedir."
     - id: b
       text: Porque el chat es más caro de implementar que una interfaz tradicional
+      rationale: "Un chat cuesta más de construir que una pantalla con sus campos."
     - id: c
       text: Porque los usuarios prefieren interfaces gráficas
+      rationale: "La gente prefiere interfaces gráficas a escribir lo que quiere."
     - id: d
       text: Porque el chat no permite mostrar resultados estructurados
+      rationale: "En un chat no caben bien los resultados estructurados, que es lo que suele hacer falta."
   correct: a
   explanation: "El chat es un lienzo en blanco: potentísimo cuando el espacio de peticiones es
     abierto, y una carga cuando la tarea siempre es la misma, porque obliga a redescubrir
@@ -1143,13 +1307,17 @@
   options:
     - id: b
       text: Corregir cada caso reportado con una regla específica en el prompt
+      rationale: "Corrigiendo cada caso con una regla en el prompt se resuelve lo que la gente reporta."
     - id: d
       text: Convertir cada queja en un caso de evaluación, buscar el patrón común entre ellas y
         atacar el patrón, no el caso
+      rationale: "Evita el bucle de parches: cada queja arreglada a mano vuelve con otra cara al cambio siguiente."
     - id: a
       text: Esperar a tener volumen suficiente para un análisis estadístico
+      rationale: "Esperar a tener volumen antes de sacar conclusiones evita perseguir casualidades."
     - id: c
       text: Derivar las quejas al equipo de soporte y centrarse en la hoja de ruta
+      rationale: "Pierde la señal más valiosa que hay: casos reales que ya fallaron, listos para medir."
   correct: d
   explanation: Parchear caso a caso produce un prompt lleno de condiciones especiales, cada
     una trazable a un incidente, y un sistema que falla de forma impredecible entre ellas.
@@ -1169,14 +1337,18 @@
   options:
     - id: a
       text: Que se elige un modelo que exponga métricas de confianza
+      rationale: "Elegir un modelo que exponga confianza, que es lo que permite medir si acierta."
     - id: c
       text: Que se documentan las métricas en la especificación técnica
+      rationale: "Dejar las métricas escritas en la especificación técnica desde el principio."
     - id: b
       text: Que se decide antes qué señal indicará que funciona y se instrumenta para capturarla
         desde el primer día, incluyendo guardar entradas y salidas para poder evaluar
         después
+      rationale: "La parte cara es la instrumentación, y ponerla después obliga a esperar meses para tener datos."
     - id: d
       text: Que se añade un panel de métricas antes del lanzamiento
+      rationale: "Montar el panel de métricas antes de lanzar, para no salir a ciegas."
   correct: b
   explanation: "Medible desde el diseño significa dos decisiones tomadas antes de construir:
     qué señal cuenta como éxito, y qué hay que capturar en ejecución para poder calcularla.
@@ -1196,14 +1368,18 @@
   options:
     - id: c
       text: Automatizar tareas que ya hace un equipo interno
+      rationale: "Se ve enseguida porque alguien se queja del tiempo que le lleva; por eso ya está en todas las listas."
     - id: a
       text: Añadir un asistente conversacional al producto
+      rationale: "Es lo primero que propone todo el mundo, y por eso rara vez es la oportunidad desaprovechada."
     - id: b
       text: Mejorar la calidad de una función existente basada en reglas
+      rationale: "Mejorar con modelo una función que hoy funciona a base de reglas."
     - id: d
       text: "Trabajo que hoy NO se hace porque a mano no compensa: revisar todo en vez de una
         muestra, personalizar para cada usuario en vez de por segmento, responder en minutos
         en vez de en días. Ahí el cambio es de escalón, no de eficiencia"
+      rationale: "Es la que no aparece en ninguna lista de peticiones: nadie pide lo que ya dio por imposible."
   correct: d
   explanation: "Automatizar lo que ya se hace da ahorros lineales y acotados por el coste
     actual. Lo que cambia de escalón es lo que era económicamente imposible: revisar el 100%
@@ -1226,12 +1402,16 @@
       text: Qué pasa si se equivoca delante de un cliente, si el fallo es visible o silencioso, si
         el usuario puede corregirlo, si hay implicaciones legales o de sesgo, y qué se hace
         si alguien intenta usarla mal a propósito
+      rationale: "Todas van del daño, no del rendimiento: qué se rompe fuera del sistema cuando el sistema falla."
     - id: b
       text: Qué coste tendrá al volumen previsto y si el proveedor aguanta el pico
+      rationale: "Es una pregunta de viabilidad económica, que se responde antes y no evita ningún daño."
     - id: c
       text: Si la latencia será aceptable en hora punta
+      rationale: "Afecta a la experiencia, no al riesgo: una respuesta lenta no perjudica a nadie."
     - id: d
       text: Si el equipo podrá mantenerla con la plantilla actual
+      rationale: "Es una pregunta de organización: importa, pero no cambia qué puede salir mal para el usuario."
   correct: a
   explanation: "De cara al cliente, el riesgo cambia de naturaleza: un fallo interno se
     corrige con una conversación y uno externo puede acabar en soporte, en prensa o en un
@@ -1252,13 +1432,17 @@
   options:
     - id: b
       text: Sustituir a las pruebas unitarias del sistema
+      rationale: "Sustituir a las pruebas: si los datos validan en la frontera, el sistema está cubierto."
     - id: d
       text: Validar en la frontera lo que entra y lo que sale del modelo, y de paso generar el
         esquema JSON que se le declara al modelo desde la misma definición
+      rationale: "Cierra los dos extremos con una sola definición: lo que se declara al modelo y lo que se comprueba al recibir."
     - id: a
       text: Acelerar el parseo de las respuestas del modelo
+      rationale: "Acelerar el parseo de las respuestas al saber de antemano su forma."
     - id: c
       text: Garantizar que el modelo produzca siempre una salida válida
+      rationale: "Nada garantiza la salida: lo que hace es detectar a tiempo cuándo no cumple."
   correct: d
   explanation: "El doble papel es lo que hace que compense: una sola definición sirve para
     declarar el esquema al modelo (salidas estructuradas o parámetros de herramienta) y para
@@ -1278,14 +1462,18 @@
   options:
     - id: a
       text: Que tenga la mayor tasa de acierto posible
+      rationale: "Que acierte lo máximo posible: la confianza es una consecuencia del acierto."
     - id: b
       text: Que explique su razonamiento en cada respuesta
+      rationale: "Que explique su razonamiento, para poder seguir cómo llegó a la respuesta."
     - id: c
       text: "Que sea predecible: que falle de formas que se entienden y se detectan, que muestre
         en qué se basa, y que no sorprenda con un error grave donde antes acertaba diez
         veces"
+      rationale: "La confianza no viene del acierto sino de la sorpresa: se usa lo que falla de formas que ya conoces."
     - id: d
       text: Que se integre visualmente con el resto del producto
+      rationale: "Que esté integrada visualmente con el resto del producto y no parezca un añadido."
   correct: c
   explanation: La confianza no es una función de la tasa de acierto, es una función de la
     varianza y de la visibilidad del fallo. Un sistema que acierta el 85% de forma
@@ -1306,14 +1494,18 @@
   options:
     - id: b
       text: El detalle técnico del diseño propuesto
+      rationale: "El detalle del diseño técnico, que es lo que demuestra que la propuesta es sólida."
     - id: c
       text: El respaldo de un interlocutor con influencia
+      rationale: "El respaldo de alguien con influencia, que es quien la va a defender."
     - id: d
       text: La novedad de la capacidad propuesta
+      rationale: "Lo novedoso de la capacidad, que es lo que la hace atractiva frente a otras."
     - id: a
       text: "Que esté atada a un resultado que a alguien le importa y con una vía de comprobación
         barata: qué problema real resuelve, cuánto vale resolverlo y cómo sabremos en dos
         semanas si va bien"
+      rationale: "Dos cosas que casi nunca están juntas: alguien que quiere el resultado, y una forma barata de comprobarlo pronto."
   correct: a
   explanation: "Quien decide compara tu propuesta con otras cosas que podrían hacerse con el
     mismo tiempo, así que necesita valor y riesgo, no arquitectura. Y la parte que más peso
@@ -1333,12 +1525,16 @@
     - id: d
       text: "Desde detectar la oportunidad hasta que funciona en producción con usuarios reales:
         exploración, prototipo, integración, interfaz, evaluación, despliegue y operación"
+      rationale: "Incluye lo que suele quedar fuera del encargo: que exista en producción y que alguien la mantenga."
     - id: b
       text: Desde el prompt hasta la respuesta del modelo
+      rationale: "Es la parte que se ve en una demo, y suele ser la más corta de todas."
     - id: a
       text: Desde el backend hasta el frontend de la función
+      rationale: "Cubre el código, y deja fuera encontrar el problema y comprobar que sirvió de algo."
     - id: c
       text: Desde la especificación hasta la entrega a control de calidad
+      rationale: "Desde la especificación hasta entregarlo a quien lo va a validar."
   correct: d
   explanation: De punta a punta aquí incluye el extremo de delante —encontrar y dar forma a la
     oportunidad, que es la parte de discovery— y el de atrás —que quede funcionando, medido
@@ -1357,14 +1553,18 @@
   options:
     - id: b
       text: "Todo a exploración: en un puesto de discovery, entregar es labor de otros equipos"
+      rationale: "Sin llevar nada hasta el final, las propuestas dejan de tener quien las respalde."
     - id: a
       text: "Un núcleo de apuestas con dueño y resultado acordado, más una parte reservada a
         exploración con punto de comprobación barato: sin exploración no hay descubrimiento,
         y sin entrega el descubrimiento no llega a nadie"
+      rationale: "Reparte el riesgo: sin la parte comprometida no hay credibilidad, y sin la otra no hay nada nuevo que proponer."
     - id: c
       text: "Todo a entregar lo comprometido: la exploración se hace cuando sobra tiempo"
+      rationale: "Todo a entregar lo comprometido, y explorar cuando quede hueco entre entregas."
     - id: d
       text: Alternar trimestres completos de exploración y de entrega
+      rationale: "Concentra el riesgo: un trimestre entero sin entregar es mucho tiempo sin señal."
   correct: a
   explanation: "Los dos extremos fallan de forma simétrica: solo explorar produce demos que
     nadie adopta, y solo entregar consume el trimestre en lo que ya estaba decidido, que es
@@ -1386,13 +1586,17 @@
   options:
     - id: a
       text: Porque en producción hay que usar un modelo distinto
+      rationale: "En producción hace falta otro modelo, con otras garantías de servicio."
     - id: c
       text: Porque la demo no tiene interfaz definitiva
+      rationale: "La demo se enseña con una interfaz provisional que aún hay que rehacer."
     - id: b
       text: Porque la demo se enseña con casos elegidos y bajo control; en producción llegan
         entradas imprevistas, fallan las dependencias y nadie está delante para reconducir
+      rationale: "La diferencia está en quién elige la entrada: en una la eliges tú, en la otra llega lo que llega."
     - id: d
       text: Porque falta documentación
+      rationale: "Falta la documentación, sin la cual nadie más puede mantenerla."
   correct: b
   explanation: "La distancia no está en el pulido, está en las condiciones: la demo se ejecuta
     sobre lo que tú elegiste y con alguien capaz de explicar el resultado; producción es lo
@@ -1410,12 +1614,16 @@
   options:
     - id: a
       text: Tener criterio de diseño visual y de interfaz
+      rationale: "Tener criterio de diseño y saber cómo debe verse y sentirse lo que se construye."
     - id: b
       text: Conocer las métricas de producto y saber leer paneles
+      rationale: "Es una herramienta útil, pero leer un panel no dice qué merece la pena hacer."
     - id: c
       text: Saber escribir especificaciones detalladas
+      rationale: "Saber convertir una idea en una especificación que otro pueda implementar."
     - id: d
       text: Saber juzgar qué merece la pena construir y para quién, no solo cómo construirlo
+      rationale: "Es la parte del trabajo que decide qué NO se construye, que suele valer más que lo que se construye."
   correct: d
   explanation: "La oferta lo dice casi con esas palabras: identificar qué debería construirse,
     no solo ejecutar requisitos predefinidos. Es criterio sobre el valor y el usuario.
@@ -1435,12 +1643,16 @@
     - id: c
       text: Porque acota la evaluación y el radio de daño, y da una señal real de si funciona
         antes de invertir en generalizar
+      rationale: "Empezar estrecho hace la pregunta contestable: con alcance amplio, un resultado mediocre no dice si sirve o no."
     - id: a
       text: Porque los modelos funcionan mejor con prompts cortos
+      rationale: "Los modelos rinden mejor cuando el prompt es corto y va al grano."
     - id: b
       text: Porque reduce el coste de inferencia
+      rationale: "Con menos alcance entra menos contexto y cada llamada sale más barata."
     - id: d
       text: Porque los usuarios prefieren herramientas especializadas
+      rationale: "Los usuarios prefieren herramientas que hacen una cosa y la hacen bien."
   correct: c
   explanation: "Un alcance estrecho hace evaluable la cosa: sabes qué entra, qué debería salir
     y qué cuenta como fallo. Y limita lo que puede romperse mientras aprendes. Generalizar
@@ -1459,14 +1671,18 @@
   options:
     - id: a
       text: "Seguir dos semanas más: las capacidades nuevas tardan en madurar"
+      rationale: "Sin criterio de parada, dos semanas más terminan en la misma conversación."
     - id: c
       text: "Volver a la pregunta que la exploración tenía que responder y comprobar si sigue sin
         respuesta: si el criterio de decisión no estaba definido, definirlo ahora y darle un
         plazo corto; si lo estaba y no se ha cumplido, parar"
+      rationale: "Dos semanas sin conclusión suelen significar que nunca se fijó qué contaría como respuesta."
     - id: b
       text: Enseñarlo al equipo y dejar que decidan si continuar
+      rationale: "Traslada al equipo una decisión que sigue sin la información que la haría posible."
     - id: d
       text: Cambiar de enfoque técnico y volver a empezar
+      rationale: "Cambia de camino sin saber si el problema era el camino."
   correct: c
   explanation: "La ambigüedad a las dos semanas suele delatar que la exploración arrancó sin
     criterio de parada, y sin él siempre habrá razones para seguir un poco más. La
@@ -1488,15 +1704,19 @@
   options:
     - id: a
       text: "Lanzar: la media supera el umbral acordado y el subgrupo es minoritario"
+      rationale: "Lanzar: la media supera lo acordado y el grupo afectado es pequeño."
     - id: c
       text: No lanzar hasta que el rendimiento sea uniforme en todos los segmentos
+      rationale: "Una barra imposible: ningún sistema rinde igual en todos los segmentos."
     - id: b
       text: "La media es la métrica equivocada aquí: un fallo sistemático concentrado en un grupo
         es trato desigual, no ruido, y hay que medir por segmento antes de lanzar. Las
         salidas son corregirlo, excluir explícitamente ese caso, o lanzar asumiéndolo de
         forma consciente y declarada"
+      rationale: "Promediar reparte el daño entre quien no lo sufre: el afectado lo sufre entero, todas las veces."
     - id: d
       text: Lanzar y añadir un aviso de que el resultado puede variar según el caso
+      rationale: "Un aviso genérico no protege a quien falla siempre, porque no le dice que es su caso."
   correct: b
   explanation: "Lo importante es que un fallo concentrado y sistemático se comporta distinto
     de un fallo aleatorio: para el grupo afectado la tasa de acierto no es la media, es la
@@ -1517,15 +1737,19 @@
   options:
     - id: d
       text: Que falta un modelo más capaz y hay que esperar a la siguiente generación
+      rationale: "Es la apuesta que lleva seis meses sin cumplirse: cada modelo nuevo arregló unos casos y destapó otros."
     - id: b
       text: Que el equipo no dedica suficiente tiempo a la ingeniería de prompt
+      rationale: "Falta dedicarle tiempo a la ingeniería de prompt, que es donde se resuelven estas cosas."
     - id: c
       text: Que hace falta más contexto en cada llamada
+      rationale: "Falta contexto en cada llamada: con más información dejaría de equivocarse."
     - id: a
       text: "Que puede que la tarea no sea viable con este reparto entre modelo y sistema: si la
         cola de casos raros no se agota, la salida no es un parche más sino estrechar el
         dominio, meter al humano en el bucle o mover parte del trabajo a código
         determinista"
+      rationale: "Seis meses de parches con la cola sin agotarse es en sí el dato: el reparto entre modelo y sistema no da más."
   correct: a
   explanation: "El patrón revelador es que la cola no se agota: cada arreglo descubre otro
     caso, lo que indica que la distribución real es más ancha de lo que el diseño asume.

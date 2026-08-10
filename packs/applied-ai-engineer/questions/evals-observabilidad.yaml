@@ -21,12 +21,16 @@
     - id: a
       text: La salida no es determinista ni tiene una única forma correcta, así que la evaluación
         mide una tasa sobre un conjunto en vez de comprobar una igualdad en un caso
+      rationale: "De ahí sale todo lo demás: por qué hace falta un conjunto, por qué se informa con su N y por qué dos ejecuciones no dan lo mismo."
     - id: b
-      text: Que las evaluaciones se ejecutan en producción y las pruebas unitarias en local
+      text: "Que las evaluaciones se ejecutan contra el sistema ya desplegado en producción y las pruebas unitarias contra el código en local, antes de integrar el cambio en la rama principal"
+      rationale: "Unas se ejecutan contra el sistema desplegado y otras contra el código en local, y de ahí la diferencia."
     - id: c
-      text: Que las evaluaciones no pueden automatizarse y requieren revisión humana
+      text: "Que las evaluaciones no pueden automatizarse porque juzgar una salida en lenguaje natural exige siempre una revisión humana que dé el visto bueno"
+      rationale: "Juzgar una respuesta abierta pide criterio, y el criterio lo pone una persona."
     - id: d
-      text: Que las evaluaciones miden latencia y las pruebas unitarias corrección
+      text: "Que las evaluaciones miden propiedades operativas como la latencia y el coste, mientras que las pruebas unitarias son las que miden la corrección funcional"
+      rationale: "Unas vigilan cómo se comporta el sistema y otras si el código hace lo que dice."
   correct: a
   explanation: "Una prueba unitaria es binaria sobre un caso; una evaluación es una tasa sobre
     una muestra, porque el mismo prompt puede dar salidas distintas y varias pueden ser
@@ -45,14 +49,18 @@
     salen los mejores casos?
   options:
     - id: c
-      text: De casos sintéticos generados por el modelo que se va a evaluar
+      text: "De casos sintéticos generados por el propio modelo que se va a evaluar, que es la forma de cubrir el espacio de entradas sin esperar a tener tráfico"
+      rationale: "Generarlos con el propio modelo da volumen enseguida y cubre variantes que a nadie se le ocurrirían."
     - id: d
       text: De entradas reales de usuarios y de los fallos observados, incluyendo los casos límite
         que ya han dado problemas
+      rationale: "Los casos que ya rompieron algo tienen una propiedad que ningún caso inventado tiene: se sabe que ocurren."
     - id: b
-      text: De un conjunto público estándar del dominio, para poder comparar con otros sistemas
+      text: "De un conjunto público estándar del dominio, para poder comparar tus resultados con los de otros sistemas y situarte frente al estado del arte"
+      rationale: "Un conjunto público permite comparar contra otros sistemas y saber si vas bien o mal."
     - id: a
-      text: De los ejemplos que ya están en el prompt, que son los que definen la tarea
+      text: "De los ejemplos que ya están dentro del prompt, que son precisamente los que definen la tarea y fijan el formato de salida esperado"
+      rationale: "Cerraría el círculo: se mediría contra lo que ya se le enseñó, y saldría bordado sin generalizar nada."
   correct: d
   explanation: "El conjunto tiene que parecerse a lo que el sistema va a ver, y la mejor
     fuente son entradas reales más los fallos que ya te han dolido. Un conjunto público mide
@@ -71,14 +79,18 @@
     sube pero los usuarios no notan mejora. ¿Cuál es la explicación más probable?
   options:
     - id: a
-      text: El conjunto es demasiado pequeño y la mejora está dentro del ruido
+      text: "El conjunto es demasiado pequeño y la mejora que estás viendo cabe entera dentro del ruido de muestreo que hay entre dos ejecuciones consecutivas"
+      rationale: "Con pocos casos, cualquier subida cabe dentro del ruido y no se traduce en nada perceptible."
     - id: c
-      text: El modelo cambió de versión y la comparación no es válida
+      text: "El modelo cambió de versión por debajo y la comparación con las medidas de hace seis meses ya no es válida"
+      rationale: "Si el modelo por debajo cambió de versión, las cifras de antes y de ahora no son comparables."
     - id: b
       text: "Sobreajuste al conjunto: llevas seis meses optimizando contra los mismos casos y ya
         mides lo bien que ajustas a ellos, no lo bien que generalizas"
+      rationale: "El síntoma es exactamente ese: la curva sube y el usuario no lo nota, porque la mejora se queda dentro del conjunto."
     - id: d
-      text: Los calificadores tienen un sesgo sistemático a favor de las respuestas largas
+      text: "Los calificadores arrastran un sesgo sistemático a favor de las respuestas largas, que son las que el prompt ha ido produciendo cada vez más"
+      rationale: "Si el calificador premia lo largo, las respuestas se alargan y la nota sube sin mejorar nada."
   correct: b
   explanation: "Un conjunto que se usa una y otra vez para tomar decisiones deja de ser una
     medida independiente: cada iteración le filtra información. Las otras tres son hipótesis
@@ -98,15 +110,19 @@
     calificador?
   options:
     - id: c
-      text: "Siempre juez con LLM: es el único que capta la calidad de verdad"
+      text: "Siempre juez con LLM: es el único tipo de calificador que capta la calidad de verdad, porque las propiedades que de verdad importan en una salida en lenguaje natural no se comprueban en código"
+      rationale: "Solo un modelo capta matices como el tono, la utilidad o si la respuesta se entiende."
     - id: b
-      text: Siempre revisión humana; lo automático es una aproximación que no vale para decidir
+      text: "Siempre revisión humana, y dejar lo automático como una aproximación barata que sirve para explorar pero no para decidir si un cambio entra o no"
+      rationale: "Toda automatización es una aproximación; para decidir de verdad hace falta que lo mire una persona."
     - id: d
-      text: Empezar con juez con LLM y sustituirlo por determinista cuando el volumen suba
+      text: "Empezar con juez con LLM porque es rápido de montar, y sustituirlo por calificadores deterministas cuando el volumen suba y el coste del juez pese"
+      rationale: "Se empieza con lo flexible y, cuando el volumen aprieta, se sustituye por algo barato y repetible."
     - id: a
       text: Primero determinista si la propiedad es comprobable en código (coincide, parsea,
         valida contra el esquema, la prueba pasa); juez con LLM solo para lo que de verdad
         requiere criterio
+      rationale: "El criterio es si la propiedad se puede comprobar sin criterio: lo que se puede, sale gratis, es estable y no hay que calibrarlo."
   correct: a
   explanation: "Un calificador determinista es más barato, más rápido, reproducible y no tiene
     sesgos propios: si la propiedad se puede comprobar en código —el JSON valida, la cita
@@ -131,12 +147,16 @@
     - id: a
       text: "El sesgo de posición: los jueces tienden a preferir una de las dos posiciones con
         independencia del contenido"
+      rationale: "Se detecta sin teoría: se pasa el mismo par dos veces con el orden cambiado y se mira si el ganador cambia."
     - id: d
-      text: "El sesgo de longitud: los jueces prefieren respuestas más largas"
+      text: "El sesgo de longitud: los jueces prefieren de forma sistemática las respuestas más largas, y alternar el orden reparte esa preferencia entre las dos"
+      rationale: "Lo largo se percibe como más completo, y barajar el orden reparte esa ventaja entre las dos."
     - id: b
-      text: "El sesgo de autopreferencia: un juez puntúa mejor sus propias salidas"
+      text: "El sesgo de autopreferencia: un juez puntúa mejor las salidas producidas por su propio modelo, y alternar el orden impide que sepa cuál es cuál"
+      rationale: "Un juez puntúa mejor lo que ha escrito él, y cambiar las posiciones impide identificar cuál es suyo."
     - id: c
-      text: "El sesgo de recencia: el juez pondera de más el final de la respuesta"
+      text: "El sesgo de recencia: el juez pondera de más el final de lo que lee, así que alternar el orden reparte esa ventaja entre las dos respuestas"
+      rationale: "Lo último leído pesa más, así que rotar el orden reparte esa ventaja entre las dos respuestas."
   correct: a
   explanation: "En una comparación por pares el juez muestra preferencia sistemática por una
     posición. Se ataca evaluando cada par en los dos órdenes y quedándose con el resultado
@@ -155,14 +175,18 @@
     imprescindible?
   options:
     - id: b
-      text: Usar el modelo más caro disponible como juez
+      text: "Usar como juez el modelo más caro que tengas disponible, porque el acuerdo con el criterio humano sube con la capacidad del modelo que juzga"
+      rationale: "Con el modelo más capaz de juez, el criterio se acerca todo lo posible al de un experto."
     - id: c
       text: Calibrarlo contra etiquetas humanas en una muestra y medir el acuerdo; si el juez no
         coincide con el humano, su puntuación no significa nada
+      rationale: "Sin ese paso, lo que se está midiendo es el acuerdo del sistema con las manías del juez, no con lo que un experto llamaría correcto."
     - id: a
-      text: Ejecutarlo tres veces por caso y quedarse con la mediana
+      text: "Ejecutarlo tres veces sobre cada caso y quedarse con la mediana, que es lo que elimina la varianza de muestreo de sus puntuaciones"
+      rationale: "Repitiendo y quedándose con el valor central se quita de encima la variabilidad de una sola pasada."
     - id: d
-      text: Comprobar que su distribución de puntuaciones es aproximadamente normal
+      text: "Comprobar que su distribución de puntuaciones es aproximadamente normal, señal de que está discriminando y no repartiendo notas al azar"
+      rationale: "Si las puntuaciones se reparten de forma razonable, el juez está discriminando y no puntuando al azar."
   correct: c
   explanation: "Un juez es un instrumento de medida y hay que contrastarlo con la referencia:
     etiquetas humanas sobre una muestra, midiendo el acuerdo. Sin eso no sabes si mides
@@ -180,14 +204,18 @@
   stem: ¿Qué distingue a una rúbrica útil de una inútil?
   options:
     - id: a
-      text: Que asigne un peso numérico a cada criterio y sume 100
+      text: "Que asigne un peso numérico a cada criterio y que los pesos sumen 100, para que la nota final sea comparable entre versiones del sistema"
+      rationale: "Con pesos que suman cien, cada criterio aporta lo suyo y el resultado sale comparable entre versiones."
     - id: b
-      text: Que la escriba alguien distinto de quien construyó el sistema
+      text: "Que la escriba alguien distinto de quien construyó el sistema, porque quien lo construyó tiende a premiar justo aquello que su propia implementación ya hace bien"
+      rationale: "Quien no ha construido el sistema juzga sin el sesgo de conocer por dónde flojea."
     - id: d
       text: Que sus criterios sean explícitos y calificables por separado ('el CSV tiene una
         columna price numérica') en vez de valorativos ('los datos tienen buena pinta')
+      rationale: "La prueba: dáselo a dos personas por separado. Si puntúan distinto, el criterio era una opinión con forma de rúbrica."
     - id: c
-      text: Que tenga al menos diez criterios para cubrir todos los aspectos
+      text: "Que tenga al menos diez criterios, número a partir del cual se cubren todos los aspectos relevantes de una salida en lenguaje natural"
+      rationale: "Con pocos criterios se escapan aspectos enteros; una decena cubre el resultado sin dejar huecos."
   correct: d
   explanation: "El calificador puntúa cada criterio por separado, así que un criterio vago
     produce un bucle ruidoso: la misma salida se aprueba o se suspende según la ejecución.
@@ -206,14 +234,18 @@
     forma práctica de construirla?
   options:
     - id: b
-      text: Pedirle al modelo que se autoevalúe y usar sus criterios
+      text: "Pedirle al modelo que se autoevalúe sobre varios informes y quedarte con los criterios que él mismo declare estar usando para juzgarlos"
+      rationale: "El modelo conoce la tarea de primera mano, y de su autoevaluación salen los criterios que él mismo aplica."
     - id: c
-      text: Usar una rúbrica genérica de escritura y adaptarla luego si hace falta
+      text: "Usar una rúbrica genérica de escritura (claridad, estructura, tono) y adaptarla más adelante si se ve que no discrimina entre informes"
+      rationale: "Una rúbrica genérica arranca en un minuto y luego se afina con lo que aparezca."
     - id: d
-      text: Puntuar del 1 al 10 en una única dimensión de 'calidad global'
+      text: "Puntuar del 1 al 10 en una única dimensión de 'calidad global', que evita discutir criterios y da una nota comparable entre informes"
+      rationale: "Una nota global es rápida de dar y suficiente para comparar dos versiones entre sí."
     - id: a
       text: Coger un informe reconocidamente bueno, analizar qué lo hace bueno y convertir ese
         análisis en criterios comprobables
+      rationale: "Convierte una intuición —esto está bien— en algo que otro puede aplicar sin haber estado en la conversación."
   correct: a
   explanation: Partir de un ejemplar bueno y destilar por qué lo es produce criterios anclados
     en el dominio real —qué secciones, qué evidencia, qué nivel de detalle— en vez de
@@ -233,13 +265,16 @@
     - id: b
       text: Es el conjunto que se ejecuta ante cada cambio para comprobar que no se rompe nada que
         antes funcionaba; el de desarrollo es contra el que iteras a diario
+      rationale: "El de uso diario se contamina: acabas conociendo sus casos de memoria. El otro solo se mira cuando algo se rompe."
     - id: a
-      text: Es el conjunto que crece con cada versión del modelo; el de desarrollo es fijo
+      text: "Es el conjunto que crece con cada versión del modelo incorporando los casos nuevos; el de desarrollo se mantiene fijo para poder comparar"
+      rationale: "Uno crece con cada versión acumulando casos y el otro se mantiene fijo como referencia."
     - id: c
-      text: Es el conjunto etiquetado por humanos; el de desarrollo está etiquetado
-        automáticamente
+      text: "Es el conjunto etiquetado por humanos, y por eso es el de referencia; el de desarrollo está etiquetado de forma automática y solo sirve para iterar rápido"
+      rationale: "Uno lo etiquetan personas y el otro se etiqueta con calificadores automáticos."
     - id: d
-      text: Son nombres distintos para lo mismo según el equipo
+      text: "Son dos nombres para lo mismo según el equipo que los use: ambos son el conjunto contra el que se mide cada cambio antes de desplegarlo"
+      rationale: "Son el mismo conjunto con dos nombres, según en qué momento del ciclo se use."
   correct: b
   explanation: "El de desarrollo es la superficie contra la que iteras y se contamina por el
     uso. El de regresión defiende lo que ya funcionaba: en particular, cada fallo corregido
@@ -258,16 +293,20 @@
     mitad de las veces sin haber cambiado nada. ¿Qué está pasando?
   options:
     - id: a
-      text: Los casos están mal etiquetados y hay que revisarlos uno a uno
+      text: "Los casos están mal etiquetados y hay que revisarlos uno a uno, porque una tasa que se mueve sin que nadie haya tocado el código solo se explica por etiquetas inconsistentes que unas veces cuentan como acierto y otras como fallo"
+      rationale: "Si las etiquetas están mal puestas, la nota baila sin que el sistema haya cambiado."
     - id: c
       text: "Con 40 casos, la variación aleatoria entre ejecuciones es del orden de varios puntos,
         así que un umbral fijo sobre una muestra pequeña dispara falsas alarmas: hay que
         subir el tamaño de la muestra, fijar la puerta sobre un intervalo de confianza o
         repetir y promediar"
+      rationale: "El número que lo delata: con esa muestra, dos ejecuciones idénticas ya se separan varios puntos por puro azar."
     - id: b
-      text: La caché de prompts hace que las ejecuciones no sean comparables entre sí
+      text: "La caché de prompts hace que unas ejecuciones lean del prefijo ya cacheado y otras lo escriban desde cero, y esa diferencia basta para que los resultados dejen de ser comparables entre sí; hay que invalidar la caché antes de cada pasada completa de la suite"
+      rationale: "Si unas ejecuciones leen de caché y otras no, no se están comparando las mismas condiciones."
     - id: d
-      text: Hay que bajar el umbral hasta que deje de fallar
+      text: "Hay que bajar el umbral de la puerta hasta que deje de dispararse, y volver a subirlo cuando el sistema tenga margen suficiente por encima"
+      rationale: "Un umbral que bloquea sin motivo está mal calibrado, y bajarlo devuelve la puerta a su sitio."
   correct: c
   explanation: "Con n=40 y p≈0,85 el error estándar ronda los 5,6 puntos porcentuales: dos
     ejecuciones idénticas pueden diferir varios puntos solo por azar. Una puerta que compara
@@ -289,13 +328,17 @@
     que marca lo son de verdad. ¿Cómo se describe eso?
   options:
     - id: b
-      text: Precisión baja y exhaustividad alta
+      text: "Precisión baja y exhaustividad alta"
+      rationale: "Marca poco pero acierta: eso es quedarse corto al señalar y muy fino en lo señalado."
     - id: a
-      text: Exactitud alta y precisión baja
+      text: "Exactitud alta y precisión baja"
+      rationale: "Al fallar pocos casos del total, el acierto global es alto aunque afine poco al marcar."
     - id: d
       text: Precisión alta y exhaustividad (recall) baja
+      rationale: "Casi todo lo que marca acierta, pero deja fuera muchos urgentes reales: fino al señalar, corto al cubrir."
     - id: c
-      text: F1 alto por definición
+      text: "F1 alto por definición, al ser una media de las dos"
+      rationale: "Cuando una de las dos medidas es muy alta, la media armónica se lleva el conjunto hacia arriba."
   correct: d
   explanation: "Precisión es qué proporción de lo marcado es correcto (aquí, alta);
     exhaustividad es qué proporción de lo que debía marcarse se marcó (aquí, baja: marca muy
@@ -314,15 +357,19 @@
     s y el equipo lo da por bueno, pero llegan quejas. ¿Qué métrica falta?
   options:
     - id: c
-      text: La mediana, que es más robusta que la media
+      text: "La mediana, que es más robusta que la media frente a las ejecuciones anómalas y describe mejor lo que vive el usuario típico"
+      rationale: "El valor central no se deja arrastrar por unos pocos casos lentos, así que representa mejor lo típico."
     - id: b
-      text: La desviación típica, para saber si el promedio es representativo
+      text: "La desviación típica de la serie, para saber si el promedio de 2,1 s es representativo o si esconde una dispersión tan grande que la media deja de describir a nadie y por eso las quejas no cuadran con el panel"
+      rationale: "Sin saber cuánto se dispersan los tiempos, un promedio de 2,1 s no dice nada por sí solo."
     - id: d
-      text: El tiempo hasta el primer token, que es el único que importa
+      text: "El tiempo hasta el primer token, que en una respuesta generada es el único que percibe el usuario y el que genera las quejas"
+      rationale: "Lo que se percibe es cuánto tarda en aparecer la primera palabra, no cuándo termina la respuesta."
     - id: a
       text: "Los percentiles altos (p95, p99): la distribución de latencia de un LLM tiene una
         cola larga y la media la esconde, mientras que la cola es justo lo que sufre el
         usuario"
+      rationale: "El promedio esconde justo lo que genera quejas: unas pocas peticiones lentísimas no mueven la media pero sí a quien las sufre."
   correct: a
   explanation: "La latencia de generación tiene cola larga: depende de cuánto se genera, de si
     el modelo razona y de las llamadas a herramienta. La media queda dominada por el grueso
@@ -344,12 +391,16 @@
       text: El resultado es la métrica que importa, pero la trayectoria (qué herramientas llamó,
         en qué orden, cuántos pasos, dónde se atascó) es lo que te dice POR QUÉ falló y es
         imprescindible para depurar
+      rationale: "Con solo la nota final sabes que falla; con el camino sabes en qué paso se torció, que es lo que hay que arreglar."
     - id: b
-      text: "Solo el resultado: si la tarea sale bien, el camino da igual"
+      text: "Solo el resultado: si la tarea termina bien, el camino que haya seguido el agente para llegar hasta ahí da igual y medirlo solo añade ruido"
+      rationale: "Si la tarea termina bien, el camino es un detalle de implementación."
     - id: a
-      text: "Solo la trayectoria: comparar con la secuencia ideal de pasos es más objetivo"
+      text: "Solo la trayectoria: comparar la secuencia de pasos que siguió el agente con la secuencia ideal que definiste es más objetivo que juzgar un resultado en lenguaje natural, que admite muchas formas correctas y obliga a un juez"
+      rationale: "Comparar los pasos con la secuencia ideal es objetivo y no depende de juzgar el texto final."
     - id: c
-      text: "Ninguna de las dos: en agentes solo se puede evaluar con revisión humana"
+      text: "Ninguna de las dos por separado: en agentes de varios pasos la única evaluación fiable es la revisión humana de la ejecución completa"
+      rationale: "Un agente encadena decisiones abiertas, y eso solo lo puede valorar una persona que lo lea entero."
   correct: d
   explanation: "Puntuar solo el resultado da una métrica honesta pero opaca: sabes que el 30%
     falla y no por qué. Puntuar solo la trayectoria contra una secuencia 'ideal' castiga
@@ -368,14 +419,18 @@
     depurar después?
   options:
     - id: b
-      text: La respuesta final y el tiempo total, para no inflar el volumen de registros
+      text: "La respuesta final y el tiempo total de la ejecución, que es lo justo para diagnosticar sin inflar el volumen de registros ni su coste de almacenamiento"
+      rationale: "Registra el qué y no el cómo: cuando algo falla, deja exactamente con lo que no se puede depurar."
     - id: a
       text: Cada llamada al modelo y a herramienta con sus entradas, sus salidas, su uso de tokens
         y su duración, correlacionadas por un identificador de ejecución
+      rationale: "La prueba de si basta: ¿puedes reconstruir por qué el agente decidió lo que decidió sin volver a ejecutarlo?"
     - id: c
-      text: Solo los pasos que terminaron en error
+      text: "Solo los pasos que terminaron en error, porque son los únicos que hacen falta para reconstruir lo que salió mal en la ejecución"
+      rationale: "Los pasos que fueron bien no hay que depurarlos: registrar lo que falló concentra el esfuerzo."
     - id: d
-      text: El razonamiento del modelo en bruto, que es donde está la explicación real
+      text: "El razonamiento del modelo en bruto de cada turno, que es donde está la explicación real de lo que el agente decidió y por qué"
+      rationale: "Es lo que más ocupa y lo que menos se puede comprobar: explica una intención, no lo que llegó a ocurrir."
   correct: a
   explanation: "Sin entradas y salidas por paso no se puede reconstruir dónde se torció, y sin
     identificador de correlación no se pueden juntar los pasos de una misma ejecución en un
@@ -395,15 +450,18 @@
     su propia regla de prefijos. ¿Por qué?
   options:
     - id: c
-      text: Porque son claves de uso interno del protocolo para correlacionar peticiones y
-        respuestas
+      text: "Porque son claves de uso interno del protocolo, que el propio MCP utiliza para correlacionar cada petición con su respuesta dentro de una sesión"
+      rationale: "Son claves internas del protocolo para emparejar cada petición con su respuesta."
     - id: a
-      text: Para permitir que los servidores facturen por petición
+      text: "Para permitir que los servidores facturen por petición, identificando de forma inequívoca a quién corresponde cada llamada recibida"
+      rationale: "Identifican al que llama en cada petición, que es lo que permite facturar por uso."
     - id: b
       text: Para propagar contexto de trazas de OpenTelemetry con los formatos estándar de W3C, y
         así poder seguir una operación a través de cliente, servidor y sistemas de destino
+      rationale: "Se reservan porque son de otro estándar: si cada implementación las prefijara a su gusto, la traza se cortaría al cambiar de sistema."
     - id: d
-      text: Para transportar la versión de protocolo cuando no hay cabeceras HTTP
+      text: "Para transportar la versión del protocolo cuando el transporte no dispone de cabeceras HTTP donde negociarla, como ocurre cuando el servidor se comunica sobre entrada y salida estándar"
+      rationale: "Llevan la versión del protocolo cuando el transporte no tiene cabeceras donde ponerla."
   correct: b
   explanation: "Es interoperabilidad con la observabilidad estándar: esas tres claves llevan
     contexto de traza en los formatos W3C Trace Context y Baggage, de modo que una llamada a
@@ -426,14 +484,18 @@
         coste = total_entrada * PRECIO_ENTRADA + total_salida * PRECIO_SALIDA
   options:
     - id: b
-      text: Falta multiplicar por el número de iteraciones del bucle
+      text: "Falta multiplicar por el número de iteraciones del bucle: usage devuelve el gasto de un único turno y no el acumulado de la ejecución entera del agente, que encadena decenas de llamadas"
+      rationale: "El bucle da varias vueltas y el cálculo solo recoge una: falta multiplicar por las iteraciones."
     - id: a
-      text: usage solo se rellena en respuestas en streaming
+      text: "usage solo se rellena en las respuestas en streaming, y en las llamadas normales llega a cero salvo que se pida de forma explícita"
+      rationale: "Sin consumo incremental el contador de uso llega vacío, y lo que se suma son ceros."
     - id: c
-      text: Hay que usar el contador de tokens antes de la llamada, no el usage de la respuesta
+      text: "Hay que usar el endpoint de conteo de tokens antes de la llamada en lugar del usage de la respuesta, que redondea a la baja por bloque"
+      rationale: "El recuento fiable se hace antes de llamar; lo que devuelve la respuesta es orientativo."
     - id: d
       text: "input_tokens es solo el resto NO cacheado: el prompt real es input_tokens más los
         tokens de escritura de caché más los de lectura de caché, cada uno con su precio"
+      rationale: "Por eso el cálculo a mano siempre sale por debajo de la factura: falta lo leído de caché, que se paga aunque más barato."
   correct: d
   explanation: Con caché activa, input_tokens es el remanente procesado a precio completo; el
     tamaño real del prompt es la suma de ese campo con los tokens de creación y de lectura
@@ -454,12 +516,16 @@
     - id: b
       text: Con el endpoint de conteo de tokens, pasándole el mismo modelo que vas a usar para
         inferir
+      rationale: "Cada familia parte el texto a su manera, así que la cuenta solo vale si se pide con el mismo modelo que va a leerlo."
     - id: c
-      text: Con tiktoken, que es el tokenizador estándar de la industria
+      text: "Con tiktoken, que es el tokenizador estándar de la industria y sirve para cualquier proveedor con un margen de error pequeño"
+      rationale: "Es el tokenizador más extendido, y sirve de referencia común para estimar cualquier prompt."
     - id: a
-      text: Estimando a razón de cuatro caracteres por token
+      text: "Estimando a razón de cuatro caracteres por token, que es la regla que usan los propios paneles de coste"
+      rationale: "La regla de cuatro caracteres por token va sobrada para dimensionar un documento largo."
     - id: d
-      text: Dividiendo el número de palabras entre 0,75
+      text: "Dividiendo el número de palabras entre 0,75, que es la proporción media entre palabras y tokens"
+      rationale: "La proporción entre palabras y tokens es bastante estable, y esa razón la aproxima bien."
   correct: b
   explanation: El conteo es específico del modelo, así que hay que pedirlo al endpoint de
     conteo con el mismo identificador de modelo que usarás. tiktoken es el tokenizador de
@@ -478,14 +544,18 @@
     el mismo texto suben. ¿Cómo actualizas los presupuestos y los paneles?
   options:
     - id: a
-      text: Aplicando un multiplicador global publicado a las cifras que ya tienes
+      text: "Aplicando a las cifras que ya tienes el multiplicador global que publica el proveedor para convertir entre los dos tokenizadores"
+      rationale: "Con el factor publicado se ajustan de golpe las cifras que ya tienes, sin volver a medir nada."
     - id: c
       text: Volviendo a medir con el endpoint de conteo sobre una muestra representativa de TUS
         prompts, porque el desplazamiento varía según el tipo de contenido
+      rationale: "El desplazamiento no es un factor fijo: código, tablas y prosa se ven afectados de forma muy distinta."
     - id: b
-      text: "No hay que hacer nada: el precio por token compensa la diferencia"
+      text: "No hay que hacer nada: el precio por token del modelo nuevo compensa la diferencia de tokenización y el coste final se mantiene"
+      rationale: "El precio por token se ajusta al tokenizador, así que el coste final se mantiene."
     - id: d
-      text: Desactivando el conteo y midiendo solo por coste facturado a fin de mes
+      text: "Desactivando el conteo previo y midiendo solo por el coste realmente facturado a fin de mes, que es la única cifra que no se estima y por tanto la única comparable entre modelos"
+      rationale: "La factura es la única medida que no se equivoca; lo demás son estimaciones."
   correct: c
   explanation: "El desplazamiento depende de la forma del contenido —código, texto no inglés y
     JSON no se comportan igual—, así que un multiplicador único va a estar mal en algún
@@ -506,16 +576,20 @@
     alta, sé conservador, no busques minucias'. ¿Qué está ocurriendo?
   options:
     - id: a
-      text: El modelo nuevo es peor encontrando fallos y hay que volver al anterior
+      text: "El modelo nuevo es peor encontrando fallos en este dominio y lo sensato es volver al anterior mientras se investiga la diferencia de capacidad"
+      rationale: "Si encuentra menos incidencias que el anterior, la capacidad ha bajado y conviene volver atrás."
     - id: c
-      text: El conjunto de evaluación quedó obsoleto y hay que reetiquetarlo
+      text: "El conjunto de evaluación quedó obsoleto respecto al código que revisa y hay que reetiquetarlo entero antes de sacar ninguna conclusión de la comparación: los fallos que el conjunto marca como altos hace meses que dejaron de serlo, y por eso el modelo nuevo, mejor calibrado, los descarta"
+      rationale: "Un conjunto etiquetado hace tiempo deja de reflejar lo que hoy se considera un fallo."
     - id: b
       text: "Es un efecto del harness, no una regresión de capacidad: el modelo nuevo obedece el
         filtro de severidad más al pie de la letra, encuentra los fallos y luego decide no
         reportarlos. La corrección es pedir cobertura (reportar todo con confianza y
         severidad) y filtrar en un paso posterior"
+      rationale: "Se distingue pidiéndole que lo saque todo sin criterio de corte: si aparecen, la capacidad está intacta y sobra la instrucción."
     - id: d
-      text: Falta subir el nivel de esfuerzo hasta que la exhaustividad se recupere
+      text: "Falta subir el nivel de esfuerzo de razonamiento hasta que la exhaustividad se recupere, porque el modelo nuevo reparte peor su presupuesto"
+      rationale: "Con más profundidad de razonamiento el modelo recupera los fallos que se estaba dejando."
   correct: b
   explanation: "Es un caso precioso de métrica que mide el harness y no el modelo: cuando el
     modelo sigue las instrucciones más literalmente, un filtro de severidad escrito para un
@@ -535,14 +609,18 @@
     ¿qué hay que mantener fijo para que la comparación signifique algo?
   options:
     - id: a
-      text: Solo el modelo; el resto puede variar porque forma parte de la configuración
+      text: "Solo el modelo y su versión; el resto de la configuración puede variar porque forma parte de lo que se está comparando entre A y B"
+      rationale: "El modelo es lo que domina el resultado; lo demás forma parte de la configuración que se compara."
     - id: b
-      text: Solo el conjunto de casos; el calificador puede mejorarse sobre la marcha
+      text: "Solo el conjunto de casos: el calificador puede irse mejorando sobre la marcha, ya que juzga las dos configuraciones con el mismo criterio en cada momento"
+      rationale: "Lo que tiene que ser común son los casos; el calificador puede irse afinando por el camino."
     - id: c
-      text: "Nada en particular: al haber muestra suficiente, las diferencias se compensan"
+      text: "Nada en particular: con una muestra suficientemente grande las diferencias de configuración se compensan entre sí y no sesgan la comparación de forma apreciable"
+      rationale: "Con muestra suficiente, las diferencias de configuración se promedian y no sesgan la comparación."
     - id: d
       text: "Todo lo demás: mismo modelo y versión, mismos parámetros, mismo conjunto de
         herramientas, mismo calificador y misma versión de la rúbrica"
+      rationale: "Si se mueve algo más, la diferencia medida deja de ser atribuible al cambio que se está probando."
   correct: d
   explanation: "Un experimento con dos variables no atribuye nada. El caso que más se cuela es
     cambiar el calificador o la rúbrica a mitad de la serie: entonces las puntuaciones de
@@ -564,12 +642,16 @@
       text: Fuera de línea mide contra un conjunto fijo antes de desplegar y sirve para comparar
         cambios; en línea mide sobre tráfico real y detecta lo que el conjunto no
         representaba
+      rationale: "Una responde 'este cambio mejora lo que ya sabía medir'; la otra, 'lo que llega no se parece a lo que medía'."
     - id: b
-      text: Fuera de línea usa calificadores automáticos y en línea revisión humana
+      text: "Fuera de línea se califica con calificadores automáticos y en línea con revisión humana, porque en producción no hay respuesta de referencia contra la que comparar"
+      rationale: "Una se automatiza entera y la otra necesita que alguien mire las respuestas reales."
     - id: c
-      text: Fuera de línea mide calidad y en línea coste y latencia
+      text: "Fuera de línea se mide la calidad de las respuestas y en línea las propiedades operativas, coste y latencia, que solo se observan con tráfico real encima"
+      rationale: "Una vigila si responde bien y la otra si el servicio va rápido y sale a cuenta."
     - id: d
-      text: "Son redundantes: si el conjunto fuera de línea es bueno, la monitorización sobra"
+      text: "Son redundantes: si el conjunto fuera de línea representa bien el tráfico real, la monitorización en línea no aporta nada que no se haya medido ya antes de desplegar el cambio"
+      rationale: "Si el conjunto está bien construido, ya cubre lo que va a pasar en producción."
   correct: a
   explanation: "Fuera de línea da control: mismo conjunto, comparación limpia entre variantes,
     puerta antes de desplegar. En línea da realidad: entradas que nadie previó, cambios de
@@ -588,15 +670,19 @@
     respuesta fue buena. ¿Qué estrategias hay?"
   options:
     - id: c
-      text: "Ninguna: sin etiquetas no hay medición posible en producción"
+      text: "Ninguna: sin etiquetas no hay medición posible en producción, y lo único honesto es esperar a tener un conjunto etiquetado antes de afirmar nada sobre la calidad"
+      rationale: "Sin una referencia de lo que es correcto, cualquier número que se calcule es inventado."
     - id: b
       text: Señales implícitas de producto (reintentos, abandono, correcciones manuales,
         aceptación de la sugerencia), muestreo con calificador automático sobre una fracción
         del tráfico y revisión humana periódica de una muestra estratificada
+      rationale: "Ninguna vale por sí sola: son señales indirectas que solo significan algo cruzadas y con una muestra revisada a mano."
     - id: a
-      text: Un botón de pulgar arriba o abajo, que es la única señal fiable
+      text: "Un botón de pulgar arriba o abajo en la interfaz, que es la única señal fiable porque viene directamente del usuario y no de una inferencia sobre su comportamiento; el resto de indicios son correlaciones que se rompen en cuanto cambia el producto"
+      rationale: "El pulgar arriba o abajo lo da el usuario, y nadie mejor que él sabe si le sirvió."
     - id: d
-      text: Comparar la distribución de longitudes de respuesta con la del conjunto de evaluación
+      text: "Comparar la distribución de longitudes de las respuestas en producción con la del conjunto de evaluación, que es lo que detecta las desviaciones de comportamiento"
+      rationale: "Si las respuestas se parecen en forma a las del conjunto de evaluación, el comportamiento se mantiene."
   correct: b
   explanation: "Se combinan tres cosas: comportamiento del usuario, que a menudo es la mejor
     etiqueta implícita (que reformule, que abandone, que corrija a mano, que acepte);
@@ -615,14 +701,18 @@
   stem: Antes de diseñar las evaluaciones de una función nueva, ¿por dónde se empieza?
   options:
     - id: b
-      text: Por elegir las métricas estándar del tipo de tarea
+      text: "Por elegir las métricas estándar del tipo de tarea, que es lo que permite comparar el sistema con otros y situarse frente al estado del arte"
+      rationale: "Cada tipo de tarea tiene sus métricas asentadas, y partir de ellas ahorra reinventar la rueda."
     - id: a
-      text: Por fijar el umbral de aprobado que exigirá el negocio
+      text: "Por fijar el umbral de aprobado que exigirá el negocio, porque sin saber dónde está la línea no se puede diseñar contra qué se mide"
+      rationale: "Sin saber qué nota hay que sacar, no se puede decidir si el sistema está listo."
     - id: c
       text: "Por enumerar cómo puede fallar de forma que importe: qué error sería caro, embarazoso
         o difícil de detectar; esos modos de fallo son los que definen qué hay que medir"
+      rationale: "Cambia el orden habitual: no se busca qué se puede medir, sino qué haría daño; lo demás sale de ahí."
     - id: d
-      text: Por construir el conjunto más grande posible y ver qué sale
+      text: "Por construir el conjunto de casos más grande que puedas y ver qué modos de fallo emergen de él, en lugar de anticiparlos con hipótesis propias que sesgan lo que se mide"
+      rationale: "Cuanto más grande sea el conjunto, más probable es que dentro esté lo que de verdad falla."
   correct: c
   explanation: Las métricas se derivan de los fallos que importan, no al revés. Si el fallo
     caro es inventarse una cifra, mides fidelidad a la fuente; si es filtrar datos de otro
@@ -641,14 +731,18 @@
     averiguas si el problema es la recuperación o la generación?
   options:
     - id: b
-      text: Subiendo el número de documentos recuperados hasta que la métrica global mejore
+      text: "Subiendo el número de documentos recuperados hasta que la métrica global mejore: si mejora, el cuello estaba en la recuperación, y si no, en la generación"
+      rationale: "Si al traer más documentos la nota sube, lo que faltaba era material: el diagnóstico sale solo."
     - id: c
-      text: "Comparando con otro modelo generador: si mejora, el problema era la generación"
+      text: "Comparando con otro modelo generador sobre el mismo sistema de recuperación: si la métrica global mejora, el problema estaba en la generación y no en lo que se recupera"
+      rationale: "Cambiando el generador y viendo si mejora se aísla la parte que estaba limitando."
     - id: d
-      text: Cambiando el modelo de embeddings y observando el efecto en la métrica global
+      text: "Cambiando el modelo de embeddings por otro y observando el efecto en la métrica global, que aísla la contribución de la etapa de recuperación al resultado"
+      rationale: "El modelo de embeddings gobierna lo que se recupera, así que su efecto señala dónde está el problema."
     - id: a
       text: "Midiendo cada etapa por separado: primero si los documentos correctos están entre los
         recuperados, y después, dándole los documentos correctos, si la generación acierta"
+      rationale: "Con contexto perfecto se separan las dos cosas: si con los documentos buenos acierta, lo que falla es lo que trae."
   correct: a
   explanation: "Una métrica de extremo a extremo no atribuye. Se descompone: la recuperación
     se mide sola (¿estaba el documento necesario entre los k recuperados?) y la generación
@@ -668,12 +762,16 @@
     - id: d
       text: La proporción de los documentos relevantes que aparecen entre los k primeros
         resultados
+      rationale: "Es la mitad de la foto: dice si lo necesario llegó, y no dice cuánta basura vino acompañando."
     - id: a
-      text: La proporción de los k resultados devueltos que son relevantes
+      text: "La proporción de los k resultados devueltos que resultan ser relevantes para la consulta"
+      rationale: "Qué proporción de lo devuelto era pertinente: mide cuánta basura acompaña a lo bueno."
     - id: b
-      text: La posición media del primer resultado relevante
+      text: "La posición media que ocupa el primer resultado relevante dentro de la lista"
+      rationale: "En qué puesto suele aparecer el primer acierto, que es lo que el usuario nota."
     - id: c
-      text: La similitud media entre la consulta y los k resultados
+      text: "La similitud media entre el vector de la consulta y los k resultados devueltos"
+      rationale: "Cómo de cerca están la consulta y lo devuelto, promediado sobre los k resultados."
   correct: d
   explanation: "recall@k mira desde los relevantes: cuántos de ellos entraron en el top-k. La
     opción de 'qué proporción de los k devueltos es relevante' es precision@k. La posición
@@ -691,15 +789,19 @@
     con LLM?
   options:
     - id: b
-      text: Porque no tiene en cuenta el coste de los embeddings
+      text: "Porque no tiene en cuenta el coste de calcular los embeddings de la consulta y del corpus, que domina la factura de un sistema con recuperación"
+      rationale: "No dice nada de lo que cuesta calcular y almacenar los vectores, que es la mitad del problema."
     - id: c
       text: "Porque ignora el ORDEN y el ruido: meter el documento correcto en el puesto 20 de 20
         cuenta igual que en el 1, y los 19 irrelevantes gastan contexto y pueden despistar
         al generador"
+      rationale: "Sube con k por construcción, así que se puede maquillar recuperando de más: lo que empeora entonces es la generación."
     - id: a
-      text: Porque solo se puede calcular si hay etiquetas humanas
+      text: "Porque solo se puede calcular si hay etiquetas humanas que digan qué documentos son relevantes, y eso rara vez existe fuera de un conjunto de laboratorio"
+      rationale: "Necesita saber de antemano qué documentos eran relevantes, y esa lista la escribe una persona."
     - id: d
-      text: Porque siempre crece con k y por tanto no es comparable entre sistemas
+      text: "Porque siempre crece al aumentar k y por tanto no resulta comparable entre sistemas que devuelven un número distinto de documentos por consulta, ni entre dos versiones del mismo sistema"
+      rationale: "Cuanto mayor es k más alto sale, así que dos sistemas con distinta k no se pueden comparar."
   correct: c
   explanation: "Con k suficientemente grande el recall se acerca a 1 sin que el sistema
     mejore: es una métrica insensible a la posición. Y en un sistema con LLM el ruido tiene
@@ -719,15 +821,19 @@
     seguridad frente a una de calidad?
   options:
     - id: a
-      text: Que se ejecuta con menos frecuencia porque es más cara
+      text: "Que se ejecuta con mucha menos frecuencia porque cada pasada es cara: las entradas adversarias hay que generarlas y revisarlas a mano una por una"
+      rationale: "Al ser más costosa de montar y ejecutar, se pasa en hitos y no en cada cambio."
     - id: b
-      text: Que la califica siempre un humano, porque un modelo no puede juzgar seguridad
+      text: "Que la califica siempre un humano, porque un modelo puesto a juzgar si una salida es segura acaba reproduciendo el mismo fallo que se le pide detectar en ella"
+      rationale: "Decidir si algo es peligroso pide criterio y contexto, y eso lo pone una persona."
     - id: d
       text: "Que el conjunto son entradas adversarias construidas a propósito para provocar el
         fallo, y que la métrica que importa suele ser el peor caso y no el promedio: una
         tasa media buena convive con un fallo inaceptable"
+      rationale: "Un 99% de media no dice nada aquí: basta un caso que funcione para que alguien lo repita a propósito."
     - id: c
-      text: Que se mide sobre el mismo conjunto de calidad aplicando otra rúbrica
+      text: "Que se mide sobre el mismo conjunto de casos que la calidad, aplicándole una rúbrica distinta centrada en el daño potencial de cada respuesta y en la gravedad de sus consecuencias para el usuario"
+      rationale: "Se aprovecha el mismo conjunto y se le aplica otra rúbrica, la de riesgo."
   correct: d
   explanation: "Un conjunto de calidad se construye para representar el uso típico; uno de
     seguridad se construye para romper el sistema, y se alimenta de lo que encuentran los
@@ -747,15 +853,19 @@
     reproducibles. ¿Qué le dices?
   options:
     - id: a
-      text: Que es correcto y es la práctica estándar
+      text: "Que es correcto y es la práctica estándar de la industria para que dos ejecuciones de la misma suite den exactamente el mismo resultado"
+      rationale: "Sin aleatoriedad en el muestreo, la misma entrada da la misma salida: es lo que se hace siempre."
     - id: b
-      text: Que solo funciona si además se fija una semilla aleatoria
+      text: "Que solo funciona si además se fija una semilla aleatoria en la petición, porque temperature a 0 elimina el muestreo pero no el desempate entre tokens con la misma probabilidad, que sigue siendo arbitrario en cada una de las ejecuciones"
+      rationale: "Hace falta además fijar la semilla, porque el muestreo sigue teniendo una fuente aleatoria."
     - id: d
-      text: Que hace las evaluaciones reproducibles pero invalida la comparación con producción
+      text: "Que hace las evaluaciones reproducibles pero invalida la comparación con producción, donde el muestreo sí está activo y las respuestas se distribuyen de otra forma"
+      rationale: "Reproducible sí, pero deja de parecerse a producción, donde no se generan así las respuestas."
     - id: c
       text: Que nunca garantizó salidas idénticas, y que además en los modelos actuales de
         Anthropic los parámetros de muestreo están retirados y la petición se rechaza; la
         reproducibilidad se busca con más muestras, no con un parámetro
+      rationale: "El error de fondo es buscar la reproducibilidad en un parámetro: se consigue con muestra, no apagando la aleatoriedad."
   correct: c
   explanation: "Dos cosas a la vez. Metodológicamente, temperature 0 nunca dio determinismo
     estricto, y evaluar solo en ese régimen mide un modo que no es el de producción. Y
@@ -776,12 +886,16 @@
     - id: a
       text: La estimación con su incertidumbre y el N de la muestra, para que se vea si esos tres
         puntos son distinguibles del ruido o no
+      rationale: "Sin el N, esos tres puntos parecen una regresión; con él suelen ser la misma medición dos veces."
     - id: b
-      text: El mejor de los dos, porque demuestra lo que el sistema puede hacer
+      text: "El mejor de los dos resultados, porque demuestra lo que el sistema es capaz de hacer cuando no le penaliza la variación aleatoria de una ejecución concreta"
+      rationale: "El mejor resultado demuestra de lo que el sistema es capaz cuando todo va bien."
     - id: c
-      text: El promedio de los dos, sin más detalle
+      text: "El promedio de las dos ejecuciones, sin más detalle, que es la cifra que mejor resume el comportamiento del sistema"
+      rationale: "El promedio de las dos ejecuciones resume las dos medidas en un solo número."
     - id: d
-      text: El último, porque es el más reciente
+      text: "El último, porque es el más reciente y el que corresponde al estado actual del sistema"
+      rationale: "La última es la que corresponde al estado actual del sistema."
   correct: a
   explanation: "Un porcentaje sin su N ni su incertidumbre no permite decidir nada: con 50
     casos, tres puntos son ruido; con 5.000, es una señal. Informar el mejor resultado es
@@ -799,14 +913,18 @@
     dos personas etiqueten los mismos casos?
   options:
     - id: d
-      text: Para duplicar el tamaño del conjunto etiquetado
+      text: "Para duplicar de hecho el tamaño del conjunto etiquetado sin duplicar el esfuerzo de selección de casos, que es la parte cara del proceso"
+      rationale: "Dos personas etiquetando producen el doble de casos con el mismo esfuerzo por cabeza."
     - id: b
       text: "Para medir el acuerdo entre anotadores: si dos humanos no coinciden, la tarea está
         mal definida y ningún calificador puede superar ese techo"
+      rationale: "Si el criterio no está claro, se descubre ahí y no tres meses después discutiendo por qué la nota no cuadra."
     - id: a
-      text: Para repartir la carga y terminar antes
+      text: "Para repartir la carga entre dos personas y terminar el etiquetado en la mitad de tiempo, que es lo que suele frenar la calibración de un calificador"
+      rationale: "Repartir el trabajo entre dos es lo que hace que la muestra esté lista a tiempo."
     - id: c
-      text: Para poder descartar al anotador más lento
+      text: "Para poder descartar al anotador más lento y quedarte con el criterio de quien haya etiquetado más casos en el mismo plazo de tiempo"
+      rationale: "Comparando su ritmo se ve quién sostiene la calidad al volumen que hace falta."
   correct: b
   explanation: "El acuerdo entre anotadores marca el techo de lo medible: si los humanos
     coinciden el 70% de las veces, exigirle al calificador automático un 90% de acuerdo no
@@ -825,15 +943,19 @@
     sistema con ella?
   options:
     - id: b
-      text: La inserta en el prompt de sistema para que el agente la tenga presente
+      text: "La inserta en el prompt de sistema del agente para que la tenga presente durante toda la sesión y ajuste su trabajo a los criterios declarados"
+      rationale: "Eso lo haría un prompt; aquí lo relevante es que la rúbrica la aplica algo que no es el propio agente."
     - id: c
-      text: La usa para validar el formato del fichero de salida
+      text: "La usa para validar el formato del fichero de salida al terminar, rechazando la ejecución si la estructura no encaja con lo que declara la rúbrica"
+      rationale: "La usa para comprobar que el fichero producido cumple la forma pedida."
     - id: a
       text: "Ejecuta un bucle iterar → calificar → revisar: un calificador con contexto propio
         puntúa cada iteración contra la rúbrica y devuelve las carencias por criterio, hasta
         que se satisface, se agotan las iteraciones o se interrumpe"
+      rationale: "Es la diferencia entre puntuar al final y usar la nota para volver a intentarlo mientras queden vueltas."
     - id: d
-      text: La aplica una única vez al final para aprobar o rechazar el resultado
+      text: "La aplica una única vez al final de la sesión para aprobar o rechazar el resultado, sin intervenir en absoluto en cómo el agente ha llegado hasta él ni en cuántos intentos le haya costado producirlo"
+      rationale: "Se aplica al final, una sola vez, para dar el resultado por bueno o por malo."
   correct: a
   explanation: "La rúbrica no es contexto para el agente: alimenta un calificador con su
     propia ventana que puntúa cada iteración y realimenta las carencias por criterio. El
@@ -853,14 +975,18 @@
     al modelo para hacer seguimiento de coste?
   options:
     - id: a
-      text: Del evento de mensaje del agente, que trae el uso acumulado
+      text: "Del evento de mensaje del agente, que trae el uso acumulado de la sesión hasta ese punto"
+      rationale: "Confunde acumulado con desglose: sirve para el total de la sesión, no para atribuir coste a un paso."
     - id: b
-      text: Del evento de sesión ociosa, único momento en que se consolida el uso
+      text: "Del evento de sesión ociosa, que es el único momento en que el uso se consolida y se puede leer entero"
+      rationale: "Cuando la sesión se queda sin trabajo es cuando se consolidan y publican los contadores."
     - id: d
-      text: "No se expone por llamada: solo hay un total al terminar la sesión"
+      text: "No se expone por llamada individual: solo hay un total agregado al terminar la sesión"
+      rationale: "Si fuera así, no se podría saber qué herramienta o qué turno disparó la factura."
     - id: c
       text: Del evento de fin de la petición al modelo, que trae el desglose de tokens de entrada,
         salida y caché
+      rationale: "Cada llamada trae su propio desglose: sin él solo se sabe el total y no dónde se fue el gasto."
   correct: c
   explanation: "El desglose por llamada llega en el evento que cierra cada petición al modelo,
     con tokens de entrada, de salida y los de creación y lectura de caché: eso es lo que
@@ -882,12 +1008,16 @@
       text: "Estratificar: una suite rápida y barata como puerta en cada cambio, y la completa
         periódicamente o antes de desplegar; y paralelizar los casos, que son
         independientes"
+      rationale: "El problema real es que ya no se ejecuta: cualquier arreglo que no la haga rápida en el momento de fusionar no lo resuelve."
     - id: b
-      text: Bajar el tamaño del conjunto a la mitad para que tarde 20 minutos
+      text: "Bajar el tamaño del conjunto a la mitad para que la suite tarde 20 minutos y vuelva a caber en el hueco que el equipo dedica a esperar antes de fusionar"
+      rationale: "Con la mitad de casos tarda la mitad y vuelve a caber en el ritmo de trabajo del equipo."
     - id: a
-      text: Sustituir el juez con LLM por comprobaciones de coincidencia exacta
+      text: "Sustituir el juez con LLM por comprobaciones de coincidencia exacta, que es lo que domina el tiempo de ejecución de una suite de este tamaño"
+      rationale: "Las comprobaciones exactas cuestan milisegundos, y ahí es donde se va la mayor parte del tiempo."
     - id: c
-      text: Ejecutarla solo en la rama principal y aceptar detectar las regresiones después
+      text: "Ejecutarla solo en la rama principal y aceptar detectar las regresiones después de haber fusionado, que es el precio razonable por no frenar a nadie en cada cambio pequeño"
+      rationale: "Dejarla en la rama principal la mantiene viva sin frenar a nadie mientras desarrolla."
   correct: d
   explanation: "Una evaluación que nadie ejecuta no protege nada, así que el problema real es
     de coste de ciclo. Se ataca por dos vías compatibles: separar una puerta rápida
@@ -906,14 +1036,18 @@
   stem: ¿Qué significa 'repetible' cuando la oferta pide sistemas de evaluación repetibles?
   options:
     - id: b
-      text: Que el modelo produzca la misma salida en cada ejecución
+      text: "Que el modelo produzca exactamente la misma salida en cada ejecución sobre el mismo caso, que es lo que permite comparar dos versiones sin ruido"
+      rationale: "Que la misma entrada dé la misma salida en cada pasada: sin eso no hay nada que comparar."
     - id: a
       text: Que cualquiera pueda volver a ejecutar la misma evaluación, sobre el mismo conjunto y
         con el mismo calificador, y obtener un resultado comparable con los anteriores
+      rationale: "La palabra clave es 'cualquiera': si solo sale igual en tu máquina y con tu versión del calificador, no lo es."
     - id: c
-      text: Que la evaluación se ejecute automáticamente en cada despliegue
+      text: "Que la evaluación se ejecute de forma automática en cada despliegue, sin depender de que alguien se acuerde de lanzarla antes de publicar"
+      rationale: "Que se dispare sola en cada despliegue, sin depender de que alguien se acuerde."
     - id: d
-      text: Que los resultados se guarden en un panel histórico
+      text: "Que los resultados de cada ejecución queden guardados en un panel histórico donde se pueda seguir la evolución de la métrica a lo largo del tiempo y entre versiones"
+      rationale: "Que los resultados queden registrados en un histórico y se puedan consultar más tarde."
   correct: a
   explanation: "Repetible es una propiedad del sistema de medida, no del modelo: conjunto
     versionado, calificador versionado, configuración registrada, resultado comparable. La
@@ -932,14 +1066,18 @@
     riesgo?
   options:
     - id: c
-      text: Desplegar al 100% y revertir si aparecen quejas
+      text: "Desplegar al 100% del tráfico y revertir en cuanto aparezcan quejas, que es lo que da la señal más rápida y con más volumen sobre el cambio"
+      rationale: "Salir al cien por cien da la señal más rápida y clara, y siempre se puede volver atrás."
     - id: a
-      text: Ampliar el conjunto fuera de línea hasta que cubra todos los casos posibles
+      text: "Ampliar el conjunto de evaluación fuera de línea hasta que cubra todos los casos posibles, y desplegar únicamente cuando la variante nueva gane en todos y cada uno de ellos"
+      rationale: "Si el conjunto cubre todos los casos, el riesgo se resuelve antes de tocar producción."
     - id: b
       text: Ejecutar la variante nueva en paralelo sin mostrar su salida (sombra) para comparar
         sobre tráfico real, y después un despliegue progresivo a un porcentaje pequeño
+      rationale: "Da la comparación sobre tráfico real sin exponer a nadie a la versión nueva: se paga en cómputo, no en usuarios."
     - id: d
-      text: Pedir a tres compañeros que lo prueben a mano durante un día
+      text: "Pedir a tres compañeros que lo prueben a mano durante un día antes de publicar, que es lo que detecta los fallos que ninguna métrica automática ve"
+      rationale: "Tres pares de ojos durante un día detectan lo que ningún conjunto tenía previsto."
   correct: b
   explanation: La ejecución en sombra da la distribución real de entradas sin exponer a nadie
     a la salida nueva, y es lo que revela lo que el conjunto no representaba. El despliegue
@@ -957,14 +1095,18 @@
   stem: ¿Qué precaución básica hay que tomar al elegir el modelo que hace de juez?
   options:
     - id: d
-      text: Que sea el mismo modelo que se evalúa, para que comparta criterio
+      text: "Que sea el mismo modelo que se evalúa, para que juez y sistema compartan criterio y las puntuaciones resulten coherentes con lo que el sistema intenta hacer"
+      rationale: "Compartiendo modelo comparte criterio, y así juzga con la misma vara con la que se generó."
     - id: b
-      text: Que sea el modelo más barato disponible, porque el juicio es una tarea sencilla
+      text: "Que sea el modelo más barato disponible, porque juzgar contra una rúbrica explícita es una tarea sencilla comparada con generar la respuesta"
+      rationale: "Puntuar contra una rúbrica es una tarea acotada, y el modelo barato la hace igual de bien."
     - id: c
-      text: Que se ejecute con el mismo prompt de sistema que el sistema evaluado
+      text: "Que se ejecute con el mismo prompt de sistema que el sistema evaluado, para que juzgue con el mismo contexto con el que se generó la salida"
+      rationale: "Con el mismo prompt de sistema, el juez entiende el contexto en el que se produjo la respuesta."
     - id: a
       text: Que no sea el mismo modelo (ni la misma familia y versión) que produce las salidas
         evaluadas, para no arrastrar autopreferencia y puntos ciegos compartidos
+      rationale: "El juez y el juzgado comparten puntos ciegos: lo que uno no sabe ver, el otro tampoco lo penaliza."
   correct: a
   explanation: "Un modelo tiende a puntuar mejor sus propias salidas, y comparte con ellas los
     puntos ciegos: lo que no sabe reconocer al generar tampoco lo reconoce al juzgar. Usar
@@ -985,12 +1127,16 @@
       text: "Que la información que se está evaluando ya esté disponible para el sistema: por
         estar en el prompt, en los ejemplos, en el índice recuperable o en los datos de
         entrenamiento del modelo"
+      rationale: "El efecto es una nota alta que no se sostiene fuera: el sistema no resolvió, recordó."
     - id: a
-      text: Que el conjunto contenga datos personales sin anonimizar
+      text: "Que el conjunto de evaluación contenga datos personales sin anonimizar, que acaban viajando al proveedor del modelo en cada una de las ejecuciones de la suite completa de pruebas"
+      rationale: "Que en el conjunto viajen datos personales sin anonimizar es la fuga clásica."
     - id: c
-      text: Que casos del conjunto se repitan más de una vez
+      text: "Que algunos casos del conjunto se repitan más de una vez y pesen de más en la métrica, inflando el resultado de forma silenciosa"
+      rationale: "Que el mismo caso aparezca varias veces infla su peso en el resultado."
     - id: d
-      text: Que los casos provengan de más de una fuente
+      text: "Que los casos provengan de más de una fuente y mezclen distribuciones distintas, de modo que la media no describa a ninguna de ellas"
+      rationale: "Mezclar fuentes distintas rompe la homogeneidad del conjunto y ensucia la medida."
   correct: b
   explanation: El sistema parece resolver la tarea cuando en realidad está recuperando la
     respuesta. Tiene varias vías —los ejemplos del prompt, un índice que contiene el propio
@@ -1010,14 +1156,18 @@
     cambios en el prompt de sistema. ¿Qué investigas primero?
   options:
     - id: a
-      text: Si el proveedor tuvo una incidencia de caché
+      text: "Si el proveedor tuvo una incidencia en el servicio de caché durante esa ventana, que es la explicación más simple de una caída total de un día para otro"
+      rationale: "Un corte del lado del proveedor explica una caída total de un día para otro."
     - id: c
       text: "Si cambió algo del PREFIJO: el conjunto o el orden de las herramientas, el modelo, o
         algún valor variable que se coló antes del contenido estable"
+      rationale: "La caché va por prefijo: lo que se mira no es qué cambió, sino qué cambió ANTES de lo que se repite."
     - id: b
-      text: Si subió el tráfico por encima de la cuota de caché
+      text: "Si el tráfico subió por encima de la cuota de caché de la organización y las entradas empezaron a desalojarse antes de poder reutilizarse"
+      rationale: "Al crecer el tráfico se supera la cuota reservada y las entradas dejan de guardarse."
     - id: d
-      text: Si expiró el TTL por bajada de tráfico
+      text: "Si expiró el TTL por una bajada de tráfico: con menos peticiones por minuto, las entradas caducan entre llamada y llamada y nunca se leen"
+      rationale: "Con menos tráfico, las entradas caducan antes de que llegue la siguiente petición."
   correct: c
   explanation: "La caché es coincidencia de prefijo, así que una caída a cero apunta casi
     siempre a que el prefijo cambió: se añadió o reordenó una herramienta (van en la
@@ -1037,14 +1187,18 @@
   options:
     - id: a
       text: "Por cumplimiento normativo: hay que poder auditar quién cambió qué"
+      rationale: "Poder auditar quién cambió qué y cuándo es un requisito en cuanto hay normativa de por medio."
     - id: b
       text: Para poder revertir a una rúbrica anterior si la nueva es peor
+      rationale: "Guardar las versiones permite volver a la rúbrica anterior si la nueva resulta peor."
     - id: d
       text: "Porque un cambio en el calificador desplaza las puntuaciones sin que cambie el
         sistema: sin versión anotada, el histórico mezcla escalas distintas y las
         comparaciones dejan de ser válidas"
+      rationale: "Sin eso, el histórico mezcla varas de medir y una mejora aparente puede ser solo un calificador más blando."
     - id: c
       text: Porque los calificadores son código y todo el código se versiona
+      rationale: "Un calificador es código como cualquier otro, y todo el código va al control de versiones."
   correct: d
   explanation: "La razón de fondo es de validez de la medida: si afinas la rúbrica el martes,
     las puntuaciones del lunes y del miércoles no están en la misma escala, y una serie
@@ -1065,15 +1219,19 @@
   options:
     - id: b
       text: "Sí: seis puntos es una mejora clara"
+      rationale: "Seis puntos sobre doscientos casos son doce aciertos más: la diferencia se ve."
     - id: c
       text: "No: por debajo de diez puntos nunca hay significación"
+      rationale: "Por debajo de diez puntos las diferencias caen dentro del ruido habitual de estas medidas."
     - id: d
       text: Sí, si el cambio se mantiene en una segunda ejecución
+      rationale: "Si el efecto se repite en una segunda pasada, deja de ser casualidad."
     - id: a
       text: "No se puede afirmar con esos datos: con n=200 el error estándar de cada estimación
         ronda los 3,5 puntos, así que la diferencia está en el borde. Lo que decide es una
         prueba emparejada sobre los mismos casos, mirando cuáles cambiaron de resultado en
         cada sentido"
+      rationale: "Seis puntos suenan a mucho y con esa muestra están dentro del margen: hay que mirar qué casos cambiaron, no la media."
   correct: a
   explanation: "Con n=200 y p≈0,6, el error estándar de una proporción ronda 3,5 puntos, así
     que seis puntos entre dos estimaciones independientes está en el límite. Pero además hay
@@ -1097,12 +1255,16 @@
       text: "Exigir que toda afirmación de progreso esté respaldada por un resultado de
         herramienta de esa misma sesión, y evaluar precisamente eso: contrastar lo que el
         agente afirma contra la traza"
+      rationale: "Ataca la raíz: el agente informa de intención, no de hechos, y eso solo se detecta contrastando con lo que sí ocurrió."
     - id: a
       text: Pedirle que sea más cuidadoso en el prompt de sistema
+      rationale: "Una instrucción explícita de rigor en el prompt corrige el exceso de confianza al informar."
     - id: b
       text: Bajar el nivel de esfuerzo para que no elabore conclusiones
+      rationale: "Con menos margen para elaborar, el agente deja de sacar conclusiones que no ha comprobado."
     - id: d
       text: Añadir un segundo agente que resuma el informe del primero
+      rationale: "Un segundo agente resumiría la misma afirmación falsa: sin la traza delante, no tiene con qué contrastarla."
   correct: c
   explanation: "Son dos mitades del mismo arreglo. En el prompt: obligar a auditar cada
     afirmación contra una salida de herramienta de la sesión y a decir explícitamente lo que
@@ -1123,14 +1285,18 @@
   options:
     - id: a
       text: Que el modelo pierde precisión con el uso, como un modelo entrenado que se degrada
+      rationale: "El modelo se va degradando con el uso, como cualquier sistema entrenado que envejece."
     - id: b
       text: "Que cambia lo de alrededor: la distribución de las entradas, los datos que se
         recuperan, las herramientas, la versión del modelo. El sistema no se mueve, pero el
         terreno sí"
+      rationale: "Por eso una función puede empeorar sin que nadie haya tocado una línea: se mueve el suelo, no el sistema."
     - id: c
       text: Que la latencia aumenta a medida que crece el historial de conversación
+      rationale: "A medida que la conversación crece, cada llamada tarda más y la experiencia se degrada."
     - id: d
       text: Que la caché de prompts se degrada con el tiempo
+      rationale: "Con el tiempo las entradas de caché se fragmentan y el sistema pierde eficiencia."
   correct: b
   explanation: "Un modelo desplegado no se desgasta: lo que cambia es el entorno —los usuarios
     preguntan otras cosas, el índice de documentos se actualiza, una herramienta cambia su
@@ -1155,14 +1321,18 @@
   options:
     - id: a
       text: Que la comparación distingue mayúsculas y minúsculas
+      rationale: "Al comparar tal cual, una mayúscula distinta ya hace fallar la comprobación."
     - id: c
       text: Que debería devolver una puntuación continua y no un booleano
+      rationale: "Citar bien no es un sí o un no: hace falta una escala para reflejar los grados."
     - id: b
       text: "Mide la presencia de una fórmula, no la propiedad que interesa: un resumen puede
         decir 'según el documento' y atribuir algo que la fuente no dice, y otro puede citar
         bien con otras palabras. Además es trivialmente optimizable desde el prompt"
+      rationale: "Se rompe en dos direcciones: aprueba textos que atribuyen lo que no está, y suspende a los que citan bien con otras palabras."
     - id: d
       text: Que no maneja el caso de que la fuente esté vacía
+      rationale: "Con la fuente vacía la comprobación sigue dando un resultado, y ahí ya no significa nada."
   correct: b
   explanation: "Es un calificador indirecto: mide un rasgo superficial correlacionado con lo
     que quieres, no lo que quieres. Y lo peligroso es que se puede satisfacer sin cumplir la
@@ -1183,15 +1353,19 @@
   options:
     - id: c
       text: El modelo memoriza los casos del conjunto de evaluación durante el entrenamiento
+      rationale: "El modelo acaba viendo los casos del conjunto durante el entrenamiento y los responde de memoria."
     - id: a
       text: La métrica deja de correlacionar con la latencia
+      rationale: "La métrica se desacopla del tiempo de respuesta y deja de reflejar la experiencia real."
     - id: b
       text: El calificador se vuelve más lento a medida que crece el conjunto
+      rationale: "A medida que el conjunto crece, calificar tarda más y la medida se vuelve impracticable."
     - id: d
       text: "El sistema se optimiza hacia lo que el calificador premia en lugar de hacia la
         propiedad real: se alarga la respuesta si el juez premia longitud, se añaden las
         fórmulas que la comprobación busca, se cubren los patrones del conjunto y no los del
         uso real"
+      rationale: "Aparece como una curva que sube y usuarios que no lo notan: el sistema aprendió a puntuar, no a servir."
   correct: d
   explanation: "El mecanismo es que optimizas contra el instrumento, no contra el mundo, y
     cada aproximación tiene su hueco: un juez con debilidad por la longitud produce
@@ -1220,12 +1394,16 @@
     - id: a
       text: Medir la recuperación por separado (si los documentos necesarios están entre los
         recuperados) para poder atribuir un fallo de extremo a extremo a la etapa concreta
+      rationale: "Sin ese corte, un fallo de extremo a extremo no se puede atribuir: se acaba tocando el prompt cuando el problema era el índice."
     - id: c
       text: Guardar los documentos recuperados como parte del registro de auditoría
+      rationale: "Guardar lo recuperado como parte del registro, para poder reconstruir después qué vio el modelo."
     - id: b
       text: Reinyectar los documentos en el calificador para que juzgue con más contexto
+      rationale: "Devolver los documentos al calificador para que juzgue la respuesta con el contexto delante."
     - id: d
       text: Comparar la longitud de los documentos con la de la respuesta
+      rationale: "Comparar el tamaño de lo recuperado con el de la respuesta para detectar desajustes."
   correct: a
   explanation: "La rama (A) es la métrica intermedia: sin ella, una puntuación baja de extremo
     a extremo no dice si el sistema no encontró la información o si la tenía y la usó mal.
@@ -1245,13 +1423,17 @@
   options:
     - id: b
       text: Documentar el cambio en el registro de versiones del prompt
+      rationale: "Dejar constancia del cambio en el registro del prompt es lo que permite entender después por qué está así."
     - id: d
       text: Añadir ese caso al conjunto de regresión, para que un cambio futuro no lo reintroduzca
         sin que nadie se entere
+      rationale: "Sin ese paso, el mismo fallo vuelve dentro de tres cambios de prompt y nadie sabrá cuál lo trajo de vuelta."
     - id: a
       text: Comprobar que la puntuación global del conjunto no bajó
+      rationale: "Comprobar que la nota global no ha bajado asegura que el arreglo no ha roto otra cosa."
     - id: c
       text: Avisar al usuario de que está resuelto
+      rationale: "Cerrar el ciclo es avisar a quien lo reportó de que ya está resuelto."
   correct: d
   explanation: El bucle de fallo → corrección → caso de regresión es lo que hace que un
     sistema mejore de forma acumulativa en vez de oscilar. Sin él, el siguiente ajuste puede
@@ -1270,14 +1452,18 @@
   options:
     - id: b
       text: Si el modelo detecta y nombra el intento de inyección en su respuesta
+      rationale: "Que el modelo reconozca y nombre el intento demuestra que no ha caído en la trampa."
     - id: a
       text: Si el texto inyectado aparece literalmente en la respuesta
+      rationale: "Si el texto inyectado aparece tal cual en la respuesta, la instrucción ha atravesado el sistema."
     - id: c
       text: "Si el agente EJECUTA la instrucción inyectada: no basta con que la mencione o la
         comente, lo que se mide es si acaba llamando a la herramienta o filtrando el dato
         que el atacante pedía"
+      rationale: "Es la diferencia entre 'lo comentó' y 'lo hizo': solo lo segundo tiene consecuencias fuera del texto."
     - id: d
       text: Si la clasificación de toxicidad del contenido recuperado supera un umbral
+      rationale: "Si el contenido recuperado pasa de cierto umbral de toxicidad, entra material que no debería."
   correct: c
   explanation: "Lo que hace daño es la ACCIÓN, no la mención: el criterio de suspenso es que
     el agente llame a la herramienta, mande el correo o incluya el secreto. Un agente puede
@@ -1297,14 +1483,18 @@
   options:
     - id: a
       text: Componer un índice ponderado de todas las métricas y presentarlo como cifra única
+      rationale: "Un índice ponderado resume todas las métricas en una sola cifra comparable entre versiones."
     - id: c
       text: Dar solo la tasa de finalización, que es la que entiende el negocio
+      rationale: "La tasa de finalización es la que conecta con el objetivo de negocio y se entiende sin explicaciones."
     - id: d
       text: Negarse a dar métricas hasta tener un conjunto de evaluación perfecto
+      rationale: "Dar números sobre un conjunto incompleto es prometer una precisión que no se tiene."
     - id: b
       text: Dar un número pequeño de métricas ligadas a decisiones distintas (tasa de
         finalización, tasa del fallo caro, coste por tarea, latencia de cola), cada una con
         su N, porque agregarlas oculta justo la que obligaría a actuar
+      rationale: "Una cifra única siempre sube por el lado fácil: la que obligaría a actuar queda promediada con las que ya iban bien."
   correct: b
   explanation: "Una cifra agregada promedia dimensiones que se compensan entre sí: se puede
     subir la tasa de finalización mientras se dispara el fallo caro, y el índice no se
@@ -1325,12 +1515,16 @@
     - id: c
       text: "Comprobar que el sistema NO hace algo: no responde cuando no debe, no llama a la
         herramienta cuando no procede, no inventa cuando la información no está"
+      rationale: "Sin ellos, un sistema que responde siempre saca buena nota: nadie está midiendo cuándo debería haberse callado."
     - id: a
       text: Servir de control estadístico para calcular el nivel base de aciertos
+      rationale: "Sirven de control: fijan el nivel de acierto que se obtendría respondiendo al azar."
     - id: b
       text: Aumentar el tamaño del conjunto sin coste de etiquetado
+      rationale: "Se generan en bloque y no hay que etiquetarlos uno a uno, así que engordan el conjunto barato."
     - id: d
       text: Entrenar el filtro que decide qué entradas rechazar
+      rationale: "Con ellos se ajusta el filtro que decide qué entradas hay que rechazar antes de responder."
   correct: c
   explanation: Un conjunto que solo contiene casos con respuesta correcta premia al sistema
     que siempre contesta algo, y ese es justo el que se inventa las cosas. Los negativos
@@ -1350,13 +1544,17 @@
   options:
     - id: b
       text: Porque después ya no hay presupuesto para hacerla
+      rationale: "Una vez la función está entregada, el presupuesto se va al siguiente hito y la evaluación no llega nunca."
     - id: d
       text: "Porque sin ella cada cambio se juzga con la impresión de quien lo hizo: no se sabe si
         una idea mejoró algo, y no se puede iterar con criterio"
+      rationale: "El coste de dejarlo para luego no es el trabajo: son los meses de decisiones tomadas a ojo mientras tanto."
     - id: a
       text: Porque los conjuntos son más fáciles de construir antes de que haya usuarios
+      rationale: "Sin usuarios todavía, los casos se eligen libremente y no hay que anonimizar nada."
     - id: c
       text: Porque los requisitos exigen documentar las métricas antes de desarrollar
+      rationale: "Confunde el motivo con el trámite: se haría igual sin ninguna normativa de por medio."
   correct: d
   explanation: "Sin medida no hay iteración, solo cambios: ajustas el prompt, pruebas tres
     casos a mano, te parece mejor y sigues. Con medida cada cambio produce una señal
@@ -1377,13 +1575,17 @@
   options:
     - id: a
       text: Porque los porcentajes son difíciles de comparar entre equipos
+      rationale: "Cada equipo calcula el suyo a su manera, y sin contexto los porcentajes no se pueden poner uno al lado del otro."
     - id: c
       text: Porque hace falta también la desviación típica
+      rationale: "Sin una medida de dispersión no se sabe si ese valor es representativo o casualidad."
     - id: b
       text: Porque sin saber sobre cuántos casos se calculó no se puede distinguir una mejora real
         del ruido de muestreo
+      rationale: "Un 90% sobre diez casos y sobre mil son la misma cifra y decisiones opuestas."
     - id: d
       text: Porque los porcentajes ocultan la distribución por dificultad
+      rationale: "Un porcentaje único mezcla lo fácil con lo difícil y esconde dónde está fallando."
   correct: b
   explanation: "El mismo 84% sobre 25 casos y sobre 2.500 son afirmaciones de fuerza muy
     distinta: en el primero, unos pocos aciertos de más o de menos mueven varios puntos. Sin
@@ -1401,13 +1603,17 @@
   options:
     - id: a
       text: Para deduplicar registros repetidos
+      rationale: "Permite detectar entradas repetidas y quedarse con una sola copia de cada paso."
     - id: b
       text: Para ordenar los registros cronológicamente
+      rationale: "Da el orden en que ocurrieron las cosas cuando las marcas de tiempo no bastan."
     - id: c
       text: Para identificar al usuario que lanzó la ejecución
+      rationale: "Identifica a quién pertenece la ejecución, que es lo que hace falta para auditar."
     - id: d
       text: Para poder juntar todos los pasos de una misma ejecución cuando hay muchas corriendo a
         la vez y sus registros se entremezclan
+      rationale: "Sin él, con veinte ejecuciones a la vez los registros se entrelazan y no hay forma de reconstruir una sola."
   correct: d
   explanation: En un sistema concurrente los registros de decenas de ejecuciones se
     intercalan, y sin un identificador común no se puede reconstruir la secuencia de una
@@ -1432,12 +1638,16 @@
         se comprueba invirtiendo el orden en las comparaciones por pares, mirando si B
         produce respuestas sistemáticamente más largas o mejor formateadas, y contrastando
         una muestra con etiquetas humanas"
+      rationale: "La pregunta no es si B es mejor, sino si el instrumento tiene una preferencia que B satisface por casualidad."
     - id: a
       text: Repetir la comparación tres veces y quedarse con la mediana
+      rationale: "Repitiendo la comparación y quedándose con el valor central se quita la variabilidad de una pasada."
     - id: b
       text: Aumentar el tamaño del conjunto hasta que la diferencia sea significativa
+      rationale: "Ampliando el conjunto hasta que la diferencia sea significativa se despeja la duda estadística."
     - id: d
       text: Cambiar el modelo juez por uno más capaz y repetir
+      rationale: "Un juez más capaz comete menos errores de criterio, así que repetir con él confirma o tumba el resultado."
   correct: c
   explanation: "Con un juez de por medio hay dos hipótesis para una ventaja: B es mejor, o B
     le gusta más al juez. Repetir y ampliar la muestra reducen la varianza pero no
@@ -1460,15 +1670,19 @@
   options:
     - id: a
       text: Que la muestra fuera de línea era demasiado pequeña
+      rationale: "Con pocos casos, una diferencia a favor puede aparecer por azar y no sostenerse fuera."
     - id: b
       text: "Que el conjunto y el tráfico real no son la misma distribución, y que lo que mide el
         calificador no es lo que le duele al usuario: hay que comparar la distribución de
         entradas y comprobar si los casos que generan queja están representados y bien
         puntuados por la rúbrica"
+      rationale: "Las dos mediciones pueden ser correctas y aun así contradecirse: miden poblaciones distintas con varas distintas."
     - id: d
       text: Que los usuarios tardan en acostumbrarse a los cambios
+      rationale: "Todo cambio molesta al principio, y las quejas bajan cuando la gente se acostumbra."
     - id: c
       text: Que la variante nueva es más lenta y eso genera insatisfacción
+      rationale: "Si la variante nueva tarda más, la insatisfacción viene por ahí aunque responda mejor."
   correct: b
   explanation: "Cuando las dos mediciones son técnicamente correctas y discrepan, el desajuste
     está en qué se mide y sobre qué. Las dos causas típicas: el conjunto no representa el

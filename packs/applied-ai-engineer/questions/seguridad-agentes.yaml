@@ -22,12 +22,16 @@
       text: "Que instrucciones para el modelo lleguen escondidas en contenido que el agente lee
         como datos: una página web, un documento recuperado, un ticket, la salida de una
         herramienta"
+      rationale: "Lo peligroso es que llega por el mismo canal que los datos legítimos: no hay forma de marcarlo como sospechoso."
     - id: a
       text: Que el usuario escriba 'ignora tus instrucciones anteriores' en el chat
+      rationale: "Que alguien escriba en el chat que ignore lo que le dijeron antes."
     - id: c
       text: Que un atacante consiga acceso al prompt de sistema y lo modifique
+      rationale: "Que un atacante llegue al prompt de sistema y lo reescriba a su gusto."
     - id: d
       text: Que el modelo genere por sí solo instrucciones contradictorias
+      rationale: "Eso sería un fallo del modelo consigo mismo; aquí hay alguien fuera que escribe con intención."
   correct: b
   explanation: La directa es la del usuario escribiendo en el chat; la indirecta es la
     peligrosa en agentes, porque el vector es el CONTENIDO que el agente consume como datos
@@ -49,13 +53,17 @@
   options:
     - id: c
       text: Razonamiento extendido, uso de herramientas y memoria persistente
+      rationale: "Razonamiento extendido, uso de herramientas y memoria: las tres cosas que hacen potente a un agente."
     - id: d
       text: Acceso a datos privados, exposición a contenido no confiable y capacidad de
         comunicarse hacia fuera
+      rationale: "Con dos cualquiera de las tres no pasa nada: hace falta la combinación completa para que haya fuga."
     - id: a
       text: Ejecución de código, acceso a red y privilegios de administrador
+      rationale: "Describe una máquina comprometida, no un agente: el problema aparece aunque nada de eso esté presente."
     - id: b
       text: Autonomía, velocidad y escala
+      rationale: "Autonomía, velocidad y escala: hace en minutos lo que a una persona le llevaría días."
   correct: d
   explanation: "Es la combinación clásica y letal: si el agente tiene datos privados, lee
     contenido que un atacante controla y puede mandar algo al exterior, entonces el
@@ -77,15 +85,19 @@
   options:
     - id: b
       text: Porque el prompt de sistema tiene menos prioridad que los mensajes de usuario
+      rationale: "Lo que llega en un mensaje pesa más que lo escrito en el prompt de sistema."
     - id: c
       text: Porque esa instrucción hace que el agente ignore también las instrucciones legítimas
+      rationale: "Esa instrucción también apaga las indicaciones legítimas que vienen en los documentos."
     - id: a
       text: "Porque es una mitigación probabilística sobre el mismo canal que el atacante
         controla: sube el listón pero no da garantías, y no se puede razonar sobre ella como
         sobre un permiso. La defensa que sí se sostiene es acotar lo que el agente PUEDE
         hacer, no lo que se le pide que ignore"
+      rationale: "El atacante escribe en el mismo sitio donde tú das la contraorden: no hay canal separado que gane siempre."
     - id: d
       text: Porque los modelos actuales ignoran las instrucciones negativas
+      rationale: "Los modelos actuales llevan mal las instrucciones formuladas en negativo."
   correct: a
   explanation: "La instrucción ayuda y conviene tenerla, pero es una defensa blanda: el
     atacante escribe en el mismo canal y puede construir texto más persuasivo. Un permiso,
@@ -105,14 +117,18 @@
   options:
     - id: b
       text: Limitar el número de llamadas a herramienta por ejecución
+      rationale: "Poner un tope de llamadas a herramienta por ejecución acota lo que puede llegar a hacer."
     - id: a
       text: Limitar la latencia máxima de la ejecución
+      rationale: "Acotar cuánto puede durar una ejecución antes de cortarla por las bravas."
     - id: d
       text: Registrar todas las acciones para poder revertirlas después
+      rationale: "Ayuda a reconstruir, no a limitar: cuando se revisa, el daño ya ocurrió."
     - id: c
       text: "Acotar de antemano cuánto daño puede causar la peor ejecución posible: qué permisos
         tiene la credencial, a qué hosts llega, qué es reversible, cuántos registros puede
         tocar"
+      rationale: "Se responde antes de desplegar y sin hablar del modelo: qué es lo peor que puede pasar si todo sale mal."
   correct: c
   explanation: "Es una pregunta de diseño previa, no de detección: suponiendo que el agente
     haga lo peor que le permita su configuración, ¿hasta dónde llega? Se acota con
@@ -133,12 +149,16 @@
     - id: d
       text: "Su reversibilidad: lo difícil de deshacer (mandar un correo, borrar datos, llamar a
         una API externa) se aprueba; lo reversible fluye"
+      rationale: "Es el único criterio que separa lo que se puede permitir de lo que no: si se deshace, se deja pasar."
     - id: a
       text: "Su coste computacional: las caras se aprueban, las baratas no"
+      rationale: "El coste: las operaciones caras se aprueban y las baratas pasan solas."
     - id: b
       text: "Su frecuencia: las poco frecuentes se aprueban"
+      rationale: "La frecuencia: lo que casi nunca ocurre merece una mirada antes de ejecutarse."
     - id: c
       text: Si el modelo expresa poca confianza al proponerla
+      rationale: "La confianza que el modelo declara al proponerla: si duda, que lo mire alguien."
   correct: d
   explanation: "La reversibilidad es el criterio que mejor escala: si te equivocas y puedes
     deshacerlo, no necesitas parar el bucle; si no puedes, sí. Pedir aprobación por coste o
@@ -158,14 +178,18 @@
   options:
     - id: c
       text: "Nada malo: es la configuración más segura y debe ser la predeterminada"
+      rationale: "Nada malo: aprobarlo todo es lo más seguro y debería venir así de fábrica."
     - id: b
       text: "Fatiga de aprobación: el humano acaba aceptando en automático y la puerta deja de
         proteger. Se arregla poniendo puerta solo a lo irreversible o de alto impacto, y
         dejando pasar lo reversible y de solo lectura"
+      rationale: "El control se degrada solo con el uso: a la vigésima ventana, aceptar es un reflejo y ya no protege nada."
     - id: a
       text: El agente se bloquea porque las confirmaciones caducan
+      rationale: "El agente se queda bloqueado porque las confirmaciones acaban caducando."
     - id: d
       text: Aumenta la latencia pero la seguridad mejora proporcionalmente
+      rationale: "Sube la latencia, pero la seguridad sube en la misma proporción."
   correct: b
   explanation: "Una puerta que se dispara constantemente se convierte en un clic reflejo, y
     entonces protege menos que ninguna, porque además da sensación de control. La seguridad
@@ -185,13 +209,17 @@
   options:
     - id: b
       text: La herramienta se ejecuta y el resultado queda retenido hasta que alguien lo apruebe
+      rationale: "Llegaría tarde: el efecto ya se habría producido y solo se ocultaría el resultado."
     - id: c
       text: La llamada se rechaza automáticamente y el agente busca otra vía
+      rationale: "La llamada se rechaza sola y el agente tiene que buscarse otra manera."
     - id: a
       text: Se emite un evento de uso de herramienta marcado como pendiente de decisión y la
         sesión queda ociosa hasta que el cliente responde permitiendo o denegando
+      rationale: "El agente no espera bloqueado ni la ejecuta a medias: la sesión se detiene y queda a la espera de una decisión."
     - id: d
       text: Se aprueba sola si el agente justifica la llamada en su razonamiento
+      rationale: "Dejaría la decisión en manos de quien la propone, que es lo contrario de una puerta."
   correct: a
   explanation: "La ejecución se detiene ANTES de ocurrir: el evento sale marcado como que
     requiere decisión, la sesión pasa a ociosa y espera la confirmación del cliente. Que se
@@ -212,13 +240,17 @@
   options:
     - id: c
       text: Porque el prompt de sistema tiene un límite de longitud y el secreto lo consume
+      rationale: "El tamaño es lo de menos: cabría de sobra y seguiría siendo un error."
     - id: a
       text: Porque invalida la caché de prompts
+      rationale: "Al meter un valor que cambia, se invalida la caché del prefijo del prompt."
     - id: b
       text: Porque el modelo podría no entender que es un secreto
+      rationale: "El modelo puede no darse cuenta de que eso es un secreto y repetirlo en la respuesta."
     - id: d
       text: "Porque queda persistida en el historial de la sesión: es recuperable después por la
         API que lista los eventos y puede acabar dentro de los resúmenes de compactación"
+      rationale: "Lo grave es que sobrevive al turno: acaba en los eventos de la sesión y en los resúmenes que se generen."
   correct: d
   explanation: "El problema no es que el modelo la 'vea' en ese turno, sino que el prompt y
     los mensajes son estado persistido: quedan en el historial de eventos, se pueden listar
@@ -243,13 +275,17 @@
       text: "En la salida a la red: dentro del contenedor solo hay un marcador opaco, así que ni
         el código que escriba el agente ni una inyección de prompt pueden leer el valor
         real"
+      rationale: "El límite está fuera del sandbox: por eso ni el código generado ni una inyección pueden alcanzarlo."
     - id: b
       text: "Al arrancar el contenedor: se escribe en el entorno del proceso, protegido por
         permisos de fichero"
+      rationale: "Ahí lo leería cualquier proceso del contenedor, incluido lo que el agente decida ejecutar."
     - id: c
       text: "En el modelo: se inyecta en el contexto justo antes de construir la llamada"
+      rationale: "En el contexto queda copiado en el historial y en cualquier traza que se guarde."
     - id: d
       text: En el servidor de destino, que lo resuelve a partir del identificador del agente
+      rationale: "El destino no sabe quién llama hasta que se le presenta algo: alguien tiene que ponerlo en la petición."
   correct: a
   explanation: "Esa es la frontera de seguridad: el secreto NO entra en el sandbox. El
     contenedor ve un marcador y la sustitución la hace un proxy después de que la petición
@@ -270,15 +306,19 @@
   options:
     - id: c
       text: Porque las URL completas no se pueden guardar como credencial
+      rationale: "Una URL completa no se puede guardar como credencial: solo valores sueltos."
     - id: b
       text: "Porque la sustitución cubre las cabeceras y el cuerpo de la petición, no la ruta de
         la URL: los secretos en la ruta no son vaultables y hay que pasarse a autenticación
         por cabecera"
+      rationale: "Es el caso límite del mecanismo: lo que va en la dirección viaja antes de que nada pueda sustituirlo."
     - id: a
       text: Porque falta añadir el dominio de Slack a la lista de hosts permitidos de la
         credencial
+      rationale: "El permiso de red no cambia el problema: la petición saldría igual, con el marcador sin resolver."
     - id: d
       text: Porque los webhooks entrantes requieren OAuth y no un secreto estático
+      rationale: "Los webhooks entrantes piden un flujo de autorización y no un secreto fijo."
   correct: b
   explanation: "El mecanismo opera sobre cabeceras y cuerpo, así que un secreto embebido en la
     ruta viaja tal cual. La salida no es forzar el mecanismo, sino cambiar de método de
@@ -301,16 +341,20 @@
     - id: a
       text: Solo cuerpo, porque las cabeceras las pueden leer los intermediarios; el marcador se
         elimina si aparece en cabecera
+      rationale: "Invierte el riesgo: el cuerpo lo suele componer el modelo, y ahí el marcador está más expuesto."
     - id: b
       text: Ambas siempre, porque desactivar una rompe la autenticación; el marcador nunca sale
         del sistema
+      rationale: "Deja la sustitución activa en sitios donde nunca hace falta, ampliando la superficie sin motivo."
     - id: d
       text: "Solo cabecera, porque la mayoría de servicios autentican por cabecera y el cuerpo
         suele armarse con contenido que el agente manipula; si el marcador aparece en una
         ubicación desactivada, NO se sustituye ni se elimina: se envía literalmente al
         tercero"
+      rationale: "Lo que hay que retener: no sustituir no significa eliminar, así que el marcador acaba en el tercero tal cual."
     - id: c
       text: "Da igual: la ubicación solo afecta al rendimiento"
+      rationale: "No es una opción de ajuste: decide dónde se resuelve el secreto y dónde se envía literal."
   correct: d
   explanation: "Solo cabecera es lo más estrecho en la práctica, porque el cuerpo se compone a
     menudo con contenido que el agente está manejando y es una superficie de exposición
@@ -331,14 +375,18 @@
   options:
     - id: a
       text: Que el agente incluya enlaces a sitios externos que el usuario podría pulsar
+      rationale: "Que meta enlaces a sitios externos y alguien acabe pulsando uno de ellos."
     - id: b
       text: Que el resumen sea más largo de lo esperado y consuma cuota
+      rationale: "Que el resumen salga mucho más largo de lo previsto y se coma la cuota."
     - id: d
       text: Que el agente cite el ticket literalmente y filtre su contenido al resumen
+      rationale: "Sería el mismo dato volviendo a quien ya lo tenía: no sale del sistema."
     - id: c
       text: "Que el agente emita una imagen markdown apuntando a un dominio del atacante con los
         datos en la URL: el navegador la carga sola al renderizar y no hace falta que nadie
         pulse nada"
+      rationale: "No hace falta que nadie haga clic: el propio visor pide la dirección al pintar la respuesta."
   correct: c
   explanation: "La imagen es el canal silencioso: el renderizador hace la petición al cargar,
     sin interacción, y los datos van en la ruta o en la cadena de consulta. Un enlace exige
@@ -362,12 +410,16 @@
         misma: si el servidor no es de confianza, su afirmación de ser inocua es la de la
         parte interesada. Y lo mismo vale para las descripciones, que además el modelo lee
         como instrucciones"
+      rationale: "Lo que declara una herramienta sobre sí misma vale tanto como quien la publica, y eso no es una garantía."
     - id: a
       text: Que hay que validar las anotaciones contra el esquema de salida
+      rationale: "Hay que validar lo que declara contra el esquema de salida antes de fiarse."
     - id: c
       text: Que hay que ignorar las anotaciones siempre, incluso de servidores propios
+      rationale: "Ignorarlas siempre tira información útil cuando el servidor es tuyo y sabes de dónde viene."
     - id: d
       text: Que las anotaciones solo valen para pintar la interfaz, nunca para nada más
+      rationale: "Solo sirven para pintar la interfaz, y no deben usarse para nada más."
   correct: b
   explanation: "Las anotaciones son autodeclaradas y no verificadas: un servidor hostil puede
     marcar como de solo lectura algo destructivo. Si tu política de aprobación las usa como
@@ -388,15 +440,19 @@
   options:
     - id: a
       text: "Ninguno relevante: las skills son documentación y no se ejecutan"
+      rationale: "Se cargan en el contexto y el agente las sigue: son instrucciones aunque estén en un fichero de texto."
     - id: d
       text: Que quien pueda commitear (una PR externa fusionada, una dependencia comprometida)
         añada o edite instrucciones para el agente, que se cargan al arrancar la sesión sin
         ningún paso de revisión, y en un entorno donde el agente tiene bash y acceso a red
+      rationale: "Convierte un permiso de escritura en el repositorio en un permiso de instruir al agente, sin revisión de por medio."
     - id: b
       text: Que las skills del repositorio choquen de nombre con las adjuntas al agente y una
         anule a la otra
+      rationale: "Un choque de nombres se ve y se arregla; lo otro no se ve."
     - id: c
       text: Que el repositorio quede desactualizado durante la sesión
+      rationale: "El repositorio se clona al arrancar: quedarse atrás es un problema de frescura, no de seguridad."
   correct: d
   explanation: "Las skills son instrucciones para el agente y forman parte de la frontera de
     confianza: se descubren al iniciar la sesión y se cargan sin revisión, en un entorno
@@ -418,14 +474,18 @@
     - id: c
       text: Darle los mismos permisos que al humano al que sustituye, para que pueda hacer su
         trabajo
+      rationale: "Una persona aplica criterio sobre esos permisos; el agente los usa hasta donde llegan."
     - id: a
       text: Darle permisos amplios y auditar después con registros
+      rationale: "Permisos amplios y auditoría después: los registros permiten reconstruir lo que pasó."
     - id: b
       text: "Privilegio mínimo para la tarea concreta: el agente puede hacer todo lo que la
         credencial permita, así que cada permiso de más agranda el radio de daño ante un
         comportamiento inesperado"
+      rationale: "Cada permiso de más amplía lo que puede ocurrir en la peor ejecución, no lo que hace en la buena."
     - id: d
       text: Rotar la credencial con frecuencia, lo que hace menos importante su alcance
+      rationale: "Rotarla a menudo, que reduce la ventana en la que su alcance importa."
   correct: b
   explanation: "La pregunta no es qué va a hacer el agente, sino qué PUEDE hacer: eso es lo
     que define el daño de la peor ejecución. Copiar los permisos del humano equivalente
@@ -445,14 +505,18 @@
   options:
     - id: a
       text: Que dos inquilinos compartan la misma versión del prompt de sistema
+      rationale: "Compartir configuración no cruza datos: lo que cruza datos es compartir el alcance de la credencial."
     - id: b
       text: Que los registros de ambos vayan al mismo índice
+      rationale: "Que los registros de unos y otros acaben mezclados en el mismo índice."
     - id: d
       text: Que la caché de prompts comparta el prefijo entre inquilinos
+      rationale: "Comparte el prefijo estable, no el contenido de cada cliente."
     - id: c
       text: Que la credencial de las herramientas sea única y con alcance a todos los inquilinos,
         de modo que el filtrado por inquilino dependa de que el modelo pase bien un
         parámetro en vez de estar impuesto por la autorización
+      rationale: "El aislamiento acaba dependiendo de un argumento que produce el modelo, que es lo que nunca debe sostenerlo."
   correct: c
   explanation: "Si el aislamiento depende de que el modelo ponga el identificador correcto de
     inquilino, entonces una inyección de prompt —o simplemente un error— cruza la frontera.
@@ -475,12 +539,16 @@
       text: Cada acción con sus argumentos, su resultado, quién la autorizó y bajo qué identidad
         se ejecutó, correlacionado por un identificador de ejecución y con los secretos
         redactados
+      rationale: "El criterio: ¿se puede responder quién hizo qué, con qué permisos y por orden de quién, sin volver a ejecutar?"
     - id: b
       text: El prompt completo y la respuesta final de cada ejecución
+      rationale: "Guarda la conversación, no los efectos: no dice qué se llegó a tocar ni con qué identidad."
     - id: c
       text: Solo las acciones que fallaron, para no inflar el volumen
+      rationale: "Solo lo que falló, que es lo único que hay que investigar después."
     - id: d
       text: Un resumen generado por el propio agente al terminar
+      rationale: "Un resumen que el propio agente escribe al terminar, en lenguaje entendible."
   correct: a
   explanation: "En un incidente las preguntas son qué se tocó, con qué parámetros, con qué
     credencial y quién lo consintió; sin identidad ni correlación no se reconstruye nada.
@@ -501,14 +569,18 @@
   options:
     - id: b
       text: Una lista negra de comandos peligrosos y una expresión regular que filtre rm -rf
+      rationale: "Una lista negra de comandos peligrosos y un filtro para los borrados masivos."
     - id: d
       text: Ejecutar en un entorno aislado con privilegios mínimos, aplicar una lista blanca de
         ejecutables permitidos, rechazar operadores de shell, poner tiempos de espera y
         límites de recursos, y registrarlo todo
+      rationale: "Ninguna vale sola: se asume que alguna se saltará, y por eso lo que cuenta es lo que puede alcanzar cuando pase."
     - id: a
       text: Pedir confirmación al usuario en cada comando
+      rationale: "Pedir confirmación en cada comando: nadie ejecuta nada sin que una persona lo vea."
     - id: c
       text: Revisar el comando con un segundo modelo antes de ejecutarlo
+      rationale: "Un segundo modelo que revise el comando antes de dejarlo pasar."
   correct: d
   explanation: Los comandos son salida no confiable de un modelo, así que la defensa es de
     contención y no de reconocimiento. Una lista negra siempre se puede rodear
@@ -529,14 +601,18 @@
   options:
     - id: b
       text: Comprobar que la extensión del fichero está en una lista permitida
+      rationale: "Comprobar que la extensión está entre las permitidas antes de tocar el fichero."
     - id: c
       text: Comprobar que el fichero existe antes de escribir
+      rationale: "Comprobar que el fichero existe, para no crear cosas donde no toca."
     - id: a
       text: Resolver la ruta a su forma canónica y comprobar que sigue dentro de la raíz permitida
         antes de operar, rechazando lo que se escape (.., enlaces simbólicos, rutas
         absolutas fuera, travesía codificada)
+      rationale: "El único control que aguanta: lo demás se puede rodear con enlaces, saltos o rutas codificadas."
     - id: d
       text: Limitar el tamaño del contenido escrito
+      rationale: "Limitar el tamaño de lo que se escribe para que no llene el disco."
   correct: a
   explanation: "La ruta es salida no confiable del modelo y el ataque es la travesía de
     directorios: llegar a claves SSH, a ficheros de configuración o al propio código del
@@ -562,14 +638,18 @@
   options:
     - id: c
       text: Validar el SQL con una expresión regular que prohíba DROP, DELETE y UPDATE
+      rationale: "Validar la consulta con un filtro que prohíba las sentencias destructivas."
     - id: a
       text: Pedir confirmación al usuario antes de cada consulta
+      rationale: "Traslada a una persona la revisión de algo que casi nadie lee con atención veinte veces al día."
     - id: d
       text: Registrar la consulta antes de ejecutarla para poder auditarla
+      rationale: "Deja constancia de lo que pasó, pero no impide que pase."
     - id: b
       text: "No exponer SQL libre: dar herramientas con parámetros tipados que construyan la
         consulta en tu código, y si hace falta consulta libre, ejecutarla con una conexión
         de solo lectura, con alcance limitado, tiempo máximo y límite de filas"
+      rationale: "Cambia lo que el modelo puede expresar: si no puede escribir la consulta, no puede escribir una peligrosa."
   correct: b
   explanation: "Una cadena de SQL generada por un modelo es entrada no confiable con todo el
     poder del motor: el filtro por palabras clave se rodea con comentarios, mayúsculas,
@@ -593,12 +673,16 @@
       text: "Que es un canal de operador no falsificable: el texto dentro de contenido de usuario
         o de herramienta lo puede imitar cualquier cosa que escriba en esa entrada, mientras
         que el rol lo pone tu código. Y además preserva el prefijo cacheado"
+      rationale: "Nadie de fuera puede falsificar un rol que pone tu código; una frase dentro de un ticket la escribe cualquiera."
     - id: d
       text: Que el modelo la obedece con prioridad absoluta sobre cualquier otra instrucción
+      rationale: "Ninguna instrucción tiene prioridad garantizada: eso sigue siendo cosa del modelo."
     - id: a
       text: Que no consume tokens del contexto
+      rationale: "Entra en el prompt como todo lo demás y se paga igual que el resto del turno."
     - id: b
       text: Que queda fuera del historial y no se persiste
+      rationale: "Viaja en el array de mensajes, así que queda en el historial como cualquier otro turno."
   correct: c
   explanation: "Son dos ventajas y la de seguridad es la principal: si el patrón de
     'recordatorio del sistema' vive como texto dentro de un turno de usuario o de un
@@ -619,14 +703,18 @@
   options:
     - id: a
       text: Porque la memoria no se puede cifrar en reposo
+      rationale: "La memoria no se puede cifrar en reposo, así que queda en claro para quien acceda."
     - id: b
       text: "Porque persiste entre sesiones y se reinyecta literalmente en cada contexto futuro
         que monte ese almacén: un secreto escrito una vez se reproduce en todas las sesiones
         posteriores"
+      rationale: "El daño se multiplica solo: una vez escrito, aparece en todas las sesiones futuras sin que nadie vuelva a decidirlo."
     - id: c
       text: Porque la memoria tiene un límite de tamaño y el secreto lo consume
+      rationale: "La memoria tiene un tamaño acotado y el secreto ocupa espacio que hace falta."
     - id: d
       text: Porque el modelo podría modificar el secreto al reescribir la nota
+      rationale: "El modelo puede alterar el secreto al reescribir la nota y dejarlo inservible."
   correct: b
   explanation: "La memoria multiplica la exposición en el tiempo: no es un secreto en un
     contexto, es un secreto en todos los contextos futuros que monten ese almacén, incluidos
@@ -646,15 +734,19 @@
   options:
     - id: a
       text: "El principio de privilegio mínimo: el token debería tener menos ámbitos"
+      rationale: "Privilegio mínimo: ese token viene con más ámbitos de los que la operación necesita."
     - id: b
       text: "La rotación de credenciales: el token debería caducar antes"
+      rationale: "Caducar antes reduce la ventana, pero no arregla que se acepte algo emitido para otro."
     - id: d
       text: "El paso de token: un servidor MCP no debe aceptar tokens que no fueran emitidos para
         él. Importa porque rompe los controles que dependen de la audiencia, destruye el
         rastro de auditoría y convierte al servidor en un proxy de exfiltración con un token
         robado"
+      rationale: "Convierte al servidor en un intermediario que presenta credenciales ajenas: el destino ya no sabe quién actúa."
     - id: c
       text: "Ninguna: reenviar el token es el comportamiento esperado de un proxy"
+      rationale: "Un proxy legítimo presenta su propia credencial: reenviar la del cliente es justo lo prohibido."
   correct: d
   explanation: "Está explícitamente prohibido, y el daño tiene tres caras. Se saltan controles
     que se apoyan en la audiencia del token (limitación de tasa, validación,
@@ -677,14 +769,18 @@
     - id: b
       text: Filtrar del texto del ticket las frases que parezcan instrucciones antes de pasarlo al
         modelo
+      rationale: "Se rodea reformulando: hay infinitas maneras de escribir una orden que no parezca una orden."
     - id: c
       text: Añadir al prompt de sistema que nunca revele datos de otros clientes
+      rationale: "Deja la protección en manos de que el modelo prefiera tu frase a la del ticket."
     - id: d
       text: Usar un modelo más capaz, que reconoce mejor los intentos de inyección
+      rationale: "Un modelo más capaz reconoce estos intentos y no se deja llevar."
     - id: a
       text: "Romper la trifecta: que la herramienta de consulta solo pueda leer el cliente del
         ticket en curso (autorización derivada del contexto, no de un argumento del modelo)
         y que el envío de correo sea a destinatarios acotados o pase por aprobación"
+      rationale: "Quita el permiso en vez de pedir prudencia: aunque el modelo obedezca al atacante, no tiene con qué cumplirlo."
   correct: a
   explanation: "Las tres opciones descartadas son defensas blandas sobre el mismo canal que
     controla el atacante: se pueden reformular, parafrasear o traducir. Lo que sostiene es
@@ -706,12 +802,16 @@
     - id: c
       text: El comando exacto que se va a ejecutar, sin truncar, identificado como operación
         potencialmente peligrosa y con opción de cancelar
+      rationale: "Es la última pantalla antes de que algo se ejecute en la máquina: si ahí no está entero, ya no se ve."
     - id: a
       text: El nombre del servidor y su editor verificado
+      rationale: "El nombre del servidor y quién lo publica, verificado contra el registro."
     - id: b
       text: Un resumen generado de lo que hace el servidor
+      rationale: "Un resumen lo genera algo que ya leyó el contenido: describe lo que dice, no lo que hará."
     - id: d
       text: Los permisos que el servidor solicitará durante su uso
+      rationale: "Los permisos que va a pedir mientras se use, para saber a qué accede."
   correct: c
   explanation: "El comando de arranque es la carga útil: puede llevar cualquier cosa
     encadenada, y el servidor se ejecuta con los privilegios del cliente. Por eso la
@@ -731,14 +831,18 @@
   options:
     - id: b
       text: Escuchar en un puerto alto y no documentarlo
+      rationale: "Escuchar en un puerto alto y no anunciarlo: quien no lo conoce no lo encuentra."
     - id: a
       text: Usar el transporte stdio, que lo deja accesible solo al cliente que lo lanzó; y si
         tiene que ser HTTP, exigir un token de autorización o usar sockets de dominio Unix
         con permisos restringidos
+      rationale: "Sin puerto abierto no hay nada que atacar desde otro proceso: el canal es la propia tubería del hijo."
     - id: c
       text: Comprobar el nombre del proceso que hace la petición
+      rationale: "El nombre del proceso lo puede elegir quien lo lanza: no identifica a nadie."
     - id: d
       text: Cifrar el tráfico con TLS autofirmado
+      rationale: "Cifrar el tráfico con un certificado propio para que nadie lo lea."
   correct: a
   explanation: "stdio es la respuesta natural: al ser un subproceso conectado por los flujos
     estándar, solo habla con quien lo lanzó. Si hace falta HTTP local, entonces hace falta
@@ -758,15 +862,19 @@
   options:
     - id: a
       text: "Nada sustancial: el mismo agente con un disparador distinto"
+      rationale: "El disparador cambia lo esencial: quién estaba delante cuando el agente decidió actuar."
     - id: b
       text: Basta con subir el nivel de registro para poder revisar por la mañana
+      rationale: "Basta con registrar más detalle para poder revisarlo por la mañana."
     - id: d
       text: "Desaparece la revisión humana en el bucle, así que hay que sustituirla: acotar de
         antemano lo que puede tocar, sustituir aprobaciones por listas de permitidos y
         cuotas, y hacer que lo irreversible o quede prohibido o quede diferido a una cola
         que revise una persona"
+      rationale: "Desaparece el control que sostenía todo lo demás, y hay que reponerlo con límites que no dependan de nadie mirando."
     - id: c
       text: Basta con añadir al prompt que actúe con especial prudencia
+      rationale: "Pide prudencia a quien nadie va a corregir si no la tiene."
   correct: d
   explanation: "En modo asistido el humano es un control de seguridad activo, aunque nadie lo
     haya escrito así; al quitarlo hay que reemplazarlo por controles que funcionen sin nadie
@@ -787,13 +895,17 @@
   options:
     - id: c
       text: Para que quede constancia en el registro de auditoría
+      rationale: "El registro es para después; el motivo cambia lo que ocurre a continuación."
     - id: b
       text: Porque sin motivo la denegación se interpreta como un error transitorio y se reintenta
+      rationale: "Sin motivo, la denegación parece un fallo pasajero y el agente lo reintenta."
     - id: d
       text: Porque es obligatorio en el protocolo
+      rationale: "Porque el protocolo obliga a acompañar toda denegación de una explicación."
     - id: a
       text: Porque el motivo se le hace llegar al agente y le permite ajustar el enfoque, en vez
         de reintentar lo mismo o quedarse bloqueado
+      rationale: "La denegación sin explicación deja al agente repitiendo lo mismo hasta agotarse."
   correct: a
   explanation: "La denegación con motivo cierra el bucle: 'lee el fichero de ejemplo en vez
     del de configuración' redirige, mientras que un rechazo mudo deja al agente adivinando y
@@ -814,12 +926,16 @@
       text: El endurecimiento del contenedor, la restricción de salida a red (no hay una por
         defecto), la custodia y rotación de la clave de entorno, la separación por frontera
         de confianza y la retención y redacción de registros
+      rationale: "Al mover la ejecución se hereda todo lo que la plataforma hacía por defecto, empezando por lo que no se ve."
     - id: b
       text: "Ninguna nueva: solo cambia dónde se ejecuta el contenedor"
+      rationale: "El sitio donde corre es justo lo que define quién responde de la contención."
     - id: a
       text: Solo el aprovisionamiento de cómputo; la seguridad la sigue aportando la plataforma
+      rationale: "El cómputo es lo fácil: lo que se hereda es el aislamiento y la salida a red."
     - id: d
       text: Solo la disponibilidad; la seguridad es compartida a partes iguales
+      rationale: "El reparto no es simétrico: lo que rodea al contenedor pasa a ser tuyo entero."
   correct: c
   explanation: "Al mover la ejecución a tu infraestructura, el modelo de responsabilidad se
     desplaza entero para esa parte: endurecer la imagen, ejecutar sin privilegios, decidir
@@ -842,15 +958,19 @@
   options:
     - id: b
       text: "Ninguno: el modelo trata todo el contexto igual y la distinción es decorativa"
+      rationale: "Aunque el modelo no distinga, tu harness sí puede: ahí está la utilidad."
     - id: d
       text: Ayuda a que el modelo pondere distinto según la procedencia, y sobre todo permite que
         TU código decida qué acciones habilita cada origen; pero es una capa más, no una
         garantía
+      rationale: "Sirve para decidir permisos en tu código, no para que el modelo se resista mejor."
     - id: a
       text: "Es la defensa definitiva: con las etiquetas correctas la inyección deja de ser
         posible"
+      rationale: "Una etiqueta no impide seguir la instrucción: solo dice de dónde venía."
     - id: c
       text: Solo sirve para depurar; no afecta al comportamiento
+      rationale: "También decide qué se habilita según el origen, que es bastante más que depurar."
   correct: d
   explanation: "Marcar la procedencia tiene dos efectos de distinto peso. El blando: el modelo
     pondera algo mejor lo que viene de un canal de operador frente a un resultado de
@@ -877,14 +997,18 @@
   options:
     - id: c
       text: "En la entrada: un clasificador que detecte inyección en el texto del ticket"
+      rationale: "En la entrada: un clasificador que detecte el intento antes de que el modelo lo lea."
     - id: b
       text: "En el prompt de sistema: reforzar la instrucción con más énfasis y ejemplos"
+      rationale: "El atacante escribe en el mismo contexto: es una discusión que el prompt no gana siempre."
     - id: a
       text: "En la consulta a la base de datos: que su autorización se derive del contexto de la
         ejecución (el cliente del ticket) y no de un argumento que produzca el modelo"
+      rationale: "Es el único punto donde la restricción no depende del texto: el permiso lo pone la ejecución, no el modelo."
     - id: d
       text: "En la salida: un revisor que lea el correo antes de enviarlo buscando datos
         sensibles"
+      rationale: "Llega al final y tiene que adivinar qué es sensible en un correo legítimo."
   correct: a
   explanation: "El diagrama dibuja las tres patas de la trifecta, y el control más fuerte por
     unidad de esfuerzo es quitar la capacidad: si la herramienta solo puede leer el cliente
@@ -904,13 +1028,17 @@
   options:
     - id: a
       text: "Ninguna: el modelo no genera scripts maliciosos"
+      rationale: "No hace falta intención: basta con que haya leído algo que la traía."
     - id: b
       text: Comprobar que el HTML es sintácticamente válido
+      rationale: "Comprobar que el HTML está bien formado para que no rompa la página."
     - id: c
       text: Limitar la longitud del HTML generado
+      rationale: "Limitar su longitud para que no desborde el hueco donde se pinta."
     - id: d
       text: Tratarlo como entrada no confiable y sanearlo o escaparlo antes de renderizar, igual
         que harías con contenido enviado por un usuario
+      rationale: "El origen es el mismo que el de cualquier contenido de fuera: lo que llegó al modelo puede volver en su salida."
   correct: d
   explanation: "La salida de un modelo es una cadena de origen no confiable, y encima puede
     estar influida por contenido que un atacante controla (un documento recuperado, un
@@ -933,14 +1061,18 @@
       text: Las operaciones se enrutan por un proxy git del lado de la plataforma que inyecta el
         token DESPUÉS de que la petición salga del sandbox; el código que corre dentro no
         puede leerlo ni exfiltrarlo
+      rationale: "El secreto se añade después del límite de confianza, así que dentro no existe ni para quien lo busque."
     - id: c
       text: El agente recibe una copia de solo lectura y los cambios se sincronizan al terminar la
         sesión
+      rationale: "Sincronizar al final no explica cómo se autentica el envío cuando llega el momento."
     - id: a
       text: El token se escribe en un fichero de credenciales de git con permisos restringidos
+      rationale: "Un fichero con permisos sigue estando dentro: el agente lee ahí con la misma herramienta que en el resto."
     - id: d
       text: El agente pide el token al orquestador mediante una herramienta cada vez que lo
         necesita
+      rationale: "Pedirlo lo devolvería al contenedor, que es exactamente lo que se quiere evitar."
   correct: b
   explanation: "Es el mismo patrón que las credenciales de MCP y las de variable de entorno:
     el secreto se inyecta fuera del sandbox, en la salida. Por eso el agente puede empujar
@@ -960,13 +1092,17 @@
   options:
     - id: b
       text: Habilitar todas y controlar el riesgo con puertas de aprobación
+      rationale: "Habilitarlas todas y contener el riesgo con puertas de aprobación donde importe."
     - id: a
       text: Desactivar todo por defecto y habilitar explícitamente las que hacen falta, en vez de
         habilitar todo y desactivar las peligrosas
+      rationale: "Lo que no se habilitó no puede fallar: el error por omisión deja al agente corto, no peligroso."
     - id: c
       text: Habilitar todas menos las de escritura
+      rationale: "Todas menos las de escritura, que son las que pueden causar daño."
     - id: d
       text: Habilitar las mismas que tenga el agente equivalente en producción
+      rationale: "Copia una configuración pensada para otro contexto y otros permisos."
   correct: a
   explanation: "Denegación por defecto: al añadirse una herramienta nueva al conjunto, con
     este patrón no aparece sola en tu agente. Con el inverso, cualquier ampliación amplía tu
@@ -987,14 +1123,18 @@
   options:
     - id: a
       text: Activar la inyección en el cuerpo además de en la cabecera
+      rationale: "Falta permitir la inyección en el cuerpo además de en la cabecera de la petición."
     - id: b
       text: Reiniciar la sesión para que recargue la configuración de red
+      rationale: "Falta reiniciar la sesión para que recoja la configuración de red nueva."
     - id: d
       text: "Añadir también el dominio a la lista de hosts permitidos del ENTORNO: son dos capas
         independientes, una decide dónde se puede usar el secreto y otra dónde se puede
         llegar"
+      rationale: "Son dos permisos independientes: uno dice con qué se puede autenticar y otro a dónde se puede llegar."
     - id: c
       text: Usar el nombre del host con comodín en vez del dominio exacto
+      rationale: "El comodín amplía dónde vale el secreto, que no es lo que estaba bloqueando la llamada."
   correct: d
   explanation: "Es la confusión típica: la lista de la credencial responde a '¿en qué
     peticiones se puede sustituir este secreto?' y la del entorno a '¿a dónde puede llegar
@@ -1014,13 +1154,17 @@
   options:
     - id: b
       text: Porque después el resultado puede ser demasiado largo para mostrarlo
+      rationale: "El tamaño es un problema de presentación, no la razón del orden."
     - id: a
       text: Porque después el usuario ya no tiene forma de saber qué se envió
+      rationale: "Porque una vez enviado ya no hay forma de saber qué se mandó exactamente."
     - id: d
       text: Porque el protocolo exige confirmación explícita en cada llamada
+      rationale: "No hay tal exigencia: es una recomendación sobre cuándo mirar, no sobre pedir permiso."
     - id: c
       text: "Porque la exfiltración ocurre en la LLAMADA: los datos sensibles viajan en los
         argumentos hacia el servidor, así que enseñarlos después ya no evita nada"
+      rationale: "Cuando se enseña después, lo que se pretendía proteger ya salió de la máquina."
   correct: c
   explanation: "El momento importa porque el daño está en el envío, no en la respuesta: si la
     llamada lleva datos que no debían salir, mostrarlos después es un informe forense. La
@@ -1041,12 +1185,16 @@
     - id: d
       text: Límites de tasa por herramienta, tiempos máximos por llamada y por ejecución, y topes
         de volumen (cuántos registros puede modificar, cuántos correos puede enviar)
+      rationale: "Los permisos dicen qué puede tocar; estos dicen cuánto, y sin ellos un bucle roto hace lo permitido mil veces."
     - id: a
       text: Solo un tope de tokens, que ya acota indirectamente todo lo demás
+      rationale: "Los tokens acotan lo que habla, no lo que hace: mil correos caben en pocos tokens."
     - id: b
       text: Solo un tiempo máximo de ejecución total
+      rationale: "Un tiempo máximo de ejecución total, que corta cualquier desmadre."
     - id: c
       text: "Ninguno: los límites impiden que el agente complete tareas legítimas"
+      rationale: "Un límite bien puesto no estorba a la tarea legítima, que nunca se acerca al tope."
   correct: d
   explanation: "Los permisos dicen QUÉ puede hacer y los límites CUÁNTO: un agente con permiso
     legítimo para enviar correos y un bucle mal cerrado puede mandar diez mil. Los topes de
@@ -1067,15 +1215,19 @@
   options:
     - id: c
       text: Que el comentario está en un lenguaje que el modelo no clasifica como instrucción
+      rationale: "El idioma da igual: si lo entiende para trabajar, lo entiende para obedecer."
     - id: b
       text: "Que el contenido del repositorio es a la vez el objeto legítimo de trabajo del agente
         y contenido no confiable: no se puede simplemente 'no leerlo', y el agente ya tiene
         permiso para ejecutar cosas. La defensa está en qué acciones se permiten y cuáles se
         aprueban, no en filtrar la lectura"
+      rationale: "No hay forma de separarlo: leer el repositorio ES la tarea, y el fichero es a la vez trabajo y vector."
     - id: a
       text: Que los comentarios de código no se pueden sanear sin romper la sintaxis
+      rationale: "Que un comentario de código no se puede sanear sin romper el fichero."
     - id: d
       text: Que el fichero está fuera del directorio de trabajo del agente
+      rationale: "Estaría fuera de alcance, y entonces ni siquiera se leería."
   correct: b
   explanation: "Es lo que hace incómodo el caso: el vector es exactamente el material que el
     agente tiene que leer para hacer su trabajo, así que no hay una frontera de entrada
@@ -1096,14 +1248,18 @@
   options:
     - id: b
       text: Que así se pueden cifrar, cosa que no ocurre en la definición del agente
+      rationale: "Los dos sitios pueden cifrarse en reposo: lo que cambia es a cuántas manos llega."
     - id: c
       text: Que reduce el tamaño de la definición del agente
+      rationale: "Que la definición del agente se queda más pequeña y manejable."
     - id: a
       text: "Que la definición del agente es reutilizable y versionada: meterle secretos dentro
         los propagaría a cada versión y a cada sesión que la referencie, incluidas las de
         otros usuarios o inquilinos"
+      rationale: "Se sigue la vida de cada cosa: una se comparte y se versiona; un secreto no puede vivir en algo que se comparte."
     - id: d
       text: Que permite usar credenciales distintas en cada llamada a herramienta
+      rationale: "El alcance por llamada es otra cosa; aquí lo que cambia es dónde se guarda."
   correct: a
   explanation: "La separación sigue la vida útil de cada cosa: el agente es una configuración
     duradera y compartida, mientras que la credencial es de quién ejecuta y cuándo. Al
@@ -1123,13 +1279,17 @@
   options:
     - id: c
       text: El nivel de confianza que declara el modelo y su razonamiento
+      rationale: "Lo que el modelo cree de sí mismo no es evidencia de nada."
     - id: a
       text: Un resumen en lenguaje natural de lo que el agente pretende conseguir
+      rationale: "La intención puede ser impecable y la acción concreta desastrosa."
     - id: d
       text: El historial completo de la conversación para poder juzgar el contexto
+      rationale: "Pide leer mucho para decidir rápido, que es como se acaba aprobando sin mirar."
     - id: b
       text: La acción concreta con sus argumentos exactos, qué va a cambiar, bajo qué identidad se
         ejecuta, y si es reversible y cómo
+      rationale: "Aprobar sin ver el detalle es firmar en blanco: quien decide de verdad sigue siendo el que lo propuso."
   correct: b
   explanation: "Una aprobación es una decisión sobre un efecto, y para decidir hacen falta el
     efecto y su reversibilidad, no la intención. Un resumen en lenguaje natural es justo lo
@@ -1150,12 +1310,16 @@
     - id: d
       text: "Redactar secretos y datos personales antes de escribir: los registros tienen
         retención larga y muchos más lectores que el sistema que los produjo"
+      rationale: "Los registros los ve mucha más gente y durante mucho más tiempo que el sistema que los generó."
     - id: b
       text: Comprimirlos para reducir el coste de almacenamiento
+      rationale: "Comprimirlos, que es lo que hace viable guardarlos con retención larga."
     - id: a
       text: Guardar solo un hash de los argumentos para no exponer nada
+      rationale: "Un resumen irreversible protege, pero deja el registro inservible para depurar."
     - id: c
       text: Registrar solo en el entorno de desarrollo
+      rationale: "Registrar con detalle solo en desarrollo, donde no hay datos reales."
   correct: d
   explanation: "Un registro completo es lo que salva una investigación, y también lo que
     convierte el sistema de registros en el sitio con más datos sensibles de la casa:
@@ -1175,16 +1339,20 @@
   options:
     - id: a
       text: "No se diferencia: los mismos controles aplican sin cambios"
+      rationale: "No se diferencia: las mismas fronteras y los mismos controles de siempre."
     - id: c
       text: En que hay un componente que decide la siguiente acción y es influenciable por
         cualquier contenido que lea; así que además de las fronteras habituales hay que
         tratar cada fuente de contenido como una entrada potencialmente hostil que puede
         dirigir acciones
+      rationale: "Aparece un componente que decide, y decide leyendo: cada fuente pasa a ser una entrada con capacidad de mandar."
     - id: b
       text: En que los agentes no tienen usuarios autenticados y por tanto no hay control de
         acceso
+      rationale: "Los agentes sí actúan en nombre de alguien: el control de acceso importa igual o más."
     - id: d
       text: En que la superficie es menor porque solo hay un punto de entrada
+      rationale: "La superficie crece: cada herramienta y cada documento leído es una entrada nueva."
   correct: c
   explanation: "La diferencia estructural es que el flujo de control es influenciable por los
     datos: en un servicio tradicional los datos hostiles atacan el parseo o la consulta,
@@ -1207,14 +1375,18 @@
   options:
     - id: a
       text: "No: el conjunto debe ser idéntico para todos los llamantes"
+      rationale: "No: el catálogo debe ser el mismo para todos los que pregunten."
     - id: c
       text: Sí, pero solo si se emite una notificación de lista cambiada
+      rationale: "Sí, siempre que se avise con la notificación de lista modificada."
     - id: b
       text: "Sí, y encaja con el modelo sin estado: las credenciales son entrada de esa petición,
         así que devolver solo lo que permiten los ámbitos concedidos es legítimo. Lo que no
         puede es variar por conexión o por peticiones anteriores"
+      rationale: "Lo permitido es depender de lo que llega en la petición; lo prohibido es depender de lo que llegó antes."
     - id: d
       text: No, porque exponer conjuntos distintos filtra información sobre los permisos
+      rationale: "Enseñar solo lo autorizado no filtra nada: quien pregunta ya sabe qué permisos presentó."
   correct: b
   explanation: "Es una distinción fina y útil: la prohibición apunta al estado de conexión (no
     puedes acordarte de quién eres por la conexión ni por peticiones previas), mientras que
@@ -1234,13 +1406,17 @@
   options:
     - id: b
       text: Impide por completo la inyección de prompt
+      rationale: "Impide la inyección de prompt: lo que entra ya no puede afectar a nada de fuera."
     - id: c
       text: Elimina la necesidad de controlar los permisos de las credenciales
+      rationale: "El contenedor no cambia lo que la credencial permite hacer fuera de él."
     - id: d
       text: Garantiza que el agente no pueda acceder a la red
+      rationale: "Garantiza que el agente no llegue a la red desde dentro del contenedor."
     - id: a
       text: "Contención y limpieza: lo que el agente escriba o instale no persiste ni contamina
         otras ejecuciones, y un compromiso queda acotado a esa sesión"
+      rationale: "Acota en el tiempo lo que no se puede acotar en permisos: lo que consiga hacer muere con la sesión."
   correct: a
   explanation: "El contenedor efímero acota en el tiempo y aísla entre ejecuciones: nada de lo
     que haga una sesión sobrevive ni se filtra a la siguiente. No tiene nada que ver con la
@@ -1263,12 +1439,16 @@
         y son un vector de inyección), qué datos recibirá en los argumentos de cada llamada,
         con qué credenciales operará y a qué hosts sale; y si el servidor puede cambiar su
         catálogo después
+      rationale: "Lo que se revisa no es el código sino el alcance: qué llega a ver, con qué habla y qué le dice al modelo."
     - id: c
       text: Que el servidor tenga buena documentación y esté mantenido activamente
+      rationale: "Que tenga buena documentación y un mantenimiento activo detrás."
     - id: a
       text: Que implemente la última revisión del protocolo
+      rationale: "La versión del protocolo no dice nada sobre a qué datos llega ni qué instrucciones inyecta."
     - id: b
       text: Que soporte el transporte Streamable HTTP en vez de stdio
+      rationale: "Que hable por HTTP en vez de por tuberías, que es lo que escala."
   correct: d
   explanation: "Añadir un servidor MCP es añadir un tercero que a la vez recibe tus datos (en
     los argumentos) y escribe en el contexto de tu modelo (por las descripciones y los
@@ -1289,14 +1469,18 @@
   options:
     - id: b
       text: Que el modelo no sepa rellenar los argumentos correctamente
+      rationale: "Sería molesto, no peligroso: fallarían las llamadas y ya está."
     - id: a
       text: Que la validación explote en coste y sirva de vector de denegación de servicio contra
         tu validador; por eso se recomienda acotar profundidad, número de subesquemas o
         tiempo por validación
+      rationale: "Un esquema es contenido que llega de fuera, así que puede estar hecho para agotar a quien lo valide."
     - id: c
       text: Que el esquema no sea compatible con el dialecto 2020-12
+      rationale: "Que el esquema no encaje con el dialecto que el protocolo exige."
     - id: d
       text: Que el esquema ocupe demasiados tokens en el contexto
+      rationale: "El coste en tokens se paga, pero no tumba el servicio."
   correct: a
   explanation: Un esquema construido a propósito puede hacer que la validación sea
     desproporcionadamente cara y tumbar el proceso que valida. Por eso la recomendación es
@@ -1316,14 +1500,18 @@
   options:
     - id: b
       text: Bajo la del usuario, suplantándolo, para que los permisos coincidan exactamente
+      rationale: "Suplantar borra el rastro: en el registro no se distingue lo que hizo la persona de lo que hizo el agente."
     - id: a
       text: Bajo una identidad de servicio compartida por todos los agentes
+      rationale: "Una identidad compartida junta a todos los agentes en una sola bolsa de permisos."
     - id: d
       text: Bajo una identidad propia y distinguible, con permisos derivados del usuario pero
         acotados a la tarea, de modo que en la auditoría se vea que actuó el agente y en
         nombre de quién
+      rationale: "Permite responder en la auditoría a las dos preguntas a la vez: quién actuó y por cuenta de quién."
     - id: c
       text: Bajo la identidad del equipo propietario del agente
+      rationale: "Ata los permisos al equipo dueño y no a quien pidió la tarea."
   correct: d
   explanation: "Suplantar al usuario hace la auditoría indistinguible: en los registros no se
     puede separar lo que hizo la persona de lo que hizo el agente en su nombre, justo cuando
@@ -1345,17 +1533,21 @@
     - id: a
       text: El XSS reescribe la definición de las herramientas MCP; se contiene firmando los
         esquemas
+      rationale: "Firmar los esquemas no impide pedirle al proxy que lance un proceso."
     - id: b
       text: El XSS accede al sistema de ficheros del navegador; se contiene con permisos del
         sistema
+      rationale: "El código inyectado llega al sistema de ficheros desde el navegador; lo contienen los permisos del sistema."
     - id: d
       text: "No puede ocurrir: stdio es un transporte local y aislado por diseño"
+      rationale: "Es local, pero quien lo lanza está expuesto por la web que tiene abierta."
     - id: c
       text: El código inyectado roba del entorno del cliente el token con que se autentica contra
         el proxy y le pide lanzar procesos arbitrarios. Se contiene evitando el XSS (validar
         esquemas de URL, no abrir URLs por shell, política de seguridad de contenido) y,
         aceptando que puede ocurrir, aislando los procesos que lanza el proxy y exigiendo
         autorización adicional para comandos peligrosos
+      rationale: "El salto es de navegador a máquina: el proxy hace lo que le pidan si le llega el token que lo autoriza."
   correct: c
   explanation: "stdio no es inseguro por sí mismo; el problema es la arquitectura de proxy que
     puede engendrar procesos. La cadena es: ejecución de código en el cliente (típicamente
@@ -1376,12 +1568,16 @@
     - id: a
       text: "Un interruptor de parada: una forma rápida e inequívoca de detenerlo y de revocar sus
         credenciales sin desplegar código"
+      rationale: "Es lo único que hay que tener antes: todo lo demás se puede añadir con el agente ya en marcha."
     - id: b
       text: Una prueba de concepto validada por el equipo de producto
+      rationale: "Dice que la idea funciona, no qué hacer cuando deje de funcionar."
     - id: c
       text: Un panel con las métricas de calidad del agente
+      rationale: "Enseña lo que pasó, pero no da forma de detenerlo."
     - id: d
       text: Documentación de las herramientas que usa
+      rationale: "Ayuda a entenderlo, no a pararlo un domingo por la noche."
   correct: a
   explanation: "Es el control que se echa en falta justo cuando hace falta: a las tres de la
     mañana con el agente haciendo algo raro, la pregunta es cómo se para AHORA. Eso implica
@@ -1403,14 +1599,18 @@
     - id: c
       text: Retrasar cualquier integración con sistemas reales hasta que la inyección de prompt
         esté resuelta
+      rationale: "No se va a resolver: esperar a eso es no integrar nunca."
     - id: d
       text: "Diseñar asumiendo que el agente hará alguna vez algo inesperado o inducido, y hacer
         que eso no baste para causar daño: permisos estrechos, puertas en lo irreversible,
         límites de volumen, registro atribuible y una forma de pararlo"
+      rationale: "Es la única postura que sobrevive a un ataque nuevo: no depende de haber previsto por dónde llega."
     - id: a
       text: Confiar en que los modelos modernos rechazan las instrucciones maliciosas
+      rationale: "Delega la seguridad en el comportamiento de un componente que el atacante también puede influir."
     - id: b
       text: Poner aprobación humana a todo, que es la única defensa completa
+      rationale: "Se degrada sola con el uso hasta convertirse en un clic automático."
   correct: d
   explanation: "La postura útil no es ni el bloqueo ni la confianza: es asumir el fallo y
     acotar sus consecuencias. La inyección de prompt no tiene solución completa hoy, así que
@@ -1432,13 +1632,17 @@
   options:
     - id: b
       text: Porque los modelos cometen errores de sintaxis con frecuencia
+      rationale: "Porque comete errores de sintaxis a menudo y hay que comprobar lo que produce."
     - id: c
       text: Porque la salida no es determinista entre ejecuciones
+      rationale: "Porque no es determinista: dos ejecuciones pueden dar cosas distintas."
     - id: a
       text: Porque está influida por todo lo que el modelo ha leído, incluido contenido que un
         atacante controla, así que puede llevar cualquier cosa
+      rationale: "Lo que sale lleva dentro lo que entró, y parte de lo que entró lo escribió alguien más."
     - id: d
       text: Porque el proveedor del modelo podría alterarla
+      rationale: "El riesgo no está en el proveedor sino en el contenido que el modelo leyó por el camino."
   correct: a
   explanation: "El motivo es la procedencia, no la calidad: el texto que sale ha sido
     condicionado por documentos, páginas y resultados de herramienta que no controlas. Por
@@ -1457,13 +1661,17 @@
   options:
     - id: a
       text: Que el agente pide permiso antes de cada llamada
+      rationale: "Eso es preguntar cada vez, que es otra cosa y se degrada con el uso."
     - id: b
       text: Que las herramientas fallan de forma segura si hay un error
+      rationale: "Que ante un error la herramienta falla del lado seguro y no ejecuta nada."
     - id: d
       text: Que el agente no puede acceder a la red salvo autorización
+      rationale: "Que no sale a la red salvo que se le autorice expresamente."
     - id: c
       text: Que se parte de todo desactivado y se habilita explícitamente lo que hace falta, en
         vez de habilitar todo y desactivar lo peligroso
+      rationale: "El error por omisión deja al agente corto, que es un fallo que se ve y no hace daño."
   correct: c
   explanation: "Es una postura de configuración: la lista de lo permitido se declara y todo lo
     demás queda fuera. Su virtud es cómo envejece: cuando se añade una herramienta nueva al
@@ -1482,12 +1690,16 @@
     - id: b
       text: Que ciertas acciones se detienen y esperan la aprobación de una persona antes de
         ejecutarse
+      rationale: "La clave es 'antes': una revisión posterior no evita nada, solo lo documenta."
     - id: a
       text: Que una persona revisa los registros del agente periódicamente
+      rationale: "Revisar después es auditoría: llega cuando la acción ya ocurrió."
     - id: c
       text: Que el agente pregunta al usuario cuando no sabe qué hacer
+      rationale: "Es el agente quien pide ayuda, no un control que se le impone."
     - id: d
       text: Que una persona escribe los prompts del agente
+      rationale: "Escribir el prompt influye en su comportamiento, pero no detiene ninguna acción concreta."
   correct: b
   explanation: "La clave es que el bucle se PARA antes del efecto: la acción no ocurre hasta
     que alguien decide. Revisar registros después es supervisión, no control —el daño ya
