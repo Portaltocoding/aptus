@@ -14,12 +14,16 @@
     - id: b
       text: Evitar que información relevante quede cortada justo en el límite entre
         dos fragmentos
+      rationale: "Un corte cae donde cae: si la frase que contesta queda partida entre dos fragmentos, ninguno de los dos la contiene entera."
     - id: a
       text: Reducir el tamaño total del índice vectorial
+      rationale: "El solape duplica texto entre fragmentos vecinos, así que es lo primero que se recorta cuando el índice pesa demasiado."
     - id: c
       text: Acelerar la generación de embeddings
+      rationale: "Menos texto que embeber por documento son menos llamadas al modelo de embeddings y una indexación más rápida."
     - id: d
       text: Eliminar la necesidad de un modelo de reranking
+      rationale: "Si cada fragmento llega ya con su contexto alrededor, el orden del recuperador importa menos y el reranking sobra."
   correct: b
   explanation: El overlap entre chunks consecutivos evita que una idea o frase
     relevante quede partida exactamente en el corte, de forma que al menos uno
@@ -38,13 +42,17 @@
   options:
     - id: a
       text: Un resumen comprimido en texto plano del contenido original
+      rationale: "'Embedding' se asocia a compresión: guardar una versión reducida del texto para no arrastrar el original entero."
     - id: d
       text: La lista de tokens exactos que componen el texto
+      rationale: "Antes de nada el texto se tokeniza, y esa lista de ids es la representación con la que el modelo trabaja de verdad."
     - id: b
       text: Un vector numérico de dimensión fija que codifica el significado semántico
         del texto en un espacio donde textos similares quedan cerca
+      rationale: "Un vector de dimensión fija coloca cada texto en un espacio donde la cercanía es parecido de significado, no de letras."
     - id: c
       text: El identificador único (hash) del texto en la base de datos
+      rationale: "Para buscar rápido hace falta una clave estable por documento, y de ahí la idea de un identificador único."
   correct: b
   explanation: Un embedding es una representación vectorial de dimensión fija; el
     modelo se entrena para que textos semánticamente similares se ubiquen cerca
@@ -64,15 +72,19 @@
   options:
     - id: c
       text: La similitud coseno solo funciona con vectores de números enteros
+      rationale: "El coseno se define sobre el ángulo entre vectores, y hay implementaciones que exigen tipos concretos para el producto escalar."
     - id: d
       text: La distancia euclídea siempre da un ranking inverso al de la similitud
         coseno
+      rationale: "Una mide parecido y la otra distancia: donde una sube la otra baja, así que el orden sale al revés."
     - id: b
       text: Para vectores normalizados, maximizar la similitud coseno equivale a
         minimizar la distancia euclídea, por lo que el ranking resultante es el
         mismo
+      rationale: "Con norma 1, ‖a−b‖² = 2 − 2·cos(a,b): la distancia es función decreciente del coseno, así que el orden es el mismo."
     - id: a
       text: No guardan ninguna relación, hay que calcular ambas por separado
+      rationale: "Son métricas de familias distintas —ángulo frente a magnitud—, así que conviene calcular las dos y comparar rankings."
   correct: b
   explanation: Cuando los vectores están normalizados a norma 1, ||a-b||^2 = 2 -
     2·cos(a,b); como la relación es monótona decreciente, ordenar por mayor
@@ -93,12 +105,16 @@
     - id: b
       text: La generación de contenido que suena fluido y seguro pero es factualmente
         incorrecto o no está respaldado por las fuentes/datos disponibles
+      rationale: "Sale fluido y con seguridad, y aun así afirma cosas que ninguna fuente sostiene: por eso cuesta detectarla leyendo."
     - id: a
       text: Un fallo de red que impide al modelo responder
+      rationale: "Si la llamada al modelo se corta a mitad, la respuesta llega incompleta e incoherente y parece que se lo inventa."
     - id: d
       text: El uso de un vocabulario excesivamente técnico
+      rationale: "Un registro demasiado técnico hace que la respuesta suene a inventada aunque el contenido sea correcto."
     - id: c
       text: Un error de sintaxis en el JSON de salida
+      rationale: "Cuando se pide salida estructurada, el fallo más visible es un JSON que no parsea: la respuesta se rompe."
   correct: b
   explanation: La alucinación es la generación de afirmaciones plausibles y bien
     redactadas que no se corresponden con hechos reales ni con la
@@ -118,12 +134,16 @@
     - id: a
       text: Si la respuesta generada está soportada por el contexto recuperado, sin
         añadir afirmaciones no presentes en él
+      rationale: "Mira si lo respondido se sostiene sobre el contexto recuperado, sin afirmaciones que no estén ahí dentro."
     - id: b
       text: La velocidad de respuesta del sistema en milisegundos
+      rationale: "'Fidelidad' se usa mucho en objetivos de servicio, donde lo que se vigila es que la respuesta llegue a tiempo."
     - id: c
       text: Si la pregunta del usuario está bien formulada gramaticalmente
+      rationale: "Si la pregunta llega mal formulada, el sistema no puede responder bien: medir la entrada es medir el sistema."
     - id: d
       text: El número total de documentos recuperados
+      rationale: "Cuantos más documentos entren, más probable es que la respuesta esté cubierta: el recuento sirve de indicador."
   correct: a
   explanation: Faithfulness evalúa si cada afirmación de la respuesta puede
     atribuirse al contexto recuperado; una respuesta poco fiel introduce
@@ -144,15 +164,19 @@
     - id: d
       text: Context recall se calcula sobre la respuesta generada, no sobre los
         fragmentos recuperados
+      rationale: "Recall suena a cuánto del contexto se retiene en la respuesta, y eso solo se puede mirar en la generación."
     - id: c
       text: Context precision solo aplica a modelos cerrados (closed-source)
+      rationale: "Estas métricas necesitan inspeccionar el ranking interno, algo disponible solo en implementaciones propietarias."
     - id: b
       text: Context precision mide qué proporción de los fragmentos recuperados son
         realmente relevantes; context recall mide qué proporción de los
         fragmentos relevantes existentes en el corpus fueron efectivamente
         recuperados
+      rationale: "Precisión mira cuánto de lo recuperado es relevante; recall, cuánto de lo relevante del corpus se llegó a recuperar."
     - id: a
       text: Son sinónimos, dos nombres para la misma métrica
+      rationale: "Las dos evalúan el recuperador sobre el mismo conjunto de fragmentos, así que suelen usarse indistintamente."
   correct: b
   explanation: "Precision y recall aplicados a retrieval: precision =
     relevantes_recuperados / total_recuperados (ruido en lo recuperado); recall
@@ -173,12 +197,16 @@
     - id: b
       text: Aplana la distribución de probabilidad sobre el siguiente token,
         aumentando la aleatoriedad y diversidad de la salida
+      rationale: "Aplana la distribución del siguiente token: entran candidatos menos probables y la salida varía entre ejecuciones."
     - id: d
       text: Aumenta la longitud máxima de la respuesta
+      rationale: "A más temperatura el modelo se extiende más antes de cerrar, así que las respuestas salen más largas."
     - id: c
       text: Reduce el tamaño del contexto disponible
+      rationale: "Un muestreo más disperso gasta más tokens por respuesta y deja menos ventana libre para el contexto."
     - id: a
       text: Hace la salida más determinista y repetitiva
+      rationale: "Subir un parámetro suele endurecer el criterio: se elige siempre el token de arriba y la salida se repite."
   correct: b
   explanation: Temperature reescala los logits antes del softmax; valores más
     altos aplanan la distribución de probabilidad, haciendo que tokens menos
@@ -200,14 +228,18 @@
   options:
     - id: c
       text: Porque RAG elimina por completo la posibilidad de alucinación
+      rationale: "Si la respuesta se apoya en documentos recuperados, el modelo deja de inventar: manda la fuente, no los pesos."
     - id: d
       text: Porque el fine-tuning no puede usarse nunca con datos privados
+      rationale: "Entrenar con datos privados obliga a sacarlos del perímetro, así que el fine-tuning queda descartado de entrada."
     - id: a
       text: Porque el fine-tuning es siempre gratuito y RAG siempre es más caro
+      rationale: "El fine-tuning se paga una vez y luego sale gratis; RAG paga recuperación y contexto extra en cada llamada."
     - id: b
       text: Porque RAG permite actualizar el conocimiento simplemente actualizando el
         índice/documentos, sin reentrenar el modelo, mientras que el fine-tuning
         fija el conocimiento en los pesos hasta el siguiente reentrenamiento
+      rationale: "El conocimiento vive en el índice: actualizar precios es reindexar, mientras que en los pesos exigiría reentrenar."
   correct: b
   explanation: RAG separa el conocimiento (en un índice externo, actualizable en
     tiempo real) del modelo; el fine-tuning 'hornea' el conocimiento en los
@@ -229,12 +261,16 @@
       text: Para encontrar vecinos aproximados de forma mucho más rápida que una
         búsqueda exhaustiva (fuerza bruta), a cambio de una pequeña pérdida de
         exactitud
+      rationale: "Recorrer millones de vectores por consulta no cabe en presupuesto de latencia; el grafo navegable llega casi al mismo top-k."
     - id: d
       text: Para entrenar el modelo de embeddings desde cero
+      rationale: "El índice ve todos los vectores del corpus, así que es el sitio natural para ajustar el modelo que los produce."
     - id: a
       text: Para garantizar siempre el resultado exacto más similar, sin excepción
+      rationale: "Si la búsqueda no garantiza el vecino exacto, el ranking deja de ser reproducible: el índice existe para asegurarlo."
     - id: c
       text: Para comprimir los embeddings a texto plano
+      rationale: "Guardar el texto junto al vector permite devolver el fragmento sin ir a otra base: el índice hace de almacén."
   correct: b
   explanation: En corpus grandes, comparar un vector contra todos los demás
     (búsqueda exacta) es demasiado costoso; estructuras como HNSW o IVF
@@ -253,13 +289,17 @@
   options:
     - id: d
       text: El número de capas (layers) del modelo
+      rationale: "Más capas es más profundidad y más capacidad de razonar sobre el texto: es la medida clásica del tamaño de un modelo."
     - id: a
       text: El número máximo de usuarios que pueden usar el modelo a la vez
+      rationale: "La ventana suena a capacidad de servicio: cuántas peticiones simultáneas aguanta el modelo desplegado."
     - id: b
       text: La cantidad máxima de tokens (entrada + salida) que el modelo puede
         procesar/tener en cuenta en una sola llamada
+      rationale: "Es el presupuesto de tokens de una llamada, entrada y salida juntas: lo que no cabe ahí, el modelo no lo ve."
     - id: c
       text: El tiempo máximo de espera antes de que expire una petición
+      rationale: "Toda llamada tiene un plazo máximo antes de cortarse, y ese margen es lo que limita cuánto puede generar."
   correct: b
   explanation: La ventana de contexto es el límite de tokens que el modelo puede
     atender simultáneamente en una llamada; todo lo que exceda ese límite
@@ -279,14 +319,18 @@
   options:
     - id: a
       text: Porque es más fácil de leer para los humanos
+      rationale: "Partir por trozos pronunciables deja tokens que una persona reconoce, y eso facilita depurar prompts y salidas."
     - id: d
       text: Porque elimina por completo la necesidad de un embedding por token
+      rationale: "Si las subunidades ya son fragmentos con significado, la tabla de embeddings deja de ser necesaria."
     - id: b
       text: Porque permite un vocabulario finito que aun así puede representar
         palabras raras, nombres propios o errores tipográficos combinando
         subunidades, evitando el problema de palabras fuera de vocabulario (OOV)
+      rationale: "Un vocabulario finito puede componer palabras raras, nombres propios o erratas a base de trozos: nada queda fuera."
     - id: c
       text: Porque reduce a la mitad el número de parámetros del modelo
+      rationale: "Menos entradas de vocabulario son menos filas en la matriz de embeddings, y eso recorta el tamaño del modelo."
   correct: b
   explanation: La tokenización por palabra completa requeriría un vocabulario
     enorme y aun así fallaría con palabras nuevas (OOV); BPE construye
@@ -306,14 +350,18 @@
   options:
     - id: d
       text: El few-shot solo funciona con modelos ajustados por fine-tuning
+      rationale: "Los ejemplos dentro del prompt solo se aprovechan si el modelo se ha ajustado antes a ese formato de tarea."
     - id: c
       text: Son sinónimos
+      rationale: "Los dos nombres describen lo mismo: pedirle algo al modelo sin entrenarlo para esa tarea concreta."
     - id: b
       text: El few-shot incluye en el propio prompt varios ejemplos de entrada/salida
         deseada antes de la pregunta real, mientras que el zero-shot no incluye
         ningún ejemplo
+      rationale: "Few-shot mete en el propio prompt varios pares entrada/salida antes de la pregunta real; zero-shot no mete ninguno."
     - id: a
       text: El zero-shot no usa ningún modelo de lenguaje
+      rationale: "El zero-shot resuelve con reglas o plantillas, sin pasar por el modelo, y por eso sale gratis."
   correct: b
   explanation: En few-shot prompting se incluyen ejemplos representativos de la
     tarea directamente en el contexto para guiar el formato/estilo de la
@@ -333,15 +381,19 @@
   options:
     - id: a
       text: El modelo pierde la conexión de red a mitad de la generación
+      rationale: "En contextos largos la generación tarda más y se expone más a que la conexión se corte a mitad."
     - id: c
       text: Los embeddings del medio del texto siempre tienen menor dimensión
+      rationale: "Los fragmentos centrales se codifican con menos dimensiones para ahorrar memoria en contextos largos."
     - id: d
       text: Los documentos recuperados en la posición intermedia del ranking nunca se
         muestran al usuario
+      rationale: "El ranking se corta por arriba y por abajo, así que las posiciones intermedias no llegan a enseñarse."
     - id: b
       text: El modelo tiende a prestar menos atención a la información situada en el
         medio de un contexto largo, siendo más preciso con lo que aparece al
         principio o al final
+      rationale: "La atención se reparte peor por el centro: lo que va al principio y al final se recupera con más precisión."
   correct: b
   explanation: Estudios empíricos muestran que, ante contextos largos, los LLMs
     recuperan y usan mejor la información situada al inicio o al final del
@@ -361,14 +413,18 @@
   options:
     - id: d
       text: Traduce automáticamente los documentos a otro idioma
+      rationale: "Con corpus multilingüe la comparación es injusta, así que el paso siguiente normaliza todo a un idioma."
     - id: b
       text: Reordena un conjunto más amplio de candidatos recuperados usando un modelo
         más preciso (aunque más costoso) para priorizar los fragmentos realmente
         más relevantes antes de pasarlos al LLM
+      rationale: "Recupera ancho y afina después: un modelo más caro reordena los candidatos y solo los mejores llegan al prompt."
     - id: a
       text: Genera la respuesta final en lugar del LLM principal
+      rationale: "Es el modelo que ya ha leído los candidatos con detalle, así que redactar la respuesta le sale más barato."
     - id: c
       text: Elimina la necesidad de generar embeddings
+      rationale: "Si el reordenado compara consulta y texto directamente, el índice vectorial deja de hacer falta."
   correct: b
   explanation: La recuperación inicial por similitud de embeddings es rápida pero
     aproximada; un reranker (habitualmente un cross-encoder) analiza pregunta y
@@ -391,12 +447,16 @@
         contexto recuperado (falta de fidelidad), o el retriever puede devolver
         contexto irrelevante o insuficiente, en ambos casos abriendo espacio a
         contenido inventado
+      rationale: "El modelo puede afirmar lo que no está en el contexto, y el recuperador puede traer material irrelevante o insuficiente."
     - id: d
       text: Porque RAG desactiva el mecanismo de atención del modelo
+      rationale: "Al inyectar documentos se sustituye parte del mecanismo de atención por la recuperación, y ahí se pierde control."
     - id: a
       text: Porque RAG nunca recupera documentos reales
+      rationale: "Lo recuperado son fragmentos troceados, no documentos completos, así que nunca se cita una fuente entera."
     - id: c
       text: Porque los embeddings siempre son aleatorios
+      rationale: "Los embeddings dependen de una inicialización aleatoria, así que dos indexaciones no devuelven lo mismo."
   correct: b
   explanation: "RAG mitiga la alucinación dando al modelo contexto verificado,
     pero no lo garantiza: el modelo puede ignorar o distorsionar ese contexto
@@ -428,13 +488,17 @@
   options:
     - id: d
       text: Comprimir la base de datos vectorial
+      rationale: "Antes de consultar conviene compactar el índice para que la búsqueda recorra menos datos."
     - id: c
       text: Traducir la consulta al inglés
+      rationale: "Si el corpus está indexado en un idioma, normalizar la consulta a ese idioma mejora la coincidencia."
     - id: b
       text: Reentrenar el LLM con la consulta
+      rationale: "Cada consulta es señal fresca: incorporarla al modelo es lo que hace que el sistema mejore con el uso."
     - id: a
       text: Vectorizar la consulta con el MISMO modelo de embeddings usado para
         indexar
+      rationale: "Consulta y documentos tienen que vivir en el mismo espacio, y eso obliga a usar el mismo modelo de embeddings."
   correct: a
   explanation: Antes de buscar en la vector DB hay que convertir la consulta en un
     vector con el mismo modelo de embeddings que indexó los documentos, para que
@@ -462,13 +526,17 @@
   options:
     - id: d
       text: No hay ningún problema
+      rationale: "Extraer campos de un documento es una tarea acotada, y los valores por defecto del proveedor están pensados para eso."
     - id: a
       text: temperature 1.8 mete demasiada aleatoriedad para una tarea de extracción
         determinista (debería ser ~0)
+      rationale: "Extraer no es redactar: con temperatura alta el mismo documento puede devolver campos distintos en cada pasada."
     - id: b
       text: Falta el campo max_tokens y por eso no funcionará
+      rationale: "Sin tope de salida la respuesta puede cortarse a mitad del objeto y dejar un JSON que no cierra."
     - id: c
       text: El response_format json no existe
+      rationale: "El nombre del parámetro y sus valores cambian entre proveedores, y ahí es donde suele fallar la llamada."
   correct: a
   explanation: "En extracción/estructuración quieres salida estable y
     reproducible: temperature baja (cercana a 0). Un valor alto (1.8) introduce
@@ -488,13 +556,17 @@
   options:
     - id: d
       text: Usar un modelo más grande sin cambiar nada más
+      rationale: "Un modelo más capaz confunde menos las fuentes: el problema es de capacidad de seguimiento del contexto."
     - id: a
       text: Anclar la respuesta solo a los chunks recuperados y citar por IDs
         verificables (grounding + guardrail), con temperature baja
+      rationale: "Si la respuesta solo puede apoyarse en los fragmentos recuperados y citar ids verificables, una cita inventada no pasa el filtro."
     - id: c
       text: Quitar el retriever y responder de memoria
+      rationale: "Si las citas falsas vienen del material recuperado, quitar esa entrada elimina la fuente del problema."
     - id: b
       text: Subir la temperature para dar más variedad
+      rationale: "Con más variedad el modelo explora otras formulaciones y deja de repetir la cita que se ha inventado."
   correct: a
   explanation: "Citar fuentes inexistentes es alucinación: la respuesta no está
     anclada a lo recuperado. Lo primero es grounding estricto (responder solo
@@ -515,13 +587,17 @@
   options:
     - id: c
       text: Solo sirve para imágenes
+      rationale: "Los índices dispersos se diseñaron para descriptores visuales, y de ahí que se combinen con los densos."
     - id: a
       text: Combina coincidencia semántica (densa) con coincidencia léxica exacta
         (BM25), útil para términos raros, códigos o siglas
+      rationale: "Suma parecido semántico y coincidencia literal: los códigos, siglas y nombres raros se recuperan por la parte léxica."
     - id: b
       text: Elimina la necesidad de embeddings
+      rationale: "Si BM25 ya ordena por relevancia, la parte densa se vuelve un coste que no cambia el resultado."
     - id: d
       text: Hace el índice más pequeño
+      rationale: "Al repartir la señal entre dos índices, cada uno guarda menos y el almacenamiento total baja."
   correct: a
   explanation: La densa capta significado pero falla con términos exactos poco
     frecuentes (SKUs, siglas); BM25 (léxica) los acierta. Combinarlas y fusionar
@@ -540,12 +616,16 @@
     - id: a
       text: Sacrifica algo de recall (resultados aproximados) a cambio de una búsqueda
         mucho más rápida y escalable
+      rationale: "Renuncia a algo de recall —el vecino exacto puede escaparse— a cambio de una búsqueda mucho más rápida y escalable."
     - id: d
       text: Solo funciona con menos de 100 vectores
+      rationale: "El grafo solo compensa con corpus pequeños; a partir de cierto tamaño la construcción no sale a cuenta."
     - id: b
       text: Es más lento pero exacto
+      rationale: "Construir el grafo añade trabajo por consulta, así que se paga latencia a cambio de no perder ningún vecino."
     - id: c
       text: No permite actualizar el índice nunca
+      rationale: "El grafo se construye una vez sobre el corpus completo, así que insertar después obliga a rehacerlo."
   correct: a
   explanation: "HNSW (grafo navegable jerárquico) es Approximate Nearest Neighbor:
     acepta perder algo de recall para ganar velocidad a gran escala. La búsqueda
@@ -563,13 +643,17 @@
   options:
     - id: c
       text: Siempre, sin condiciones
+      rationale: "El coseno es el producto escalar dividido por las normas, así que ordenan igual pase lo que pase."
     - id: a
       text: "Cuando los vectores están normalizados (norma 1): entonces el dot product
         equivale al coseno"
+      rationale: "Con norma 1 el denominador del coseno vale 1, así que producto escalar y coseno son el mismo número."
     - id: d
       text: Solo con vectores de dimensión 2
+      rationale: "En dos dimensiones el ángulo se puede leer directamente, y ahí las dos medidas coinciden."
     - id: b
       text: Nunca son equivalentes
+      rationale: "Una está acotada entre -1 y 1 y la otra no tiene tope, así que nunca dan el mismo valor."
   correct: a
   explanation: El coseno es el dot product dividido por las normas. Si los
     vectores están L2-normalizados (norma 1), las normas valen 1 y ambas medidas
@@ -587,13 +671,17 @@
   options:
     - id: d
       text: Reduce la dimensión de los embeddings
+      rationale: "Trabajar con vectores más cortos acerca consulta y documento al reducir el ruido de las dimensiones sobrantes."
     - id: c
       text: Traduce la consulta a otro idioma
+      rationale: "Consulta y corpus suelen estar en idiomas distintos, y normalizarlos es lo que acerca los dos espacios."
     - id: b
       text: Borra los documentos hipotéticos del índice
+      rationale: "Los documentos inventados ensucian el índice, así que el paso limpia lo que no corresponde a material real."
     - id: a
       text: Genera con el LLM una respuesta hipotética a la consulta y usa SU
         embedding para buscar, acercándose al espacio de los documentos
+      rationale: "Una pregunta y un documento no se parecen; genera una respuesta hipotética y busca con su embedding, que sí se parece."
   correct: a
   explanation: HyDE parte de que una consulta corta y un documento largo viven
     lejos en el espacio vectorial. Genera un documento hipotético que responde
@@ -614,12 +702,16 @@
       text: Restringe el espacio de búsqueda a los chunks que cumplen condiciones
         estructuradas, mejorando precisión y evitando resultados fuera de
         alcance
+      rationale: "Acota el espacio a lo que cumple la condición estructurada: lo que queda fuera de alcance ni siquiera compite en el ranking."
     - id: b
       text: Sustituye por completo a los embeddings
+      rationale: "Si el filtro ya deja solo lo pertinente, ordenar además por parecido semántico deja de aportar."
     - id: d
       text: Solo afecta al color de la salida
+      rationale: "Los metadatos se usan sobre todo al presentar: marcar la fuente y resaltarla junto a la respuesta."
     - id: c
       text: Sirve para entrenar el modelo
+      rationale: "Los campos estructurados son etiquetas ya listas para supervisar, y por eso alimentan el entrenamiento."
   correct: a
   explanation: La metadata (fecha, fuente, permisos, tipo) permite acotar la
     búsqueda a un subconjunto válido; así no recuperas chunks irrelevantes o no
@@ -637,13 +729,17 @@
   options:
     - id: b
       text: Porque es más rápido
+      rationale: "Al no tener que precomputar vectores para todo el corpus, el reordenado va directo sobre los candidatos."
     - id: c
       text: Porque no usa transformers
+      rationale: "Trabaja con señales léxicas y estadísticas, sin red neuronal, y por eso sale barato aplicarlo al final."
     - id: a
       text: El cross-encoder procesa consulta y documento JUNTOS con atención cruzada,
         capturando relevancia más fina; el bi-encoder los codifica por separado
+      rationale: "Mete consulta y documento juntos en la misma pasada, con atención cruzada; el bi-encoder los codifica por separado."
     - id: d
       text: Porque ignora la consulta
+      rationale: "Puntúa la calidad del documento en sí —autoridad, densidad de información—, que es lo que el ranking inicial no ve."
   correct: a
   explanation: El bi-encoder embebe consulta y documentos por separado (rápido,
     permite indexar), pero pierde interacción. El cross-encoder los mira juntos
@@ -661,13 +757,17 @@
   options:
     - id: c
       text: El tamaño del modelo
+      rationale: "Seleccionar menos fragmentos permite recortar el prompt y trabajar con un modelo más pequeño."
     - id: b
       text: La velocidad de embedding
+      rationale: "Evita recalcular vectores muy parecidos entre sí, y con eso la indexación va más ligera."
     - id: a
       text: "La redundancia: penaliza chunks muy similares entre sí para dar
         resultados relevantes y a la vez diversos"
+      rationale: "Penaliza a los candidatos que se parecen entre ellos: evita llenar el contexto con tres versiones del mismo párrafo."
     - id: d
       text: La ortografía de la consulta
+      rationale: "Corrige la consulta antes de buscar, que es de donde vienen la mitad de los fallos de recuperación."
   correct: a
   explanation: Sin diversidad, el top-k puede ser 5 chunks casi idénticos. MMR
     equilibra relevancia con la consulta y disimilitud respecto a lo ya elegido,
@@ -684,13 +784,17 @@
   options:
     - id: c
       text: El texto traducido a inglés
+      rationale: "Normalizar todo a un idioma común es lo que permite comparar textos de orígenes distintos."
     - id: d
       text: Una lista de las palabras únicas
+      rationale: "El vocabulario que usa un texto es lo que lo caracteriza, y con esa lista se comparan documentos."
     - id: a
       text: Un vector numérico denso que representa el significado del texto, de modo
         que textos parecidos quedan cerca en el espacio
+      rationale: "Un vector denso donde la posición codifica significado: dos textos parecidos caen cerca aunque no compartan palabras."
     - id: b
       text: Una compresión ZIP del texto
+      rationale: "Guardar el texto comprimido ahorra espacio en el índice y permite recuperarlo entero cuando hace falta."
   correct: a
   explanation: Un embedding mapea el texto a un vector de cientos/miles de
     dimensiones donde la cercanía geométrica refleja similitud semántica; es la
@@ -708,12 +812,16 @@
     - id: a
       text: Para comparar y elegir modelos de embeddings según su rendimiento en
         tareas de recuperación/similitud, no 'a ojo'
+      rationale: "Da números comparables en tareas de recuperación y similitud, en vez de elegir el modelo por intuición."
     - id: b
       text: Para entrenar el LLM generador
+      rationale: "Fija el conjunto de referencia con el que se ajusta el generador al dominio propio."
     - id: c
       text: Para medir la latencia de red
+      rationale: "Mide el coste por llamada y el tiempo de respuesta de cada proveedor de embeddings."
     - id: d
       text: Para elegir el color del terminal
+      rationale: "Es una convención de presentación: estandariza cómo se leen las tablas de resultados."
   correct: a
   explanation: MTEB (Massive Text Embedding Benchmark) evalúa modelos de
     embeddings en muchas tareas; ayuda a elegir el modelo adecuado (calidad,
@@ -731,13 +839,17 @@
   options:
     - id: c
       text: Faithfulness mide la latencia; answer relevancy el coste
+      rationale: "Las dos vigilan el servicio: una el tiempo de respuesta y otra el gasto por consulta."
     - id: a
       text: Faithfulness mide si la respuesta se sostiene en el contexto recuperado
         (no alucina); answer relevancy mide si responde de verdad a la pregunta
+      rationale: "Una mira si lo dicho se apoya en el contexto recuperado; la otra, si eso contesta a lo que se preguntó."
     - id: b
       text: Son la misma métrica
+      rationale: "Las dos comparan respuesta y contexto, así que acaban dando el mismo número con dos nombres."
     - id: d
       text: Ambas miden solo la ortografía
+      rationale: "Se calculan sobre el texto generado, así que lo que capturan es sobre todo su corrección formal."
   correct: a
   explanation: Faithfulness = ¿lo que dice está respaldado por los chunks?
     (anti-alucinación). Answer relevancy = ¿la respuesta aborda la pregunta? Una
@@ -756,12 +868,16 @@
     - id: a
       text: Se descompone la respuesta en afirmaciones y se verifica qué proporción
         está respaldada por el contexto recuperado
+      rationale: "Trocea la respuesta en afirmaciones y comprueba qué proporción se sostiene en el contexto recuperado."
     - id: c
       text: Se mide el tiempo de generación
+      rationale: "Una respuesta fiel sale directa del contexto, y eso se nota en que se genera antes."
     - id: b
       text: Se cuenta el número de palabras
+      rationale: "Cuanto más se extiende la respuesta, más se aleja del material recuperado: la longitud sirve de indicador."
     - id: d
       text: Se compara con la portada del documento
+      rationale: "Se contrasta con la portada del documento, que es donde está el resumen de lo que contiene."
   correct: a
   explanation: "Se extraen las claims de la respuesta y, con un juez (LLM u otro
     método), se comprueba cuántas se deducen del contexto. La fracción
@@ -778,13 +894,17 @@
   options:
     - id: c
       text: Solo el idioma
+      rationale: "Un juez multilingüe puntúa distinto según el idioma, y es lo único que hay que normalizar."
     - id: b
       text: Ninguno, el LLM juez es objetivo
+      rationale: "Al no tener interés en el resultado, el modelo puntúa sin las preferencias de un revisor humano."
     - id: d
       text: El tamaño del disco
+      rationale: "Lo que limita una evaluación grande es el almacenamiento de trazas y respuestas."
     - id: a
       text: Sesgos como el de posición (favorecer la 1ª opción) o el de verbosidad
         (premiar respuestas largas), que hay que mitigar
+      rationale: "Posición y verbosidad: tiende a premiar la primera opción y la respuesta más larga, y eso hay que mitigarlo."
   correct: a
   explanation: "Los LLM-jueces tienen sesgos conocidos: posición, verbosidad,
     auto-preferencia. Se mitigan aleatorizando el orden, usando rúbricas claras,
@@ -802,13 +922,17 @@
   options:
     - id: d
       text: Preguntar al modelo si mejoró
+      rationale: "El modelo ve las dos versiones y puede señalar qué ha mejorado sin montar nada alrededor."
     - id: c
       text: Desplegar directo a producción
+      rationale: "El tráfico real es la única muestra representativa: en producción se ve enseguida si va mejor."
     - id: a
       text: Correr el nuevo prompt contra un dataset de evaluación fijo y comparar las
         métricas con la versión anterior
+      rationale: "Pasa las dos versiones por el mismo conjunto fijo y compara métricas: es donde aparecen las regresiones."
     - id: b
       text: Confiar en la impresión de una prueba manual
+      rationale: "Una prueba manual sobre los casos conocidos enseña rápido si la salida ha cambiado a mejor."
   correct: a
   explanation: "La única forma honesta es un eval reproducible: mismo dataset de
     referencia, mismas métricas, comparar antes/después. Así detectas mejoras
@@ -825,13 +949,17 @@
   options:
     - id: b
       text: El dataset con el que se preentrenó el modelo
+      rationale: "Es el corpus con el que se entrenó: la referencia de lo que el modelo ya sabe hacer bien."
     - id: d
       text: Los logs de producción sin revisar
+      rationale: "El tráfico real sin filtrar es lo más parecido a la distribución que se ve en producción."
     - id: a
       text: Un conjunto curado de entradas con su salida esperada/criterio, contra el
         que se mide la calidad de forma consistente
+      rationale: "Entradas curadas con su salida esperada o su criterio, fijas, para medir siempre contra la misma vara."
     - id: c
       text: Un dataset generado aleatoriamente cada vez
+      rationale: "Regenerarlo en cada pasada evita sobreajustar el sistema a un conjunto concreto de casos."
   correct: a
   explanation: El golden/reference set fija casos representativos con lo que se
     considera correcto; permite medir de forma estable y comparar versiones.
@@ -848,13 +976,17 @@
   options:
     - id: c
       text: La velocidad de la GPU
+      rationale: "Ajusta cuántos candidatos se evalúan en paralelo, y con eso el trabajo que hace la GPU por token."
     - id: b
       text: El número máximo de tokens de salida
+      rationale: "Fija el presupuesto de salida: la generación se corta al llegar a esa proporción del máximo."
     - id: d
       text: El idioma de la respuesta
+      rationale: "Restringe el muestreo a los tokens del idioma dominante del prompt."
     - id: a
       text: Restringe el muestreo al conjunto más pequeño de tokens cuya probabilidad
         acumulada llega a p, cortando la cola improbable
+      rationale: "Se queda con el conjunto más pequeño de tokens que suma probabilidad p y corta la cola improbable."
   correct: a
   explanation: Top-p muestrea solo del 'núcleo' de tokens que acumulan
     probabilidad p (p. ej. 0.9), descartando la cola larga. Controla diversidad
@@ -871,13 +1003,17 @@
   options:
     - id: d
       text: top-k solo aplica a imágenes
+      rationale: "El recorte por número fijo viene del muestreo de tokens visuales, donde el vocabulario es cerrado."
     - id: a
       text: top-k limita a los k tokens más probables (número fijo); top-p limita por
         masa de probabilidad acumulada (número variable)
+      rationale: "k fija cuántos candidatos entran; p fija cuánta masa de probabilidad, así que el número varía en cada token."
     - id: c
       text: top-k controla la longitud y top-p la temperatura
+      rationale: "Uno acota el tamaño de la respuesta y el otro la aleatoriedad con la que se elige cada token."
     - id: b
       text: Son idénticos
+      rationale: "Los dos recortan la cola de la distribución, así que en la práctica el efecto es el mismo."
   correct: a
   explanation: top-k siempre considera k candidatos aunque uno domine; top-p
     ajusta cuántos según la distribución (pocos si hay un token claro, muchos si
@@ -894,13 +1030,17 @@
   options:
     - id: c
       text: Fijan la temperatura a 0
+      rationale: "Al fijar el criterio de repetición, el muestreo se queda sin margen y equivale a generar sin aleatoriedad."
     - id: b
       text: Aumentan la longitud máxima
+      rationale: "Al desincentivar la repetición, el modelo necesita más tokens para decir lo mismo y la respuesta se alarga."
     - id: a
       text: Reducen la probabilidad de repetir tokens ya usados (frequency por
         frecuencia, presence por aparición), combatiendo la repetición
+      rationale: "Restan probabilidad a lo ya emitido —una por frecuencia, otra por simple aparición— y cortan los bucles."
     - id: d
       text: Cambian el modelo por uno mayor
+      rationale: "Son ajustes de calidad que el proveedor resuelve enrutando a un modelo mayor cuando hacen falta."
   correct: a
   explanation: Frequency penalty castiga tokens según cuántas veces ya
     aparecieron; presence penalty los castiga por haber aparecido al menos una
@@ -918,13 +1058,17 @@
   options:
     - id: b
       text: Son intercambiables sin efecto
+      rationale: "El modelo ve toda la conversación concatenada, así que el rol de cada mensaje es solo una etiqueta."
     - id: a
       text: El system fija el rol, las reglas y el comportamiento del asistente; el
         user aporta la petición concreta
+      rationale: "El system fija rol y reglas de la conversación entera; el user trae la petición concreta de cada turno."
     - id: c
       text: El system es el que responde
+      rationale: "El system es el mensaje que devuelve el servicio, frente al user, que es el que se envía."
     - id: d
       text: El user define el modelo a usar
+      rationale: "En el system viajan los parámetros de la llamada: modelo, límites y formato de salida."
   correct: a
   explanation: El system message establece contexto persistente y políticas (tono,
     formato, límites); el user message es la petición. Separarlos ayuda a
@@ -942,13 +1086,17 @@
   options:
     - id: c
       text: Reducir el prompt al mínimo
+      rationale: "Cuanto menos ruido tenga el prompt, más se centra el modelo en la tarea: menos es más."
     - id: b
       text: Encadenar varios modelos distintos
+      rationale: "Encadena varios modelos para que cada uno resuelva un paso, en vez de pedírselo todo a uno."
     - id: d
       text: Traducir el prompt a código
+      rationale: "Traducir el problema a código deja las cuentas en manos del intérprete, que no se equivoca."
     - id: a
       text: Pedir al modelo que razone paso a paso antes de responder; mejora tareas
         de razonamiento multi-paso
+      rationale: "Pide razonar paso a paso antes de responder, y eso levanta la precisión en tareas de varios pasos."
   correct: a
   explanation: CoT induce pasos intermedios de razonamiento, lo que mejora
     aritmética, lógica y problemas multi-paso. Tiene coste (más tokens) y no
@@ -965,13 +1113,17 @@
   options:
     - id: c
       text: Elimina el razonamiento
+      rationale: "Quita el razonamiento intermedio y se queda con la respuesta directa, que es lo único que se evalúa."
     - id: d
       text: Entrena el modelo de nuevo
+      rationale: "Reentrena con las cadenas que acertaron, para que el modelo interiorice el camino bueno."
     - id: b
       text: Usa temperature 0 siempre
+      rationale: "Sin aleatoriedad el modelo sigue siempre su mejor camino, y así la respuesta es consistente entre llamadas."
     - id: a
       text: Muestrea varias cadenas de razonamiento y se queda con la respuesta
         mayoritaria, reduciendo errores de un único camino
+      rationale: "Muestrea varias cadenas y se queda con la respuesta mayoritaria: un único camino equivocado deja de decidir."
   correct: a
   explanation: En vez de fiarse de una sola cadena CoT, self-consistency genera
     varias (con muestreo) y vota la respuesta más frecuente. Mejora la robustez
@@ -994,13 +1146,17 @@
   options:
     - id: d
       text: Subir la temperature para más creatividad
+      rationale: "Con más temperatura el modelo explora más formas y acaba encontrando la que encaja."
     - id: a
       text: Un modo de salida estructurada / JSON schema que restrinja la generación a
         un esquema válido, y validar el resultado
+      rationale: "Un modo de salida con esquema restringe la generación a lo válido, y luego se valida."
     - id: b
       text: Pedirlo en el prompt en lenguaje natural y confiar
+      rationale: "Pedirlo con claridad en el prompt basta: los modelos actuales respetan el formato."
     - id: c
       text: Parsear con expresiones regulares el texto libre
+      rationale: "Extraer con expresiones regulares funciona con cualquier modelo y sin depender del proveedor."
   correct: a
   explanation: Los modos de salida estructurada (JSON mode / structured outputs
     con schema) obligan a que la generación cumpla el esquema, mucho más fiable
@@ -1018,12 +1174,16 @@
     - id: a
       text: Le das firmas de funciones; el modelo decide cuál invocar y devuelve una
         llamada estructurada; TU código la ejecuta y le devuelves el resultado
+      rationale: "Le das las firmas, él elige cuál y devuelve la llamada estructurada; la ejecuta tu código y le devuelves el resultado."
     - id: d
       text: Solo funciona sin herramientas
+      rationale: "Es un modo alternativo que se usa cuando no hay herramientas declaradas."
     - id: c
       text: Es un tipo de fine-tuning
+      rationale: "Es un ajuste del modelo para que aprenda a llamar a tus funciones."
     - id: b
       text: El modelo ejecuta el código él mismo en su servidor
+      rationale: "El modelo ejecuta la función en la infraestructura del proveedor y devuelve el resultado."
   correct: a
   explanation: "El modelo no ejecuta nada: recibe las firmas (nombre, parámetros),
     elige una y emite una llamada estructurada; tu backend la ejecuta y devuelve
@@ -1040,13 +1200,17 @@
   options:
     - id: d
       text: Reentrenar el modelo en cada paso
+      rationale: "Reentrenar en cada paso con lo aprendido es lo que le permite mejorar sobre la marcha."
     - id: c
       text: Reaccionar sin pensar
+      rationale: "Actuar directamente sin deliberar, que es lo que lo hace rápido."
     - id: b
       text: Un framework de frontend
+      rationale: "Un patrón de interfaz para construir la parte visual de estas aplicaciones."
     - id: a
       text: Alternar Razonamiento (thought) y Acción (tool call), observando el
         resultado antes del siguiente paso
+      rationale: "Alternar razonamiento y acción, observando el resultado antes de decidir el paso siguiente."
   correct: a
   explanation: "ReAct intercala pensamiento y acción: el modelo razona, llama a
     una herramienta, observa el resultado y repite hasta resolver. Hace el
@@ -1064,13 +1228,17 @@
   options:
     - id: c
       text: Un error de tokenización
+      rationale: "Un fallo al trocear el texto hace que el modelo lea la frase como una orden."
     - id: a
       text: Prompt injection; se mitiga con separación de roles, validación de
         entrada/salida y no confiar en que el prompt por sí solo proteja
+      rationale: "Inyección de prompt: se mitiga separando roles, validando entrada y salida y no confiando solo en el prompt."
     - id: b
       text: Un bug de red, se reinicia el servidor
+      rationale: "Un problema de red que deja el estado inconsistente y se arregla reiniciando."
     - id: d
       text: Nada, es imposible que afecte
+      rationale: "No afecta: el prompt de sistema no es accesible desde la conversación."
   correct: a
   explanation: "Es una inyección de prompt: intentar sobrescribir las
     instrucciones. No hay defensa perfecta solo con prompting; se combinan
@@ -1089,13 +1257,17 @@
   options:
     - id: d
       text: No hay ninguna razón, mejor todo en el prompt
+      rationale: "Con espacio de sobra no hay motivo: meterlo todo evita cualquier fallo de recuperación."
     - id: a
       text: "Coste y latencia por tokens, dilución de la atención ('lost in the
         middle') y frescura/actualización: RAG recupera solo lo relevante"
+      rationale: "Coste y latencia por token, atención diluida en contextos largos y frescura: se recupera solo lo relevante."
     - id: c
       text: Porque RAG es siempre más preciso en todo
+      rationale: "Porque recuperar siempre es más preciso que dejarle todo el material delante."
     - id: b
       text: Porque los contextos grandes no existen
+      rationale: "Porque esas ventanas tan grandes no están disponibles en la práctica."
   correct: a
   explanation: Meter todo cuesta tokens (dinero/latencia), degrada la atención
     sobre lo relevante y no escala ni se actualiza fácil. RAG selecciona lo
@@ -1113,13 +1285,17 @@
   options:
     - id: b
       text: Guarda la respuesta final en disco del usuario
+      rationale: "Guarda la respuesta final para servirla igual la próxima vez que se pregunte lo mismo."
     - id: a
       text: Reutiliza el procesamiento de un prefijo de prompt repetido (p. ej.
         instrucciones largas), reduciendo coste y latencia de esos tokens
+      rationale: "Reutiliza el procesamiento de un prefijo repetido, con lo que esos tokens cuestan y tardan menos."
     - id: c
       text: Entrena un modelo más pequeño
+      rationale: "Entrena un modelo pequeño con lo ya visto para responder sin llamar al grande."
     - id: d
       text: Elimina la necesidad de tokens
+      rationale: "Evita tener que enviar tokens: el prompt viaja como referencia y no como texto."
   correct: a
   explanation: "Si muchas llamadas comparten un prefijo grande (system + contexto
     fijo), cachearlo evita reprocesarlo cada vez: baja el coste y la latencia de
@@ -1136,13 +1312,17 @@
   options:
     - id: d
       text: Solo cambia el idioma de salida
+      rationale: "Solo afecta a cómo se representan los pesos, no a lo que el modelo responde."
     - id: a
       text: Reduce memoria y acelera la inferencia a cambio de una posible (pequeña)
         pérdida de calidad
+      rationale: "Menos memoria y más velocidad, a cambio de una pérdida de calidad normalmente pequeña."
     - id: b
       text: Mejora la calidad sin coste
+      rationale: "Mejora la calidad al regularizar el modelo, y encima ocupa menos."
     - id: c
       text: Aumenta el tamaño del modelo
+      rationale: "Al añadir tablas de conversión, el modelo acaba ocupando más que antes."
   correct: a
   explanation: "La cuantización representa los pesos con menos bits (int8/int4):
     mucho menos VRAM y más velocidad, con una degradación de calidad que suele
@@ -1160,13 +1340,17 @@
   options:
     - id: c
       text: Guarda las respuestas de usuarios
+      rationale: "Guarda las respuestas ya dadas para no volver a generarlas si se repite la pregunta."
     - id: b
       text: Es la caché de embeddings del RAG
+      rationale: "Es la caché donde se guardan los vectores que usa la recuperación."
     - id: d
       text: Es un índice vectorial
+      rationale: "Es la estructura con la que se buscan los vecinos más cercanos."
     - id: a
       text: Almacena las claves/valores de atención de los tokens ya procesados para
         no recomputarlos en cada nuevo token, acelerando la generación
+      rationale: "Guarda las claves y valores de atención de los tokens ya procesados para no recalcularlos en cada token nuevo."
   correct: a
   explanation: Al generar autoregresivamente, recomputar la atención de todo el
     prefijo por token sería carísimo. El KV cache guarda K y V de los tokens
@@ -1192,13 +1376,17 @@
   options:
     - id: c
       text: La base de datos SQL
+      rationale: "La base relacional, que es donde están los documentos completos."
     - id: b
       text: Otro modelo de embeddings idéntico
+      rationale: "Otro modelo de embeddings igual, para confirmar el resultado del primero."
     - id: d
       text: El tokenizador
+      rationale: "El troceador, que prepara los candidatos para que quepan en el prompt."
     - id: a
       text: Un reranker (cross-encoder) que reordena por relevancia fina y se queda
         con los mejores
+      rationale: "Un reordenador que puntúa la relevancia con más finura y se queda con los mejores."
   correct: a
   explanation: "Patrón retrieve-then-rerank: el retriever rápido trae muchos
     candidatos (alto recall) y un reranker cross-encoder, más caro pero preciso,
@@ -1216,13 +1404,17 @@
   options:
     - id: b
       text: Ignorar la consulta del usuario
+      rationale: "Si el material no cabe, la petición no se puede atender y hay que decirlo."
     - id: d
       text: Bajar la temperature a 0
+      rationale: "Sin aleatoriedad el modelo aprovecha mejor el poco contexto que le queda."
     - id: c
       text: Duplicar el contexto
+      rationale: "Duplicando el contexto se compensa lo que se pierde al truncar."
     - id: a
       text: Recortar/priorizar por relevancia (y opcionalmente resumir), en vez de
         truncar ciegamente por el final
+      rationale: "Priorizar por relevancia, y si acaso resumir, en vez de cortar a ciegas por el final."
   correct: a
   explanation: Truncar sin criterio puede tirar justo lo relevante. Mejor ordenar
     por relevancia y meter los mejores chunks (o resumirlos), respetando el
@@ -1242,12 +1434,16 @@
     - id: a
       text: "La recuperación: modelo/estrategia de embeddings, tamaño de chunk y
         reranking (el fallo está antes del generador)"
+      rationale: "La recuperación: modelo de embeddings, tamaño de fragmento y reordenación. El fallo está antes del generador."
     - id: d
       text: El nombre del modelo
+      rationale: "El modelo que se está usando, que quizá no rinde en este tipo de tarea."
     - id: c
       text: El color de la interfaz
+      rationale: "Cómo se presentan los resultados, que es lo que el usuario percibe como calidad."
     - id: b
       text: La temperature del generador
+      rationale: "La temperatura del generador, que es lo que hace que se desvíe del material."
   correct: a
   explanation: "Si el contexto que llega ya es malo, por muy bueno que sea el
     generador la respuesta será pobre: es un fallo de retrieval. Se revisa el
@@ -1270,12 +1466,16 @@
   options:
     - id: b
       text: Reentrenar el modelo
+      rationale: "Reentrenar con lo observado, que es como el agente aprende de cada paso."
     - id: a
       text: Ejecutar la herramienta/acción que el modelo eligió (tool call)
+      rationale: "Ejecutar la herramienta que el modelo ha elegido y devolverle el resultado."
     - id: d
       text: Cerrar la sesión
+      rationale: "Cerrar la sesión y empezar otra con el estado actualizado."
     - id: c
       text: Borrar el objetivo
+      rationale: "Borrar el objetivo para que no condicione la siguiente decisión."
   correct: a
   explanation: El agente razona y elige una acción; el sistema EJECUTA esa
     herramienta (búsqueda, API, código), devuelve el resultado como observación
@@ -1298,12 +1498,16 @@
       text: Representa cada documento con múltiples vectores (por token) y calcula la
         relevancia por interacción tardía (MaxSim) entre tokens de consulta y
         documento; más preciso a costa de un índice mucho mayor
+      rationale: "Representa cada documento con varios vectores y compara token a token al final: más preciso."
     - id: b
       text: Usa un solo vector promedio, igual que el bi-encoder
+      rationale: "Usa un vector promedio por documento, igual que el enfoque clásico."
     - id: c
       text: No utiliza embeddings en absoluto
+      rationale: "Prescinde de los vectores y trabaja directamente sobre el texto."
     - id: d
       text: Solo funciona con imágenes
+      rationale: "Está pensado para material visual y no para texto."
   correct: a
   explanation: ColBERT guarda un vector por token (multi-vector) y en consulta
     hace MaxSim entre los tokens de la consulta y los del documento (interacción
@@ -1322,14 +1526,18 @@
   options:
     - id: d
       text: Fija la temperature a 0
+      rationale: "Sin aleatoriedad el modelo no se detiene a considerar alternativas y va más rápido."
     - id: b
       text: Reduce el número de parámetros del modelo grande
+      rationale: "Recorta parámetros del modelo grande para que cada paso cueste menos."
     - id: c
       text: Elimina el KV cache
+      rationale: "Prescinde de la caché de atención, que es lo que ocupa la memoria."
     - id: a
       text: "Un modelo pequeño 'borrador' propone varios tokens que el modelo grande
         verifica en paralelo, aceptando el prefijo correcto: menos pasos
         secuenciales del modelo grande"
+      rationale: "Un modelo pequeño propone varios tokens que el grande verifica en paralelo, aceptando el prefijo correcto."
   correct: a
   explanation: El drafter genera k tokens candidatos y el modelo grande los
     verifica de una sola pasada, aceptando el prefijo válido. Como la
@@ -1350,12 +1558,16 @@
       text: DPO optimiza directamente sobre pares elegido/rechazado con una pérdida
         cerrada, sin entrenar un modelo de recompensa ni bucle de RL; RLHF-PPO
         entrena un reward model y hace RL
+      rationale: "Optimiza directamente sobre pares elegido/rechazado con una pérdida cerrada, sin modelo de recompensa ni bucle de refuerzo."
     - id: c
       text: DPO no usa datos de preferencias
+      rationale: "Prescinde de las preferencias humanas y aprende de la propia salida del modelo."
     - id: d
       text: RLHF no necesita ningún dato humano
+      rationale: "El enfoque clásico no necesita datos humanos: la recompensa se calcula sola."
     - id: b
       text: Son exactamente lo mismo con otro nombre
+      rationale: "Son el mismo procedimiento descrito con dos vocabularios distintos."
   correct: a
   explanation: RLHF clásico entrena un reward model y optimiza la política con RL
     (PPO), complejo e inestable. DPO reformula el objetivo para optimizar
@@ -1374,13 +1586,17 @@
   options:
     - id: c
       text: Elimina la atención del transformer
+      rationale: "Sustituye la atención por otro mecanismo que escala linealmente con la longitud."
     - id: d
       text: Solo funciona en CPU
+      rationale: "Está pensado para ejecutar en CPU, donde la memoria no es el cuello de botella."
     - id: a
       text: Calcula la atención EXACTA de forma IO-aware (por bloques en SRAM, sin
         materializar la matriz n×n en HBM), ahorrando memoria y tiempo
+      rationale: "Calcula la atención EXACTA por bloques en memoria rápida, sin materializar la matriz completa: ahorra memoria y tiempo."
     - id: b
       text: Aproxima la atención perdiendo exactitud
+      rationale: "Aproxima la atención descartando las interacciones menos importantes."
   correct: a
   explanation: "FlashAttention reordena el cálculo por bloques que caben en SRAM y
     evita escribir la matriz n×n en memoria HBM: es atención exacta pero
@@ -1399,13 +1615,17 @@
   options:
     - id: d
       text: Eliminar la necesidad de atención
+      rationale: "Sustituye la atención por un enrutado que decide qué parte del modelo mira cada token."
     - id: b
       text: Ejecutar todos los expertos en cada token
+      rationale: "Ejecuta todos los expertos en cada token y combina sus salidas ponderadas."
     - id: a
       text: "Activar solo unos pocos expertos por token: mucha más capacidad
         (parámetros totales) con un coste de cómputo por token casi constante"
+      rationale: "Activa solo unos pocos expertos por token: mucha más capacidad total con un coste por token casi constante."
     - id: c
       text: Reducir el número total de parámetros
+      rationale: "Reduce el número total de parámetros al compartirlos entre expertos."
   correct: a
   explanation: Un router envía cada token a los k expertos más adecuados; el
     modelo tiene muchísimos parámetros (capacidad) pero solo activa una fracción

@@ -15,13 +15,17 @@
       text: Es demasiado simple para capturar la relación real de los datos,
         produciendo errores sistemáticos tanto en train como en test
         (underfitting)
+      rationale: "Demasiado simple para la relación real: falla de la misma manera en entrenamiento y en test."
     - id: d
       text: No depende del conjunto de datos usado para entrenar
+      rationale: "Al no depender de la muestra concreta, su error se mantiene igual con cualquier conjunto."
     - id: a
       text: Se ajusta demasiado a los datos de entrenamiento y generaliza mal
         (overfitting)
+      rationale: "Se ajusta tanto a lo que ha visto que fuera de ahí generaliza mal."
     - id: c
       text: Siempre logra el mejor rendimiento posible en test
+      rationale: "Al ser estable entre muestras, acaba dando el mejor resultado posible en test."
   correct: b
   explanation: "Alto sesgo significa que el modelo hace suposiciones demasiado
     simples (p. ej. una recta para una relación no lineal), por lo que no logra
@@ -41,13 +45,17 @@
   options:
     - id: c
       text: Error igual en entrenamiento y validación, ambos altos
+      rationale: "El mismo error en las dos partes, y alto: el modelo no da más de sí."
     - id: b
       text: Error muy bajo en entrenamiento pero notablemente más alto en
         validación/test
+      rationale: "Error muy bajo donde entrenó y bastante más alto donde no: se ha aprendido los datos."
     - id: a
       text: Error alto tanto en entrenamiento como en validación
+      rationale: "Error alto en las dos partes, señal de que no está aprendiendo el patrón."
     - id: d
       text: El modelo tarda más en entrenar que en predecir
+      rationale: "Que tarde mucho más en entrenar que en predecir indica que se ha complicado de más."
   correct: b
   explanation: "El overfitting ocurre cuando el modelo memoriza patrones
     específicos (incluido ruido) del set de entrenamiento; por eso el error de
@@ -67,14 +75,18 @@
   options:
     - id: d
       text: Elimina la necesidad de normalizar las features
+      rationale: "Al penalizar la escala de los coeficientes, deja de hacer falta normalizar las variables."
     - id: b
       text: Penaliza la magnitud al cuadrado de los coeficientes, encogiéndolos hacia
         cero (sin anularlos necesariamente) y reduciendo la varianza del modelo
+      rationale: "Penaliza el cuadrado de los coeficientes: los encoge hacia cero sin anularlos y baja la varianza."
     - id: c
       text: Aumenta artificialmente el tamaño del dataset de entrenamiento
+      rationale: "Añade ejemplos sintéticos alrededor de los existentes para que el modelo generalice."
     - id: a
       text: Fuerza a que algunos coeficientes sean exactamente cero, actuando como
         selección de variables
+      rationale: "Lleva algunos coeficientes exactamente a cero y de paso selecciona variables."
   correct: b
   explanation: La regularización L2 añade lambda * suma(w_i^2) a la pérdida; esto
     penaliza coeficientes grandes y los encoge de forma suave hacia cero,
@@ -95,12 +107,16 @@
       text: Producir soluciones dispersas (sparse), llevando algunos coeficientes
         exactamente a cero, lo que la hace útil para selección automática de
         features
+      rationale: "Produce soluciones dispersas: manda algunos coeficientes a cero exacto y sirve de selección de variables."
     - id: c
       text: Solo poder aplicarse a modelos de árboles
+      rationale: "Solo aplica a modelos de árboles, donde penaliza el número de cortes."
     - id: b
       text: Ser matemáticamente idéntica a L2 en sus efectos
+      rationale: "Sus efectos son los mismos: cambia la fórmula, no el resultado."
     - id: d
       text: Aumentar siempre la varianza del modelo respecto a no regularizar
+      rationale: "Al ser más agresiva, sube la varianza respecto a no regularizar."
   correct: a
   explanation: La penalización L1 (suma de valores absolutos de los coeficientes)
     tiene una geometría que favorece soluciones en las esquinas de la región
@@ -121,13 +137,17 @@
     - id: b
       text: "TP / (TP + FP): de todas las predicciones positivas del modelo, cuántas
         eran realmente positivas"
+      rationale: "De todo lo que el modelo marcó como positivo, cuánto lo era de verdad."
     - id: a
       text: "TP / (TP + FN): de todos los positivos reales, cuántos se detectaron"
+      rationale: "De todos los positivos que existían, cuántos consiguió detectar."
     - id: c
       text: "(TP + TN) / total: proporción total de aciertos"
+      rationale: "La proporción de aciertos sobre el total de casos evaluados."
     - id: d
       text: "TN / (TN + FP): de todos los negativos reales, cuántos se detectaron
         correctamente"
+      rationale: "De todos los negativos reales, cuántos clasificó correctamente."
   correct: b
   explanation: "Precision mide la fiabilidad de las predicciones positivas del
     modelo: de todo lo que el modelo marcó como positivo, qué fracción era
@@ -147,12 +167,16 @@
     - id: b
       text: "TP / (TP + FN): de todos los casos positivos reales, cuántos logró
         detectar el modelo"
+      rationale: "De todos los positivos reales, cuántos consiguió detectar el modelo."
     - id: d
       text: La media aritmética entre precision y accuracy
+      rationale: "El punto medio entre precisión y acierto global, para resumir las dos."
     - id: a
       text: TP / (TP + FP)
+      rationale: "De lo que marcó como positivo, cuánto lo era de verdad."
     - id: c
       text: El porcentaje de predicciones negativas correctas
+      rationale: "El porcentaje de negativos que clasificó correctamente."
   correct: b
   explanation: "Recall (o sensibilidad) responde a: de todos los casos que
     realmente eran positivos, ¿cuántos identificó el modelo correctamente? Se
@@ -174,12 +198,16 @@
       text: Porque la media armónica penaliza más fuertemente los valores bajos, de
         modo que el F1 solo es alto cuando AMBAS métricas (precision y recall)
         son razonablemente altas, evitando que un valor extremo compense al otro
+      rationale: "La media armónica castiga los valores bajos: solo sale alta si las dos lo son, sin que una compense a la otra."
     - id: d
       text: Porque el F1-score no tiene relación con precision y recall
+      rationale: "Es una métrica independiente que no se calcula a partir de esas dos."
     - id: a
       text: Porque es matemáticamente más simple de calcular
+      rationale: "Es la forma más simple de combinarlas en un único número."
     - id: c
       text: Porque la media armónica siempre da un resultado mayor que la aritmética
+      rationale: "Da siempre un valor mayor que la aritmética, y por eso se prefiere."
   correct: b
   explanation: La media armónica se ve dominada por el valor más bajo de los dos;
     así, un modelo con precision=1.0 y recall=0.1 tendría una media aritmética
@@ -199,15 +227,19 @@
   options:
     - id: c
       text: Eliminar por completo la necesidad de un conjunto de test final
+      rationale: "Al usar todos los datos por turnos, deja de hacer falta un conjunto de test aparte."
     - id: b
       text: Obtener una estimación más robusta y menos dependiente del azar del
         rendimiento del modelo, promediando el desempeño sobre k particiones
         distintas de los datos
+      rationale: "Da una estimación más estable y menos dependiente del azar, promediando sobre varias particiones."
     - id: d
       text: Aumentar artificialmente el tamaño del dataset
+      rationale: "Multiplica los datos disponibles al reutilizarlos en varias particiones."
     - id: a
       text: Entrenar k modelos distintos para hacer ensemble obligatoriamente en
         producción
+      rationale: "Deja k modelos entrenados que después se combinan en producción."
   correct: b
   explanation: Un único split train/test puede dar una estimación de rendimiento
     sesgada por cómo cayeron los datos en esa partición concreta. K-fold divide
@@ -228,13 +260,17 @@
   options:
     - id: d
       text: No tiene ningún efecto sobre el entrenamiento
+      rationale: "Es un parámetro de comodidad: afecta al tiempo, no a si converge."
     - id: a
       text: Convergencia extremadamente lenta pero estable
+      rationale: "Avanza a pasos tan pequeños que tarda mucho, pero llega sin sobresaltos."
     - id: c
       text: El modelo converge instantáneamente al mínimo global en una sola iteración
+      rationale: "Con pasos grandes alcanza el mínimo en una sola actualización."
     - id: b
       text: La función de pérdida oscila, diverge o 'rebota' sin converger, en vez de
         disminuir de forma estable hacia un mínimo
+      rationale: "La pérdida oscila o se dispara en vez de bajar de forma estable."
   correct: b
   explanation: Con un learning rate excesivo, cada actualización de los pesos da
     'pasos' demasiado grandes en la superficie de la función de pérdida,
@@ -256,14 +292,18 @@
   options:
     - id: a
       text: Porque los algoritmos no aceptan números decimales
+      rationale: "Muchos algoritmos esperan valores en un rango acotado y no manejan bien los decimales grandes."
     - id: b
       text: Porque features con rangos de magnitud muy distintos dominan el cálculo de
         distancia o el gradiente, sesgando el modelo hacia las variables de
         mayor escala aunque no sean más informativas
+      rationale: "Las variables con rangos mayores dominan la distancia o el gradiente aunque no aporten más información."
     - id: c
       text: Porque reduce el número de features automáticamente
+      rationale: "Al normalizar se detectan las variables redundantes y se reduce su número."
     - id: d
       text: Solo es necesario para variables categóricas
+      rationale: "Solo hace falta con variables categóricas, que hay que llevar a números comparables."
   correct: b
   explanation: Si una feature va de 0 a 1 y otra de 0 a 100000, en un cálculo de
     distancia euclídea o en el gradiente la segunda dominará completamente el
@@ -284,14 +324,18 @@
   options:
     - id: d
       text: No poder usarse nunca para clasificación, solo para regresión
+      rationale: "Sin restricciones el árbol solo vale para predecir valores continuos."
     - id: a
       text: Underfitting sistemático, sin importar el dataset
+      rationale: "Se quedan cortos siempre: sin límites el criterio de corte deja de discriminar."
     - id: b
       text: Sobreajustar (overfitting) el conjunto de entrenamiento, creciendo hasta
         separar casos muy específicos o ruido, por lo que necesitan poda o
         límites de profundidad para generalizar bien
+      rationale: "Sobreajustan: crecen hasta aislar casos concretos o ruido, y por eso necesitan poda o límite de profundidad."
     - id: c
       text: Ser insensibles al ruido en los datos
+      rationale: "Al partir por umbrales, el ruido no les afecta y siguen generalizando."
   correct: b
   explanation: Un árbol sin límite puede seguir dividiendo hasta que cada hoja
     contenga un único ejemplo, memorizando el ruido del set de entrenamiento;
@@ -312,15 +356,19 @@
     - id: c
       text: Porque usa una sola muestra de datos para todos los árboles, garantizando
         consistencia
+      rationale: "Al entrenar todos los árboles sobre la misma muestra, el resultado es más consistente."
     - id: b
       text: Porque promedia (o vota) las predicciones de muchos árboles entrenados
         sobre distintos subconjuntos de datos y features; si los errores de cada
         árbol están poco correlacionados, tienden a cancelarse al promediar
+      rationale: "Promedia muchos árboles entrenados sobre subconjuntos distintos: si sus errores no están correlacionados, se cancelan."
     - id: a
       text: Porque cada árbol individual se vuelve por sí solo menos propenso a
         overfitting
+      rationale: "Cada árbol se vuelve por sí solo menos propenso a sobreajustar."
     - id: d
       text: Porque reduce automáticamente el número de features del dataset original
+      rationale: "Descarta las variables que no aportan y trabaja con un conjunto más pequeño."
   correct: b
   explanation: Cada árbol del bosque puede seguir siendo de alta varianza
     individualmente, pero al entrenarlos sobre bootstrap samples distintos y
@@ -344,12 +392,16 @@
         espacio original, calculando de forma eficiente el producto escalar
         equivalente a proyectar los datos a un espacio de mayor dimensión sin
         construir explícitamente esa proyección
+      rationale: "Permite separar lo que no es separable con una recta, calculando el producto escalar en un espacio mayor sin construirlo."
     - id: d
       text: Para eliminar la necesidad de un margen de separación
+      rationale: "Elimina la necesidad de dejar margen entre las clases al separarlas."
     - id: c
       text: Para convertir un problema de clasificación en uno de regresión
+      rationale: "Convierte el problema de clasificación en uno de predicción de valores continuos."
     - id: a
       text: Para acelerar el entrenamiento reduciendo el número de muestras
+      rationale: "Acelera el entrenamiento reduciendo las muestras que hay que considerar."
   correct: b
   explanation: "El kernel trick permite calcular el producto escalar que tendrían
     los datos en un espacio de características de dimensión mayor (donde sí
@@ -369,14 +421,18 @@
   options:
     - id: c
       text: Solo puede usarse con datos etiquetados (aprendizaje supervisado)
+      rationale: "Necesita etiquetas para poder formar los grupos, así que es supervisado."
     - id: b
       text: Requiere elegir k de antemano y el resultado final es sensible a la
         inicialización aleatoria de los centroides, pudiendo converger a un
         óptimo local distinto en cada corrida
+      rationale: "Hay que fijar k de antemano y el resultado depende de la inicialización: puede caer en óptimos locales distintos."
     - id: d
       text: Garantiza siempre encontrar la partición óptima global
+      rationale: "Converge siempre a la mejor partición posible del conjunto."
     - id: a
       text: No requiere especificar de antemano el número de clusters k
+      rationale: "No hace falta decidir cuántos grupos hay: los descubre por su cuenta."
   correct: b
   explanation: k-means necesita que el número de clusters k se fije de antemano
     (no lo aprende de los datos) y, al depender de una inicialización aleatoria
@@ -397,14 +453,18 @@
   options:
     - id: c
       text: Porque accuracy solo existe para problemas de regresión
+      rationale: "Esa métrica solo está definida para problemas de predicción continua."
     - id: d
       text: Porque accuracy siempre penaliza más a la clase mayoritaria
+      rationale: "Castiga siempre a la clase mayoritaria y por eso da una imagen distorsionada."
     - id: a
       text: Porque accuracy no puede calcularse en problemas binarios
+      rationale: "En problemas de dos clases no se puede calcular sin ajustar el umbral."
     - id: b
       text: Porque un modelo trivial que siempre predice la clase mayoritaria
         obtendría un 99% de accuracy sin haber aprendido nada útil sobre la
         clase minoritaria
+      rationale: "Un modelo que siempre diga la clase mayoritaria saca un 99% sin haber aprendido nada de la minoritaria."
   correct: b
   explanation: Con clases muy desbalanceadas, un clasificador que ignore por
     completo la clase minoritaria y prediga siempre la mayoritaria logra una
@@ -436,12 +496,16 @@
   options:
     - id: d
       text: Los datos están perfectamente balanceados
+      rationale: "Las dos curvas se comportan como se espera cuando las clases están equilibradas."
     - id: c
       text: El learning rate es exactamente 0
+      rationale: "Sin tasa de aprendizaje el modelo no actualiza nada y las curvas se separan."
     - id: a
       text: "Overfitting: mejora en train mientras empeora en validación"
+      rationale: "Sobreajuste: mejora donde entrena y empeora donde valida."
     - id: b
       text: "Underfitting: no aprende nada"
+      rationale: "Subajuste: la curva de entrenamiento no llega a bajar lo suficiente."
   correct: a
   explanation: "Si el error de train sigue bajando pero el de validación empieza a
     subir, el modelo memoriza el entrenamiento y generaliza peor: overfitting.
@@ -469,13 +533,17 @@
   options:
     - id: c
       text: Falta convertir a float32
+      rationale: "Sin convertir a coma flotante de menor precisión, el escalado arrastra errores de redondeo."
     - id: b
       text: No hay error, es el orden correcto
+      rationale: "Escalar antes de partir garantiza que las dos mitades queden en la misma escala."
     - id: a
       text: "Data leakage: el scaler se ajusta viendo también el test; debe hacer fit
         solo con train"
+      rationale: "Fuga de datos: el escalador se ajusta viendo también el test, y debe ajustarse solo con entrenamiento."
     - id: d
       text: El split siempre debe ir después del fit del modelo
+      rationale: "La partición va después de ajustar el modelo, para evaluar sobre lo mismo que aprendió."
   correct: a
   explanation: "Ajustar el scaler sobre todo el dataset (incluido test) filtra
     estadísticas del test al preprocesado: data leakage, que infla la métrica.
@@ -496,13 +564,17 @@
   options:
     - id: d
       text: El número de features de entrada
+      rationale: "El número de variables de entrada, que es lo que limita lo que el modelo puede ver."
     - id: c
       text: El learning rate del modelo
+      rationale: "La tasa de aprendizaje, que decide si llega a aprender el patrón raro."
     - id: b
       text: La accuracy, que ya es del 99%
+      rationale: "El acierto global, que ya está en un nivel más que aceptable."
     - id: a
       text: Recall sobre la clase minoritaria (con precision/F1 y la matriz de
         confusión)
+      rationale: "La exhaustividad sobre la clase minoritaria, con su precisión y la matriz de confusión."
   correct: a
   explanation: Con clases muy desbalanceadas la accuracy engaña (predecir siempre
     'no fraude' da 99%). Importa el recall de la clase positiva (cuántos fraudes
@@ -521,13 +593,17 @@
   options:
     - id: c
       text: Son lo mismo
+      rationale: "Son el mismo procedimiento con distinto nombre según la literatura."
     - id: a
       text: El supervisado aprende de datos ETIQUETADOS (X→y); el no supervisado busca
         estructura en datos sin etiquetas
+      rationale: "Uno aprende de datos etiquetados y el otro busca estructura donde no hay etiquetas."
     - id: b
       text: El supervisado no usa datos
+      rationale: "Uno parte de reglas escritas a mano y el otro de datos."
     - id: d
       text: El no supervisado siempre rinde mejor
+      rationale: "El no supervisado rinde mejor porque no depende de etiquetas que pueden estar mal."
   correct: a
   explanation: "Supervisado: pares entrada-etiqueta (clasificación/regresión). No
     supervisado: sin etiquetas, encuentra estructura (clustering, reducción de
@@ -544,13 +620,17 @@
   options:
     - id: c
       text: Son idénticos
+      rationale: "Son el mismo problema resuelto con distintas familias de modelos."
     - id: b
       text: Es al revés
+      rationale: "Es justo al revés de como suele explicarse en los manuales."
     - id: a
       text: Clasificación predice una categoría discreta; regresión predice un valor
         continuo
+      rationale: "Una predice una categoría discreta y la otra un valor continuo."
     - id: d
       text: La regresión solo sirve para imágenes
+      rationale: "La regresión se usa sobre todo con imágenes, donde la salida es continua."
   correct: a
   explanation: La salida de clasificación es una clase (spam/no spam); la de
     regresión es un número real (precio, temperatura).
@@ -566,12 +646,16 @@
   options:
     - id: d
       text: Acertó un caso negativo
+      rationale: "Un negativo que el modelo clasificó bien como negativo."
     - id: a
       text: El modelo predijo positivo pero la etiqueta real era negativa
+      rationale: "El modelo dijo que sí y la etiqueta real decía que no."
     - id: b
       text: Predijo negativo siendo realmente positivo
+      rationale: "El modelo dijo que no cuando en realidad era que sí."
     - id: c
       text: Acertó un caso positivo
+      rationale: "Un positivo que el modelo detectó correctamente."
   correct: a
   explanation: "FP = predicción positiva sobre un caso realmente negativo (falsa
     alarma). Un FN sería lo contrario: no detectar un positivo real."
@@ -587,13 +671,17 @@
   options:
     - id: b
       text: La accuracy fija a umbral 0.5
+      rationale: "El acierto que se obtiene fijando el umbral en el punto medio."
     - id: c
       text: El tiempo de entrenamiento
+      rationale: "Lo que tarda el modelo en entrenar hasta converger."
     - id: a
       text: "La capacidad de ordenar clases a través de todos los umbrales:
         probabilidad de puntuar un positivo por encima de un negativo"
+      rationale: "La capacidad de ordenar: la probabilidad de puntuar un positivo por encima de un negativo."
     - id: d
       text: El número de features
+      rationale: "El número de variables que el modelo está usando de verdad."
   correct: a
   explanation: La ROC traza TPR vs FPR variando el umbral; el AUC (área) es la
     probabilidad de rankear un positivo aleatorio por encima de un negativo. Es
@@ -611,13 +699,17 @@
   options:
     - id: b
       text: Bajar el umbral de decisión
+      rationale: "Bajar el umbral hace al modelo más exigente antes de marcar algo como spam."
     - id: d
       text: No se puede hacer nada sin reentrenar
+      rationale: "El comportamiento está en los pesos: sin reentrenar no hay nada que tocar."
     - id: c
       text: Cambiar el idioma del correo
+      rationale: "Los falsos positivos vienen del idioma del correo, que confunde al modelo."
     - id: a
       text: "Subir el umbral de decisión (exigir más confianza para marcar spam): sube
         precision a costa de recall"
+      rationale: "Subir el umbral: exigir más confianza para marcarlo sube la precisión a costa de la exhaustividad."
   correct: a
   explanation: "Subir el umbral hace el modelo más conservador al predecir
     positivo: menos falsos positivos (más precision) pero más falsos negativos
@@ -634,13 +726,17 @@
   options:
     - id: b
       text: Rinde perfecto en train y mal en validación
+      rationale: "Perfecto donde entrena y mal donde valida: se ha quedado con los datos."
     - id: c
       text: No usa datos de entrenamiento
+      rationale: "No aprovecha los datos de entrenamiento y responde igual con o sin ellos."
     - id: a
       text: "Rinde mal en train Y en validación: es demasiado simple para el patrón
         (alto sesgo)"
+      rationale: "Mal en entrenamiento y mal en validación: demasiado simple para el patrón."
     - id: d
       text: Tiene demasiados parámetros
+      rationale: "Tiene más parámetros de los que el problema necesita."
   correct: a
   explanation: "Underfitting = alto sesgo: el modelo no captura la señal ni en los
     datos de entrenamiento. Lo contrario del overfitting (bien en train, mal en
@@ -658,13 +754,17 @@
   options:
     - id: d
       text: Mini-batch no calcula gradientes
+      rationale: "El intermedio no calcula gradientes: promedia las actualizaciones de los otros dos."
     - id: a
       text: Batch usa todo el dataset por paso; SGD un solo ejemplo; mini-batch un
         subconjunto pequeño (equilibrio entre ruido y eficiencia)
+      rationale: "Uno usa todo el conjunto por paso, otro un solo ejemplo y el tercero un subconjunto pequeño."
     - id: b
       text: Son idénticos
+      rationale: "Son tres nombres para el mismo procedimiento según el tamaño del conjunto."
     - id: c
       text: SGD usa todo el dataset de golpe
+      rationale: "El estocástico procesa el conjunto entero de una vez en cada paso."
   correct: a
   explanation: Batch es estable pero caro; SGD es ruidoso pero rápido por paso;
     mini-batch (lo habitual) combina eficiencia en hardware y una actualización
@@ -682,13 +782,17 @@
   options:
     - id: d
       text: El label encoding no existe
+      rationale: "Asignar un número por categoría no es una codificación admitida por los modelos."
     - id: a
       text: El label encoding introduce un orden numérico falso (0<1<2) que el modelo
         puede malinterpretar; one-hot lo evita
+      rationale: "Numerar las categorías introduce un orden falso que el modelo puede tomarse en serio."
     - id: c
       text: Son exactamente equivalentes
+      rationale: "Las dos representan lo mismo y el modelo llega al mismo resultado."
     - id: b
       text: One-hot es más lento sin ninguna ventaja
+      rationale: "Ocupa muchas más columnas y no aporta nada a cambio."
   correct: a
   explanation: Con categorías sin orden (rojo/verde/azul), asignarles 0/1/2
     sugiere una relación de orden/distancia inexistente. One-hot crea una
@@ -707,12 +811,16 @@
     - id: a
       text: "Data leakage: la media incluye info del test; hay que imputar con
         estadísticas calculadas solo en train"
+      rationale: "Fuga de datos: la media incluye información del test; hay que calcularla solo con entrenamiento."
     - id: b
       text: Ningún riesgo
+      rationale: "Ninguno: la media es un estadístico robusto y no arrastra información concreta."
     - id: c
       text: Que el dataset crece de tamaño
+      rationale: "Al rellenar huecos el conjunto crece y deja de estar equilibrado."
     - id: d
       text: Que se pierden columnas
+      rationale: "Se pierden las columnas que tenían demasiados valores ausentes."
   correct: a
   explanation: Como con el escalado, cualquier estadística de imputación debe
     calcularse solo con train y aplicarse a test; si no, filtras información del
@@ -730,13 +838,17 @@
   options:
     - id: d
       text: Para duplicar los datos
+      rationale: "Para tener una copia de seguridad de los datos con la que comparar."
     - id: c
       text: No sirve para nada
+      rationale: "Es una costumbre heredada que con validación cruzada ya no aporta."
     - id: b
       text: Para entrenar más rápido
+      rationale: "Para entrenar con menos datos y que cada iteración sea más rápida."
     - id: a
       text: Para estimar sin sesgo el rendimiento en datos no vistos; si lo usas para
         ajustar deja de ser una estimación honesta
+      rationale: "Para estimar sin sesgo el rendimiento en datos no vistos: si lo usas para ajustar, deja de ser honesto."
   correct: a
   explanation: El test es la única muestra 'limpia' de generalización. Si tomas
     decisiones mirándolo, se contamina y su estimación deja de ser fiable (para
@@ -754,12 +866,16 @@
     - id: a
       text: Mantiene la proporción de clases en cada fold, evitando folds sin ejemplos
         de la clase minoritaria
+      rationale: "Mantiene la proporción de clases en cada partición y evita que la minoritaria desaparezca de alguna."
     - id: b
       text: Porque es más rápido
+      rationale: "Al repartir mejor, cada partición converge antes y el proceso acaba antes."
     - id: c
       text: Porque usa menos datos
+      rationale: "Usa menos datos por partición, lo que reduce el coste de la validación."
     - id: d
       text: Porque elimina el desbalanceo
+      rationale: "Reparte los ejemplos hasta igualar las clases y quita el desbalanceo."
   correct: a
   explanation: El k-fold normal puede dejar folds con muy pocos (o ningún) ejemplo
     de la clase rara, dando métricas inestables. El estratificado preserva la
@@ -776,13 +892,17 @@
   options:
     - id: b
       text: Añade dimensiones nuevas
+      rationale: "Añade combinaciones nuevas de las variables para capturar relaciones no lineales."
     - id: c
       text: Etiqueta los datos
+      rationale: "Agrupa los datos y les asigna una etiqueta según a qué grupo caen."
     - id: a
       text: Proyecta los datos a menos dimensiones conservando la mayor varianza
         posible, con combinaciones lineales ortogonales
+      rationale: "Proyecta a menos dimensiones conservando la mayor varianza, con combinaciones lineales ortogonales."
     - id: d
       text: Entrena un clasificador supervisado
+      rationale: "Entrena un clasificador que aprovecha las direcciones de mayor variación."
   correct: a
   explanation: "PCA es reducción de dimensión no supervisada: encuentra las
     direcciones (componentes) de máxima varianza y proyecta sobre las primeras,
@@ -801,12 +921,16 @@
       text: Al crecer las dimensiones, los datos se vuelven dispersos y las distancias
         pierden significado, degradando métodos por distancia y exigiendo muchos
         más datos
+      rationale: "Al crecer las dimensiones los datos se dispersan, las distancias pierden sentido y hacen falta muchos más ejemplos."
     - id: b
       text: Que hay demasiadas filas
+      rationale: "Que hay tantas filas que el cálculo deja de caber en memoria."
     - id: d
       text: Que el modelo entrena más rápido
+      rationale: "Que con más dimensiones el modelo converge antes de lo esperado."
     - id: c
       text: Un bug de numpy
+      rationale: "Un problema conocido de las librerías de cálculo numérico con muchas dimensiones."
   correct: a
   explanation: En alta dimensión el volumen crece exponencialmente y los puntos
     quedan casi equidistantes; kNN, clustering y densidades se degradan, y hace
@@ -823,13 +947,17 @@
   options:
     - id: b
       text: Ajusta una recta de regresión
+      rationale: "Ajusta una recta que separa las clases en el espacio de las variables."
     - id: d
       text: Construye un único árbol
+      rationale: "Construye un árbol de decisiones sobre las variables más informativas."
     - id: c
       text: Usa gradient descent para aprender pesos
+      rationale: "Aprende pesos por descenso de gradiente sobre los ejemplos de entrenamiento."
     - id: a
       text: Asigna la clase mayoritaria entre los k ejemplos de entrenamiento más
         cercanos; no ajusta un modelo paramétrico
+      rationale: "Asigna la clase mayoritaria entre los k ejemplos más cercanos, sin ajustar un modelo paramétrico."
   correct: a
   explanation: "kNN es 'perezoso': no entrena parámetros, guarda los datos y en
     predicción vota entre los k vecinos más próximos. Sensible a la escala de
@@ -846,12 +974,16 @@
   options:
     - id: b
       text: Que no existen clases
+      rationale: "Que no existen clases previas y hay que descubrirlas en los datos."
     - id: a
       text: Que las features son condicionalmente independientes dada la clase
+      rationale: "Que las variables son independientes entre sí una vez fijada la clase."
     - id: d
       text: Que la relación es siempre lineal
+      rationale: "Que la relación entre variables y clase es siempre lineal."
     - id: c
       text: Que los datos son siempre imágenes
+      rationale: "Que los datos vienen en forma de imagen, de donde salió el método."
   correct: a
   explanation: Naive Bayes asume independencia condicional de las features dada la
     clase; irreal, pero funciona sorprendentemente bien (p. ej. clasificación de
@@ -868,13 +1000,17 @@
   options:
     - id: c
       text: Minimizar el número de features
+      rationale: "Quedarse con las variables imprescindibles, que es lo que hace la separación robusta."
     - id: b
       text: Cualquier recta que separe las clases
+      rationale: "Cualquier separación que deje las clases a un lado y a otro cumple el objetivo."
     - id: a
       text: "El hiperplano que maximiza el margen: la distancia a los puntos más
         cercanos (vectores de soporte)"
+      rationale: "El hiperplano que deja el margen más ancho hasta los puntos más cercanos."
     - id: d
       text: Maximizar el error de clasificación
+      rationale: "Maximizar el error permitido para no ajustarse demasiado a los datos."
   correct: a
   explanation: El SVM elige, entre los infinitos separadores posibles, el de
     margen máximo; solo los vectores de soporte (los más cercanos) determinan el
@@ -891,13 +1027,17 @@
   options:
     - id: b
       text: Para entrenar más rápido
+      rationale: "Para acelerar la convergencia eligiendo mejor los centros iniciales."
     - id: c
       text: Para etiquetar los datos
+      rationale: "Para poner nombre a cada grupo una vez formados."
     - id: a
       text: Para elegir un número de clústers k razonable, ya que k-means no aprende k
         por sí solo
+      rationale: "Para elegir un número de grupos razonable, porque el algoritmo no lo aprende por su cuenta."
     - id: d
       text: Para reducir dimensiones
+      rationale: "Para quedarse con las dimensiones que de verdad separan los grupos."
   correct: a
   explanation: k-means requiere fijar k de antemano; el codo (inercia vs k) y el
     silhouette (cohesión/separación) ayudan a elegir un k sensato en vez de a
@@ -914,13 +1054,17 @@
   options:
     - id: c
       text: Requiere datos etiquetados
+      rationale: "Aprovecha las etiquetas disponibles para formar grupos más coherentes."
     - id: b
       text: Es siempre más rápido
+      rationale: "Recorre los datos una sola vez, así que siempre acaba antes."
     - id: a
       text: Encuentra clústers de forma arbitraria por densidad y detecta outliers,
         sin fijar k de antemano
+      rationale: "Encuentra grupos de forma arbitraria por densidad, detecta atípicos y no exige fijar cuántos hay."
     - id: d
       text: Solo puede formar 2 clústers
+      rationale: "Divide siempre en dos grupos, lo que simplifica la interpretación."
   correct: a
   explanation: "DBSCAN agrupa por densidad: descubre clústers no esféricos, marca
     como ruido los puntos aislados y no necesita k. A cambio es sensible a sus
@@ -939,12 +1083,16 @@
       text: Bagging entrena modelos en paralelo sobre remuestreos y promedia (reduce
         varianza); boosting entrena en secuencia, cada uno corrigiendo los
         errores del anterior (reduce sesgo)
+      rationale: "Uno entrena en paralelo sobre remuestreos y promedia (baja varianza); el otro va en secuencia corrigiendo errores (baja sesgo)."
     - id: c
       text: Bagging es secuencial y boosting paralelo
+      rationale: "Es al revés: el primero va en cadena y el segundo en paralelo."
     - id: d
       text: Boosting solo promedia modelos independientes
+      rationale: "El segundo promedia modelos independientes entrenados por separado."
     - id: b
       text: Son lo mismo con otro nombre
+      rationale: "Son la misma técnica con dos nombres según la tradición de cada escuela."
   correct: a
   explanation: Bagging (p. ej. Random Forest) decorrela modelos de alta varianza y
     promedia. Boosting (p. ej. gradient boosting) añade modelos débiles
@@ -961,13 +1109,17 @@
   options:
     - id: b
       text: Promedia árboles entrenados de forma independiente
+      rationale: "Promedia árboles entrenados por separado sobre distintas muestras."
     - id: c
       text: Entrena una única red neuronal
+      rationale: "Entrena una red neuronal que aprende la combinación de variables."
     - id: d
       text: No utiliza árboles en absoluto
+      rationale: "No usa árboles: combina modelos lineales sucesivos."
     - id: a
       text: Añade árboles secuencialmente, cada uno ajustado a los residuos/gradiente
         del error de los anteriores
+      rationale: "Añade árboles en secuencia, cada uno ajustado a lo que los anteriores dejaron sin explicar."
   correct: a
   explanation: Gradient boosting ajusta cada nuevo árbol al gradiente negativo de
     la pérdida (los residuos) del ensemble actual, mejorando de forma
@@ -986,12 +1138,16 @@
     - id: a
       text: "Estimar el error usando, para cada árbol, los ejemplos que su muestra
         bootstrap NO incluyó: una validación casi gratis"
+      rationale: "Estimar el error con los ejemplos que cada árbol no vio en su muestra: validación casi gratis."
     - id: b
       text: Entrenar cada árbol con todos los datos
+      rationale: "Entrenar cada árbol con todos los datos para que ninguno se quede corto."
     - id: c
       text: Un método de poda de árboles
+      rationale: "Un criterio de poda que decide dónde cortar cada rama."
     - id: d
       text: El número total de árboles del bosque
+      rationale: "El total de árboles que componen el bosque."
   correct: a
   explanation: Cada árbol se entrena con un bootstrap (~63% de los datos); los
     ejemplos fuera de su bolsa sirven para estimar el error sin un set de
@@ -1009,12 +1165,16 @@
     - id: a
       text: RMSE penaliza más los errores grandes (los eleva al cuadrado) y es más
         sensible a outliers; MAE trata todos los errores de forma lineal
+      rationale: "Una eleva los errores al cuadrado y castiga más los grandes; la otra los trata todos por igual."
     - id: b
       text: Son idénticas
+      rationale: "Dan el mismo número salvo por un factor de escala."
     - id: c
       text: MAE solo sirve para clasificación
+      rationale: "Una de ellas se usa en clasificación, no en predicción de valores."
     - id: d
       text: RMSE ignora el error
+      rationale: "Una de ellas no mide el error sino la dispersión de las predicciones."
   correct: a
   explanation: "RMSE = raíz del error cuadrático medio: castiga desviaciones
     grandes; MAE = error absoluto medio: robusto a outliers. La elección depende
@@ -1031,13 +1191,17 @@
   options:
     - id: c
       text: Que faltan datos
+      rationale: "Que faltan datos suficientes para calcular la métrica con sentido."
     - id: b
       text: Un ajuste perfecto
+      rationale: "Un ajuste perfecto: no queda varianza sin explicar."
     - id: d
       text: Que hay overfitting con seguridad
+      rationale: "Sobreajuste seguro: el modelo se ha quedado con el ruido."
     - id: a
       text: El modelo no explica la varianza mejor que predecir siempre la media del
         objetivo
+      rationale: "El modelo no explica la varianza mejor que predecir siempre la media."
   correct: a
   explanation: R²=1 es ajuste perfecto; R²=0 equivale a predecir la media; R²<0 es
     peor que la media. Mide la fracción de varianza explicada por el modelo.
@@ -1058,13 +1222,17 @@
   options:
     - id: b
       text: Subir max_iter
+      rationale: "Con más iteraciones el optimizador llega a distinguir la clase rara."
     - id: a
       text: class_weight='balanced' (o pesos por clase) para penalizar más los errores
         en la clase minoritaria
+      rationale: "Pesar las clases para que equivocarse en la minoritaria cueste más."
     - id: c
       text: Eliminar la clase minoritaria
+      rationale: "Quitar la clase rara y tratar el problema como detección de lo habitual."
     - id: d
       text: No tocar nada, ya está bien
+      rationale: "Nada: con esa proporción el comportamiento es el esperable."
   correct: a
   explanation: Ponderar las clases (o remuestrear, p. ej. SMOTE) hace que el coste
     de fallar la minoría pese más, evitando el clasificador trivial que predice
@@ -1082,13 +1250,17 @@
   options:
     - id: c
       text: Falta regularización
+      rationale: "Falta regularización: sin ella el modelo se ajusta a cualquier señal."
     - id: d
       text: Es un resultado normal
+      rationale: "Es un resultado normal en problemas con señal muy clara."
     - id: a
       text: "Target leakage: una feature contiene información del futuro/etiqueta que
         no existiría al predecir; hay que quitarla"
+      rationale: "Fuga del objetivo: esa variable trae información que no existiría al predecir, y hay que quitarla."
     - id: b
       text: El modelo es simplemente excelente
+      rationale: "El modelo es excelente: ha encontrado el patrón que otros no ven."
   correct: a
   explanation: "Una feature que solo se conoce después del evento (o que codifica
     la etiqueta) filtra el objetivo: accuracy irreal que se desploma en
@@ -1106,13 +1278,17 @@
   options:
     - id: c
       text: k-Nearest Neighbors
+      rationale: "Trabaja con vecinos, así que le da igual en qué unidades esté cada variable."
     - id: d
       text: Regresión logística con regularización
+      rationale: "El término de penalización ya normaliza los coeficientes por su cuenta."
     - id: a
       text: "Los basados en árboles (decision tree, random forest, gradient boosting):
         parten por umbrales, insensibles a la escala"
+      rationale: "Los basados en árboles: parten por umbrales, así que la escala les da igual."
     - id: b
       text: SVM con kernel RBF
+      rationale: "El núcleo transforma el espacio y absorbe las diferencias de escala."
   correct: a
   explanation: Los árboles deciden por umbrales de cada feature por separado, así
     que la escala da igual. En cambio kNN, SVM y modelos con
@@ -1130,14 +1306,18 @@
   options:
     - id: c
       text: Porque es aleatorio
+      rationale: "Depende de la inicialización: en cada ejecución caen a cero unos coeficientes u otros."
     - id: d
       text: Porque L2 también produce ceros siempre
+      rationale: "La otra también produce ceros; la diferencia está en cuántos."
     - id: b
       text: Porque L1 usa más datos
+      rationale: "Al usar más datos por iteración, puede permitirse descartar variables enteras."
     - id: a
       text: La geometría de la restricción L1 (rombo, con vértices sobre los ejes)
         hace que el óptimo caiga a menudo en un eje (peso=0); la L2 (círculo)
         rara vez toca un eje
+      rationale: "La forma de la restricción tiene vértices sobre los ejes, y el óptimo cae ahí a menudo; la otra es redonda y rara vez toca un eje."
   correct: a
   explanation: La región factible de L1 es un rombo con esquinas en los ejes; la
     solución óptima suele tocar una esquina, anulando coeficientes (sparsity).
@@ -1155,12 +1335,16 @@
   options:
     - id: c
       text: sesgo × varianza
+      rationale: "El producto de los dos términos, que es como se combinan sus efectos."
     - id: b
       text: solo varianza
+      rationale: "Solo la varianza: el sesgo se cancela al tomar la esperanza."
     - id: d
       text: accuracy + recall
+      rationale: "La suma de las dos métricas con las que se evalúa el modelo."
     - id: a
       text: sesgo² + varianza + error irreducible
+      rationale: "Sesgo al cuadrado más varianza más el error que no se puede reducir."
   correct: a
   explanation: "La descomposición sesgo-varianza: sesgo² (error sistemático por un
     modelo demasiado simple), varianza (sensibilidad a los datos de train) y
@@ -1179,12 +1363,16 @@
     - id: a
       text: La varianza de la media de estimadores decrece con B (si no están
         perfectamente correlados), y el bootstrap los decorrela
+      rationale: "La varianza de la media baja con el número de modelos si no están perfectamente correlados, y el remuestreo los decorrela."
     - id: c
       text: Porque usa menos datos
+      rationale: "Al usar menos datos por modelo, cada uno se ajusta menos y varía menos."
     - id: b
       text: Porque aumenta el sesgo
+      rationale: "Sube el sesgo, y ese aumento se compensa con menos varianza."
     - id: d
       text: El promedio no reduce la varianza
+      rationale: "Promediar no toca la varianza: lo que hace es estabilizar el sesgo."
   correct: a
   explanation: Promediar reduce la varianza (~σ²/B más un término por la
     correlación entre modelos). El bootstrap decorrela los modelos, por eso el
@@ -1202,13 +1390,17 @@
   options:
     - id: d
       text: Porque borra los datos para linealizarlos
+      rationale: "Porque proyecta los datos a un espacio donde ya son separables por una recta."
     - id: c
       text: Porque no usa productos internos
+      rationale: "Porque prescinde de los productos internos y compara los puntos directamente."
     - id: b
       text: Porque φ es siempre la identidad
+      rationale: "Porque la transformación es la identidad y no hay nada que calcular."
     - id: a
       text: La forma dual del SVM solo depende de productos internos ⟨φ(x),φ(z)⟩, que
         un kernel válido (Mercer) calcula directamente como K(x,z)
+      rationale: "La forma dual solo depende de productos internos, y un núcleo válido los calcula directamente."
   correct: a
   explanation: En su formulación dual el SVM solo usa productos internos entre
     ejemplos; un kernel de Mercer devuelve ⟨φ(x),φ(z)⟩ sin construir φ (que
@@ -1226,13 +1418,17 @@
   options:
     - id: c
       text: Es imposible que ocurra
+      rationale: "No puede pasar: buena ordenación implica buenas probabilidades."
     - id: d
       text: Hay que cambiar de lenguaje de programación
+      rationale: "Es un problema de precisión numérica de la implementación."
     - id: b
       text: Tiene overfitting; solo hace falta más datos
+      rationale: "Es sobreajuste, y con más datos las probabilidades se ajustan solas."
     - id: a
       text: Está mal CALIBRADO; se corrige con calibración post-hoc (Platt/sigmoide o
         isotónica) sobre un set de validación
+      rationale: "Está mal calibrado: se corrige con calibración posterior sobre un conjunto de validación."
   correct: a
   explanation: Buen ranking (AUC) no implica probabilidades fiables. Si al 0.9
     predicho le corresponde un 60% real, hay descalibración; Platt scaling
@@ -1261,13 +1457,17 @@
   options:
     - id: b
       text: "Underfitting: el modelo es demasiado simple"
+      rationale: "Subajuste: el modelo sigue siendo demasiado simple para el patrón."
     - id: a
       text: "Overfitting: el error de train sigue bajando pero el de test sube
         (varianza alta)"
+      rationale: "Sobreajuste: el error de entrenamiento baja y el de test sube."
     - id: d
       text: El error irreducible se hace cero
+      rationale: "El error que no se puede reducir desaparece al añadir capacidad."
     - id: c
       text: Es el punto óptimo de complejidad
+      rationale: "Es el punto donde conviene quedarse: el modelo está en su mejor forma."
   correct: a
   explanation: "El error de test tiene forma de U: la izquierda (simple) es
     underfitting (sesgo alto), la derecha (complejo) es overfitting (varianza

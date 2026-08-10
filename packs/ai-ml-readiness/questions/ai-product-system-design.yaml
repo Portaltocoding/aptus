@@ -14,13 +14,17 @@
   options:
     - id: d
       text: Da igual, el coste y la fiabilidad son idénticos
+      rationale: "Las dos formas acaban haciendo el mismo trabajo, así que cuestan y fallan igual."
     - id: a
       text: "Cuando el problema tiene pasos conocidos y acotados: un workflow es más
         predecible, barato y fácil de evaluar que dar autonomía al modelo"
+      rationale: "Cuando los pasos son conocidos y acotados: sale más predecible, más barato y más fácil de evaluar."
     - id: c
       text: Siempre un workflow, porque los agents no funcionan nunca
+      rationale: "Siempre el flujo fijo: dejar decidir al modelo nunca acaba bien en producción."
     - id: b
       text: Siempre un agent, porque más autonomía es siempre mejor
+      rationale: "Siempre el agente: más autonomía es más capacidad de resolver lo imprevisto."
   correct: a
   explanation: Si la tarea se puede descomponer en pasos deterministas, un
     workflow orquestado es más predecible, depurable, barato y evaluable.
@@ -41,13 +45,17 @@
   options:
     - id: c
       text: Subir siempre al modelo más caro porque es el mejor
+      rationale: "Subir al modelo más capaz reduce reintentos, y eso acaba saliendo más barato."
     - id: b
       text: Eliminar toda la evaluación de calidad para ahorrar llamadas
+      rationale: "Quitar la evaluación ahorra todas las llamadas que no atienden a usuarios."
     - id: d
       text: Ignorar el coste, no es responsabilidad del ingeniero
+      rationale: "El coste es cosa de infraestructura, no de quien construye la función."
     - id: a
       text: Cachear respuestas a prompts repetidos y enrutar los casos fáciles a un
         modelo más pequeño, reservando el modelo grande para los difíciles
+      rationale: "Cachear lo repetido y mandar los casos fáciles a un modelo pequeño, dejando el grande para lo difícil."
   correct: a
   explanation: "Estrategias de coste sin sacrificar calidad: caching de prompts
     frecuentes, routing por dificultad (modelo pequeño para lo fácil, grande
@@ -67,14 +75,18 @@
   options:
     - id: b
       text: Porque los evals son obligatorios legalmente
+      rationale: "Porque hay que poder acreditar cómo se mide la calidad del sistema."
     - id: d
       text: "No conviene: los evals se escriben solo al final, si sobra tiempo"
+      rationale: "No conviene: los criterios se fijan mejor cuando ya se ha visto qué produce."
     - id: a
       text: "Porque el eval actúa como contrato: fija qué significa 'correcto' de
         forma medible, permite iterar el prompt/modelo sin regresiones y evita
         el 'creo que funciona' subjetivo"
+      rationale: "El eval es el contrato: fija qué significa correcto de forma medible y permite iterar sin regresiones."
     - id: c
       text: Porque así el modelo entrena más rápido
+      rationale: "Porque con los criterios delante el modelo converge antes a lo que se espera."
   correct: a
   explanation: "Definir el eval primero convierte 'parece que va' en un criterio
     medible y reproducible. Funciona como contrato del skill: puedes cambiar
@@ -95,12 +107,16 @@
       text: En decisiones de alto impacto o irreversibles con baja tolerancia al
         error, donde el coste de un fallo del modelo supera el coste de la
         revisión humana
+      rationale: "En decisiones de alto impacto o irreversibles, donde el fallo cuesta más que la revisión."
     - id: b
       text: En todas las decisiones, siempre, sin excepción
+      rationale: "En todas: la supervisión es lo único que garantiza que no se cuele un error."
     - id: d
       text: Solo cuando el modelo es muy barato
+      rationale: "Cuando el modelo es barato y revisar no añade coste apreciable."
     - id: c
       text: Nunca, porque frena la automatización
+      rationale: "Nunca: meter a una persona en medio anula la ventaja de automatizar."
   correct: a
   explanation: El human-in-the-loop se justifica donde el error es caro o
     irreversible (pagos, decisiones legales/médicas, acciones destructivas).
@@ -120,13 +136,17 @@
   options:
     - id: d
       text: Renderizar la respuesta solo cuando el usuario recargue
+      rationale: "Pintar la respuesta al recargar evita mostrar estados intermedios."
     - id: a
       text: "Streaming de tokens: mostrar la respuesta a medida que se genera, en vez
         de esperar a tenerla entera"
+      rationale: "Ir mostrando la respuesta según se genera, en vez de esperar a tenerla entera."
     - id: b
       text: Aumentar el max_tokens de la respuesta
+      rationale: "Dar más margen de salida para que no tenga que cortarse y reintentar."
     - id: c
       text: Deshabilitar el caché
+      rationale: "Sin caché de por medio, la respuesta llega directa y sin pasos intermedios."
   correct: a
   explanation: "El streaming (SSE/token-by-token) reduce drásticamente la latencia
     percibida: el usuario empieza a leer casi de inmediato aunque la generación
@@ -145,14 +165,18 @@
   options:
     - id: b
       text: Un parámetro del modelo que garantiza que nunca alucina
+      rationale: "Un ajuste del modelo que garantiza que no afirma cosas que no sabe."
     - id: d
       text: Una métrica de coste
+      rationale: "Una métrica que vigila cuánto cuesta cada respuesta."
     - id: c
       text: Un tipo de fine-tuning
+      rationale: "Un ajuste del modelo con ejemplos de lo que no debe responder."
     - id: a
       text: Una comprobación programática alrededor del LLM (validación de
         formato/salida, filtros, límites) que rechaza o corrige salidas fuera de
         contrato antes de que lleguen al usuario o a un sistema aguas abajo
+      rationale: "Una comprobación programática alrededor del modelo que rechaza o corrige lo que se sale del contrato."
   correct: a
   explanation: "Un guardrail es lógica determinista que envuelve al modelo: valida
     que la salida cumple el contrato (schema, rangos, políticas), la filtra o la
@@ -171,13 +195,17 @@
   options:
     - id: b
       text: Son sinónimos
+      rationale: "Son dos nombres para lo mismo según se mida por operación o por lote."
     - id: c
       text: La latencia mide bytes y el throughput mide segundos
+      rationale: "Una se mide en volumen de datos y la otra en tiempo."
     - id: a
       text: La latencia es el tiempo de una operación individual; el throughput es
         cuántas operaciones se completan por unidad de tiempo
+      rationale: "Una es lo que tarda una operación; la otra, cuántas se completan por unidad de tiempo."
     - id: d
       text: El throughput solo aplica a bases de datos
+      rationale: "Una de las dos solo tiene sentido al hablar de bases de datos."
   correct: a
   explanation: Latencia = cuánto tarda una petición (p. ej. p95 en ms). Throughput
     = capacidad, peticiones/segundo. Se pueden optimizar por separado e incluso
@@ -198,12 +226,16 @@
     - id: a
       text: "Una idempotency key: el cliente envía un identificador único y el
         servidor descarta reintentos con la misma clave"
+      rationale: "Una clave de idempotencia: el cliente manda un identificador y el servidor descarta los reintentos con la misma."
     - id: b
       text: Aumentar el timeout hasta que nunca falle
+      rationale: "Ampliar el tiempo de espera hasta que la operación no llegue a fallar."
     - id: d
       text: Reintentar más veces para asegurar que entra
+      rationale: "Reintentar más veces para asegurar que la operación entra al menos una vez."
     - id: c
       text: Guardar el pago en una variable global
+      rationale: "Guardar el estado del pago en memoria del proceso para detectar repeticiones."
   correct: a
   explanation: "Una idempotency key hace que repetir la petición produzca el mismo
     efecto que hacerla una vez: el servidor registra la clave y, ante un
@@ -224,13 +256,17 @@
   options:
     - id: d
       text: Caché y Autenticación
+      rationale: "Entre guardar en caché o exigir credenciales en cada petición."
     - id: b
       text: Coste y Rendimiento
+      rationale: "Entre lo que cuesta el sistema y lo rápido que responde."
     - id: c
       text: Concurrencia y Persistencia
+      rationale: "Entre atender varias peticiones a la vez o garantizar que nada se pierde."
     - id: a
       text: "Consistencia (C) y Disponibilidad (A): durante la partición no se pueden
         garantizar ambas a la vez"
+      rationale: "Entre consistencia y disponibilidad: durante la partición no se pueden garantizar las dos."
   correct: a
   explanation: "CAP dice que, cuando hay partición de red (P, inevitable en
     sistemas distribuidos reales), debes sacrificar Consistencia o
@@ -250,13 +286,17 @@
   options:
     - id: b
       text: Cifrar los datos en tránsito
+      rationale: "Cifrar los mensajes mientras viajan entre las dos partes."
     - id: d
       text: Hacer el sistema síncrono y bloqueante
+      rationale: "Hacer que el productor espere la confirmación del consumidor."
     - id: a
       text: "Desacoplar y absorber picos: el productor no espera al consumidor y la
         cola amortigua ráfagas, dando resiliencia y backpressure"
+      rationale: "Desacoplar y absorber picos: el productor no espera y la cola amortigua las ráfagas."
     - id: c
       text: Eliminar la necesidad de una base de datos
+      rationale: "Evitar la base de datos guardando los mensajes en la propia cola."
   correct: a
   explanation: "Una cola desacopla productor y consumidor en el tiempo: el
     productor encola y sigue, el consumidor procesa a su ritmo. Absorbe picos de
@@ -276,13 +316,17 @@
   options:
     - id: b
       text: Bubble sort
+      rationale: "Un algoritmo de ordenación que reparte las peticiones por prioridad."
     - id: a
       text: "Token bucket: se rellenan tokens a una tasa fija y cada petición consume
         uno; el tamaño del bucket permite ráfagas hasta agotarlo"
+      rationale: "Cubo de tokens: se rellenan a ritmo fijo y cada petición gasta uno, y el tamaño del cubo permite ráfagas."
     - id: c
       text: Round-robin de DNS
+      rationale: "Repartir por turnos entre varias direcciones para no saturar ninguna."
     - id: d
       text: Hashing consistente
+      rationale: "Repartir por hash para que cada cliente caiga siempre en el mismo nodo."
   correct: a
   explanation: El token bucket rellena tokens a ritmo constante (la tasa media
     permitida) y cada request gasta uno; mientras haya tokens acumulados se
@@ -303,12 +347,16 @@
     - id: a
       text: Alinear a otros mediante contexto y trade-offs explícitos (por qué esta
         decisión y qué se sacrifica), no imponer por jerarquía
+      rationale: "Alinear a otros con contexto y compromisos explícitos: por qué esta decisión y qué se sacrifica."
     - id: c
       text: Evitar documentar para mantener el conocimiento propio
+      rationale: "Concentrar el conocimiento propio para ser la referencia en ese terreno."
     - id: d
       text: Tomar todas las decisiones en solitario y comunicarlas al final
+      rationale: "Decidir en solitario y comunicar cuando ya está resuelto, para no frenar."
     - id: b
       text: Escribir más código que nadie para demostrar valía
+      rationale: "Producir más que nadie, que es lo que acaba dando autoridad técnica."
   correct: a
   explanation: "Influir sin autoridad se basa en hacer visible el razonamiento:
     exponer trade-offs, contexto y criterios para que otros se alineen por
@@ -333,12 +381,16 @@
   options:
     - id: b
       text: Eliminar el load balancer
+      rationale: "Quitar el balanceador acorta el camino y reduce la carga sobre la base."
     - id: a
       text: Una capa de caché (p. ej. Redis) entre app y DB, con TTL/invalidación
+      rationale: "Una capa de caché entre la aplicación y la base, con su caducidad e invalidación."
     - id: c
       text: Comprar un dominio nuevo
+      rationale: "Separar el tráfico por dominios para repartir la carga entre entornos."
     - id: d
       text: Añadir más CSS al frontend
+      rationale: "Aligerar el frontal para que haga menos peticiones por página."
   correct: a
   explanation: Para lecturas repetidas y costosas, una caché en memoria
     (Redis/Memcached) delante de la DB reduce carga y latencia sirviendo
@@ -359,13 +411,17 @@
   options:
     - id: c
       text: Quitar el LLM del flujo
+      rationale: "Sacar el modelo del camino crítico y resolverlo con reglas."
     - id: a
       text: Streaming para la latencia percibida + un guardrail que valide/repare el
         JSON contra el schema antes de responder
+      rationale: "Ir mostrando la respuesta para la latencia percibida, y validar o reparar el formato antes de responder."
     - id: b
       text: Subir la temperature del modelo
+      rationale: "Más aleatoriedad para que no repita la misma salida mal formada."
     - id: d
       text: Reintentar la misma llamada 10 veces
+      rationale: "Reintentar hasta que salga una respuesta con el formato correcto."
   correct: a
   explanation: "Son dos problemas distintos: la latencia (el streaming mejora la
     percepción mostrando tokens según se generan) y la salida no fiable (un
@@ -386,12 +442,16 @@
     - id: a
       text: Horizontal = añadir más máquinas; vertical = hacer más grande una máquina
         (más CPU/RAM)
+      rationale: "Uno añade más máquinas y el otro hace más grande la que ya hay."
     - id: b
       text: Al revés
+      rationale: "Es justo al revés de como suelen nombrarse."
     - id: c
       text: Son lo mismo
+      rationale: "Son el mismo movimiento visto desde la infraestructura o desde la aplicación."
     - id: d
       text: El horizontal solo aplica a bases de datos
+      rationale: "Uno de los dos solo tiene sentido en bases de datos."
   correct: a
   explanation: Vertical topa con el límite de una sola máquina y tiene punto único
     de fallo; horizontal reparte carga entre muchas (mejor tolerancia y escala),
@@ -409,13 +469,17 @@
   options:
     - id: d
       text: Elimina servidores
+      rationale: "Retira de la rotación los servidores que van saturados."
     - id: b
       text: Cifra el tráfico
+      rationale: "Cifra el tráfico antes de repartirlo entre los servidores."
     - id: a
       text: Envía la petición al servidor con menos conexiones activas, en vez de
         repartir por turnos ciego
+      rationale: "Manda la petición al servidor con menos conexiones abiertas, en vez de repartir por turnos a ciegas."
     - id: c
       text: Cachea respuestas
+      rationale: "Guarda las respuestas para servir las repetidas sin llegar al servidor."
   correct: a
   explanation: Round robin reparte por turnos sin mirar la carga; least
     connections tiene en cuenta cuántas conexiones lleva cada backend, mejor
@@ -434,12 +498,16 @@
     - id: a
       text: Escalar las LECTURAS repartiéndolas entre copias; las escrituras van al
         primario y se replican
+      rationale: "Escalar las lecturas repartiéndolas entre copias; las escrituras van al principal y se replican."
     - id: b
       text: Escalar las escrituras
+      rationale: "Escalar las escrituras al poder aceptarlas en varios nodos a la vez."
     - id: c
       text: Borrar datos antiguos
+      rationale: "Mover los datos antiguos a copias para aligerar el principal."
     - id: d
       text: Cifrar la base de datos
+      rationale: "Guardar una copia cifrada por si el principal se compromete."
   correct: a
   explanation: Las réplicas absorben carga de lectura (habitualmente mayoritaria).
     Introducen lag de replicación, así que una lectura tras una escritura puede
@@ -456,13 +524,17 @@
   options:
     - id: d
       text: Hacer backups
+      rationale: "Guardar copias periódicas para poder restaurar si algo se pierde."
     - id: b
       text: Duplicar toda la base en cada nodo
+      rationale: "Tener la base entera en cada nodo para que cualquiera pueda responder."
     - id: c
       text: Cifrar columnas
+      rationale: "Proteger las columnas sensibles cifrándolas por separado."
     - id: a
       text: Repartir las FILAS entre varios nodos según una clave de partición, para
         escalar más allá de una sola máquina
+      rationale: "Repartir las filas entre nodos según una clave, para pasar del límite de una máquina."
   correct: a
   explanation: El sharding divide los datos por una shard key entre nodos; escala
     escritura y almacenamiento, pero complica las consultas cross-shard y
@@ -479,14 +551,18 @@
   options:
     - id: c
       text: La eventual es siempre más lenta en todo
+      rationale: "Una de las dos siempre responde más lenta por tener que coordinar."
     - id: d
       text: La fuerte no permite réplicas
+      rationale: "Una de las dos no admite copias porque rompería la garantía."
     - id: a
       text: "Fuerte: toda lectura ve la última escritura confirmada; eventual: las
         réplicas convergen con el tiempo y una lectura puede ver datos algo
         antiguos"
+      rationale: "Una garantiza que toda lectura ve la última escritura; la otra converge con el tiempo."
     - id: b
       text: Son sinónimos
+      rationale: "Son dos formas de nombrar la misma garantía."
   correct: a
   explanation: Consistencia fuerte da la vista más reciente a costa de
     latencia/disponibilidad; la eventual prioriza disponibilidad y rendimiento
@@ -504,13 +580,17 @@
   options:
     - id: b
       text: Entrena modelos
+      rationale: "Prepara el contenido en el borde para servirlo ya procesado."
     - id: a
       text: Sirve contenido (estático y a veces dinámico) desde nodos cercanos al
         usuario, reduciendo latencia y carga del origen
+      rationale: "Sirve contenido desde nodos cercanos al usuario, bajando latencia y descargando el origen."
     - id: c
       text: Sustituye la base de datos
+      rationale: "Guarda los datos consultados para no ir a la base en cada visita."
     - id: d
       text: Cifra contraseñas
+      rationale: "Protege las credenciales que viajan entre cliente y origen."
   correct: a
   explanation: "Una CDN cachea y sirve desde el edge geográficamente cercano:
     menos latencia para el usuario y menos tráfico al origen. Clave para assets
@@ -527,13 +607,17 @@
   options:
     - id: b
       text: Solo ventajas, sin coste
+      rationale: "Solo aporta: acelera las consultas sin contrapartida apreciable."
     - id: d
       text: Borra datos
+      rationale: "Reorganiza la tabla y descarta las filas que no encajan en el índice."
     - id: a
       text: Acelera las lecturas/búsquedas por esa columna, pero ralentiza algo las
         escrituras y ocupa más espacio
+      rationale: "Acelera las búsquedas por esa columna, pero ralentiza las escrituras y ocupa más espacio."
     - id: c
       text: Hace las lecturas más lentas
+      rationale: "Hace las lecturas más lentas al obligar a recorrer una estructura más."
   correct: a
   explanation: Un índice es una estructura extra que hay que mantener en cada
     insert/update/delete; acelera búsquedas/orden por esa clave a cambio de
@@ -551,13 +635,17 @@
   options:
     - id: c
       text: Nunca
+      rationale: "Nunca: lo relacional cubre cualquier caso con el diseño adecuado."
     - id: a
       text: Cuando priorizas escala horizontal y un esquema flexible sobre
         transacciones/JOINs complejos y garantías ACID fuertes
+      rationale: "Cuando pesa más escalar en horizontal y tener esquema flexible que las uniones complejas y las garantías transaccionales."
     - id: d
       text: Solo para imágenes
+      rationale: "Solo para guardar ficheros y contenido binario."
     - id: b
       text: Siempre, NoSQL es superior
+      rationale: "Siempre: escala mejor y no obliga a decidir el esquema por adelantado."
   correct: a
   explanation: NoSQL (documentos, clave-valor, columnar) brilla en escala,
     flexibilidad de esquema y ciertos patrones de acceso; las relacionales ganan
@@ -575,13 +663,17 @@
   options:
     - id: d
       text: No se usa BD
+      rationale: "No hay base de datos: la caché es la fuente de la verdad."
     - id: a
       text: La app mira la caché; si falla (miss), lee de la BD, guarda en caché y
         responde
+      rationale: "La aplicación mira la caché; si no está, lee de la base, guarda y responde."
     - id: b
       text: Siempre lee de la BD
+      rationale: "Siempre se lee de la base y la caché guarda una copia por si acaso."
     - id: c
       text: La caché escribe sola en la BD
+      rationale: "La caché escribe en la base cuando el valor caduca."
   correct: a
   explanation: "Cache-aside (lazy loading): la aplicación gestiona la caché; en un
     miss va a la BD y rellena la caché para próximas lecturas. Requiere una
@@ -599,13 +691,17 @@
   options:
     - id: c
       text: Bajar el TTL a cero
+      rationale: "Sin tiempo de vida, la clave se recalcula siempre y no hay avalancha."
     - id: b
       text: Quitar la caché
+      rationale: "Sin caché de por medio, la carga se reparte de forma constante."
     - id: a
       text: Un lock/single-flight para que solo una regenere el valor, más expiración
         con jitter y/o refresco anticipado (stale-while-revalidate)
+      rationale: "Que solo una regenere el valor, con caducidad repartida y refresco anticipado sirviendo lo viejo mientras tanto."
     - id: d
       text: Añadir más claves
+      rationale: "Repartir el valor en varias claves para que no caduquen a la vez."
   correct: a
   explanation: El stampede ocurre cuando expira una clave caliente y todas las
     peticiones recalculan a la vez. Se ataca con single-flight (una sola
@@ -624,13 +720,17 @@
   options:
     - id: b
       text: Para reintentar más rápido siempre
+      rationale: "Para volver a intentarlo cuanto antes y no perder la operación."
     - id: d
       text: No aporta nada
+      rationale: "Es una recomendación de estilo sin efecto medible."
     - id: c
       text: Para cifrar la petición
+      rationale: "Para que cada reintento viaje protegido frente a interceptaciones."
     - id: a
       text: El backoff evita martillear el servicio y el jitter (aleatoriedad)
         desincroniza los reintentos para no crear picos coordinados
+      rationale: "La espera creciente evita machacar al servicio y la aleatoriedad desincroniza los reintentos."
   correct: a
   explanation: Reintentar de inmediato agrava la caída; el backoff exponencial
     espaciar los intentos, y el jitter evita que todos los clientes reintenten a
@@ -648,12 +748,16 @@
     - id: a
       text: Tras muchos fallos, 'abre' el circuito y falla rápido sin llamar al
         servicio caído, dándole tiempo a recuperarse
+      rationale: "Tras muchos fallos abre el circuito y falla rápido sin llamar, dando tiempo a recuperarse."
     - id: d
       text: Balancea carga
+      rationale: "Reparte las llamadas entre las instancias que siguen respondiendo."
     - id: c
       text: Cifra el tráfico
+      rationale: "Protege el tráfico entre servicios que no confían entre sí."
     - id: b
       text: Reintenta infinitamente
+      rationale: "Reintenta indefinidamente hasta que el servicio vuelva."
   correct: a
   explanation: El circuit breaker detecta un umbral de fallos y deja de reenviar
     peticiones al servicio dañado (falla rápido, evita agotar recursos y da
@@ -670,13 +774,17 @@
   options:
     - id: d
       text: Ordena alfabéticamente
+      rationale: "Mantiene las claves ordenadas para poder recorrerlas por rangos."
     - id: c
       text: Comprime datos
+      rationale: "Reduce el tamaño de las claves antes de repartirlas."
     - id: a
       text: Minimiza cuántas claves se remapean al añadir/quitar nodos (p. ej. en un
         cluster de caché), evitando un rehash masivo
+      rationale: "Minimiza cuántas claves cambian de nodo al añadir o quitar uno, evitando un recálculo masivo."
     - id: b
       text: Cifra las claves
+      rationale: "Protege las claves para que un nodo no pueda leer las de otro."
   correct: a
   explanation: Con hashing módulo-N, cambiar N remapea casi todas las claves. El
     consistent hashing coloca nodos y claves en un anillo, de modo que al
@@ -696,12 +804,16 @@
     - id: a
       text: Es estable y eficiente aunque se inserten/borren filas y en offsets
         grandes; offset se degrada y puede saltarse o repetir elementos
+      rationale: "Es estable y eficiente aunque se inserten o borren filas, y no se degrada al avanzar mucho."
     - id: c
       text: Son idénticas
+      rationale: "Son equivalentes y se elige por comodidad de la API."
     - id: b
       text: El cursor es siempre más lento
+      rationale: "Obliga a mantener estado en el servidor y por eso responde peor."
     - id: d
       text: Offset no existe
+      rationale: "La otra forma no está disponible en bases modernas."
   correct: a
   explanation: OFFSET grande obliga a la BD a recorrer y descartar muchas filas
     (lento) y, si los datos cambian, salta/duplica registros. El cursor (keyset,
@@ -719,13 +831,17 @@
   options:
     - id: b
       text: Polling cada minuto
+      rationale: "Preguntar cada cierto tiempo, que es lo más simple de implementar."
     - id: d
       text: FTP
+      rationale: "Un canal de transferencia pensado para flujos largos de datos."
     - id: a
       text: "Server-Sent Events (SSE): flujo unidireccional servidor→cliente sobre
         HTTP, simple; WebSocket sería para bidireccional"
+      rationale: "Eventos del servidor: flujo en un solo sentido sobre HTTP, simple; el canal bidireccional sería para otra cosa."
     - id: c
       text: Un cron job
+      rationale: "Una tarea programada que empuja los cambios acumulados."
   correct: a
   explanation: SSE da streaming unidireccional sencillo (ideal para streaming de
     tokens o notificaciones). WebSocket aporta bidireccionalidad (chat en vivo,
@@ -743,13 +859,17 @@
   options:
     - id: d
       text: Enviar cada mensaje una sola vez sin ack
+      rationale: "Enviar cada mensaje una sola vez y no esperar confirmación."
     - id: a
       text: Entrega 'at-least-once' + operaciones IDEMPOTENTES (o deduplicación por
         id), logrando un efecto 'exactly-once' a nivel de procesamiento
+      rationale: "Entrega al menos una vez más operaciones idempotentes o deduplicación por id: el efecto es de una sola vez."
     - id: b
       text: Confiar en que la red nunca duplica
+      rationale: "Confiar en que la red no duplica cuando se usa un transporte fiable."
     - id: c
       text: Reintentar hasta que no falle
+      rationale: "Reintentar hasta que la operación deje de fallar."
   correct: a
   explanation: Garantizar entrega exacta a través de una red poco fiable es
     inviable; se combina at-least-once (con reintentos/acks) con consumidores
@@ -768,13 +888,17 @@
   options:
     - id: c
       text: Guardar texto libre de eventos
+      rationale: "Guardar el detalle de cada evento con su texto para poder buscarlo."
     - id: a
       text: Seguir una petición a través de múltiples servicios (con spans y un trace
         id) para localizar dónde se va el tiempo o falla
+      rationale: "Seguir una petición a través de varios servicios para ver dónde se va el tiempo o dónde falla."
     - id: b
       text: Contar errores por minuto
+      rationale: "Contar cuántos errores se producen por unidad de tiempo."
     - id: d
       text: Cifrar los logs
+      rationale: "Proteger el detalle de los eventos que se guardan."
   correct: a
   explanation: Las métricas agregan (tasas, latencias), los logs registran eventos
     puntuales, y las trazas reconstruyen el recorrido de una petición entre
@@ -794,12 +918,16 @@
       text: SLI es la métrica medida (p. ej. % de peticiones <300ms), SLO el objetivo
         interno sobre ese SLI, y SLA el compromiso contractual con el cliente
         (con penalización)
+      rationale: "Uno es la métrica que se mide, otro el objetivo interno sobre ella y el tercero el compromiso con el cliente."
     - id: b
       text: Son sinónimos
+      rationale: "Son tres nombres para lo mismo según quién lo escriba."
     - id: d
       text: Solo aplican a bases de datos
+      rationale: "Solo tienen sentido al hablar de bases de datos y su disponibilidad."
     - id: c
       text: El SLA es una métrica y el SLI un contrato
+      rationale: "Es al revés: el contractual es la métrica y el interno el compromiso."
   correct: a
   explanation: SLI = indicador medido; SLO = objetivo que te pones sobre ese
     indicador; SLA = promesa externa (contractual) normalmente más laxa que el
@@ -818,12 +946,16 @@
       text: Canary manda a la nueva versión un pequeño % de tráfico y lo sube si va
         bien; blue-green cambia todo el tráfico de golpe entre dos entornos
         idénticos
+      rationale: "Uno manda a la versión nueva un porcentaje pequeño; el otro cambia todo el tráfico de golpe."
     - id: b
       text: Son lo mismo
+      rationale: "Son la misma estrategia con dos nombres según la herramienta."
     - id: c
       text: Canary no permite rollback
+      rationale: "Uno de los dos no permite volver atrás una vez empezado."
     - id: d
       text: Blue-green es gradual y canary instantáneo
+      rationale: "Es al revés: el gradual es el otro."
   correct: a
   explanation: Canary reduce riesgo exponiendo la nueva versión a una fracción
     creciente de usuarios (observando métricas); blue-green mantiene dos
@@ -842,14 +974,18 @@
   options:
     - id: c
       text: Cifrar la cola
+      rationale: "Proteger la cola para que solo el consumidor autorizado la lea."
     - id: d
       text: Duplicar mensajes
+      rationale: "Duplicar los mensajes para que ninguno se pierda si el consumidor cae."
     - id: b
       text: Aumentar la presión sobre el consumidor
+      rationale: "Forzar al consumidor a ir más rápido cuando la cola crece."
     - id: a
       text: Un mecanismo por el que un consumidor lento comunica/limita el ritmo del
         productor para no desbordarse (buffers, pausa, rechazo), evitando el
         colapso por acumulación
+      rationale: "Que un consumidor lento pueda limitar el ritmo del productor —pausando, rechazando o acumulando— para no desbordarse."
   correct: a
   explanation: Si el productor va más rápido que el consumidor, sin backpressure
     la memoria/cola crece hasta reventar. La contrapresión regula el flujo
@@ -867,13 +1003,17 @@
   options:
     - id: d
       text: Que no hay trade-offs
+      rationale: "Que con el diseño adecuado se pueden tener las tres propiedades a la vez."
     - id: b
       text: Que CAP estaba equivocado
+      rationale: "Que la formulación clásica se demostró incorrecta y hubo que sustituirla."
     - id: a
       text: Que incluso SIN partición (Else) hay un trade-off entre Latencia y
         Consistencia, no solo entre C y A durante una partición
+      rationale: "Que incluso sin partición hay que elegir entre latencia y consistencia, no solo durante el corte."
     - id: c
       text: Que la disponibilidad no importa
+      rationale: "Que la disponibilidad deja de ser una propiedad relevante en la práctica."
   correct: a
   explanation: "PACELC: si hay Partición (P) eliges entre Disponibilidad y
     Consistencia (como CAP); en caso contrario (E, Else) sigues eligiendo entre
@@ -894,12 +1034,16 @@
     - id: a
       text: Hot partition; se ataca eligiendo una shard key de mayor
         cardinalidad/uniforme (o compuesta) que reparta mejor la carga
+      rationale: "Partición caliente: se ataca con una clave de mayor cardinalidad o compuesta que reparta mejor."
     - id: b
       text: Es normal y no se toca
+      rationale: "Es lo esperable cuando el tráfico real está concentrado en un mercado."
     - id: d
       text: Overfitting
+      rationale: "Ajuste excesivo a la distribución de los datos con los que se diseñó."
     - id: c
       text: Data leakage
+      rationale: "Fuga de datos entre particiones, que concentra el tráfico en una."
   correct: a
   explanation: Una shard key con distribución desigual crea particiones calientes.
     Se rediseña la clave hacia una más uniforme (hash, clave compuesta, o
@@ -917,14 +1061,18 @@
   options:
     - id: c
       text: Solo si no hay presupuesto
+      rationale: "Cuando no hay presupuesto para pagar las llamadas al modelo."
     - id: a
       text: "Cuando la tarea es determinista y bien definida (validar un formato,
         calcular, aplicar una regla): un LLM añade coste, latencia y
         variabilidad innecesarios"
+      rationale: "Cuando la tarea es determinista y está bien definida: el modelo solo añade coste, latencia y variabilidad."
     - id: d
       text: Cuando la tarea es creativa
+      rationale: "Cuando la tarea es creativa y la salida no se puede comprobar."
     - id: b
       text: Nunca, siempre conviene un LLM
+      rationale: "Nunca: el modelo resuelve también lo determinista con menos código."
   correct: a
   explanation: Un LLM aporta donde hay ambigüedad/lenguaje natural; para reglas
     deterministas (regex, validación, cálculo) el código normal es más barato,
@@ -941,13 +1089,17 @@
   options:
     - id: c
       text: No medir nada
+      rationale: "Construir primero y decidir después qué merece la pena medir."
     - id: b
       text: Desplegar y ver qué pasa
+      rationale: "Desplegar pronto y aprender de lo que pase con usuarios reales."
     - id: a
       text: Definir primero un conjunto de evaluación y métricas de 'correcto', e
         iterar prompt/modelo midiendo contra él en vez de por impresión
+      rationale: "Definir primero el conjunto de evaluación y qué es correcto, e iterar midiendo contra él en vez de por impresión."
     - id: d
       text: Escribir solo tests unitarios del código
+      rationale: "Cubrir el código con pruebas unitarias, que es lo que evita regresiones."
   correct: a
   explanation: "Igual que TDD guía el código, el eval-driven guía la IA: un
     dataset de evaluación con criterios objetivos permite iterar sin regresiones
@@ -965,13 +1117,17 @@
   options:
     - id: c
       text: Es lo mismo que un CDN
+      rationale: "Es la misma idea que servir contenido desde nodos cercanos al usuario."
     - id: d
       text: No existe
+      rationale: "No existe como tal: solo se puede cachear por coincidencia exacta."
     - id: b
       text: Cachea solo strings exactos
+      rationale: "Guarda la respuesta indexada por el texto exacto de la consulta."
     - id: a
       text: Cachea por SIMILITUD de significado de la consulta (vía embeddings),
         sirviendo respuestas a preguntas parecidas, no solo idénticas
+      rationale: "Guarda por parecido de significado, así que sirve también preguntas parecidas y no solo idénticas."
   correct: a
   explanation: Una caché exacta solo acierta con la misma clave literal; la
     semántica embebe la consulta y sirve la respuesta si hay una consulta previa
@@ -990,14 +1146,18 @@
   options:
     - id: b
       text: Para gastar más
+      rationale: "Tener un segundo proveedor contratado asegura capacidad en los picos."
     - id: c
       text: Porque los LLM nunca fallan
+      rationale: "Los proveedores grandes no fallan, así que es una precaución teórica."
     - id: a
       text: Si el proveedor falla, va lento o supera un límite, se puede degradar
         (modelo alterno, respuesta cacheada o camino sin IA) sin tirar el
         producto
+      rationale: "Si el proveedor falla o va lento, se degrada a otro modelo, a una respuesta cacheada o a un camino sin IA."
     - id: d
       text: Para desactivar los logs
+      rationale: "Permite apagar el registro detallado cuando el sistema va justo."
   correct: a
   explanation: Los proveedores de LLM tienen caídas, límites de rate y picos de
     latencia. Un fallback (otro modelo, cache, o una respuesta reducida)
@@ -1014,13 +1174,17 @@
   options:
     - id: b
       text: Para ocupar más disco
+      rationale: "Guardar cada versión ocupa espacio y da trazabilidad de quién tocó qué."
     - id: c
       text: Porque los prompts no cambian nunca
+      rationale: "Es una formalidad: el prompt se escribe una vez y se queda así."
     - id: d
       text: Para cifrarlos
+      rationale: "Mantenerlos junto al código permite protegerlos como el resto del repositorio."
     - id: a
       text: Para reproducir el comportamiento pasado, comparar versiones con evals y
         hacer rollback; el prompt es parte del artefacto que define la salida
+      rationale: "Para reproducir el comportamiento pasado, comparar versiones con evaluaciones y poder volver atrás."
   correct: a
   explanation: Un cambio de prompt cambia el comportamiento tanto como un cambio
     de código. Versionarlo (y ligarlo a sus evals) permite reproducir, auditar,
@@ -1038,13 +1202,17 @@
   options:
     - id: b
       text: Mantener la request HTTP abierta 40s
+      rationale: "Mantener la conexión abierta hasta que termine, que es lo más simple."
     - id: a
       text: "Procesarla de forma asíncrona: encolar el trabajo, responder 202 con un
         id, y notificar por webhook/polling/stream cuando esté lista"
+      rationale: "Procesarlo en segundo plano: encolar, responder con un identificador y avisar cuando esté listo."
     - id: c
       text: Subir el timeout a 5 minutos
+      rationale: "Ampliar el tiempo de espera para que la petición no se corte."
     - id: d
       text: Reintentar la request cada segundo
+      rationale: "Reintentar la petición hasta que una de ellas llegue a completarse."
   correct: a
   explanation: "Bloquear una request 40s agota conexiones y da mala UX/timeouts.
     Se desacopla: encolar el trabajo (worker), devolver de inmediato un id, y
@@ -1063,14 +1231,18 @@
   options:
     - id: c
       text: Quitar toda la observabilidad
+      rationale: "Quitar la observabilidad, que es lo que más carga añade por petición."
     - id: b
       text: Usar siempre el modelo más grande para todo
+      rationale: "Usar el modelo más capaz siempre, para no tener que clasificar la dificultad."
     - id: d
       text: Un único prompt gigante para todo
+      rationale: "Un único prompt que cubra todos los casos y evite mantener varios."
     - id: a
       text: Routing por dificultad (modelo pequeño para lo fácil), caché
         (exacta/semántica), batching donde aplique, límites/cuotas y un
         presupuesto de tokens monitorizado
+      rationale: "Enrutar por dificultad, cachear, agrupar donde se pueda, poner cuotas y vigilar el presupuesto de tokens."
   correct: a
   explanation: "A escala, el coste/latencia se gestiona con varias palancas a la
     vez: enrutar por dificultad, cachear, batching, imponer cuotas/rate limits y
@@ -1088,13 +1260,17 @@
   options:
     - id: d
       text: Desactivar el cifrado
+      rationale: "Quitar el cifrado en tránsito para reducir la latencia de cada llamada."
     - id: c
       text: Mandar las claves de API en el prompt
+      rationale: "Incluir las credenciales en el prompt para que el modelo pueda usarlas."
     - id: b
       text: Enviar todo tal cual, da igual
+      rationale: "Enviar el contenido tal cual: el proveedor ya se compromete a no usarlo."
     - id: a
       text: Minimizar/enmascarar PII y secretos antes de enviarlos al modelo, y
         respetar las políticas de retención/uso de datos del proveedor
+      rationale: "Minimizar o enmascarar datos personales y secretos antes de enviarlos, y respetar la política de retención del proveedor."
   correct: a
   explanation: Lo que mandas a un proveedor externo sale de tu perímetro. Se
     minimiza y enmascara PII/secretos, se revisan las políticas de retención y,
@@ -1115,12 +1291,16 @@
       text: Definir qué problema del usuario resuelve y cómo medirás su valor, y
         validar con un MVP barato (prompt sobre un modelo existente) antes de
         fine-tuning o infra pesada
+      rationale: "Definir qué problema resuelve y cómo se medirá, y validarlo con un producto mínimo antes de infraestructura pesada."
     - id: c
       text: Montar un cluster de GPUs primero
+      rationale: "Preparar la infraestructura de cálculo, que es lo que más tarda en estar lista."
     - id: b
       text: Entrenar un modelo propio desde cero ya
+      rationale: "Entrenar un modelo propio para que el resultado sea distintivo."
     - id: d
       text: Añadirlo porque está de moda
+      rationale: "Lanzarlo porque es lo que el mercado espera ahora mismo."
   correct: a
   explanation: "Product sense: empezar por el problema y la métrica de valor, y
     validar con el MVP más barato (prompt + modelo existente). Fine-tuning o
@@ -1138,13 +1318,17 @@
   options:
     - id: c
       text: Porque lo exige la ley
+      rationale: "Porque la normativa exige declarar cómo se mide el sistema."
     - id: d
       text: No hace falta medir
+      rationale: "No hace falta: el uso ya indica por sí solo si la función aporta."
     - id: b
       text: Para tener más dashboards
+      rationale: "Para tener el panel completo con todas las cifras del producto."
     - id: a
       text: Para saber si aporta valor real al usuario/negocio y decidir con datos si
         iterar, mantener o retirar, en vez de por percepción
+      rationale: "Para saber si aporta valor real y decidir con datos si iterar, mantener o retirar."
   correct: a
   explanation: Sin una métrica que capture el valor (adopción, tiempo ahorrado,
     conversión, satisfacción), no puedes saber si la feature funciona ni
@@ -1168,12 +1352,16 @@
     - id: a
       text: "Una cola entre la API y unos workers: la API encola y responde rápido;
         los workers procesan a su ritmo (con backpressure)"
+      rationale: "Una cola entre la API y unos trabajadores: la API encola y responde, y ellos procesan a su ritmo."
     - id: b
       text: Más CSS
+      rationale: "Aligerar la parte visual para que el navegador pida menos."
     - id: c
       text: Un segundo dominio
+      rationale: "Repartir el tráfico en un segundo dominio para dividir la carga."
     - id: d
       text: Quitar la API
+      rationale: "Quitar la capa intermedia y llamar directamente al procesamiento."
   correct: a
   explanation: "Una cola de mensajes desacopla recepción de procesamiento: la API
     encola y contesta al instante, y un pool de workers consume a su ritmo,
@@ -1196,12 +1384,16 @@
     - id: a
       text: "Un guardrail: validar/estructurar la salida (schema, políticas) y reparar
         o rechazar si no cumple, antes de entregarla"
+      rationale: "Una comprobación que valide o estructure la salida y la repare o rechace si no cumple."
     - id: c
       text: Borrar la entrada
+      rationale: "Descartar la entrada del usuario una vez generada la respuesta."
     - id: d
       text: Subir la temperature
+      rationale: "Ajustar la aleatoriedad antes de entregar el resultado."
     - id: b
       text: Reentrenar el modelo
+      rationale: "Ajustar el modelo con lo aprendido en esta interacción."
   correct: a
   explanation: "Entre la salida cruda del modelo y el usuario/sistema aguas abajo
     va un guardrail determinista: valida contra el schema y las políticas, y
@@ -1225,13 +1417,17 @@
   options:
     - id: c
       text: No tiene ningún problema
+      rationale: "Ninguno: reintenta un número acotado de veces y espera entre intentos."
     - id: a
       text: "Espera fija sin backoff exponencial ni jitter: bajo un fallo masivo todos
         los clientes reintentan a la vez y sincronizados, agravando la caída"
+      rationale: "Espera fija sin crecimiento ni aleatoriedad: ante un fallo masivo, todos reintentan a la vez y agravan la caída."
     - id: d
       text: Falta cifrar la llamada
+      rationale: "Falta proteger la llamada, que en el reintento viaja sin credenciales."
     - id: b
       text: Reintenta demasiado despacio
+      rationale: "Espera demasiado entre intentos y la operación tarda de más en recuperarse."
   correct: a
   explanation: Una espera fija no da tiempo creciente de recuperación y, peor,
     sincroniza los reintentos de todos los clientes (efecto manada). Se corrige
@@ -1250,13 +1446,17 @@
   options:
     - id: d
       text: Quitar los logs para ir más rápido
+      rationale: "Quitar el registro detallado para que la acción se ejecute cuanto antes."
     - id: b
       text: Dejar que el LLM ejecute todo automáticamente
+      rationale: "Dejar que ejecute directamente: para eso se le han dado las herramientas."
     - id: c
       text: Subir la temperature para más creatividad
+      rationale: "Más margen de exploración para que encuentre la mejor forma de resolverlo."
     - id: a
       text: "Human-in-the-loop: el LLM propone y una persona aprueba antes de ejecutar
         las acciones críticas (con guardrails y auditoría)"
+      rationale: "Que el modelo proponga y una persona apruebe las acciones críticas, con comprobaciones y auditoría."
   correct: a
   explanation: "En decisiones de alto impacto o irreversibles, el coste de un
     error del modelo supera el de la revisión: el LLM propone y un humano
