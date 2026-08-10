@@ -376,22 +376,26 @@ describe("extractJdProfile: nivel por años de experiencia", () => {
   });
 });
 
+// Muestra realista por tramo: con una o dos preguntas por dificultad, el acierto
+// se encoge hacia el azar y ningún nivel se concede (ver PHANTOM en readiness.ts).
+function tramoLlm(prefijo: string, difficulty: Diff, n = 10): Question[] {
+  return Array.from({ length: n }, (_, i) => q(`${prefijo}${i}`, "llm", difficulty));
+}
+const BANCO_LLM = [
+  ...tramoLlm("e", "easy"),
+  ...tramoLlm("m", "medium"),
+  ...tramoLlm("h", "hard"),
+];
+
 describe("computeJdReadiness", () => {
-  const bank = [
-    q("e1", "llm", "easy"),
-    q("e2", "llm", "easy"),
-    q("m1", "llm", "medium"),
-    q("m2", "llm", "medium"),
-    q("h1", "llm", "hard"),
-    q("h2", "llm", "hard"),
-  ];
+  const bank = BANCO_LLM;
 
   it("da el nivel para el rol ad-hoc de la oferta con la misma vara de siempre", () => {
     const p = extractJdProfile("Senior LLM Engineer\nLLM, RAG, prompt.", KEYWORDS, LEVELS);
     const r = computeJdReadiness(bank.map((x) => ans(x.id, "a")), bank, CONFIG, p)!;
 
     expect(r.levelId).toBe("senior");
-    expect(r.answered).toBe(6);
+    expect(r.answered).toBe(30);
     expect(r.byDimension.map((d) => d.dimension)).toEqual(["llm"]);
   });
 
@@ -400,7 +404,7 @@ describe("computeJdReadiness", () => {
     const p = extractJdProfile("Senior LLM Engineer\nLLM, RAG, prompt.", KEYWORDS, LEVELS);
     const r = computeJdReadiness(mixto.map((x) => ans(x.id, "a")), mixto, CONFIG, p)!;
 
-    expect(r.answered).toBe(6); // la pregunta de front no entra: la oferta no lo pide
+    expect(r.answered).toBe(30); // la pregunta de front no entra: la oferta no lo pide
   });
 
   it("devuelve null cuando la oferta no pide nada medible", () => {
@@ -411,7 +415,10 @@ describe("computeJdReadiness", () => {
 });
 
 describe("jdVerdict", () => {
-  const bank = [q("e1", "llm", "easy"), q("m1", "llm", "medium"), q("h1", "llm", "hard")];
+  const bank = BANCO_LLM;
+  /** Todo el banco acertado salvo el tramo que se diga. */
+  const todoSalvo = (falla?: Diff): AnsweredQuestion[] =>
+    bank.map((x) => ans(x.id, x.difficulty === falla ? "b" : "a"));
 
   function verdictFor(jd: string, answers: AnsweredQuestion[]) {
     const p = extractJdProfile(jd, KEYWORDS, LEVELS);
@@ -420,7 +427,7 @@ describe("jdVerdict", () => {
   }
 
   it("dice que llegas cuando alcanzas el nivel que pide la oferta", () => {
-    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", todoSalvo());
 
     expect(v.targetLevelId).toBe("junior");
     expect(v.meetsTarget).toBe(true);
@@ -429,7 +436,7 @@ describe("jdVerdict", () => {
 
   it("cuenta los escalones que faltan cuando la oferta pide más de lo que demuestras", () => {
     // Falla lo difícil: no hay senior.
-    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "b")]);
+    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", todoSalvo("hard"));
 
     expect(v.targetLevelId).toBe("senior");
     expect(v.meetsTarget).toBe(false);
@@ -437,14 +444,14 @@ describe("jdVerdict", () => {
   });
 
   it("superar el nivel pedido también cuenta como llegar", () => {
-    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("Junior LLM Engineer\nLLM, RAG y prompt.", todoSalvo());
 
     expect(v.achievedLevelId).toBe("senior");
     expect(v.meetsTarget).toBe(true);
   });
 
   it("sin nivel declarado en la oferta no hay comparación (null, no un false engañoso)", () => {
-    const v = verdictFor("LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a"), ans("m1", "a"), ans("h1", "a")]);
+    const v = verdictFor("LLM Engineer\nLLM, RAG y prompt.", todoSalvo());
 
     expect(v.meetsTarget).toBeNull();
     expect(v.levelsShort).toBeNull();
@@ -456,7 +463,7 @@ describe("jdVerdict", () => {
     const cfg: ReadinessConfig = { ...CONFIG, levels };
 
     const p = extractJdProfile("Staff LLM Engineer\nSolo LLM, RAG y prompt.", KEYWORDS, levels);
-    const r = computeJdReadiness([ans("e1", "a")], bank, cfg, p)!;
+    const r = computeJdReadiness(todoSalvo(), bank, cfg, p)!;
     const v = jdVerdict(r, p, levels);
 
     expect(r.secondary).toEqual([]); // la oferta no pide ninguna secundaria con peso
@@ -465,7 +472,7 @@ describe("jdVerdict", () => {
   });
 
   it("sin niveles que exijan amplitud no hay nada que avisar", () => {
-    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", [ans("e1", "a")]);
+    const v = verdictFor("Senior LLM Engineer\nLLM, RAG y prompt.", todoSalvo());
 
     expect(v.capReason).toBeNull(); // LEVELS no declara breadth en ningún nivel
   });

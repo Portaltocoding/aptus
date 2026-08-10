@@ -150,12 +150,66 @@ export function renderReadiness(roles: RoleReadiness[]): string {
     })
     .join("\n");
 
+  const porque = roles
+    .filter((r) => r.answered > 0 && r.blockers.length > 0)
+    .map((r) => `  ${r.label} → ${blockerReason(r)}`)
+    .join("\n");
+
   return (
     "Readiness por rol (lectura orientativa, anclada a tu acierto por dificultad):\n" +
     table.toString() +
     "\n\nDetalle por rol y dimensión núcleo:\n" +
-    detalle
+    detalle +
+    (porque === "" ? "" : "\n\nQué falta para el siguiente nivel:\n" + porque)
   );
+}
+
+const TIER_LABEL: Record<string, string> = {
+  easy: "en las fáciles",
+  medium: "en las medias",
+  hard: "en las difíciles",
+  experto: "en las de nivel experto",
+};
+
+/** La misma dificultad en singular: "no salió ninguna pregunta difícil". */
+const TIER_LABEL_SG: Record<string, string> = {
+  easy: "fácil",
+  medium: "media",
+  hard: "difícil",
+  experto: "de nivel experto",
+};
+
+/**
+ * Por qué no se ha concedido el siguiente nivel, en una frase.
+ *
+ * Es la pieza que faltaba: un veredicto que solo dice "Aún no junior-ready" vale
+ * lo mismo para quien lo falla todo que para quien acertó las dos únicas
+ * preguntas fáciles que le tocaron, y quien lo lee no sabe si tiene que estudiar
+ * o simplemente responder más. Los dos casos se nombran distinto.
+ */
+export function blockerReason(r: RoleReadiness): string {
+  const meta = r.nextLevelLabel ?? "el siguiente nivel";
+  const partes = r.blockers.map((b) => {
+    const tramo = b.difficulty === null ? "" : ` ${TIER_LABEL[b.difficulty] ?? b.difficulty}`;
+    const pide = `${Math.round(b.required * 100)}%`;
+    if (b.kind === "amplitud") {
+      return b.answered === 0
+        ? `falta amplitud: no has respondido nada de las dimensiones secundarias (se pide ${pide})`
+        : `amplitud: una dimensión secundaria va al ${Math.round(b.accuracy * 100)}% y se pide ${pide}`;
+    }
+    if (b.answered === 0) {
+      const sg = b.difficulty === null ? "" : ` ${TIER_LABEL_SG[b.difficulty] ?? b.difficulty}`;
+      return `no salió ninguna pregunta${sg} (se pide ${pide} de acierto)`;
+    }
+    if (b.kind === "muestra") {
+      return (
+        `vas al ${Math.round(b.accuracy * 100)}%${tramo}, que llega al ${pide}, pero con ` +
+        `${b.answered} pregunta${b.answered === 1 ? "" : "s"} no basta para afirmarlo`
+      );
+    }
+    return `${Math.round(b.accuracy * 100)}%${tramo} (${b.correct}/${b.answered}) y se pide ${pide}`;
+  });
+  return `${meta}: ${partes.join("; ")}.`;
 }
 
 /**
@@ -178,6 +232,9 @@ export function renderSummary(roles: RoleReadiness[], gaps: Gap[], levelOrder: s
   if (ordered.length > 0) {
     const top = ordered[0]!;
     lines.push(`  • Tu readiness más alto: ${top.label} — ${levelColor(top.levelId)(top.levelLabel)}.`);
+    // Un nivel sin el motivo de por qué no es el siguiente no se puede accionar:
+    // no distingue "estudia" de "responde más preguntas".
+    if (top.blockers.length > 0) lines.push(`  • Para ${blockerReason(top)}`);
     const ranking = ordered.map((r) => `${r.label} (${r.levelLabel})`).join("  >  ");
     lines.push(`  • Ranking (de más a menos listo): ${ranking}`);
   }

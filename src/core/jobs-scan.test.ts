@@ -24,7 +24,12 @@ function q(id: string, dimension: string, difficulty: "easy" | "medium" | "hard"
   };
 }
 
-const BANK = [q("e1", "llm", "easy"), q("m1", "llm", "medium"), q("h1", "llm", "hard")];
+// 10 por tramo: con una sola pregunta por dificultad el acierto se encoge hacia
+// el azar y no se concede ningún nivel (ver PHANTOM en readiness.ts), así que
+// estas ofertas dejarían de tener contra qué compararse.
+const BANK = (["easy", "medium", "hard"] as const).flatMap((d) =>
+  Array.from({ length: 10 }, (_, i) => q(`${d}${i}`, "llm", d)),
+);
 const TODO_BIEN: AnsweredQuestion[] = BANK.map((x) => ({ questionId: x.id, selectedOptionId: "a" }));
 
 const CONFIG: ReadinessConfig = {

@@ -17,7 +17,15 @@
 version: "1.0.0"
 
 # Umbral mínimo de acierto por tramo de dificultad para considerarse "listo" a cada
-# nivel. Un tramo sin preguntas en la sesión (N=0) no se evalúa (se omite su requisito).
+# nivel.
+#
+# Dos reglas que NO están aquí sino en el motor, y conviene saber al tocar estos números:
+#   - Un tramo que un nivel exige y del que no salió NINGUNA pregunta bloquea ese
+#     nivel. No se concede lo que no se ha medido.
+#   - El acierto se compara encogido hacia el azar según la muestra:
+#     (aciertos + 0,25) / (respondidas + 1). Así una sola pregunta acertada no vale
+#     un 100%. El porcentaje que se enseña sigue siendo el crudo.
+#     Orden de magnitud: 2/2 cuenta 0,75 · 5/5 cuenta 0,88 · 10/10 cuenta 0,93.
 levels:
   - id: junior
     label: "Junior-ready"
