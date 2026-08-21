@@ -11,7 +11,7 @@ import { computeJdGaps, computeJdReadiness, extractJdProfile, jdVerdict } from "
 import { attachMaterial, briefFileName, briefFromJd, renderBrief } from "../../core/brief.js";
 import { ingestDirectory } from "../../content/ingest.js";
 import { renderJdGaps, renderJdProfile, renderJdReadiness } from "../render.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 /**
  * Subcomando `jd <fichero>`: evalúa tu readiness contra una oferta CONCRETA.
@@ -25,18 +25,23 @@ import { DEFAULT_PACK } from "./start.js";
  * No sale a la red y no escribe nada: es puramente lectura sobre lo que ya tienes.
  */
 export interface JdOptions {
-  pack: string;
+  /** Con qué pack evaluar. Sin esto se usa el tuyo, si solo tienes uno. */
+  pack?: string;
   /** Emitir un brief de pack a partir de la oferta en vez de evaluar tu readiness. */
   brief?: boolean;
   /** Carpeta de material propio con la que cruzar el brief (tu vault, apuntes...). */
   memoria?: string;
 }
 
-export async function jdCommand(
-  jdPath: string,
-  opts: JdOptions = { pack: DEFAULT_PACK },
-): Promise<void> {
-  const packName = opts.pack;
+export async function jdCommand(jdPath: string, opts: JdOptions = {}): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(opts.pack);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   const packDir = packDirForRead(packName);
   if (packDir === null) {
     console.error(`\n✗ No existe el pack '${packName}'.`);

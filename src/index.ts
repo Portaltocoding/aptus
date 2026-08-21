@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { Command } from "commander";
-import { startCommand, DEFAULT_PACK } from "./cli/commands/start.js";
+import { startCommand } from "./cli/commands/start.js";
 import { resumeCommand } from "./cli/commands/resume.js";
 import { historyCommand } from "./cli/commands/history.js";
 import { packsCommand } from "./cli/commands/packs.js";
@@ -13,6 +13,7 @@ import { reviewCommand } from "./cli/commands/review.js";
 import { jobsCommand } from "./cli/commands/jobs.js";
 import { ingestCommand } from "./cli/commands/ingest.js";
 import { draftCommand, promoteCommand } from "./cli/commands/draft.js";
+import { temaCommand } from "./cli/commands/tema.js";
 import { mainMenu } from "./cli/menu.js";
 
 // La versión se lee en ejecución del package.json del propio paquete. Un nivel
@@ -46,7 +47,7 @@ program
       yes: boolean;
     }) => {
       await startCommand({
-        pack: opts.yes ? (opts.pack ?? DEFAULT_PACK) : opts.pack,
+        pack: opts.pack,
         dims: opts.dims,
         difficulty: opts.difficulty,
         questions: opts.questions,
@@ -68,7 +69,7 @@ program
 program
   .command("history")
   .description("Muestra el historial de sesiones de un pack y la evolución entre ellas")
-  .option("-p, --pack <name>", "pack cuyo historial mostrar", DEFAULT_PACK)
+  .option("-p, --pack <name>", "pack cuyo historial mostrar")
   .option("--delete", "borra una sesión concreta (la eliges y la confirmas)", false)
   .option("--review", "repasa los fallos de una sesión pasada, con su explicación", false)
   .action(async (opts: { pack: string; delete: boolean; review: boolean }) => {
@@ -99,7 +100,7 @@ program
 program
   .command("review")
   .description("Repasa (repetición espaciada) lo que peor llevas — estudio, no medición")
-  .option("-p, --pack <name>", "pack que repasar", DEFAULT_PACK)
+  .option("-p, --pack <name>", "pack que repasar")
   .option("-d, --dims <lista>", "dimensiones separadas por comas (por defecto, pregunta)")
   .option("-y, --yes", "no preguntar nada: repasa todo lo que toque", false)
   .action(async (opts: { pack: string; dims?: string; yes: boolean }) => {
@@ -109,7 +110,7 @@ program
 program
   .command("jd <fichero>")
   .description("Evalúa tu readiness contra una oferta concreta (pega su texto en un fichero)")
-  .option("-p, --pack <name>", "pack con el que evaluar la oferta", DEFAULT_PACK)
+  .option("-p, --pack <name>", "pack con el que evaluar la oferta")
   .option("-b, --brief", "en vez de evaluarte, saca el brief del pack que haría falta", false)
   .option("-m, --memoria <carpeta>", "cruza el brief con tu material propio (vault, apuntes)")
   .action(async (fichero: string, opts: { pack: string; brief: boolean; memoria?: string }) => {
@@ -123,9 +124,27 @@ program
   .command("ingest <carpeta>")
   .description("Ingiere una carpeta de material y saca el brief de un pack nuevo")
   .option("-p, --pack <name>", "pack destino (por defecto, el nombre de la carpeta)")
-  .option("--no-copy", "no copiar el material a packs/<tema>/sources/")
+  .option("--no-copy", "no copiar el material a sources/ dentro del pack")
   .action(async (carpeta: string, opts: { pack?: string; copy: boolean }) => {
     await ingestCommand(carpeta, { pack: opts.pack, copy: opts.copy });
+  });
+
+// `tema` es la línea recta de "no tengo nada" a "tengo un pack": investiga o lee
+// tu material, parte el tema en dimensiones y llama a `draft` por cada una. Sale a
+// la red, y como todo lo que sale a la red, deja el resultado en drafts/.
+program
+  .command("tema <nombre>")
+  .description("De un tema a un pack: investiga, lo parte en dimensiones y escribe los borradores")
+  .option("-m, --material <carpeta>", "carpeta de material tuyo (sin esto, lo investiga en la web)")
+  .option("-d, --dims <lista>", "dimensiones separadas por comas (sin esto, las propone el modelo)")
+  .option(
+    "-n, --count <n>",
+    "cuántas preguntas por dimensión",
+    (v: string) => Number.parseInt(v, 10),
+    12,
+  )
+  .action(async (nombre: string, opts: { material?: string; dims?: string; count: number }) => {
+    await temaCommand(nombre, { material: opts.material, dims: opts.dims, count: opts.count });
   });
 
 // `draft` es lo ÚNICO que sale a la red y necesita credenciales. Escribe en
@@ -154,7 +173,7 @@ program
 program
   .command("jobs")
   .description("Evalúa en bloque las ofertas ya escaneadas por jobhunt contra tu readiness")
-  .option("-p, --pack <name>", "pack con el que evaluarlas", DEFAULT_PACK)
+  .option("-p, --pack <name>", "pack con el que evaluarlas")
   .option("-l, --limit <n>", "cuántas mostrar", (v: string) => Number.parseInt(v, 10), 20)
   .action(async (opts: { pack: string; limit: number }) => {
     await jobsCommand(opts.pack, opts.limit);

@@ -7,9 +7,7 @@
     "aptus": "dist/index.js"
   },
   "files": [
-    "dist",
-    "packs",
-    "!packs/**/*.test.ts"
+    "dist"
   ],
   "scripts": {
     "start": "tsx src/index.ts",

@@ -4,11 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadReadiness } from "./readiness.js";
 
-const REAL_READINESS = new URL("../../packs/ai-ml-readiness/readiness.yaml", import.meta.url).pathname;
+// El pack de test, no un pack real: aptus no versiona contenido, así que lo que
+// se protege aquí es la FORMA de una config de readiness, no unos números concretos.
+const READINESS = new URL("../../test/fixtures/packs/pack-completo/readiness.yaml", import.meta.url)
+  .pathname;
 
 describe("loadReadiness", () => {
-  it("carga la config real: niveles, roles y plan de estudio", () => {
-    const cfg = loadReadiness(REAL_READINESS);
+  it("carga la config: niveles, roles y plan de estudio", () => {
+    const cfg = loadReadiness(READINESS);
 
     expect(cfg.levels.map((l) => l.id)).toEqual(["junior", "mid", "senior", "staff"]);
     expect(cfg.roles.length).toBeGreaterThanOrEqual(5);
@@ -26,7 +29,7 @@ describe("loadReadiness", () => {
   });
 
   it("declara keywords de mercado para cada dimensión núcleo (Phase 6)", () => {
-    const cfg = loadReadiness(REAL_READINESS);
+    const cfg = loadReadiness(READINESS);
     expect(cfg.market_keywords).toBeDefined();
     const dims = new Set(cfg.roles.flatMap((r) => r.core));
     for (const dim of dims) {
@@ -37,7 +40,7 @@ describe("loadReadiness", () => {
   });
 
   it("los umbrales suben (o se mantienen) de un nivel al siguiente, en cada tramo", () => {
-    const cfg = loadReadiness(REAL_READINESS);
+    const cfg = loadReadiness(READINESS);
     for (const d of ["easy", "medium", "hard", "experto"] as const) {
       for (let i = 1; i < cfg.levels.length; i++) {
         expect(
@@ -49,7 +52,7 @@ describe("loadReadiness", () => {
   });
 
   it("staff exige tramo experto y amplitud (breadth); los niveles previos no", () => {
-    const cfg = loadReadiness(REAL_READINESS);
+    const cfg = loadReadiness(READINESS);
     const staff = cfg.levels.find((l) => l.id === "staff")!;
     expect(staff.requires.experto).toBeGreaterThan(0);
     expect(staff.breadth).toBeGreaterThan(0);

@@ -3,14 +3,22 @@ import { join } from "node:path";
 import { loadHistory } from "../../content/history.js";
 import { ensureDir, historyPath as historyPathOf, packDataDir } from "../../content/paths.js";
 import { buildHtmlReport } from "../html-report.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 /**
  * Subcomando `report [tema]`: genera un informe HTML local y autocontenido con el
  * resultado de la última sesión y la evolución. Lee el historial aislado del pack
  * (data/<tema>/) y escribe data/<tema>/report.html. No sale a la red.
  */
-export async function reportCommand(packName: string = DEFAULT_PACK): Promise<void> {
+export async function reportCommand(pedido?: string): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(pedido);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   const historyPath = historyPathOf(packName);
   const outPath = join(packDataDir(packName), "report.html");
 

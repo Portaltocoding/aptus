@@ -8,7 +8,7 @@ import { loadJobs, jobsDbPath } from "../../content/jobhunt.js";
 import { measurements } from "../../core/evolution.js";
 import { scanJobs } from "../../core/jobs-scan.js";
 import { renderJobsScan } from "../render.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 const DEFAULT_LIMIT = 20;
 
@@ -20,7 +20,15 @@ const DEFAULT_LIMIT = 20;
  * evidencia (tu última sesión de medición), que es lo que las hace comparables
  * entre sí. Solo lectura: no escribe en jobhunt ni en el historial.
  */
-export async function jobsCommand(packName: string = DEFAULT_PACK, limit: number = DEFAULT_LIMIT): Promise<void> {
+export async function jobsCommand(pedido?: string, limit: number = DEFAULT_LIMIT): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(pedido);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   const packDir = packDirForRead(packName);
   if (packDir === null) {
     console.error(`\n✗ No existe el pack '${packName}'.`);

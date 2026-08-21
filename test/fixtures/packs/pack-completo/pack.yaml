@@ -1,0 +1,13 @@
+# Pack COMPLETO de test: pack.yaml + questions/ + readiness.yaml.
+#
+# Sustituye al pack real que antes vivía versionado en el repo. aptus no trae
+# contenido: los packs se generan (`aptus tema`) o se escriben, y viven en tu
+# directorio de packs. Los tests de integración necesitaban un pack de verdad
+# contra el que correr el camino completo, y ese es este — con vocabulario
+# inventado, para que ningún test dependa de un dominio concreto (ENG-04).
+name: pack-completo
+version: "1.0.0"
+dimensions:
+  - dimension-alpha
+  - dimension-beta
+  - dimension-gamma

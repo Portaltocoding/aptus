@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasApiCredentials, parseDraft } from "./draft.js";
+import { hasApiCredentials, parseDraft, parsePlan } from "./draft.js";
 
 describe("hasApiCredentials", () => {
   it("con API key hay con qué llamar", () => {
@@ -96,5 +96,57 @@ describe("parseDraft", () => {
     const { valid, rejected } = parseDraft(wrap([]));
     expect(valid).toEqual([]);
     expect(rejected).toEqual([]);
+  });
+});
+
+/**
+ * El plan de dimensiones que devuelve el modelo. Se valida igual de duro que las
+ * preguntas: un nombre de dimensión da nombre a un fichero y es la clave del
+ * readiness, así que no puede entrar tal cual venga.
+ */
+describe("parsePlan", () => {
+  const json = (dimensions: unknown): string => JSON.stringify({ dimensions });
+
+  it("normaliza los nombres a kebab-case", () => {
+    // El modelo devuelve a veces "Colas de Mensajes"; el pack necesita un nombre
+    // de fichero. Normalizar aquí evita que cada consumidor lo haga a su manera.
+    const plan = parsePlan(json([{ name: "Colas de Mensajes", foco: "Kafka y compañía." }]));
+
+    expect(plan).toEqual([{ name: "colas-de-mensajes", foco: "Kafka y compañía." }]);
+  });
+
+  it("descarta duplicados que aparecen al normalizar", () => {
+    const plan = parsePlan(
+      json([
+        { name: "Redes", foco: "uno" },
+        { name: "redes", foco: "dos" },
+      ]),
+    );
+
+    expect(plan).toHaveLength(1);
+    expect(plan[0]!.foco).toBe("uno"); // gana la primera, no la última
+  });
+
+  it("descarta nombres que no dan para un fichero", () => {
+    const plan = parsePlan(
+      json([
+        { name: "!!", foco: "ruido" },
+        { name: "consenso", foco: "Raft." },
+      ]),
+    );
+
+    expect(plan.map((d) => d.name)).toEqual(["consenso"]);
+  });
+
+  it("un JSON roto no escribe nada: lo dice", () => {
+    expect(() => parsePlan("{ esto no es json")).toThrow(/JSON/i);
+  });
+
+  it("una respuesta sin lista de dimensiones también", () => {
+    expect(() => parsePlan(JSON.stringify({ otra_cosa: [] }))).toThrow(/dimensiones/i);
+  });
+
+  it("si no queda ninguna utilizable, falla en vez de devolver un pack sin esqueleto", () => {
+    expect(() => parsePlan(json([{ name: "!!", foco: "x" }]))).toThrow(/utilizable/i);
   });
 });

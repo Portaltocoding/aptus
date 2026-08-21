@@ -1,0 +1,79 @@
+# Config de readiness del pack de test. Misma FORMA que la de un pack real —
+# niveles, roles, plan de estudio y keywords de mercado— con vocabulario inventado.
+#
+# Lo que aquí se protege es la forma, no los números: que los umbrales suban de un
+# nivel al siguiente, que solo 'staff' exija tramo experto y amplitud, y que cada
+# dimensión núcleo tenga plan de estudio y keywords con las que reconocerla en una
+# oferta.
+version: "1.0.0"
+
+levels:
+  - id: junior
+    label: "Junior-ready"
+    requires:
+      easy: 0.70
+      medium: 0.40
+      hard: 0.00
+  - id: mid
+    label: "Mid-ready"
+    requires:
+      easy: 0.80
+      medium: 0.60
+      hard: 0.35
+  - id: senior
+    label: "Senior-ready"
+    requires:
+      easy: 0.90
+      medium: 0.75
+      hard: 0.55
+  - id: staff
+    label: "Staff-ready"
+    requires:
+      easy: 0.90
+      medium: 0.80
+      hard: 0.70
+      experto: 0.55
+    # Amplitud: a staff no le basta con clavar su núcleo (solo en este nivel).
+    breadth: 0.60
+
+roles:
+  - id: rol-alfa
+    label: "Especialista Alfa"
+    core: [dimension-alpha]
+    secondary: [dimension-gamma]
+    source: "fixture de test — ningún rol real"
+  - id: rol-gamma
+    label: "Especialista Gamma"
+    core: [dimension-gamma]
+    secondary: [dimension-alpha]
+    source: "fixture de test — ningún rol real"
+  - id: rol-beta
+    label: "Especialista Beta"
+    core: [dimension-beta]
+    secondary: []
+    source: "fixture de test — ningún rol real"
+  - id: rol-mixto
+    label: "Perfil Mixto"
+    core: [dimension-alpha, dimension-gamma]
+    secondary: [dimension-beta]
+    source: "fixture de test — ningún rol real"
+  - id: rol-amplio
+    label: "Perfil Amplio"
+    core: [dimension-alpha, dimension-beta, dimension-gamma]
+    secondary: []
+    source: "fixture de test — ningún rol real"
+
+study:
+  dimension-alpha: "Material de estudio de alfa (fixture)."
+  dimension-beta: "Material de estudio de beta (fixture)."
+  dimension-gamma: "Material de estudio de gamma (fixture)."
+
+market_keywords:
+  dimension-alpha: ["alfa", "alfa-core", "protocolo alfa"]
+  dimension-beta: ["beta", "beta-legacy"]
+  dimension-gamma: ["gamma", "gamma-scale", "diseño gamma"]
+
+# Palabras que aparecen en cualquier oferta: cuentan como mención pero por sí solas
+# no hacen núcleo a una dimensión.
+weak_keywords:
+  dimension-beta: ["beta"]

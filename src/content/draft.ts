@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { toKebab } from "../core/brief.js";
 import { QuestionSchema, type Question } from "./schema.js";
 
 /**
@@ -304,4 +305,124 @@ export function parseDraft(text: string): DraftResult {
   }
 
   return { valid, rejected };
+}
+
+// ─── Plan de dimensiones ─────────────────────────────────────────────────────
+
+/**
+ * En cuántas dimensiones se parte un tema. No es una preferencia estética: por
+ * debajo de cuatro, el readiness no distingue en qué eres fuerte y en qué no —te
+ * daría un porcentaje y poco más—; por encima de seis, cada dimensión se queda sin
+ * preguntas suficientes y su porcentaje se mueve con dos aciertos.
+ */
+export const MIN_DIMENSIONES = 4;
+export const MAX_DIMENSIONES = 6;
+
+const PLAN_SCHEMA = {
+  type: "object",
+  properties: {
+    dimensions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          foco: { type: "string" },
+        },
+        required: ["name", "foco"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["dimensions"],
+  additionalProperties: false,
+} as const;
+
+export interface DimensionPlan {
+  /** Nombre en kebab-case: es el nombre del fichero y la clave del readiness. */
+  name: string;
+  /** Qué cae dentro de esta dimensión y qué no. Va al brief. */
+  foco: string;
+}
+
+/**
+ * Parte un tema en las dimensiones sobre las que se te va a evaluar.
+ *
+ * Va en una llamada aparte de la que escribe las preguntas porque es una decisión
+ * distinta y se revisa distinto: las dimensiones son el esqueleto del pack —salen
+ * en el readiness, dan nombre a los ficheros y deciden qué se compara con qué—,
+ * mientras que una pregunta mala se borra y ya. Que se puedan ver y corregir
+ * ANTES de gastar seis llamadas escribiendo preguntas es justamente el punto.
+ */
+export async function planDimensions(tema: string, material: string): Promise<DimensionPlan[]> {
+  const client = new Anthropic();
+
+  const encargo = [
+    `Parte el tema '${tema}' en entre ${MIN_DIMENSIONES} y ${MAX_DIMENSIONES} dimensiones de evaluación.`,
+    "",
+    "Una dimensión es un área sobre la que alguien puede ser fuerte o flojo POR SEPARADO:",
+    "si dominar una implica dominar otra, sobra una de las dos. Entre todas deben cubrir",
+    "el tema de fundamentos a nivel experto, sin solaparse.",
+    "",
+    "Devuelve para cada una:",
+    "- 'name': en kebab-case, sin acentos, descriptivo (es el nombre del fichero).",
+    "- 'foco': una o dos frases en castellano que digan qué entra y qué NO entra en ella.",
+    material.trim().length > 0
+      ? `\n=== MATERIAL DE REFERENCIA ===\nApóyate en esto para partir el tema como lo parte quien lo conoce:\n${material}`
+      : "\n(No hay material: usa la estructura canónica del campo.)",
+  ].join("\n");
+
+  const stream = client.messages.stream({
+    model: MODEL,
+    max_tokens: 8000,
+    output_config: { format: { type: "json_schema", schema: PLAN_SCHEMA } },
+    messages: [{ role: "user", content: encargo }],
+  });
+
+  const message = await stream.finalMessage();
+  if (message.stop_reason === "refusal") {
+    throw new Error("El modelo ha rechazado partir ese tema en dimensiones.");
+  }
+
+  const text = message.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+
+  return parsePlan(text);
+}
+
+/**
+ * Valida el plan que ha devuelto el modelo. Igual que con las preguntas, el
+ * modelo no tiene un contrato más laxo: un nombre que no sea kebab-case rompería
+ * el nombre del fichero y la clave del readiness, así que se normaliza aquí y se
+ * descartan los duplicados que salgan de normalizar.
+ */
+export function parsePlan(text: string): DimensionPlan[] {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error("La respuesta del modelo no es JSON válido; no se escribe nada.");
+  }
+
+  const raw = (payload as { dimensions?: unknown }).dimensions;
+  if (!Array.isArray(raw)) {
+    throw new Error("La respuesta del modelo no trae ninguna lista de dimensiones.");
+  }
+
+  const vistas = new Set<string>();
+  const plan: DimensionPlan[] = [];
+  for (const item of raw) {
+    const name = toKebab(String((item as { name?: unknown }).name ?? ""));
+    const foco = String((item as { foco?: unknown }).foco ?? "").trim();
+    if (name.length < 3 || vistas.has(name)) continue;
+    vistas.add(name);
+    plan.push({ name, foco });
+  }
+
+  if (plan.length === 0) {
+    throw new Error("Ninguna de las dimensiones propuestas tiene un nombre utilizable.");
+  }
+  return plan;
 }

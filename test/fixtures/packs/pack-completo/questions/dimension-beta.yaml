@@ -1,0 +1,409 @@
+# Fixture determinista: dimensión 'dimension-beta'.
+#
+# Nombres GENÉRICOS a propósito (ENG-04): el dominio real vive en TUS packs, nunca
+# en el código ni en las fixtures. Este pack existe para que los tests de
+# integración ejerciten el camino completo (loader → selección → puntuación →
+# readiness → render) sin depender de ningún contenido versionado en el repo.
+#
+# Forma: 4 tramos de dificultad × 4 preguntas, 4 opciones con apunte en
+# TODAS ellas, y la correcta rotando por posición para no sesgar la selección.
+
+- id: beta-001
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: easy
+  type: escenario
+  roles: []
+  stem: "Pregunta beta-001 (easy): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-001"
+      rationale: "Por qué alguien elegiría la A en beta-001, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-001"
+      rationale: "Por qué alguien elegiría la B en beta-001, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-001"
+      rationale: "Por qué alguien elegiría la C en beta-001, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-001"
+      rationale: "Por qué alguien elegiría la D en beta-001, sin delatar cuál es la buena."
+  correct: b
+  explanation: "La B es la correcta en beta-001 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-002
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: easy
+  type: codigo
+  roles: []
+  stem: "Pregunta beta-002 (easy): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-002"
+      rationale: "Por qué alguien elegiría la A en beta-002, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-002"
+      rationale: "Por qué alguien elegiría la B en beta-002, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-002"
+      rationale: "Por qué alguien elegiría la C en beta-002, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-002"
+      rationale: "Por qué alguien elegiría la D en beta-002, sin delatar cuál es la buena."
+  correct: c
+  explanation: "La C es la correcta en beta-002 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-003
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: easy
+  type: diagrama
+  roles: []
+  stem: "Pregunta beta-003 (easy): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-003"
+      rationale: "Por qué alguien elegiría la A en beta-003, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-003"
+      rationale: "Por qué alguien elegiría la B en beta-003, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-003"
+      rationale: "Por qué alguien elegiría la C en beta-003, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-003"
+      rationale: "Por qué alguien elegiría la D en beta-003, sin delatar cuál es la buena."
+  correct: d
+  explanation: "La D es la correcta en beta-003 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-004
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: easy
+  type: concepto
+  roles: []
+  stem: "Pregunta beta-004 (easy): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-004"
+      rationale: "Por qué alguien elegiría la A en beta-004, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-004"
+      rationale: "Por qué alguien elegiría la B en beta-004, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-004"
+      rationale: "Por qué alguien elegiría la C en beta-004, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-004"
+      rationale: "Por qué alguien elegiría la D en beta-004, sin delatar cuál es la buena."
+  correct: a
+  explanation: "La A es la correcta en beta-004 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-005
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: medium
+  type: escenario
+  roles: []
+  stem: "Pregunta beta-005 (medium): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-005"
+      rationale: "Por qué alguien elegiría la A en beta-005, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-005"
+      rationale: "Por qué alguien elegiría la B en beta-005, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-005"
+      rationale: "Por qué alguien elegiría la C en beta-005, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-005"
+      rationale: "Por qué alguien elegiría la D en beta-005, sin delatar cuál es la buena."
+  correct: b
+  explanation: "La B es la correcta en beta-005 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-006
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: medium
+  type: codigo
+  roles: []
+  stem: "Pregunta beta-006 (medium): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-006"
+      rationale: "Por qué alguien elegiría la A en beta-006, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-006"
+      rationale: "Por qué alguien elegiría la B en beta-006, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-006"
+      rationale: "Por qué alguien elegiría la C en beta-006, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-006"
+      rationale: "Por qué alguien elegiría la D en beta-006, sin delatar cuál es la buena."
+  correct: c
+  explanation: "La C es la correcta en beta-006 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-007
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: medium
+  type: diagrama
+  roles: []
+  stem: "Pregunta beta-007 (medium): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-007"
+      rationale: "Por qué alguien elegiría la A en beta-007, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-007"
+      rationale: "Por qué alguien elegiría la B en beta-007, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-007"
+      rationale: "Por qué alguien elegiría la C en beta-007, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-007"
+      rationale: "Por qué alguien elegiría la D en beta-007, sin delatar cuál es la buena."
+  correct: d
+  explanation: "La D es la correcta en beta-007 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-008
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: medium
+  type: concepto
+  roles: []
+  stem: "Pregunta beta-008 (medium): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-008"
+      rationale: "Por qué alguien elegiría la A en beta-008, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-008"
+      rationale: "Por qué alguien elegiría la B en beta-008, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-008"
+      rationale: "Por qué alguien elegiría la C en beta-008, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-008"
+      rationale: "Por qué alguien elegiría la D en beta-008, sin delatar cuál es la buena."
+  correct: a
+  explanation: "La A es la correcta en beta-008 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-009
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: hard
+  type: escenario
+  roles: []
+  stem: "Pregunta beta-009 (hard): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-009"
+      rationale: "Por qué alguien elegiría la A en beta-009, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-009"
+      rationale: "Por qué alguien elegiría la B en beta-009, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-009"
+      rationale: "Por qué alguien elegiría la C en beta-009, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-009"
+      rationale: "Por qué alguien elegiría la D en beta-009, sin delatar cuál es la buena."
+  correct: b
+  explanation: "La B es la correcta en beta-009 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-010
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: hard
+  type: codigo
+  roles: []
+  stem: "Pregunta beta-010 (hard): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-010"
+      rationale: "Por qué alguien elegiría la A en beta-010, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-010"
+      rationale: "Por qué alguien elegiría la B en beta-010, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-010"
+      rationale: "Por qué alguien elegiría la C en beta-010, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-010"
+      rationale: "Por qué alguien elegiría la D en beta-010, sin delatar cuál es la buena."
+  correct: c
+  explanation: "La C es la correcta en beta-010 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-011
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: hard
+  type: diagrama
+  roles: []
+  stem: "Pregunta beta-011 (hard): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-011"
+      rationale: "Por qué alguien elegiría la A en beta-011, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-011"
+      rationale: "Por qué alguien elegiría la B en beta-011, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-011"
+      rationale: "Por qué alguien elegiría la C en beta-011, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-011"
+      rationale: "Por qué alguien elegiría la D en beta-011, sin delatar cuál es la buena."
+  correct: d
+  explanation: "La D es la correcta en beta-011 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-012
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: hard
+  type: concepto
+  roles: []
+  stem: "Pregunta beta-012 (hard): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-012"
+      rationale: "Por qué alguien elegiría la A en beta-012, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-012"
+      rationale: "Por qué alguien elegiría la B en beta-012, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-012"
+      rationale: "Por qué alguien elegiría la C en beta-012, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-012"
+      rationale: "Por qué alguien elegiría la D en beta-012, sin delatar cuál es la buena."
+  correct: a
+  explanation: "La A es la correcta en beta-012 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-013
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: experto
+  type: escenario
+  roles: []
+  stem: "Pregunta beta-013 (experto): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-013"
+      rationale: "Por qué alguien elegiría la A en beta-013, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-013"
+      rationale: "Por qué alguien elegiría la B en beta-013, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-013"
+      rationale: "Por qué alguien elegiría la C en beta-013, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-013"
+      rationale: "Por qué alguien elegiría la D en beta-013, sin delatar cuál es la buena."
+  correct: b
+  explanation: "La B es la correcta en beta-013 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-014
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: experto
+  type: codigo
+  roles: []
+  stem: "Pregunta beta-014 (experto): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-014"
+      rationale: "Por qué alguien elegiría la A en beta-014, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-014"
+      rationale: "Por qué alguien elegiría la B en beta-014, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-014"
+      rationale: "Por qué alguien elegiría la C en beta-014, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-014"
+      rationale: "Por qué alguien elegiría la D en beta-014, sin delatar cuál es la buena."
+  correct: c
+  explanation: "La C es la correcta en beta-014 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-015
+  dimension: dimension-beta
+  subtopic: subtopic-beta-1
+  difficulty: experto
+  type: diagrama
+  roles: []
+  stem: "Pregunta beta-015 (experto): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-015"
+      rationale: "Por qué alguien elegiría la A en beta-015, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-015"
+      rationale: "Por qué alguien elegiría la B en beta-015, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-015"
+      rationale: "Por qué alguien elegiría la C en beta-015, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-015"
+      rationale: "Por qué alguien elegiría la D en beta-015, sin delatar cuál es la buena."
+  correct: d
+  explanation: "La D es la correcta en beta-015 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"
+
+- id: beta-016
+  dimension: dimension-beta
+  subtopic: subtopic-beta-2
+  difficulty: experto
+  type: concepto
+  roles: []
+  stem: "Pregunta beta-016 (experto): ¿cuál de estas opciones es la correcta?"
+  options:
+    - id: a
+      text: "Opción A de beta-016"
+      rationale: "Por qué alguien elegiría la A en beta-016, sin delatar cuál es la buena."
+    - id: b
+      text: "Opción B de beta-016"
+      rationale: "Por qué alguien elegiría la B en beta-016, sin delatar cuál es la buena."
+    - id: c
+      text: "Opción C de beta-016"
+      rationale: "Por qué alguien elegiría la C en beta-016, sin delatar cuál es la buena."
+    - id: d
+      text: "Opción D de beta-016"
+      rationale: "Por qué alguien elegiría la D en beta-016, sin delatar cuál es la buena."
+  correct: a
+  explanation: "La A es la correcta en beta-016 porque así lo fija esta fixture; las demás son distractores de relleno."
+  source: fixture
+  date: "2026-01-01"

@@ -377,3 +377,59 @@ describe("expandirRuta", () => {
     expect(expandirRuta("/tmp/a~b", "/home/carlos")).toBe("/tmp/a~b");
   });
 });
+
+describe("'tema' — de un tema a un pack, desde el menú", () => {
+  const conKey = { tieneApiKey: true };
+  const sinKey = { tieneApiKey: false };
+
+  it("sin credenciales avisa ANTES de preguntar el nombre", () => {
+    // Recorrerte el asistente entero para reventar en la llamada sería hacerte
+    // trabajar para nada. Mismo criterio que 'draft'.
+    const paso = nextMenuStep("tema", [], sinKey);
+
+    expect(paso.tipo).toBe("aviso");
+    if (paso.tipo !== "aviso") return;
+    expect(paso.titulo).toMatch(/credenciales/i);
+    expect(paso.cuerpo).toMatch(/Crear un pack nuevo/);
+  });
+
+  it("pregunta el nombre y luego el material", () => {
+    expect(nextMenuStep("tema", [], conKey)).toEqual({
+      tipo: "preguntar",
+      prompt: { id: "nombreTema" },
+    });
+    expect(nextMenuStep("tema", ["redes-tcp-ip"], conKey)).toEqual({
+      tipo: "preguntar",
+      prompt: { id: "materialDelTema" },
+    });
+  });
+
+  it("sin material, el tema se investiga: material null y adelante", () => {
+    // Es el caso normal —de eso va el comando—, así que un enter en blanco tiene
+    // que seguir, no volver a preguntar.
+    expect(nextMenuStep("tema", ["redes-tcp-ip", "  "], conKey)).toEqual({
+      tipo: "ejecutar",
+      invocacion: { comando: "tema", nombre: "redes-tcp-ip", material: null, cantidad: 12 },
+    });
+  });
+
+  it("con material, lo pasa tal cual", () => {
+    expect(nextMenuStep("tema", ["redes-tcp-ip", "/casa/curso"], conKey)).toEqual({
+      tipo: "ejecutar",
+      invocacion: {
+        comando: "tema",
+        nombre: "redes-tcp-ip",
+        material: "/casa/curso",
+        cantidad: 12,
+      },
+    });
+  });
+
+  it("un nombre que no es kebab se rechaza antes de tocar disco", () => {
+    // El nombre compone una ruta: '../fuera' no puede llegar a un join().
+    for (const malo of ["Con Mayúsculas", "../fuera", "con espacio"]) {
+      const paso = nextMenuStep("tema", [malo], conKey);
+      expect(paso.tipo, `'${malo}' debería rechazarse`).toBe("aviso");
+    }
+  });
+});

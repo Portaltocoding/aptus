@@ -1,10 +1,11 @@
 import { input, select } from "@inquirer/prompts";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import pc from "picocolors";
 import { listPackEntries } from "../content/paths.js";
 import { pausedPacks } from "../content/paused.js";
 import { hasApiCredentials } from "../content/draft.js";
-import { startCommand, DEFAULT_PACK } from "./commands/start.js";
+import { startCommand } from "./commands/start.js";
 import { resumeCommand } from "./commands/resume.js";
 import { reviewCommand } from "./commands/review.js";
 import { historyCommand } from "./commands/history.js";
@@ -15,6 +16,7 @@ import { jdCommand } from "./commands/jd.js";
 import { jobsCommand } from "./commands/jobs.js";
 import { ingestCommand } from "./commands/ingest.js";
 import { newPackCommand } from "./commands/new-pack.js";
+import { temaCommand } from "./commands/tema.js";
 import { draftCommand, promoteCommand } from "./commands/draft.js";
 import { ESCAPED, ESC_HINT, withEscape } from "./keys.js";
 import {
@@ -93,6 +95,11 @@ const CHOICES: { value: MenuAction; name: string; description: string }[] = [
     description: "Control de calidad del banco: curadas, no relleno.",
   },
   {
+    value: "tema",
+    name: "Generar un tema nuevo",
+    description: "De un tema a un pack entero: investiga, lo parte y escribe los borradores.",
+  },
+  {
     value: "ingest",
     name: "Ingerir material",
     description: "Una carpeta → el brief de un pack nuevo.",
@@ -136,9 +143,21 @@ export function menuChoices(
 
 /** Pregunta un pack de los que hay, con ESC para volver. */
 async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
-  // Las dos raíces a la vez: los packs del producto y los tuyos.
   const nombres = listPackEntries().map((e) => e.name);
-  if (nombres.length === 0) return DEFAULT_PACK;
+  // Sin packs no hay nada que elegir. Antes se devolvía el nombre del pack que
+  // aptus traía de fábrica, y el menú seguía adelante hacia un "no existe el pack"
+  // más abajo; ahora se dice aquí, que es donde se sabe, y se vuelve al menú.
+  if (nombres.length === 0) {
+    console.log(
+      "\n" +
+        pc.yellow("  Todavía no tienes ningún pack.") +
+        pc.dim(
+          `  aptus viene vacío: los temas los pones tú.\n` +
+            '    Genera uno con `aptus tema <tema>`, o desde "Crear un pack nuevo" en este menú.\n',
+        ),
+    );
+    return ESCAPED;
+  }
   if (nombres.length === 1) return nombres[0]!;
 
   return await withEscape((signal) =>
@@ -155,7 +174,6 @@ async function askPack(mensaje: string): Promise<string | typeof ESCAPED> {
 
 /** Pide una ruta que exista, con ESC para volver. */
 async function askPath(mensaje: string): Promise<string | typeof ESCAPED> {
-  const { existsSync } = await import("node:fs");
   return await withEscape((signal) =>
     input(
       {
@@ -210,6 +228,37 @@ async function preguntar(prompt: MenuPrompt): Promise<string | typeof ESCAPED> {
           { signal },
         ),
       );
+
+    case "nombreTema":
+      return await withEscape((signal) =>
+        input(
+          {
+            message: pc.bold("  ¿De qué tema?") + pc.dim("  (minúsculas y guiones: redes-tcp-ip)"),
+            theme: promptTheme,
+          },
+          { signal },
+        ),
+      );
+
+    case "materialDelTema":
+      // Admite vacío a propósito: no tener material es el caso normal, y de eso
+      // va el comando. Por eso NO se usa `askPath`, que exige una ruta que exista.
+      return await withEscape((signal) =>
+        input(
+          {
+            message:
+              pc.bold("  ¿Carpeta con material tuyo?") +
+              pc.dim("  (enter = que lo investigue el modelo)"),
+            theme: promptTheme,
+            validate: (v: string) => {
+              const t = v.trim();
+              if (t.length === 0) return true;
+              return existsSync(expandirRuta(t, process.env.HOME)) ? true : "No existe esa ruta.";
+            },
+          },
+          { signal },
+        ),
+      ).then((r) => (r === ESCAPED || r.trim().length === 0 ? r : expandirRuta(r, process.env.HOME)));
 
     case "nombreNuevoPack":
       return await withEscape((signal) =>
@@ -354,6 +403,12 @@ async function ejecutar(invocacion: Invocacion): Promise<string | null> {
       await ingestCommand(invocacion.carpeta, {
         pack: invocacion.pack ?? undefined,
         copy: true,
+      });
+      return null;
+    case "tema":
+      await temaCommand(invocacion.nombre, {
+        material: invocacion.material ?? undefined,
+        count: invocacion.cantidad,
       });
       return null;
     case "new-pack":

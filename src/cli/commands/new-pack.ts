@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { assertPackName, packDirForWrite } from "../../content/paths.js";
+import { join } from "node:path";
+import { aptusPaths, assertPackName } from "../../content/paths.js";
 
 const PACK_YAML = (name: string) => `# Pack: ${name} (esqueleto — rellenar)
 name: "${name}"
@@ -49,7 +49,7 @@ Este pack es autocontenido y no comparte contexto con otros.
 4. (Opcional) niveles/roles en \`../readiness.yaml\` para el readiness por rol.
 
 ## Salida
-- Contenido: \`packs/${name}/\`  ·  Resultados de sesión: \`data/${name}/\` (aislado).
+- Contenido: esta carpeta  ·  Resultados de sesión: tu directorio de datos (aislado por tema).
 - Jugar: \`aptus start --pack ${name}\`
 `;
 
@@ -77,10 +77,9 @@ export function scaffoldPack(packsRoot: string, name: string): string {
  */
 export async function newPackCommand(name: string): Promise<void> {
   try {
-    // El pack nuevo se crea en TU directorio de packs, nunca dentro de la
-    // instalación. Si el nombre choca con uno que viene con aptus, esto lanza
-    // PackReadOnlyError con la salida escrita en el mensaje.
-    const dir = scaffoldPack(dirname(packDirForWrite(name)), name);
+    // Todos los packs son tuyos y viven en la misma raíz: no hay contenido de
+    // fábrica del que distinguirlos ni instalación en la que no se pueda escribir.
+    const dir = scaffoldPack(aptusPaths().packsDir, name);
     console.log(
       `\n✓ Pack '${name}' creado en ${dir}\n` +
         `  1. Deja el material de origen en ${name}/sources/\n` +

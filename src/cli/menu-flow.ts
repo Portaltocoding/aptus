@@ -24,6 +24,7 @@ export type MenuAction =
   | "jobs"
   | "packs"
   | "verify"
+  | "tema"
   | "ingest"
   | "new-pack"
   | "draft"
@@ -69,6 +70,8 @@ export type MenuPrompt =
   | { readonly id: "carpeta"; readonly mensaje: string }
   | { readonly id: "nombrePack" }
   | { readonly id: "nombreNuevoPack" }
+  | { readonly id: "nombreTema" }
+  | { readonly id: "materialDelTema" }
   | { readonly id: "dimension"; readonly mensaje: string }
   | { readonly id: "confirmarPromote"; readonly pack: string; readonly dimension: string };
 
@@ -85,6 +88,13 @@ export type Invocacion =
       readonly pack: string;
       readonly brief: boolean;
       readonly memoria: string | null;
+    }
+  | {
+      readonly comando: "tema";
+      readonly nombre: string;
+      /** Carpeta de material propio, o `null` para que lo investigue el modelo. */
+      readonly material: string | null;
+      readonly cantidad: number;
     }
   | { readonly comando: "ingest"; readonly carpeta: string; readonly pack: string | null }
   | { readonly comando: "new-pack"; readonly nombre: string }
@@ -114,6 +124,9 @@ const JOBS_LIMITE = 20;
 
 /** Cuántas preguntas pide `draft` desde el menú (el mismo defecto que el flag `-n`). */
 const DRAFT_CANTIDAD = 12;
+
+/** Cuántas por dimensión pide `tema` desde el menú (el mismo defecto que su `-n`). */
+const TEMA_CANTIDAD = 12;
 
 /**
  * Siguiente paso de una acción dadas las respuestas ya recogidas, en orden.
@@ -230,6 +243,45 @@ export function nextMenuStep(
           comando: "ingest",
           carpeta: r0,
           pack: r1.trim().length > 0 ? r1.trim() : null,
+        },
+      };
+    }
+
+    case "tema": {
+      // Mismo motivo que en `draft`: sale a la red, así que si no hay con qué
+      // llamar se dice antes de preguntarte nada.
+      if (!ctx.tieneApiKey) {
+        return {
+          tipo: "aviso",
+          titulo: "Generar un tema necesita credenciales, y aquí no hay",
+          cuerpo:
+            "Es lo ÚNICO de aptus que sale a la red: exporta ANTHROPIC_API_KEY (o entra con\n" +
+            "  `ant auth login`) y vuelve a abrir el menú.\n" +
+            "  Sin credenciales el camino es el de siempre: «Crear un pack nuevo» y curarlo a mano.",
+        };
+      }
+      if (r0 === undefined) return { tipo: "preguntar", prompt: { id: "nombreTema" } };
+      const nombre = r0.trim();
+      if (!PACK_NAME_RE.test(nombre)) {
+        return {
+          tipo: "aviso",
+          titulo: `Nombre de pack inválido: '${nombre}'`,
+          cuerpo:
+            "Un nombre de pack es minúsculas, números y guiones, y empieza por letra o número.\n" +
+            "  Sirve de nombre de carpeta, así que ni espacios, ni acentos, ni barras.",
+        };
+      }
+      // El material se pregunta DESPUÉS del nombre y admite vacío: no tener
+      // material es el caso normal —de eso va el comando— y no una carencia que
+      // haya que resolver antes de seguir.
+      if (r1 === undefined) return { tipo: "preguntar", prompt: { id: "materialDelTema" } };
+      return {
+        tipo: "ejecutar",
+        invocacion: {
+          comando: "tema",
+          nombre,
+          material: r1.trim().length > 0 ? r1.trim() : null,
+          cantidad: TEMA_CANTIDAD,
         },
       };
     }

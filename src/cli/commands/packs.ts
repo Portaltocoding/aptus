@@ -1,47 +1,45 @@
 import { loadPackDir } from "../../content/loader.js";
 import { aptusPaths, listPackEntries } from "../../content/paths.js";
-import { DEFAULT_PACK } from "./start.js";
 
 /**
- * Subcomando `packs`: lista los packs de conocimiento disponibles, con sus
- * dimensiones y su nº de preguntas. Base del uso multi-tema (PACK-02).
+ * Subcomando `packs`: lista los packs de conocimiento que tienes, con sus
+ * dimensiones y su nº de preguntas.
  *
- * Mira las DOS raíces: los packs que viajan dentro de la instalación (el producto)
- * y los tuyos. Cuando son la misma —trabajar desde el repo— la salida se queda
- * exactamente como estaba; cuando no, cada línea dice de dónde sale el pack,
- * porque saber cuál puedes editar y cuál no es la mitad de la información.
+ * No hay packs "del producto": aptus se instala vacío y todo lo que aparece aquí
+ * lo has puesto tú —escrito a mano o generado con `aptus tema`—. Por eso la lista
+ * vacía no es un error ni un estado raro: es el primer día, y lo que toca decir
+ * es cómo salir de él.
  */
 export async function packsCommand(): Promise<void> {
   const entries = listPackEntries();
-  const { bundledPacksDir, userPacksDir } = aptusPaths();
-  const dosRaices = bundledPacksDir !== userPacksDir;
+  const { packsDir } = aptusPaths();
 
   if (entries.length === 0) {
     console.log(
-      `\nNo hay ningún pack disponible.\n` +
-        `  Crea uno con \`aptus new-pack <tema>\` (se creará en ${userPacksDir}).\n`,
+      `\nTodavía no tienes ningún pack. aptus viene vacío a propósito: mide lo que tú\n` +
+        `le des de comer, no un temario que venga de fábrica.\n\n` +
+        `  · Genera uno de un tema:      aptus tema <tema>\n` +
+        `  · O desde material que tengas: aptus ingest <carpeta>\n` +
+        `  · O empieza por el esqueleto:  aptus new-pack <tema>\n\n` +
+        `Se escribirán en ${packsDir}\n`,
     );
     return;
   }
 
-  console.log("\nPacks disponibles:\n");
-  for (const { name, origin, dir } of entries) {
-    const marca = name === DEFAULT_PACK ? " (por defecto)" : "";
-    const procedencia = dosRaices ? (origin === "paquete" ? " [de aptus]" : " [tuyo]") : "";
+  console.log("\nTus packs:\n");
+  for (const { name, dir } of entries) {
     try {
       const pack = loadPackDir(dir);
       console.log(
-        `  • ${name}${marca}${procedencia} — "${pack.name}": ${pack.questions.length} preguntas, ${pack.dimensions.length} dimensiones`,
+        `  • ${name} — "${pack.name}": ${pack.questions.length} preguntas, ${pack.dimensions.length} dimensiones`,
       );
     } catch (err) {
       console.log(
-        `  • ${name}${procedencia} — ✗ inválido: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`,
+        `  • ${name} — ✗ inválido: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`,
       );
     }
   }
 
-  if (dosRaices) {
-    console.log(`\nLos tuyos viven en ${userPacksDir}`);
-  }
+  console.log(`\nViven en ${packsDir}`);
   console.log(`\nUsa: aptus start --pack <nombre>\n`);
 }

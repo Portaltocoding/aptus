@@ -81,15 +81,18 @@ OBTENIDA="$("$APTUS" --version)"
   muere "aptus --version dice '$OBTENIDA' y package.json dice '$ESPERADA'"
 paso "aptus --version = $OBTENIDA (ejecutado desde $PWD)"
 
-"$APTUS" packs | grep -q 'ai-ml-readiness' ||
-  muere "aptus packs no ve el pack del producto: no ha viajado en el tarball"
-paso "aptus packs ve el pack del producto"
+# aptus se instala VACÍO: no viaja contenido en el tarball. Lo que se comprueba
+# aquí es que ese estado se explique en vez de parecer una instalación rota.
+SALIDA="$("$APTUS" packs)"
+echo "$SALIDA" | grep -q 'aptus tema' ||
+  muere "una instalación limpia no dice cómo crear el primer pack"
+paso "aptus packs, recién instalado, guía a crear el primer pack"
 
-# Que el nombre salga en un listado no prueba que el contenido cargue. Sale 0
-# aunque haya avisos de calidad; solo los errores lo tumban.
-"$APTUS" verify-pack ai-ml-readiness >/dev/null ||
-  muere "aptus verify-pack ai-ml-readiness falla: el contenido empaquetado no carga"
-paso "aptus verify-pack ai-ml-readiness carga y audita el contenido empaquetado"
+# NEGATIVO: ningún pack ha viajado dentro del tarball.
+if [ -d "$INSTALL_PKG/packs" ]; then
+  muere "el tarball trae $INSTALL_PKG/packs: aptus tiene que instalarse sin contenido"
+fi
+paso "NEGATIVO: el tarball no trae ningún pack dentro"
 
 # ── 6. Huella de la instalación ANTES de escribir ────────────────────────────
 huella() { (cd "$INSTALL_PKG" && find . -print | LC_ALL=C sort); }
@@ -127,18 +130,23 @@ if ! diff -u "$TMP/huella-antes.txt" "$TMP/huella-despues.txt" >"$TMP/huella.dif
 fi
 paso "NEGATIVO: la huella de la instalación es idéntica antes y después"
 
-# ── 9. Las dos raíces conviven ───────────────────────────────────────────────
+# ── 9. El pack propio se ve y carga ──────────────────────────────────────────
 SALIDA="$("$APTUS" packs)"
-echo "$SALIDA" | grep -q 'ai-ml-readiness' ||
-  muere "tras crear un pack propio ha desaparecido el del producto"
 echo "$SALIDA" | grep -q 'prueba-instalacion' ||
   muere "el pack recién creado no aparece en aptus packs"
-paso "aptus packs lista LAS DOS raíces: el del producto y el propio"
+paso "aptus packs lista el pack propio"
+
+# Que el nombre salga en un listado no prueba que el contenido cargue. Sale 0
+# aunque haya avisos de calidad; solo los errores lo tumban.
+"$APTUS" verify-pack prueba-instalacion >/dev/null ||
+  muere "aptus verify-pack prueba-instalacion falla: el pack escrito no carga"
+paso "aptus verify-pack carga y audita el pack escrito desde la instalación"
 
 # ── Resumen ──────────────────────────────────────────────────────────────────
 printf '\n\033[1mTodo verificado sobre una instalación real:\033[0m\n'
 printf '  · empaquetado con npm pack (dispara el build) e instalado del tarball\n'
 printf '  · --version, packs y verify-pack ejecutados desde %s\n' "$TMP/desde-aqui"
+printf '  · el tarball se instaló SIN contenido: ningún pack dentro\n'
 printf '  · new-pack escribió en %s\n' "$XDG_DATA_HOME/aptus/packs/prueba-instalacion"
 printf '  · la instalación (%s) no ha cambiado ni una entrada\n' "$INSTALL_PKG"
 printf '  · el home real no se ha tocado en ningún momento\n\n'

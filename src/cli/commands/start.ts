@@ -23,8 +23,6 @@ import { heading, promptTheme } from "../theme.js";
 const SESSION_TARGET_QUESTIONS = 120;
 const MIN_PER_DIMENSION = 20;
 
-export const DEFAULT_PACK = "ai-ml-readiness";
-
 /**
  * Compone la sesión end-to-end sobre el pack elegido: asistente (qué pack, qué
  * dimensiones, qué dificultad) → seleccionar equilibrado → barajar opciones →
@@ -42,7 +40,7 @@ export async function startCommand(
 ): Promise<StartOutcome> {
   let setup;
   try {
-    setup = await resolveSetup(defaultPackLocator(), opts, SESSION_TARGET_QUESTIONS, DEFAULT_PACK);
+    setup = await resolveSetup(defaultPackLocator(), opts, SESSION_TARGET_QUESTIONS);
   } catch (err) {
     console.error(
       `\n✗ No se puede iniciar la sesión: ${err instanceof Error ? err.message : String(err)}`,

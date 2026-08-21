@@ -1,7 +1,8 @@
 import { checkbox, select } from "@inquirer/prompts";
 import pc from "picocolors";
 import { loadPackDir } from "../content/loader.js";
-import type { PackLocator } from "../content/paths.js";
+import { aptusPaths, type PackLocator } from "../content/paths.js";
+import { explicaFalloDePack, resolveDefaultPack } from "./default-pack.js";
 import type { Pack } from "../content/schema.js";
 import { filterQuestions, type Difficulty } from "../core/session.js";
 import { DIFFICULTY_LABEL, difficultyColor, heading, promptTheme } from "./theme.js";
@@ -140,14 +141,10 @@ export function sampleWarning(bank: Pack["questions"], target: number): string |
 async function pickPack(
   packs: PackLocator,
   preseleccionado: string | undefined,
+  interactivo: boolean,
 ): Promise<{ name: string; packDir: string; pack: Pack }> {
   const nombres = packs.list();
-  if (nombres.length === 0) {
-    throw new Error("no hay ningún pack disponible (ni en la instalación ni en tu directorio).");
-  }
 
-  // El localizador mira las DOS raíces —los packs del producto y los tuyos—, así
-  // que "no existe el pack X" ahora es cierto en los dos sitios donde se ha mirado.
   const cargar = (name: string): { name: string; packDir: string; pack: Pack } => {
     const packDir = packs.dir(name);
     if (packDir === null) throw new Error(`no existe el pack '${name}'.`);
@@ -155,7 +152,16 @@ async function pickPack(
   };
 
   if (preseleccionado !== undefined) return cargar(preseleccionado);
-  if (nombres.length === 1) return cargar(nombres[0]!);
+
+  // Sin `--pack`, la elección la decide lo que TENGAS: ninguno es el primer día,
+  // uno solo no es una elección, y varios sin decir cuál sería adivinar sobre qué
+  // te evalúas. Solo el último caso se puede resolver preguntando.
+  const porDefecto = resolveDefaultPack(nombres);
+  if (porDefecto.ok) return cargar(porDefecto.name);
+  // Sin packs no hay nada que preguntar ni en interactivo: se dice cómo crear uno.
+  if (!interactivo || porDefecto.motivo === "sin-packs") {
+    throw new Error(explicaFalloDePack(porDefecto, aptusPaths().packsDir));
+  }
 
   // Cada pack se anuncia con lo que trae dentro: elegir a ciegas por el nombre de
   // la carpeta no es elegir.
@@ -435,14 +441,13 @@ export async function resolveSetup(
   packs: PackLocator,
   opts: SetupOptions,
   defaultTarget: number,
-  defaultPack: string,
 ): Promise<SessionSetup | null> {
   const interactivo = opts.interactive && process.stdin.isTTY === true;
 
   try {
-    // Sin TTY (scripts, CI, pipes) nunca se pregunta: se cae al pack por defecto.
-    const preseleccionado = interactivo ? opts.pack : (opts.pack ?? defaultPack);
-    const { name: packName, packDir, pack } = await pickPack(packs, preseleccionado);
+    // Sin TTY (scripts, CI, pipes) nunca se pregunta: o el pack sale de `--pack`,
+    // o del hecho de que solo tengas uno, o falla diciendo cuáles hay.
+    const { name: packName, packDir, pack } = await pickPack(packs, opts.pack, interactivo);
 
     let dimensions: string[] | null = opts.dims !== undefined ? parseDims(opts.dims) : null;
     let difficulties: Difficulty[] | null =

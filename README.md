@@ -11,8 +11,11 @@ rol, gaps y repaso espaciado) no sabe de qué tema evalúa. Cada dominio evaluab
 un pack en YAML: banco de preguntas, baselines y perfiles de rol. Añadir un tema
 nuevo no toca ni una línea de TypeScript.
 
-El primer pack, **AI/ML Readiness**, tiene 255 preguntas curadas en cinco
-dimensiones y sirve de caso de validación del concepto.
+**aptus viene vacío.** No trae temario de fábrica: el contenido lo pones tú, y
+`aptus tema <tema>` lo monta de una pasada —investiga el tema, lo parte en
+dimensiones y escribe los borradores— para que el primer día no sea escribir 300
+preguntas a mano. Lo que genera aterriza en `drafts/`, que no evalúa hasta que lo
+lees: esa parte no la automatiza nadie, y es a propósito.
 
 ## Qué hace una sesión
 
@@ -31,6 +34,7 @@ aptus ────────────────────────�
   Ver el historial       Sesiones guardadas y evolución entre ellas.
   Borrar una sesión      Quitar una del historial. No se puede deshacer.
   Evaluar una oferta     Tu readiness contra una oferta concreta (o su brief).
+  Generar un tema nuevo  De un tema a un pack entero: investiga y escribe.
   Ingerir material       Una carpeta → el brief de un pack nuevo.
   Crear un pack nuevo    El esqueleto de un tema: pack.yaml y questions/.
   Borrador con LLM       Lo único que sale a la red: necesita API key.
@@ -55,6 +59,9 @@ siempre — el menú llama a los mismos comandos, no los reimplementa.
 evalúas, qué dimensiones entran, a qué nivel de dificultad y cuántas preguntas.
 Antes de empezar dice con qué se está alimentando el motor y avisa si el filtro
 deja una muestra demasiado corta para concluir nada.
+
+*(Los ejemplos de aquí abajo salen de un pack propio de 255 preguntas sobre IA/ML.
+No viene con aptus: es el aspecto que tiene un pack tuyo una vez montado.)*
 
 ```
 Qué vamos a evaluar ───────────────────────────────────────────────────
@@ -171,11 +178,19 @@ Al terminar no sale un número. Sale un desglose:
 | `aptus verify-pack [nombre]` | audita la calidad de un pack (curadas, no relleno) |
 | `aptus jd <fichero>` | evalúa tu readiness contra una oferta concreta |
 | `aptus jobs` | evalúa en bloque ofertas ya escaneadas (integración opcional) |
+| `aptus tema <nombre>` | de un tema a un pack: investiga, lo parte y escribe los borradores |
 | `aptus ingest <carpeta>` | ingiere material y saca el brief de un pack nuevo |
 | `aptus draft <tema>` | borrador de preguntas con LLM (revisión obligatoria) |
 | `aptus promote <tema> <dim>` | mueve un borrador revisado a questions/ |
 
-Todos aceptan `-p, --pack <nombre>`. El pack por defecto es `ai-ml-readiness`.
+Todos aceptan `-p, --pack <nombre>`. Sin ese flag: si solo tienes un pack, se usa
+ése; si tienes varios, hay que decir cuál —elegir por ti sería decidir sobre qué te
+evalúas sin decírtelo—; y si no tienes ninguno, te dice cómo crear el primero.
+
+`aptus tema` acepta `-m, --material <carpeta>` para partir de material tuyo en vez
+de investigar en la web, `-d, --dims <lista>` para imponer las dimensiones en lugar
+de dejar que las proponga el modelo, y `-n, --count <n>` para cuántas preguntas
+pedir por dimensión.
 
 `aptus review` acepta `-d, --dims <lista>` para acotar el repaso a unas
 dimensiones, y `-y, --yes` para no preguntar. Acotar elige **qué estudias**, no
@@ -201,6 +216,20 @@ y determinista, la otra juzga.
 ```
 fuente ──▶ aptus ingest / aptus jd --brief ──▶ BRIEF.md ──▶ curación ──▶ drafts/ ──▶ aptus promote ──▶ questions/
            (determinista, sin red)                          (a mano o LLM)          (auditoría)      (ya evalúa)
+
+tema ────▶ aptus tema <tema> ─────────────────────────────────────────▶ drafts/ ──▶ aptus promote ──▶ questions/
+           (recorre el camino entero de una pasada)                                 (sigue siendo tuyo)
+```
+
+`aptus tema` no es un camino distinto: es ese mismo, recorrido de una pasada. Crea
+el pack, consigue el material (lo investiga, o lee el tuyo con `--material`), parte
+el tema en dimensiones, escribe el `BRIEF.md` y llama a `draft` una vez por
+dimensión. Lo que no hace —y por eso el resumen final habla de lo que falta en vez
+de celebrar seis ficheros nuevos— es promover nada.
+
+```bash
+aptus tema sistemas-distribuidos              # investiga y escribe los borradores
+aptus tema redes -m ~/curso/redes -n 15       # partiendo de material tuyo
 ```
 
 Un brief se llama **igual venga de donde venga**: `BRIEF.md` si cubre el pack entero,
@@ -240,7 +269,7 @@ loader mira, así que **un borrador no puede evaluarte**. Cada pregunta se valid
 contra el mismo schema que un pack real, y lo que no pasa se descarta y se dice.
 
 ```bash
-aptus draft mi-tema -d colas-de-mensajes -n 12   # → packs/mi-tema/drafts/
+aptus draft mi-tema -d colas-de-mensajes -n 12   # → mi-tema/drafts/
 # ...lo lees entero, corriges lo que esté mal...
 aptus promote mi-tema colas-de-mensajes          # → questions/, si pasa la auditoría
 ```
@@ -282,11 +311,15 @@ Dos variables mandan sobre eso:
 | Variable | Qué hace |
 |---|---|
 | `APTUS_DATA_DIR` | Dónde se guardan historial e informes. Gana a todo lo demás. |
-| `APTUS_PACKS_DIR` | Dónde viven tus packs propios. Por defecto, junto a los datos. |
+| `APTUS_PACKS_DIR` | Dónde viven tus packs. Por defecto, `$XDG_DATA_HOME/aptus/packs`. |
 
-Los packs que creas (`aptus new-pack`, `aptus ingest`) se escriben ahí, nunca
-dentro de la instalación — por eso `aptus packs` lista los del producto y los
-tuyos juntos, marcando cuál es cuál.
+**Los packs no siguen la regla del repo, y es deliberado.** Los resultados sí: desde
+un checkout van a `data/` del repo, para que trastear con el código no ensucie el
+home ni mezcle pruebas con historial de verdad. Un pack, en cambio, es contenido que
+escribes tú, no un subproducto del checkout: está en el mismo sitio lo ejecutes desde
+donde lo ejecutes. Si tuviera una copia por checkout, acabarías con el mismo tema
+duplicado en dos discos y `aptus packs` diría cosas distintas según desde dónde lo
+llamaras.
 
 ## Arquitectura
 
@@ -299,19 +332,21 @@ src/content/   carga y validación de packs (zod), persistencia del historial
                y resolución de rutas (dónde viven packs y datos)
 
 src/cli/       render de terminal, informe HTML, comandos
-
-packs/         los datos: un directorio por tema
 ```
+
+No hay `packs/` en el repo: el contenido no vive aquí. Un pack de test completo
+—con vocabulario inventado— vive en `test/fixtures/packs/` para que los tests de
+integración recorran el camino entero sin depender de ningún dominio real.
 
 La regla que sostiene el diseño: **el núcleo es puro**. Nada en `src/core/` lee el
 reloj, genera aleatoriedad ni toca disco. El `now` y la función de barajado se
 inyectan desde la capa de I/O, así que mismo input produce siempre mismo output.
-Por eso los 513 tests corren en menos de dos segundos sin un solo mock.
+Por eso los 691 tests corren en menos de dos segundos sin un solo mock.
 
 ## Anatomía de un pack
 
 ```
-packs/ai-ml-readiness/
+<tus-packs>/sistemas-distribuidos/
 ├── pack.yaml          nombre, versión y lista de dimensiones
 ├── readiness.yaml     perfiles de rol y baselines de nivel
 ├── questions/         un YAML por dimensión
@@ -383,7 +418,7 @@ Basta con una tabla `jobs` que tenga `title` y `description`; si además trae
 ## Desarrollo
 
 ```bash
-npm test         # 513 tests, 33 ficheros
+npm test         # 691 tests, 39 ficheros
 npm run typecheck
 npm run lint
 ```

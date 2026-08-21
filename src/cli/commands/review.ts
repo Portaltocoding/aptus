@@ -23,7 +23,7 @@ import {
 } from "../render.js";
 import { ESCAPED } from "../keys.js";
 import { parseDims, pickDimensionsFrom } from "../setup.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 // Tanda de repaso CORTA: esto es estudio, no medición. Se busca que te sientes a
 // repasar 15 preguntas, no que te comas otro test de 120.
@@ -50,10 +50,15 @@ export interface ReviewOptions {
  * de LLM. Sin ese aviso, un filtro que se parece al de `start` invita justo a la
  * lectura equivocada.
  */
-export async function reviewCommand(
-  packName: string = DEFAULT_PACK,
-  opts: ReviewOptions = {},
-): Promise<void> {
+export async function reviewCommand(pedido?: string, opts: ReviewOptions = {}): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(pedido);
+  } catch (err) {
+    console.error(`\n✗ No se puede iniciar el repaso: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   const packDir = packDirForRead(packName);
   if (packDir === null) {
     console.error(`\n✗ No se puede iniciar el repaso: no existe el pack '${packName}'.`);

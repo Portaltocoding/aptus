@@ -11,10 +11,16 @@ import { listPacks } from "./loader.js";
  * donde `npm update` lo borra y donde muchas veces ni hay permiso de escritura.
  *
  * El módulo vive en `src/content/` porque resolver rutas es I/O: `src/core/` sigue
- * puro. Dentro, la separación se mantiene igual de estricta: `resolvePaths`,
- * `mergePackNames`, `choosePackDir` y `choosePackDirForWrite` son PURAS y son lo
- * único que se testea; el resto es una capa delgada que las alimenta con disco y
- * entorno.
+ * puro. Dentro, la separación se mantiene igual de estricta: `resolvePaths` y
+ * `assertPackName` son PURAS y son lo único que se testea; el resto es una capa
+ * delgada que las alimenta con disco y entorno.
+ *
+ * **Aptus no trae contenido.** Hubo un tiempo en que sí: dos packs viajaban dentro
+ * del paquete y este módulo distinguía "los del producto" (solo lectura) de "los
+ * tuyos". Esa distinción se ha ido entera —con su `PackReadOnlyError`, su
+ * sombreado por nombre y su doble raíz— porque ya no modela nada: TODO pack es
+ * tuyo, lo hayas escrito a mano o generado con `aptus tema`. Queda una sola raíz
+ * de packs, y es de escritura.
  */
 
 export interface PathsEnv {
@@ -34,10 +40,8 @@ export interface PathsInput {
 
 export interface AptusPaths {
   packageRoot: string;
-  /** Packs que viajan DENTRO del paquete: el producto. Solo lectura si está instalado. */
-  bundledPacksDir: string;
-  /** Packs propios del usuario: donde escriben `new-pack` e `ingest`. */
-  userPacksDir: string;
+  /** Tus packs: lo único que hay. Siempre de escritura. */
+  packsDir: string;
   /** Historial de sesiones e informes: datos personales, nunca dentro de la instalación. */
   dataDir: string;
 }
@@ -54,14 +58,25 @@ function absoluta(ruta: string): string {
   return isAbsolute(ruta) ? ruta : resolve(ruta);
 }
 
+/** Raíz de datos del usuario según XDG, con el respaldo de siempre. */
+function xdgAptus(home: string, xdg: string | null): string {
+  return xdg !== null ? join(absoluta(xdg), "aptus") : join(home, ".local", "share", "aptus");
+}
+
 /**
- * Decide las cuatro rutas. Función PURA: no lee el entorno, no mira el disco, no
+ * Decide las tres rutas. Función PURA: no lee el entorno, no mira el disco, no
  * llama al reloj. Precedencias, en este orden y por esta razón:
  *
- * - `APTUS_DATA_DIR` manda siempre: es la salida explícita para quien quiera otra cosa.
- * - Checkout de desarrollo antes que `XDG_DATA_HOME`: en Linux XDG suele estar
- *   definida, y trabajar desde el repo no debe ensuciar el home.
- * - Instalado: `XDG_DATA_HOME/aptus`, o `~/.local/share/aptus`.
+ * - `APTUS_DATA_DIR` / `APTUS_PACKS_DIR` mandan siempre: son la salida explícita
+ *   para quien quiera otra cosa.
+ * - Los RESULTADOS siguen la regla de siempre: desde un checkout del repo van a
+ *   `<repo>/data` (que está en .gitignore), para que trabajar sobre el código no
+ *   ensucie el home ni mezcle pruebas con historial de verdad.
+ * - Los PACKS no siguen esa regla, y la asimetría es deliberada. Un pack es
+ *   contenido que TÚ escribes, no un subproducto del checkout: tiene que estar en
+ *   el mismo sitio lo ejecutes desde el repo o desde una instalación global, o
+ *   `aptus packs` diría cosas distintas según desde dónde lo llames y tendrías el
+ *   mismo tema duplicado en dos discos.
  */
 export function resolvePaths(input: PathsInput): AptusPaths {
   const { packageRoot, home, isDevCheckout, env } = input;
@@ -74,48 +89,19 @@ export function resolvePaths(input: PathsInput): AptusPaths {
       ? absoluta(dataDirExplicito)
       : isDevCheckout
         ? join(packageRoot, "data")
-        : xdg !== null
-          ? join(absoluta(xdg), "aptus")
-          : join(home, ".local", "share", "aptus");
-
-  // Los packs del producto viajan dentro del paquete y se resuelven relativos al
-  // código: eso es correcto y no cambia (D-05).
-  const bundledPacksDir = join(packageRoot, "packs");
+        : xdgAptus(home, xdg);
 
   const packsDirExplicito = limpia(env.APTUS_PACKS_DIR);
-  const userPacksDir =
-    packsDirExplicito !== null
-      ? absoluta(packsDirExplicito)
-      : isDevCheckout
-        ? bundledPacksDir // desde el repo, las dos raíces son la misma de siempre
-        : join(dataDir, "packs");
+  const packsDir =
+    packsDirExplicito !== null ? absoluta(packsDirExplicito) : join(xdgAptus(home, xdg), "packs");
 
-  return { packageRoot, bundledPacksDir, userPacksDir, dataDir };
+  return { packageRoot, packsDir, dataDir };
 }
+
+// ─── Nombres de pack ─────────────────────────────────────────────────────────
 
 /**
- * Unión ordenada y sin duplicados de los nombres de las dos raíces. Cuál de las
- * dos GANA cuando el nombre coincide lo decide `choosePackDir` (el del usuario),
- * que es quien devuelve un directorio; aquí solo se compone la lista.
- */
-export function mergePackNames(delPaquete: string[], delUsuario: string[]): string[] {
-  return [...new Set([...delPaquete, ...delUsuario])].sort();
-}
-
-// ─── Elegir raíz de pack (puro) ──────────────────────────────────────────────
-
-/** De dónde ha salido un pack: del producto o del usuario. */
-export type PackOrigin = "paquete" | "usuario";
-
-/** Presencia del pack en cada raíz, como DATO: así la decisión sigue siendo pura. */
-export interface PackPresence {
-  enUsuario: boolean;
-  enPaquete: boolean;
-}
-
-/**
- * Nombre de pack válido. Es la misma exigencia que ya hacía `scaffoldPack`, pero
- * vive aquí porque ahora se comprueba ANTES de componer ninguna ruta: un nombre
+ * Nombre de pack válido. Se comprueba ANTES de componer ninguna ruta: un nombre
  * llega por la CLI, y `..`, `/` o una ruta absoluta no pueden alcanzar un `join`.
  */
 export const PACK_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
@@ -124,55 +110,6 @@ export function assertPackName(name: string): void {
   if (!PACK_NAME_RE.test(name)) {
     throw new Error(`Nombre de pack inválido: '${name}'. Usa minúsculas, números y guiones.`);
   }
-}
-
-/** Se intentó escribir sobre un pack que solo existe dentro de la instalación. */
-export class PackReadOnlyError extends Error {
-  constructor(
-    readonly packName: string,
-    userPacksDir: string,
-  ) {
-    super(
-      `El pack '${packName}' viene dentro de la instalación de aptus y es de solo lectura.\n` +
-        `  Para trabajarlo como tuyo: cópialo a ${userPacksDir}/${packName}, ` +
-        `o define APTUS_PACKS_DIR apuntando a tu directorio de packs.`,
-    );
-    this.name = "PackReadOnlyError";
-  }
-}
-
-/** Dónde LEER un pack: el del usuario sombrea al del producto. */
-export function choosePackDir(
-  name: string,
-  presencia: PackPresence,
-  rutas: AptusPaths,
-): { dir: string; origin: PackOrigin } | null {
-  if (presencia.enUsuario) return { dir: join(rutas.userPacksDir, name), origin: "usuario" };
-  if (presencia.enPaquete) return { dir: join(rutas.bundledPacksDir, name), origin: "paquete" };
-  return null;
-}
-
-/**
- * Dónde ESCRIBIR un pack. Lanza `PackReadOnlyError` si el pack solo existe dentro
- * del paquete: es lo que impide que `new-pack`, `ingest`, `draft` o `promote`
- * escriban en `node_modules`.
- */
-export function choosePackDirForWrite(
-  name: string,
-  presencia: PackPresence,
-  rutas: AptusPaths,
-): string {
-  assertPackName(name);
-  const destino = join(rutas.userPacksDir, name);
-
-  // Desde el repo las dos raíces son la misma: escribir ahí es lo de siempre y
-  // nada es de solo lectura.
-  if (rutas.userPacksDir === rutas.bundledPacksDir) return destino;
-
-  if (!presencia.enUsuario && presencia.enPaquete) {
-    throw new PackReadOnlyError(name, rutas.userPacksDir);
-  }
-  return destino;
 }
 
 // ─── Capa impura: entorno y disco ────────────────────────────────────────────
@@ -231,9 +168,9 @@ export function ensureDir(dir: string): void {
 }
 
 /**
- * Cómo se buscan packs, sin que quien busca tenga que saber si hay una raíz o dos.
- * `dir` devuelve `null` cuando el pack no existe en ninguna de las raíces miradas;
- * `dirForWrite` lanza `PackReadOnlyError` si el pack es del producto.
+ * Cómo se buscan packs, sin que quien busca tenga que saber dónde viven.
+ * `dir` devuelve `null` cuando el pack no existe; `dirForWrite` compone la ruta
+ * en la que escribirlo, exista o no.
  */
 export interface PackLocator {
   list(): string[];
@@ -241,7 +178,7 @@ export interface PackLocator {
   dirForWrite(name: string): string;
 }
 
-/** Localizador sobre UNA sola raíz: para tests y para contextos de raíz única. */
+/** Localizador sobre una raíz concreta: para tests y para contextos aislados. */
 export function singleRootLocator(root: string): PackLocator {
   return {
     list: () => listPacks(root),
@@ -253,47 +190,30 @@ export function singleRootLocator(root: string): PackLocator {
   };
 }
 
-/** ¿Hay un pack con ese nombre bajo esa raíz? Presencia = tiene `pack.yaml`. */
-function hayPack(root: string, name: string): boolean {
-  return existsSync(join(root, name, "pack.yaml"));
-}
-
-function presencia(name: string): PackPresence {
-  const { bundledPacksDir, userPacksDir } = aptusPaths();
-  return { enUsuario: hayPack(userPacksDir, name), enPaquete: hayPack(bundledPacksDir, name) };
-}
-
 export interface PackEntry {
   name: string;
-  origin: PackOrigin;
   dir: string;
 }
 
-/** Los packs visibles: los del producto MÁS los del usuario, sin duplicados. */
+/** Los packs que tienes. Lista vacía = aptus recién instalado, que es lo normal. */
 export function listPackEntries(): PackEntry[] {
-  const rutas = aptusPaths();
-  const nombres = mergePackNames(
-    listPacks(rutas.bundledPacksDir),
-    // Cuando las raíces coinciden (repo) no se lista dos veces.
-    rutas.userPacksDir === rutas.bundledPacksDir ? [] : listPacks(rutas.userPacksDir),
-  );
-  return nombres.flatMap((name) => {
-    const elegido = choosePackDir(name, presencia(name), rutas);
-    return elegido === null ? [] : [{ name, origin: elegido.origin, dir: elegido.dir }];
-  });
+  const { packsDir } = aptusPaths();
+  return listPacks(packsDir).map((name) => ({ name, dir: join(packsDir, name) }));
 }
 
-/** Directorio del que LEER el pack, o `null` si no está en ninguna raíz. */
+/** Directorio del que LEER el pack, o `null` si no existe. */
 export function packDirForRead(name: string): string | null {
-  return choosePackDir(name, presencia(name), aptusPaths())?.dir ?? null;
+  const { packsDir } = aptusPaths();
+  return existsSync(join(packsDir, name, "pack.yaml")) ? join(packsDir, name) : null;
 }
 
-/** Directorio en el que ESCRIBIR el pack. Lanza `PackReadOnlyError` si es del producto. */
+/** Directorio en el que ESCRIBIR el pack. No exige que exista todavía. */
 export function packDirForWrite(name: string): string {
-  return choosePackDirForWrite(name, presencia(name), aptusPaths());
+  assertPackName(name);
+  return join(aptusPaths().packsDir, name);
 }
 
-/** Localizador sobre las dos raíces: lo que consume el asistente de arranque. */
+/** Localizador sobre tus packs: lo que consume el asistente de arranque. */
 export function defaultPackLocator(): PackLocator {
   return {
     list: () => listPackEntries().map((e) => e.name),

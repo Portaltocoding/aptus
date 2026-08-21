@@ -10,8 +10,9 @@ import { renderResult, renderCalibration, renderReadiness, renderGaps } from "./
 
 const CONF_CYCLE: Confidence[] = ["alta", "media", "baja"];
 
-const REAL_PACK_DIR = new URL("../../packs/ai-ml-readiness/", import.meta.url).pathname;
-const REAL_READINESS = new URL("../../packs/ai-ml-readiness/readiness.yaml", import.meta.url).pathname;
+const PACK_DIR = new URL("../../test/fixtures/packs/pack-completo/", import.meta.url).pathname;
+const PACK_READINESS = new URL("../../test/fixtures/packs/pack-completo/readiness.yaml", import.meta.url)
+  .pathname;
 
 // Smoke NO interactivo: ejercita el camino end-to-end motor+contenido+render sin
 // `@inquirer` (la interactividad viva del select se verifica manualmente en UAT).
@@ -59,10 +60,10 @@ describe("start end-to-end (smoke no interactivo)", () => {
   });
 });
 
-describe("readiness + gaps end-to-end (pack y config reales)", () => {
-  it("compone readiness por rol y gaps priorizados sobre el pack real", () => {
-    const pack = loadPackDir(REAL_PACK_DIR);
-    const cfg = loadReadiness(REAL_READINESS);
+describe("readiness + gaps end-to-end (pack completo de fixture)", () => {
+  it("compone readiness por rol y gaps priorizados sobre un pack completo", () => {
+    const pack = loadPackDir(PACK_DIR);
+    const cfg = loadReadiness(PACK_READINESS);
     const selected = selectBalanced(pack.questions, 25, 4, makeSeededShuffle(99));
 
     const answered: AnsweredQuestion[] = selected.map((q) => ({
@@ -81,7 +82,7 @@ describe("readiness + gaps end-to-end (pack y config reales)", () => {
     }
 
     const readinessOut = renderReadiness(roles);
-    expect(readinessOut).toContain("AI Engineer");
+    expect(readinessOut).toContain("Especialista Alfa");
     expect(readinessOut).not.toMatch(/empleab|índice de contrataci/i);
 
     // Cada gap (si lo hay) trae su plan de estudio; el render nunca revienta.

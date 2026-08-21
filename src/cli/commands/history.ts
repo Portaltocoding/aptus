@@ -14,7 +14,7 @@ import {
 import { renderEvolution } from "../render.js";
 import { ESCAPED, ESC_HINT, withEscape } from "../keys.js";
 import { heading, promptTheme } from "../theme.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 export interface HistoryOptions {
   /** Borrar una sesión concreta en vez de consultar el historial (PERS-03). */
@@ -27,10 +27,15 @@ export interface HistoryOptions {
  * Subcomando `history`: consulta el historial de un pack y muestra la evolución
  * (PERS-02) sin correr una sesión nueva. El historial es por pack.
  */
-export async function historyCommand(
-  packName: string = DEFAULT_PACK,
-  opts: HistoryOptions = {},
-): Promise<void> {
+export async function historyCommand(pedido?: string, opts: HistoryOptions = {}): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(pedido);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   if (opts.delete === true) return await deleteSessionFlow(packName);
   if (opts.review === true) return await reviewMistakesFlow(packName);
   // Resultados aislados por tema (no se cruzan entre packs), y fuera de la

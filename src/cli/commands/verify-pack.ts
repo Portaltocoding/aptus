@@ -2,14 +2,22 @@ import pc from "picocolors";
 import { loadPackDir } from "../../content/loader.js";
 import { packDirForRead } from "../../content/paths.js";
 import { auditPack } from "../../core/pack-audit.js";
-import { DEFAULT_PACK } from "./start.js";
+import { requirePackName } from "../default-pack.js";
 
 /**
  * Subcomando `verify-pack <tema>`: valida (schema) y AUDITA la calidad de un pack
  * (ids únicos, cobertura por dimensión, tramo experto, relleno sin curar...).
  * Control "curadas, no relleno". Exit code != 0 si hay errores.
  */
-export async function verifyPackCommand(packName: string = DEFAULT_PACK): Promise<void> {
+export async function verifyPackCommand(pedido?: string): Promise<void> {
+  let packName;
+  try {
+    packName = requirePackName(pedido);
+  } catch (err) {
+    console.error(`\n✗ ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exitCode = 1;
+    return;
+  }
   const packDir = packDirForRead(packName);
   if (packDir === null) {
     console.error(`\n✗ No existe el pack '${packName}'.`);

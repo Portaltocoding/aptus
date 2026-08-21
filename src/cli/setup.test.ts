@@ -9,11 +9,12 @@ import {
 } from "./setup.js";
 import { singleRootLocator } from "../content/paths.js";
 
-// Las cuatro llamadas envuelven la raíz de fixtures con el localizador de una
-// sola raíz: resolveSetup ya no recibe una ruta, porque ahora hay dos sitios
-// donde mirar. Las aserciones no cambian.
-const PACKS = singleRootLocator(new URL("../../packs/", import.meta.url).pathname);
-const DEFAULT_PACK = "ai-ml-readiness";
+// La raíz de packs entra envuelta en un localizador: resolveSetup no recibe una
+// ruta, recibe "cómo se buscan packs". Aquí esa raíz es la de las fixtures —aptus
+// no versiona contenido— y tiene exactamente un pack dentro, que es lo que hace
+// que el camino sin `--pack` resuelva sin preguntar nada.
+const PACKS = singleRootLocator(new URL("../../test/fixtures/packs/", import.meta.url).pathname);
+const PACK = "pack-completo";
 
 function q(id: string, dimension: string, difficulty: Question["difficulty"] = "easy"): Question {
   return {
@@ -104,11 +105,11 @@ describe("sampleWarning", () => {
 describe("resolveSetup (no interactivo)", () => {
   const opts = { interactive: false };
 
-  it("sin flags cae al pack por defecto y al banco entero", async () => {
-    const setup = await resolveSetup(PACKS, opts, 120, DEFAULT_PACK);
+  it("sin flags, con un solo pack, lo usa entero sin preguntar", async () => {
+    const setup = await resolveSetup(PACKS, opts, 120);
 
     expect(setup).not.toBeNull();
-    expect(setup!.packName).toBe(DEFAULT_PACK);
+    expect(setup!.packName).toBe(PACK);
     expect(setup!.dimensions).toBeNull();
     expect(setup!.difficulties).toBeNull();
     expect(setup!.target).toBe(120);
@@ -118,12 +119,11 @@ describe("resolveSetup (no interactivo)", () => {
   it("acota el banco a las dimensiones pedidas", async () => {
     const setup = await resolveSetup(
       PACKS,
-      { ...opts, dims: "ml-clasico" },
+      { ...opts, dims: "dimension-beta" },
       120,
-      DEFAULT_PACK,
     );
 
-    expect(new Set(setup!.bank.map((x) => x.dimension))).toEqual(new Set(["ml-clasico"]));
+    expect(new Set(setup!.bank.map((x) => x.dimension))).toEqual(new Set(["dimension-beta"]));
     expect(setup!.bank.length).toBeLessThan(setup!.pack.questions.length);
   });
 
@@ -132,7 +132,6 @@ describe("resolveSetup (no interactivo)", () => {
       PACKS,
       { ...opts, difficulty: "experto" },
       120,
-      DEFAULT_PACK,
     );
 
     expect(setup!.bank.every((x) => x.difficulty === "experto")).toBe(true);
@@ -141,7 +140,7 @@ describe("resolveSetup (no interactivo)", () => {
 
   it("una dimensión mal escrita falla con un mensaje, no con una sesión vacía", async () => {
     await expect(
-      resolveSetup(PACKS, { ...opts, dims: "no-existe" }, 120, DEFAULT_PACK),
+      resolveSetup(PACKS, { ...opts, dims: "no-existe" }, 120),
     ).rejects.toThrow(/dimensión desconocida/i);
   });
 
@@ -149,10 +148,9 @@ describe("resolveSetup (no interactivo)", () => {
     await expect(
       resolveSetup(
         PACKS,
-        { ...opts, dims: "comportamental-star", difficulty: "nada" },
+        { ...opts, dims: "dimension-gamma", difficulty: "nada" },
         120,
-        DEFAULT_PACK,
-      ),
+        ),
     ).rejects.toThrow();
   });
 });
